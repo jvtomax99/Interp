@@ -118,6 +118,32 @@ each other. Use the map data for which streets are one-way." `traffic.js` (put i
   heading, so stopping or turning there needs new renders); the people do not wait for cars yet (prompt 3); lane changes,
   overtaking, parking manoeuvres.
 
+## People (2026-10-29)
+
+Jose's prompt 3: "sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing
+and talking; never through walls, cars, trees or each other." `people.js` (put in before `traffic.js`, which calls
+`makePeople()` and steps the people before the cars in each 1/30 s) walks everyone; `life(t)` no longer moves `WALKS` or
+`BACKWALKS` (their figures and paths stay, the card's capture reads them).
+
+- Routes on the sidewalks, door to edge or edge to door: Link Pavilion's revolving door in the drive-through (bollards,
+  its crosswalk, round the brick pier), Jurist's door on Prospect and its side door, Medical Plaza's, the Cancer
+  Center's on 2nd Street. Prospect's north sidewalk is two-way: east-bound at z 13.06, west-bound at 12.75 (each keeps
+  right, clear of the benches and the people standing at 12.25-12.4); the side streets' sidewalks are walked one way.
+- Nobody through anybody: a person slows behind someone in their path, two who would wait for each other take turns,
+  and on a shared line (the path to Link's door) people coming the other way each step 0.2 to the right.
+- Crossings: where a walk crosses a car's route, grouped by street (a median is a place to wait); a person waits at
+  the curb until no car is on the crossing or coming within 3.4 s (a car that has stopped counts as clear), then goes
+  without stopping. The cars give way to anyone on or stepping onto their path (traffic.js), so neither waits forever.
+- A couple side by side on the far sidewalk, falling into single file to pass its trees; a child a step behind a parent
+  (out of the door after them, in after them); a wheelchair at 0.55 with the one pushing it, taking room for both.
+- Standing and talking: `IDLE`; the main entrance's group moved off the drive-through's road onto its sidewalks, and four
+  people wait outside the ER's doors in the court.
+- Measured (`traffic_check.cjs`, 300 s): crowding (people closer than 0.25, or within 0.3 of someone standing), someone
+  stopped out on a street, someone waiting over 30 s, all zero, every walk finishing trips; the cars' counts still zero.
+  `audit.cjs` (walls, trees, poles, buildings, roads): one known spot, the walk from Jurist's walk across the
+  drive-through's mouth to Link's outer sidewalk, about 3.5 units of driveway with no crosswalk in the scene.
+- Not in this version: the card's walkers (fixed paths, not re-rendered); people going into buildings past the door.
+
 ## The fit (`scene_export.py`)
 
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then

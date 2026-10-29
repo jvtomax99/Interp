@@ -285,12 +285,23 @@ function clearOfBuildings(pts){""")
 # life() calls traffic(t) once the people have moved. The card is not changed: its cars still follow their fixed paths.
 lines = out.split('\n'); li = [i for i, l in enumerate(lines) if l.startswith('function life(t){')]; assert len(li) == 1
 gone = ['  { const p = along(' + DRIVE_LOOP + ', loop(17000)); CAR_IN.', '  { const u = loop(9000, 4000); CAR_OUT.', '  { const p = along(' + DRIVE_LOOP + ', loop(17000, 8500)); CAR_IN2.',
-        '  { const u = loop(26000, 2000), p = along(' + AMB_PATH, '  STREET.forEach((o, i) => {', '  BACKCARS.forEach((o, i) => {']
+        '  { const u = loop(26000, 2000), p = along(' + AMB_PATH, '  STREET.forEach((o, i) => {', '  BACKCARS.forEach((o, i) => {',
+        '  BACKWALKS.forEach((w, i) => {', '  WALKS.forEach((w, i) => {']   # (prompt 3) the people too: people.js walks them
 for g in gone:
     hit = [i for i in range(li[0], li[0] + 20) if lines[i] is not None and lines[i].startswith(g)]; assert len(hit) == 1, g; lines[hit[0]] = None
 lines = [l for l in lines if l is not None]
-w = [i for i in range(li[0], li[0] + 20) if lines[i].startswith('  WALKS.forEach((w, i) => {')]; assert len(w) == 1
-lines.insert(w[0] + 1, '  traffic(t);')
-lines.insert(li[0], open(os.path.join(HERE, 'traffic.js')).read().rstrip('\n'))
+w = [i for i in range(li[0], li[0] + 20) if lines[i].startswith('  IDLE.forEach((o, i) =>')]; assert len(w) == 1
+lines.insert(w[0], '  traffic(t);')
+lines.insert(li[0], open(os.path.join(HERE, 'people.js')).read().rstrip('\n') + '\n' + open(os.path.join(HERE, 'traffic.js')).read().rstrip('\n'))
 out = '\n'.join(lines)
+
+# ==================== people (Jose's prompt 3, 2026-10-29): people.js walks them, traffic.js steps them with the cars ====================
+# The main entrance: the people waiting there move out of the drive-through's road onto its two sidewalks.
+# The ER: people waiting outside its doors in the court off Atlantic, by the glass, clear of the ambulance's loop.
+a = "['doctor',3,-1.45,-7.45,0.5],['nurse',1,-0.75,-7.85,-0.4],['wheel',2,0.55,-7.2,-0.5],['visitor',1,1.55,-7.55,-0.9,1],['kid',0,1.25,-6.95,-0.6],"
+assert out.count(a) == 1   # they stood in the drive-through's road: on the lobby's sidewalk by the revolving door, and the outer one
+out = out.replace(a, "['doctor',3,-1.55,-10.9,0.4],['nurse',1,-1.05,-10.95,-2.6],['visitor',1,2.6,-10.9,-0.5,1],['kid',0,3.1,-10.9,-1.0],['wheel',2,2.9,-6.3,1.6],", 1)
+a = "    ['hoodie',4,16.2,7.4,2.9],['elder',2,-16.4,-15.2,0.4,1]]) stand(k, i, x, z, ry, f);"
+assert out.count(a) == 1
+out = out.replace(a, "    ['hoodie',4,16.2,7.4,2.9],['elder',2,-16.4,-15.2,0.4,1],\n    ['visitor',4,-17.5,-25.35,-1.9],['patient',2,-17.55,-25.95,-1.3,1],['nurse',0,-17.5,-29.0,-1.6],['wheel',3,-17.6,-29.6,-1.4]]) stand(k, i, x, z, ry, f);")
 open(OUT, 'w').write(out); print(OUT, len(out))
