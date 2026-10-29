@@ -12,7 +12,7 @@ function patch(html){
   // the card's lot car backs out of one spot on the Visitors Parking garage's top deck: that spot is left empty here
   rep('(SCN.cars.roofs[b.key] || []).forEach(([x, z, a], j) => parkedAt(', '(SCN.cars.roofs[b.key] || []).forEach(([x, z, a], j) => (window.__roofSpots = window.__roofSpots || []).push([b.key, j, x, z, a, y0 + h + 0.22]) && b.key + j === window.__skipRoof || parkedAt(');
   rep('if (!REDUCE) life(t);', 'if (!REDUCE && !window.__freeze) life(t);');
-  rep('life(0); if (!APP)', `window.__L = { CAR_IN, CAR_OUT, AMB, HELI, CAR_IN2, STREET, BACKCARS, BACKWALKS, WALKS, SITTERS, IDLE, BIRDS, FLAGS, CLOUDS, SPR, petals, BAY_DOORS, bayDoors, ambLights, waveFlags, fountain, flap, stride, along, PAD, BOX, BG, LABEL_AT, cam, scene, renderer, vehicle, person, sitter, BLD, setHour, BUILT, BX0, BX1, BZ0, BZ1, SCN, turnHead, life, ASPH_T, GRASS_T, PAVE_T };
+  rep('life(0); if (!APP)', `window.__L = { TRAFFIC, CAR_IN, CAR_OUT, AMB, HELI, CAR_IN2, STREET, BACKCARS, BACKWALKS, WALKS, SITTERS, IDLE, BIRDS, FLAGS, CLOUDS, SPR, petals, BAY_DOORS, bayDoors, ambLights, waveFlags, fountain, flap, stride, along, PAD, BOX, BG, LABEL_AT, cam, scene, renderer, vehicle, person, sitter, BLD, setHour, BUILT, BX0, BX1, BZ0, BZ1, SCN, turnHead, life, ASPH_T, GRASS_T, PAVE_T };
 life(0); if (!APP)`);
   return html;
 }

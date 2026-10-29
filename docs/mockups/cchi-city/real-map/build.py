@@ -278,4 +278,19 @@ rep("  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildi
 rep("function clearOfBuildings(pts){", """function densify(pts, step){ const out = []; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az)/step));
     for (let k = 0; k < n; k++) out.push([ax + (bx - ax)*k/n, az + (bz - az)*k/n]); } out.push(pts[pts.length - 1]); return out; }
 function clearOfBuildings(pts){""")
+
+# ==================== traffic (Jose's prompt 2, 2026-10-29): traffic.js drives every car on the board ====================
+# Lanes on the right, the map's one-way drive and court, turns on arcs, stop signs, the light at Prospect and Essex, cars
+# giving way to people and to each other, never overlapping (traffic.js says how). The cars' old fixed loops in life() go;
+# life() calls traffic(t) once the people have moved. The card is not changed: its cars still follow their fixed paths.
+lines = out.split('\n'); li = [i for i, l in enumerate(lines) if l.startswith('function life(t){')]; assert len(li) == 1
+gone = ['  { const p = along(' + DRIVE_LOOP + ', loop(17000)); CAR_IN.', '  { const u = loop(9000, 4000); CAR_OUT.', '  { const p = along(' + DRIVE_LOOP + ', loop(17000, 8500)); CAR_IN2.',
+        '  { const u = loop(26000, 2000), p = along(' + AMB_PATH, '  STREET.forEach((o, i) => {', '  BACKCARS.forEach((o, i) => {']
+for g in gone:
+    hit = [i for i in range(li[0], li[0] + 20) if lines[i] is not None and lines[i].startswith(g)]; assert len(hit) == 1, g; lines[hit[0]] = None
+lines = [l for l in lines if l is not None]
+w = [i for i in range(li[0], li[0] + 20) if lines[i].startswith('  WALKS.forEach((w, i) => {')]; assert len(w) == 1
+lines.insert(w[0] + 1, '  traffic(t);')
+lines.insert(li[0], open(os.path.join(HERE, 'traffic.js')).read().rstrip('\n'))
+out = '\n'.join(lines)
 open(OUT, 'w').write(out); print(OUT, len(out))
