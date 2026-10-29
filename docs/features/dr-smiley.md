@@ -772,8 +772,11 @@ too); wider, the lapel stood up as a white tab beside his cheek. After:
 what the window still counts is background beside his jaw, outside him.
 The rig's own rest keeps a small dark gap at the left of his collar
 (the cutout pieces, older than this).
-`smiley-body-app.cjs` checks every track: one entry per frame, no step
-over 4 px or 3 degrees, both ends at the clip's rest. His face
+`smiley-body-app.cjs` checks every track: one entry per frame, both
+ends at the clip's rest, no tilt step over 3 degrees, and the centre's
+step a frame within the clip's budget (3 px for the wave, 3.5 the think,
+where the old track stepped 4.1 and 5.5; the wince, hop and jump really
+move the head fast: 6, 13, 14). His face
 acts along on
 his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
 walking the in-betweens; the cheer's laugh mostly open-eyed, `laugh1`,

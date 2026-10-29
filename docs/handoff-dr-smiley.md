@@ -72,7 +72,7 @@ when the clip's head dips (its bigger jaw had covered the collar);
 `behead.py` now carries the collar up behind the head (`FILL`, `SPAN`).
 Filming on Home: `tests/tools/home-film.cjs` (30 fps, one PNG a frame,
 `BG='#ff00ff'` for a flat banner to count holes). `smiley-body-app.cjs` checks
-every track. Videos sent: the wave and the think, before/after.
+every track (a step budget per clip; the hop and jump move the head fast). Videos sent: the wave and the think, before/after.
 Details: `docs/features/dr-smiley.md`, "Clips", the paragraph "followed
 by his hair alone". Still open (not measured as faults, worth asking him):
 the thinking finger now rests a little below his chin (his head is
