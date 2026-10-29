@@ -36,7 +36,6 @@ const DR_CLIPS = {
   wince: { dir: './drsmiley/clips/wince/', n: 180, fps: 30, w: 320, h: 440 },    // the flinch and the caring smile, 6 s
   bounce: { dir: './drsmiley/clips/thumbs/', n: 180, fps: 30, w: 320, h: 440 },  // the hop with the thumbs-up (a right answer), 6 s
 };
-const DR_CLIP_FADE = 150;   // ms: the clip's first frame over the rig's rest, and back (their small likeness difference hidden)
 
 // The rig's head centre at rest on the clips' 320 x 440 grid, measured the way headtrack.py
 // measures (the blob of skin and hair), and the clips' head centre at rest (their first frame).
@@ -65,9 +64,10 @@ function drClipPreload(name){
     im.src = C.dir + String(i).padStart(4, '0') + '.webp';
     imgs.push(im);
   }
-  const entry = { imgs, head: null, ok: false };
+  const entry = { imgs, head: null, pose: null, ok: false };
   const track = fetch(C.dir + 'head.json').then(r => r.ok ? r.json() : null).then(h => { entry.head = h; }).catch(() => {});
-  entry.ready = Promise.all([...loads, track]).then(r => { entry.ok = r.slice(0, C.n).every(Boolean); return entry.ok; });
+  const poseT = fetch(C.dir + 'head-pose.json').then(r => r.ok ? r.json() : null).then(h => { entry.pose = h; }).catch(() => {});
+  entry.ready = Promise.all([...loads, track, poseT]).then(r => { entry.ok = r.slice(0, C.n).every(Boolean); return entry.ok; });
   drClipFrames.set(name, entry);
   return entry;
 }
@@ -106,15 +106,14 @@ function drClipPlay(m, name, done){
   // the offset goes on the head's idle wrapper (.db-idle-head), not .db-head itself: a CSS transform there would override
   // the rig's own transform attribute on .db-head (the lift and tilt of a performance)
   const headEl = m.svg.querySelector('.db-idle-head'), k = 1070 / 320, topRows = C.top ? Math.round(C.top * 320 / 1070) : 0;
-  // the head rides the clip's head, and acts with it (a head carried flat over a jumping body read as hovering): it leans
-  // into sideways motion (a degree per grid px of travel over 6 frames, at most 7) and squashes a little on a fast rise or
-  // drop (up to 4%), both from the track itself, about the neck
+  // the head rides the clip's head and does what it did: its place (head.json), its tilt and its size (head-pose.json,
+  // from the hair against the head's centre in the clip, before beheading; 2026-10-29: a head carried flat and level
+  // over a body that tilts its head 16 degrees in the wave read as a photo stuck on). Turned and sized about the neck.
   const headAt = i => { const h = F.head && F.head[i]; if(!h || !headEl) return;
     const dx = (h[0] - DR_CLIP_HEAD0[0]) * k, dy = (h[1] - topRows - DR_CLIP_HEAD0[1]) * k;
-    const b = F.head[Math.max(0, i - 6)], vx = h[0] - b[0], vy = h[1] - b[1];
-    const lean = Math.max(-7, Math.min(7, vx * 1.0)), sq = 1 + Math.max(-.04, Math.min(.04, -vy * .002));
+    const p = (F.pose && F.pose[i]) || [0, 1], tilt = p[0], sc = p[1];
     headEl.style.transformOrigin = '547px 585px';   // the neck, in the rig's units
-    headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${lean.toFixed(2)}deg) scale(${(2 - sq).toFixed(3)}, ${sq.toFixed(3)})`; };
+    headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${tilt.toFixed(2)}deg) scale(${sc.toFixed(3)})`; };
   // his face along the clip: the next beat whose time has come (the rig walks the in-betweens itself)
   const faces = DR_CLIP_FACES[name] || []; let fi = 0;
   const faceAt = ms => { while(fi < faces.length && faces[fi][0] <= ms){ m.body.set({ face: faces[fi][1], brow: faces[fi][2] }); fi++; } };
@@ -124,21 +123,19 @@ function drClipPlay(m, name, done){
   host.appendChild(cv);
   const clip = { name, canvas: cv, raf: 0, timer: 0, stopped: false };
   m.clip = clip;
-  // the canvas fades in over the rig at rest (is-fading); once it is opaque the rig's pieces go (is-clip; visibility,
-  // no fade of its own: hiding them while the canvas was still see-through showed the background through him)
-  requestAnimationFrame(() => { if(!clip.stopped) host.classList.add('is-fading'); });
-  clip.inT = setTimeout(() => { if(!clip.stopped) host.classList.add('is-clip'); }, DR_CLIP_FADE + 30);
-  const step = 1000 / C.fps, t0 = performance.now() + DR_CLIP_FADE;
+  // the hand-off, as a cut (2026-10-29: a cross-fade of the rig's body and the clip's, both at rest but not the
+  // same drawing, showed for a frame as a ghost): the clip's first frame and the rig's body swap in the same paint
+  // (is-clip: the canvas shown, the rig's pieces hidden; his head stays over both), and swap back at the end.
+  host.classList.add('is-clip');
+  const step = 1000 / C.fps, t0 = performance.now();
   let shown = 0;
   const end = () => {
     if(clip.stopped) return;
     clip.stopped = true;
     draw(C.n - 1);
-    clearTimeout(clip.inT);
-    host.classList.remove('is-clip');                                              // the rig back under the still-opaque canvas
     if(headEl) headEl.style.transform = ''; m.body.set({ face: 'rest', brow: 'rest' });
-    requestAnimationFrame(() => host.classList.remove('is-fading'));               // then the canvas fades out
-    clip.timer = setTimeout(() => { cv.remove(); if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE + 40);
+    host.classList.remove('is-clip'); cv.remove();                                 // the rig's body back and the canvas gone in one paint
+    if(m.clip === clip) m.clip = null; if(done) done();
   };
   const tick = now => {
     if(clip.stopped) return;
@@ -147,7 +144,7 @@ function drClipPlay(m, name, done){
     if(i >= C.n - 1) end(); else clip.raf = requestAnimationFrame(tick);
   };
   clip.raf = requestAnimationFrame(tick);
-  clip.stop = () => { if(clip.stopped) return; cancelAnimationFrame(clip.raf); clip.stopped = true; clearTimeout(clip.timer); clearTimeout(clip.inT); host.classList.remove('is-clip', 'is-fading'); cv.remove(); if(headEl) headEl.style.transform = ''; if(m.clip === clip) m.clip = null; };
+  clip.stop = () => { if(clip.stopped) return; cancelAnimationFrame(clip.raf); clip.stopped = true; host.classList.remove('is-clip'); cv.remove(); if(headEl) headEl.style.transform = ''; if(m.clip === clip) m.clip = null; };
   return true;
 }
 function drClipStop(m){ if(m && m.clip) m.clip.stop(); }

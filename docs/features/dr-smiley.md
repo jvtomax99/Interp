@@ -742,14 +742,17 @@ the tool writes the frames in place and refreshes `head.json`). His face
 acts along on
 his own head (`DR_CLIP_FACES`: beats of face and brow per clip, the rig
 walking the in-betweens; the cheer's laugh mostly open-eyed, `laugh1`,
-shut only at the peak: shut for two seconds read as asleep). The head acts
-with the body too (a head carried flat over a jumping body read as
-hovering): it leans into sideways motion and squashes a little on a fast
-rise or drop, both from the track, about the neck. The hand-off: the
-canvas fades in over the rig at rest (`is-fading`), and only once it is
-opaque do the rig's pieces go (`is-clip`); they come back under the
-still-opaque canvas before it fades out (hiding them during the fade
-showed the background through him). The tests' harness serves `*.json` from the
+shut only at the peak: shut for two seconds read as asleep). The head does what
+the clip's head did (2026-10-29, Jose: "his movements aren't natural"; a
+head carried level over a body whose own head tilted 16 degrees in the
+wave read as a photo stuck on): `head-pose.json` beside the frames, from
+`headtrack.py` run before beheading, gives its tilt (from where the hair
+sits against the head's centre) and its size per frame, and the player
+turns and sizes his head by them about the neck. The hand-off is a cut
+(a cross-fade of the rig's body and the clip's, both at rest but not the
+same drawing, showed for a frame as a ghost): the clip's first frame and
+the rig's body swap in one paint (`is-clip`), his head over both, and
+swap back at the end. The tests' harness serves `*.json` from the
 checkout for the tracks. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the
