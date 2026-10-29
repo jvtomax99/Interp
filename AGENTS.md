@@ -365,3 +365,47 @@ is something to review or decide. **Always a phone notification when
 something is ready for his "push"** (Jose, 2026-10-24): every time a
 change is waiting for his OK to go live (its checks passed), notify his
 phone, even if he seems to be watching the chat.
+
+### How Jose works with AI tools (Jose, 2026-10-29)
+
+Treat the AI as a junior developer he manages, not a genie. These hold on
+every request, for every tool:
+
+**Read it back first, every request.** Before building anything, even a
+small fix, say his ask back in 2-3 plain lines (what changes, what it is
+for, what it leaves alone) and wait for his OK. If something is unclear,
+the one clarifying question goes in the same message. If the read-back is
+wrong, the code would have been too. Exception: fixing your own open
+change's failing checks or a reviewer's small note needs no read-back.
+
+**Spec before code for a new feature.** Write its note in
+`docs/features/` first: what it does, who it is for, and what it does
+**not** do in this first version. Code follows the note, not the other way
+round.
+
+**Research before a new feature.** Look at how two or three similar tools
+do it (primary sources: their own docs or the product, not a summary
+site), and say in the spec where ours can be better or should copy.
+
+**Challenge him.** Say plainly when an idea is weak, costly, off his goal
+or already covered by something in the app. No sugarcoating, no praise
+for its own sake. Disagree when he is wrong, then do what he decides.
+
+**Teach only when he asks.** Replies stay as short as the rule above. When
+he asks "explain X", explain it in plain words.
+
+## Not building (proposed 2026-10-29, waiting for Jose's OK)
+
+Things the Hub will not do. A request that crosses one gets flagged
+before any work starts.
+
+- **No patient information, ever.** No names, record numbers, dates of
+  birth, room numbers or anything else that identifies a patient, in
+  Firestore, `localStorage`, Team Chat or an AI request. The Hub is for
+  terms, doctors and practice, never for a patient's details.
+- **Not a replacement for the hospital's official interpreting systems,**
+  its scheduling or its records. It is a study and prep tool beside them.
+- **No app-store app.** It stays an installable web app.
+- **No new 3D scenes or large visual pieces until the `index.html` split
+  (`docs/split-index.md`) is finished.** Fixes and polish to what exists
+  are fine.

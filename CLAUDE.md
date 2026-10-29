@@ -462,6 +462,12 @@ design and anything touching data or rules stay with the main model.
   with options, a next step or a trade-off, name your pick and why, in
   plain words, unasked. If the buttons are refused, list the options in
   plain language with the pick marked.
+- **How Jose works with AI tools** (Jose, 2026-10-29; `AGENTS.md`, its
+  section of that name): read every request back in 2-3 plain lines and wait
+  for his OK before building; spec with "not in this version" before a new
+  feature's code; research similar tools first; challenge his ideas; teach
+  only when asked. And the `AGENTS.md` list **Not building** (no patient
+  information, ever, among others).
 - **Ambiguous request: one clarifying question first. Evidence before
   confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
   without a measurement, test, primary source or the code behind it; say
