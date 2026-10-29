@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude guide: title cards</title>
+<link rel="stylesheet" href="kit/kit.css">
+<style>
+  .t{position:absolute;left:80px;right:80px;text-align:center}
+  #big{top:520px;font-size:120px;font-weight:700;line-height:1.05}
+  #big em{font-style:normal;background:linear-gradient(transparent 55%,#FFB3C7 55%,#FFB3C7 92%,transparent 92%);padding:0 10px}
+  #sub{top:830px;font-size:52px;font-weight:600}
+  #num{top:420px;font-size:300px;font-weight:700;line-height:1;color:var(--gold);-webkit-text-stroke:10px #2B2A4C;paint-order:stroke}
+  #name{top:780px;font-size:96px;font-weight:700;line-height:1.1}
+  #icon{left:420px;top:250px;width:240px;height:240px;border-radius:56px}
+  .smiley{left:305px;top:1050px}
+</style>
+</head>
+<body>
+<div id="root"><div class="bg"></div><div id="c"></div></div>
+<script>
+const FRAMES = ['rest', 'blink1', 'blink2', 'shut', 'wink1', 'wink2', 'wink', 'smile1', 'smile2', 'smile'];
+const n = +new URLSearchParams(location.search).get('n');
+const NAMES = ['', 'Claude is your junior developer', 'Profile settings', 'CLAUDE.md, the project\'s rulebook', 'Handoff'];
+const smile = `<div class="a smiley"><svg viewBox="4 4 112 112" style="width:100%;height:100%;overflow:visible">
+  <image href="assets/drsmiley/base.webp" x="14" y=".8" width="106" height="132.5" preserveAspectRatio="none"/>
+  <svg x="31.667" y="47.617" width="66.692" height="49.025" viewBox="${9 * 151} 0 151 111" preserveAspectRatio="none"><image href="assets/drsmiley/face.webp" x="0" y="0" width="${151 * 30}" height="111" preserveAspectRatio="none"/></svg>
+  <image href="assets/drsmiley/brow-l.webp" x="33.875" y="39.446" width="28.708" height="14.354" preserveAspectRatio="none"/>
+  <image href="assets/drsmiley/brow-r.webp" x="73.625" y="42.758" width="27.604" height="19.875" preserveAspectRatio="none"/></svg></div>`;
+document.getElementById('c').innerHTML = n === 0
+  ? `<img class="a st" id="icon" src="assets/appicon.png" alt=""><div class="t" id="big">Build apps<br>with <em>Claude</em></div><div class="t" id="sub">4 short lessons with Dr. Smiley</div>${smile}`
+  : `<div class="t" id="num">${n}</div><div class="t" id="name">${NAMES[n]}</div>${smile}`;
+</script>
+</body></html>

@@ -4,7 +4,7 @@ clip per sentence), a breath between lines, then a little warmth and a very ligh
 
 Reads the "Says" lines of SCRIPT.md (the captions), swaps in spellings the voice reads right
 (SAY below), and writes per chapter:
-  voice/ch<N>.wav       the chapter's voice, 24 kHz
+  voice/ch<N>.wav       the chapter's voice, 24 kHz (and voice/ch<N>.m4a, its compressed copy)
   voice/cues.tsv        chapter, line, start, end (seconds), caption: what the animation follows
 
 Needs kokoro-onnx in a venv and Kokoro's files, which `hyperframes tts` downloads once into
@@ -71,6 +71,8 @@ def main():
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', raw, '-af', WARM + ',loudnorm=I=-16:TP=-1.5',
                         '-ar', str(sr), dst], check=True)
         os.remove(raw)
+        # the compressed copy the pages and the mix use (the .wav isn't kept in git)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', dst, '-c:a', 'aac', '-b:a', '96k', dst[:-4] + '.m4a'], check=True)
         print(f'chapter {n}: {len(caps)} lines, {t - GAP + TAIL:.1f} s')
     rows = sorted(old + cues, key=lambda l: (int(l.split('\t')[0]), int(l.split('\t')[1])))
     with open(cues_path, 'w', encoding='utf-8') as f:
