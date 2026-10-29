@@ -183,4 +183,99 @@ rep("cam.position.set(-34, 70, 82); controls.update();","cam.position.set(-34, 7
 note="/* HUMC campus, front and back (Jose, 2026-10-27/28): every building placed from his OpenStreetMap export, the front's\n   three included; the hand-built ground at the front (street, drive, fountain, drop-off) refitted around them. */\n"
 rep("window.__LITE = true;\n","window.__LITE = true;\n"+note)
 page('bottom:calc(env(safe-area-inset-bottom,0px) + 168px)', 'bottom:calc(env(safe-area-inset-bottom,0px) + 186px)')   # the card clears the taller sheet
+
+# ==================== the audit's fixes (audit.cjs, Jose 2026-10-29: "some people walk into walls and some cars do the
+# same"; "I want the interactions to mimic real life") ====================
+# The drive: one lane in (x 2.75, its arrow) and two out (x -2.35 and -1.25, theirs), as the aerial has it. The cars in
+# pull up at the drop-off before Link Pavilion, turn round behind the fountain and leave by the outer lane out; a third
+# car leaves from the drive-through. They no longer run on into the fence and the piers at the end of the drive, and the
+# two that came in side by side, half a car apart, now share the one lane, half a loop apart.
+DRIVE_LOOP = "[[2.75,0.2,13.4],[2.75,0.2,-1.3],[2.35,0.2,-2.35],[1.4,0.2,-2.85],[0.0,0.2,-2.85],[-0.95,0.2,-2.35],[-1.25,0.2,-1.3],[-1.25,0.2,13.4]]"
+rep("{ const u = loop(9000); CAR_IN.position.set(2.5, 0.2, 15.5 - u*21); CAR_IN.rotation.y = Math.PI; }",
+    "{ const p = along(" + DRIVE_LOOP + ", loop(17000)); CAR_IN.position.set(p[0], 0.2, p[2]); CAR_IN.rotation.y = p[3]; }")
+rep("{ const u = loop(11000, 4000); CAR_OUT.position.set(-2.2, 0.2, -6.5 + u*22); CAR_OUT.rotation.y = 0; }",
+    "{ const u = loop(9000, 4000); CAR_OUT.position.set(-2.35, 0.2, -3.2 + u*16.6); CAR_OUT.rotation.y = 0; }")
+rep("{ const u = loop(13000, 7000); CAR_IN2.position.set(2.0, 0.2, 15.5 - u*22); CAR_IN2.rotation.y = Math.PI; }",
+    "{ const p = along(" + DRIVE_LOOP + ", loop(17000, 8500)); CAR_IN2.position.set(p[0], 0.2, p[2]); CAR_IN2.rotation.y = p[3]; }")
+# the ambulance (in 3D as on the card): up Atlantic Street's northbound lane (from Atlantic, not out on Prospect), then out
+# of the lane into the mouth of the ER's court, where it stops (a car in its lane drove through it). Atlantic's northbound
+# car goes: the ambulance is that lane's traffic
+AMB_PATH = "[...SCN.paths.atlA.slice(1, 8).map(([x, z]) => [x, 0.2, z]), [-24.35, 0.2, -24.7], [-23.0, 0.2, -26.2]]"
+rep("{ const u = loop(16000, 2000), p = along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]], Math.min(1, u*1.4));",
+    "{ const u = loop(26000, 2000), p = along(" + AMB_PATH + ", Math.min(1, u*1.6));")
+# the ambulance parked at the corner of Atlantic and 2nd stood in 2nd Street's westbound lane, and its traffic ran into
+# it: it waits in the ER's court instead, by the doors
+rep("pa.position.set(-28.6, 0.2, -51.3); pa.rotation.y = Math.PI/2;", "pa.position.set(-20.9, 0.2, -27.1); pa.rotation.y = Math.PI/2;")
+# Prospect's cars stay on the board (they ran out onto the soil past its ends) and on a street raised over the side
+# streets' sidewalks (Atlantic's and Essex's sidewalks crossed its asphalt); its centre lines with it
+rep("STREET.forEach((o, i) => { const u = loop(o.dur*2, i*3000); o.g.position.set((o.dir > 0 ? BX0 - 1 : BX1 + 1) + u*(BW + 2)*o.dir, 0.2, o.z);", "STREET.forEach((o, i) => { const u = loop(o.dur*2, o.off); o.g.position.set((o.dir > 0 ? BX0 + 0.4 : BX1 - 0.4) + u*(BW - 0.8)*o.dir, 0.2, o.z);")
+rep("box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.2, 15, 0.02, false);", "box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.232, 15, 0.02, false);")
+rep("box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 15.1, 0.01, false);",
+    "box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 15.1, 0.01, false);")
+# Prospect's sidewalks stop where a street or the drive crosses them; the drive's mouth is paved across them with a
+# crosswalk, so the people walking along Prospect cross it on the stripes
+rep("box(BW - 0.4, 0.1, 1.2, walk, BCX, 0.22, 12.7, 0.03, false); box(BW - 0.4, 0.1, 1.0, walk, BCX, 0.22, 17.3, 0.03, false);",
+    """{ const cuts = z => { const out = [[-2.95, 3.65]];   // the drive's mouth
+    for (const r of ROADLINES){ if (r.hw === 'service') continue; for (let i = 1; i < r.pts.length; i++){ const [ax, az] = r.pts[i-1], [bx, bz] = r.pts[i];
+      if ((az - z)*(bz - z) > 0 || az === bz) continue; const x = ax + (bx - ax)*(z - az)/(bz - az), s = Math.abs(Math.hypot(bx - ax, bz - az)/(bz - az)); out.push([x - (r.w/2 + 0.9)*s, x + (r.w/2 + 0.9)*s]); } }
+    return out.sort((p, q) => p[0] - q[0]); };
+  for (const [z, d] of [[12.7, 1.2], [17.3, 1.0]]){ let x0 = BX0 + 0.2;
+    for (const [a, b] of [...cuts(z), [BX1 - 0.2, BX1 - 0.2]]){ if (a > x0 + 0.05) box(a - x0, 0.1, d, walk, (a + x0)/2, 0.22, z, 0.03, false); x0 = Math.max(x0, b);
+      if (b > a) for (let x = a + 0.2; x < b - 0.1; x += 0.42) box(0.24, 0.012, d - 0.1, paint, x, 0.272, z, 0.003, false); } }
+  box(6.6, 0.06, 1.3, asphalt, 0.35, 0.23, 12.75, 0.02, false);
+ }""")
+# the people standing on Prospect's sidewalk keep to its inner edge, by the benches, out of the way of those walking
+for a, b in [("['visitor',2,-15,12.6,", "['visitor',2,-15,12.25,"), ("['elder',4,-12.4,12.9,", "['elder',4,-12.4,12.25,"), ("['visitor',0,-1.5,12.5,", "['visitor',0,-4.2,12.25,"),
+             ("['nurse',1,1.0,12.8,", "['nurse',1,4.3,12.25,"), ("['doctor',2,6.5,12.4,", "['doctor',2,6.5,12.25,"), ("['patient',3,13.5,12.7,", "['patient',3,13.5,12.25,"), ("['visitor',4,16.8,12.5,", "['visitor',4,16.8,12.25,")]:
+    rep(a, b)
+# the people walking: on Prospect's sidewalks in two lanes (east on the inner, west on the outer), the kid beside the
+# patient; the nurse and the wheelchair out of Jurist's doors and down its walk to Link Pavilion's, the walk's lamps moved
+# to the drive's edge; the doctor along Prospect behind the visitor; the elder and another patient one way along the far
+# sidewalk, half a loop apart, on its outer side clear of the street trees in it
+rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z);", "for (let z = 11; z > -6; z -= 3.4){ lamp(-2.92, z);")
+a = out.index("const WALKS = ["); b = out.index("];", a) + 2
+out = out[:a] + """const WALKS = [
+  { g: person('visitor', 0), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000 },
+  { g: person('patient', 1), pts: [[BX1 - 1,0.1,13.25],[BX0 + 1,0.1,13.25]], dur: 100000 },
+  { g: person('nurse', 2), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 0 },
+  { g: person('doctor', 3), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000, off: 45000 },
+  { g: person('wheel', 4), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 15000 },
+  { g: person('kid', 0), pts: [[BX1 - 1,0.1,12.98],[BX0 + 1,0.1,12.98]], dur: 100000, off: 5000 },
+  { g: person('elder', 1), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 0 },
+  { g: person('patient', 2), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 55000 },
+];""" + out[b:]
+rep("WALKS.forEach((w, i) => { const u = loop(w.dur, i*5000), p = along(w.pts, u);", "WALKS.forEach((w, i) => { const u = loop(w.dur, w.off != null ? w.off : i*5000), p = along(w.pts, u);")
+# the walkers along the side streets keep out of the buildings the map draws up to the curb: a point inside one moves
+# toward its street until it is clear
+rep("""  .map(([p, k, i, dur]) => ({ g: person(k, i), pts: SCN.walks[p].map(([x, z]) => [x, 0.12, z]), dur }));""",
+    """  .map(([p, k, i, dur]) => ({ g: person(k, i), pts: clearOfBuildings(SCN.walks[p]).map(([x, z]) => [x, 0.12, z]), dur }));""")
+rep("const BACKWALKS = [", """function clearOfBuildings(pts){ const inB = (x, z) => SCN.blds.some(b => inside(b.pts, x, z));
+  const near = (x, z) => { let best = null, bd = 1e9; for (const r of ROADLINES) for (let i = 1; i < r.pts.length; i++){ const [ax, az] = r.pts[i-1], [bx, bz] = r.pts[i], dx = bx - ax, dz = bz - az, L2 = dx*dx + dz*dz || 1,
+      t = Math.max(0, Math.min(1, ((x - ax)*dx + (z - az)*dz)/L2)), px = ax + t*dx, pz = az + t*dz, d = Math.hypot(x - px, z - pz); if (d < bd){ bd = d; best = [px, pz]; } } return best; };
+  return pts.map(([x, z]) => { if (!inB(x, z)) return [x, z]; const [px, pz] = near(x, z), L0 = Math.hypot(px - x, pz - z) || 1;
+    for (let s = 0.05; s < 1.4; s += 0.05){ const qx = x + (px - x)/L0*s, qz = z + (pz - z)/L0*s; if (!inB(qx, qz)) return [qx + (px - x)/L0*0.12, qz + (pz - z)/L0*0.12]; } return [x, z]; }); }
+const BACKWALKS = [""")
+
+# (round 2 of the audit) Prospect's traffic: one speed per lane, the two in each lane half a loop apart (they drove
+# through each other)
+rep("{ g: vehicle('car', 0x6fb3e0), ry: Math.PI/2, z: 15.9, dir: 1, dur: 11000 }, { g: vehicle('car', 0xb83a3a), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 9500 },",
+    "{ g: vehicle('car', 0x6fb3e0), ry: Math.PI/2, z: 15.9, dir: 1, dur: 13000, off: 0 }, { g: vehicle('car', 0xb83a3a), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 11000, off: 0 },")
+rep("{ g: bus(), ry: Math.PI/2, z: 15.9, dir: 1, dur: 16000 }, { g: vehicle('car', 0xf3f5fb), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 12500 } ];",
+    "{ g: bus(), ry: Math.PI/2, z: 15.9, dir: 1, dur: 13000, off: 13000 }, { g: vehicle('car', 0xf3f5fb), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 11000, off: 11000 } ];")
+rep("const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlA',0x5b6170,17000],['atlB',0xc9583a,19000],",
+    "const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlB',0xc9583a,16000],")
+# the side streets' walkers on the sidewalks the map leaves clear: Atlantic's west side (its east side runs into the houses
+# and Women's and Children's), Essex's east side; the two on Atlantic one way, half a loop apart
+rep("const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],['atlR','sweater',4,70000],['essexL','visitor',1,50000],['atlL','nurse',0,72000]]",
+    "const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],['atlL','sweater',4,72000,36000],['essexR','visitor',1,50000],['atlL','nurse',0,72000,0]]")
+rep("  .map(([p, k, i, dur]) => ({ g: person(k, i), pts: clearOfBuildings(", "  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(")
+rep("BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, i*7000));", "BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, w.off != null ? w.off : i*7000));")
+
+# (round 3) the two side-street walkers past things standing on their sidewalks step toward the road: on 2nd Street's
+# north side the bridge's grey columns, on its south side a sign and a tree
+rep("  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(SCN.walks[p]).map(([x, z]) => [x, 0.12, z]), dur }));",
+    """  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(densify(SCN.walks[p], 0.5)).map(([x, z]) => [x, 0.12, z + (p === 'secondR' && x > -4 && x < 5 ? -0.38 : p === 'secondL' && (Math.abs(x + 30.32) < 0.7 || Math.abs(x + 8.13) < 0.7) ? 0.38 : 0)]), dur }));""")
+rep("function clearOfBuildings(pts){", """function densify(pts, step){ const out = []; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az)/step));
+    for (let k = 0; k < n; k++) out.push([ax + (bx - ax)*k/n, az + (bz - az)*k/n]); } out.push(pts[pts.length - 1]); return out; }
+function clearOfBuildings(pts){""")
 open(OUT, 'w').write(out); print(OUT, len(out))

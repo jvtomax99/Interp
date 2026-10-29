@@ -60,14 +60,16 @@ fs.mkdirSync(path.join(OUT, 'm'), { recursive: true });
     const pick = d => { let best = -1; d.forEach((p, i) => { if (p[3] && inFrame(p) && (best < 0 || Math.abs(i - d.length/2) < Math.abs(best - d.length/2))) best = i; });
       if (best < 0) best = Math.floor(d.length/2); const a = d[Math.max(0, best - 1)], b = d[Math.min(d.length - 1, best + 1)];
       return { at: d[best].slice(0, 3), ry: Math.atan2(b[0] - a[0], b[2] - a[2]) }; };
-    // the three cars on the drive (life(): x 2.5 in, -2.2 out, 2.0 in)
-    for (const [name, g, x, ry, z0, z1] of [['carIn', L.CAR_IN, 2.5, Math.PI, 15.5, -5.5], ['carOut', L.CAR_OUT, -2.2, 0, -6.5, 15.5], ['carIn2', L.CAR_IN2, 2.0, Math.PI, 15.5, -6.5]]){
+    // the three cars on the drive, as life() runs them (build.py, the audit's fixes): in on its one lane (x 2.75) to the
+    // drop-off; out on the inner lane (x -1.25) after turning round behind the fountain; out from the drive-through on the
+    // outer lane (x -2.35). The card draws each leg straight; the turn round is behind the fountain's island.
+    for (const [name, g, x, ry, z0, z1] of [['carIn', L.CAR_IN, 2.75, Math.PI, 13.4, -1.3], ['carOut', L.CAR_OUT, -2.35, 0, -3.2, 13.4], ['carIn2', L.CAR_IN2, -1.25, 0, -1.3, 13.4]]){
       place(g, x, 0.2, 4.5, ry); M[name] = { frames: await shoot(name, g, 1), ref: [x, 0.4, 4.5], pts: dense([[x, 0.4, z0], [x, 0.4, z1]]) }; g.visible = false; }
     // the ambulance: up Atlantic Street's northbound lane (the map's path) to the curb at the mouth of the court off
     // Atlantic, the ER's drop-off (Jose, 2026-10-28; the court's middle is hidden behind Women's and Children's), where it
     // stops, its lights still flashing, and its back doors open toward the camera
-    { const A = L.SCN.paths.atlA, stop = [-24.0, 0.2, -25.45], heading = Math.atan2(-24.05 - -29.25, -25.68 - -5.58);
-      const drive = [...A.slice(0, 8).map(([x, z]) => [x, 0.2, z]), stop];
+    { const A = L.SCN.paths.atlA, stop = [-23.0, 0.2, -26.2], heading = Math.atan2(-24.05 - -29.25, -25.68 - -5.58);
+      const drive = [...A.slice(1, 8).map(([x, z]) => [x, 0.2, z]), [-24.35, 0.2, -24.7], stop];
       const g = L.AMB; place(g, ...stop, heading);
       // two rear doors, hinged at the body's sides
       const dm = new T.MeshStandardMaterial({ color: 0xf4f6fa, roughness: 0.4 }), red = new T.MeshStandardMaterial({ color: 0xd43a3a, roughness: 0.5 }), inside = new T.MeshStandardMaterial({ color: 0xe6e9ee, roughness: 0.6 });
