@@ -49,6 +49,12 @@ const DR_CLIP_SETTLE = 150;
 // A clip ends near the master's pose, not on it (the film drifts a little: hands, sleeves): its last frame blends
 // into its own first frame over this long on the canvas, both the film's drawing, before the swap back to the rig.
 const DR_CLIP_BLEND = 200;
+// The swap itself is a fade this long at both ends (app.css, is-clip-fade): the rig's pieces fade by a CSS filter over
+// the canvas, which is drawn solid underneath from the first paint and stays solid until the pieces are back (the two
+// fading together let the background through at the midpoint: a see-through body for two frames). With the poses
+// matched (the settle, the blend) the two drawings differ only by a hair at the coat's edges, and three soft frames read
+// better than one hard one (the ghost of 2026-10-29 was a fade over mismatched poses).
+const DR_CLIP_FADE = 100;
 // His face acts along with each clip, on his own head (the clip's face is under it): beats of
 // [at (ms from the clip's start), face, brow]. The times follow the clips' own acting.
 const DR_CLIP_FACES = {
@@ -147,8 +153,8 @@ function drClipPlay(m, name, done){
     if(clip.stopped) return;
     clip.stopped = true;
     if(headEl) headEl.style.transform = ''; m.body.set({ face: 'rest', brow: 'rest' });
-    host.classList.remove('is-clip'); cv.remove(); wake();                         // the rig's body back, at neutral, and the canvas gone in one paint
-    if(m.clip === clip) m.clip = null; if(done) done();
+    host.classList.remove('is-clip'); host.classList.remove('is-clip-fade'); wake();   // the rig's body back, at neutral, fading in over the solid canvas
+    clip.timer = setTimeout(() => { cv.remove(); if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE);
   };
   // the last frame blending into the first (DR_CLIP_BLEND): the head's track walks back to its first values too
   const blend = k => { const a = F.imgs[C.n - 1], b = F.imgs[0]; ctx.clearRect(0, 0, C.w, C.h); ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0, C.w, C.h); ctx.globalAlpha = k; ctx.drawImage(b, 0, 0, C.w, C.h); ctx.globalAlpha = 1;
@@ -163,9 +169,13 @@ function drClipPlay(m, name, done){
     if(i >= C.n - 1){ const k = (now - t0 - (C.n - 1) * step) / DR_CLIP_BLEND; if(k >= 1) end(); else { blend(Math.max(0, k)); clip.raf = requestAnimationFrame(tick); } }
     else clip.raf = requestAnimationFrame(tick);
   };
-  const start = () => { if(clip.stopped) return; draw(0); host.appendChild(cv); host.classList.add('is-clip'); t0 = performance.now(); clip.raf = requestAnimationFrame(tick); };
+  const start = () => { if(clip.stopped) return; draw(0); host.appendChild(cv); host.classList.add('is-clip-fade');   // the canvas solid under the pieces, the pieces fading out
+    clip.timer = setTimeout(() => { if(!clip.stopped) host.classList.add('is-clip'); }, DR_CLIP_FADE);
+    t0 = performance.now(); clip.raf = requestAnimationFrame(tick); };
   settle(); clip.timer = setTimeout(start, DR_CLIP_SETTLE);
-  clip.stop = () => { if(clip.stopped) return; clearTimeout(clip.timer); cancelAnimationFrame(clip.raf); clip.stopped = true; host.classList.remove('is-clip'); cv.remove(); if(headEl) headEl.style.transform = ''; wake(); if(m.clip === clip) m.clip = null; };
+  // stopped early: the pieces fade back over the canvas the same way, the canvas going once they are solid
+  clip.stop = () => { if(clip.stopped) return; clearTimeout(clip.timer); cancelAnimationFrame(clip.raf); clip.stopped = true; host.classList.remove('is-clip'); host.classList.remove('is-clip-fade'); if(headEl) headEl.style.transform = ''; wake(); if(m.clip === clip) m.clip = null;
+    if(cv.isConnected) setTimeout(() => cv.remove(), DR_CLIP_FADE); };
   return true;
 }
 function drClipStop(m){ if(m && m.clip) m.clip.stop(); }

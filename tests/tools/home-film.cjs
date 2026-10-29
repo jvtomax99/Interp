@@ -25,9 +25,10 @@ const OUT = path.resolve(process.argv[2]), NAME = process.argv[3] || 'greet', DU
   await page.clock.install();
   await page.clock.runFor(600);
   const r = await page.evaluate(() => { const h = window.homeBody.host.getBoundingClientRect(); return { x: h.x - 30, y: h.y - 120, width: h.width + 60, height: h.height + 140 }; });
+  const was = await page.evaluate(() => ({ clip: !!window.homeBody.clip, busy: window.homeBody.body.busy() })); await page.evaluate(() => { drClipStop(window.homeBody); window.homeBody.body.stop(); window.homeBody.body.rest(); }); await page.clock.runFor(200); await page.waitForTimeout(400);
   await page.clock.pauseAt(await page.evaluate(() => Date.now()) + 50);
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
-  const was = await page.evaluate(() => ({ clip: !!window.homeBody.clip, busy: window.homeBody.body.busy() })); await page.evaluate(() => { drClipStop(window.homeBody); window.homeBody.body.stop(); window.homeBody.body.rest(); }); await page.clock.runFor(100); const played = await page.evaluate(n => window.homeBody.act(n), NAME); console.log('before', was);
+  const played = await page.evaluate(n => window.homeBody.act(n), NAME); console.log('before', was);
   console.log('loaded', loaded, 'played', played, 'box', r);
   for(let k = 0; k * STEP < DUR; k++){
     await page.screenshot({ path: path.join(dir, String(k).padStart(4, '0') + '.png'), clip: r });

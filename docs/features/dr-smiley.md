@@ -805,18 +805,29 @@ where they cross zero: -1.85 s and -2.825 s). And the film ends near
 the master's pose, not on it (it drifts: hands, sleeves), so its last
 frame blends into its own first frame on the canvas over `DR_CLIP_BLEND`
 (200 ms; the head's track walks back with it), both the film's drawing,
-before the swap. Measured on the wave at phone size (mean change per
-frame over his box; a frame of the clip itself changes by 1.7): the end
-cut 4.6 to 3.6, the blend's frames 1.3 to 1.5, the start cut 3.0 (it was
-always there; it used to fall before the first filmed frame). What
-remains at both cuts is the drawing: the film's coat and hands are drawn
-a hair differently from the rig's pieces (the hem longer, the hands
-narrower, the lapels and cuffs 1 to 3 px off; edge sharpness is the
-same, measured), a soft flick no player change removes. Two ways out,
-not built: pieces cut from the film's own first frame (the rig redone),
-or his rest body being the film's rest frame on the canvas, breathing by
-CSS, with the rig only for its own moves (the flick then moves to the
-wink, shrug, clipboard and doze). The tests' harness serves `*.json` from the
+before the swap. And the swap itself is a short fade
+again, now that the poses match (`DR_CLIP_FADE`, 100 ms; `app.css`,
+`is-clip-fade`): the rig's pieces fade by a CSS filter (`filter:
+opacity(0)`; the rig shows and hides pieces by inline `opacity`, which a
+stylesheet cannot beat, and a filter multiplies with it), over the canvas
+drawn solid underneath from its first paint; `is-clip` (visibility)
+follows once they are gone and leaves first at the end, the canvas going
+once the pieces are solid again; a stop mid-clip does the same. The
+canvas never fades with them: both fading at once let the background
+through at the midpoint, a see-through body for two frames (measured
+before this was fixed). What the fade softens is the drawing itself: the
+film's coat and hands are drawn a hair differently from the rig's pieces
+(the hem longer, the hands narrower, the lapels and cuffs 1 to 3 px off;
+edge sharpness is the same, measured); with matched poses there is no
+double body in the mid-fade frames (the ghost of the morning was a fade
+over mismatched poses). Measured on the wave at phone size (mean change
+per frame over his box; a frame of the clip itself changes by 1.7, the
+fastest by 4.3): the end cut was 4.6 at the start of the day, 3.6 with
+the settle and the blend, and is now 2.1 spread over three frames; the
+start cut 3.0 to 1.8. Both are now below the film's own motion. The
+recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
+the page's animations, or the stopped move's fade-back freezes at zero
+and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the
 checkout for the tracks. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the
