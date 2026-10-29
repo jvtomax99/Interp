@@ -728,7 +728,12 @@ ignored); `keyclip.py` with `FIT` scales and places his rest box onto the
 master's figure and with `TOP=200` keeps 200 rows of the grid above the
 master's top (frames 320 x 500), and `DR_CLIPS.cheer.top` has the player
 draw the canvas that much taller above the host, so the jump rises above
-the host's top instead of cutting. **His head stays his own** (2026-10-28,
+the host's top instead of cutting. That FIT landed his figure 5 px right
+and 3 px high of the master's (measured by fitting the cheer's first
+frame onto the wave's: scale 1.0, shift -5, +3, IoU 0.95), so his head
+hopped at the cheer's cut; `DR_CLIPS.cheer.shift` has the player draw
+the frames and read the head track moved by that much, in the grid's px
+(2026-10-29). **His head stays his own** (2026-10-28,
 Jose: a clip starting read as a face switch; the video tool draws his
 face rounder, with bigger eyes, the same in every clip): under a clip only
 the rig's body goes (`app.css`, `.is-clip`: everything in the breath
@@ -783,8 +788,10 @@ block is 150 px wide under a jaw 212 px wide, so when the head tilted
 the jaw's underside and the collar; `drBodyArt` draws an oval in the
 jaw's shadow colour (`.db-neck`, `#4c2e32`, 200 by 60 on the head's
 grid, centred under the chin) behind the head image, which shows only in
-that notch (the head covers it above, the coat below; in a clip it sits
-over the collar fill, where the film's own jaw shadow was). Measured on
+that notch (the head covers it above, the coat below). Under a clip it
+is hidden with the pieces (`app.css`): the rig's body is gone and the
+film's is under the SVG, so it painted a dark wedge over the film's
+collar beside his neck (seen on the cheer's first frame). Measured on
 the flat banner through the wince: no notch in the tilt frames; what the
 neck window still counts is background beside the jaw, outside him.
 `smiley-body-app.cjs` checks every track: one entry per frame, both

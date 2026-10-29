@@ -96,10 +96,10 @@ chin), because his head was 10% smaller than the film's; `DR_BODY.head`
 and `rig.json` now scale it 1.10 about the chin (scale 1.1969, at 280.9,
 23.8; the picture's numbers kept beside). Then the notch under the jaw's sides when the head tilts: an oval in the
 jaw's shadow colour behind the head image (`.db-neck`), measured closed.
-Still open (not measured as
-faults): the cheer's rest head is 3.7 px right of the rig's (`FIT`), a
-small shift at its cut; the clip's head turns a little (yaw) and his
-cannot. To redo a clip:
+Then the cheer's shift: its whole figure sat 5 px right and 3 px high of
+the master's (FIT), so his head hopped at its cut; `DR_CLIPS.cheer.shift`
+moves its frames and head track in the player. Still open: the clip's
+head turns a little (yaw) and his cannot. To redo a clip:
 `headtrack.py` on the keyed frames, then `behead.py <keyed> drsmiley/clips/<move>`.
 
 ## Where it stood (2026-10-29, seventh chat)

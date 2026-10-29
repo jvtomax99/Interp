@@ -31,7 +31,10 @@ const DR_CLIPS = {
   greet: { dir: './drsmiley/clips/wave/', n: 150, fps: 30, w: 320, h: 440 },     // the wave, 5 s
   // the jump with both fists up, 7 s, on a green wall (on grey the raised sleeves keyed out torn); its frames
   // keep 200 rows of the grid above the master's top, so the jump stays in the picture: `top` (2026-10-28)
-  cheer: { dir: './drsmiley/clips/cheer/', n: 210, fps: 30, w: 320, h: 500, top: 200 },
+  // the cheer's figure landed 5 px right and 3 px high of the master's (its FIT from a clip framed with room around him):
+  // shift draws its frames and head track by this much, in the grid's px, so its rest is the rig's rest (2026-10-29: his
+  // head hopped 3.7 px at the cheer's cut; the whole film was off, measured by fitting its first frame onto the wave's)
+  cheer: { dir: './drsmiley/clips/cheer/', n: 210, fps: 30, w: 320, h: 500, top: 200, shift: [-5, 3] },
   think: { dir: './drsmiley/clips/think/', n: 210, fps: 30, w: 320, h: 440 },    // the finger on the chin, the aha, 7 s
   wince: { dir: './drsmiley/clips/wince/', n: 180, fps: 30, w: 320, h: 440 },    // the flinch and the caring smile, 6 s
   bounce: { dir: './drsmiley/clips/thumbs/', n: 180, fps: 30, w: 320, h: 440 },  // the hop with the thumbs-up (a right answer), 6 s
@@ -120,18 +123,19 @@ function drClipPlay(m, name, done){
   // the offset goes on the head's idle wrapper (.db-idle-head), not .db-head itself: a CSS transform there would override
   // the rig's own transform attribute on .db-head (the lift and tilt of a performance)
   const headEl = m.svg.querySelector('.db-idle-head'), k2 = 1070 / 320, topRows = C.top ? Math.round(C.top * 320 / 1070) : 0;
+  const [sx, sy] = C.shift || [0, 0];   // the clip's frames and head track moved onto the master's figure (DR_CLIPS shift)
   // the head rides the clip's head and does what it did: its place (head.json), its tilt and its size (head-pose.json,
   // from the hair against the head's centre in the clip, before beheading; 2026-10-29: a head carried flat and level
   // over a body that tilts its head 16 degrees in the wave read as a photo stuck on). Turned and sized about the neck.
   const headAt = i => { const h = F.head && F.head[i]; if(!h || !headEl) return;
-    const dx = (h[0] - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] - topRows - DR_CLIP_HEAD0[1]) * k2;
+    const dx = (h[0] + sx - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] + sy - topRows - DR_CLIP_HEAD0[1]) * k2;
     const p = (F.pose && F.pose[i]) || [0, 1], tilt = p[0], sc = p[1];
     headEl.style.transformOrigin = '547px 585px';   // the neck, in the rig's units
     headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${tilt.toFixed(2)}deg) scale(${sc.toFixed(3)})`; };
   // his face along the clip: the next beat whose time has come (the rig walks the in-betweens itself)
   const faces = DR_CLIP_FACES[name] || []; let fi = 0;
   const faceAt = ms => { while(fi < faces.length && faces[fi][0] <= ms){ m.body.set({ face: faces[fi][1], brow: faces[fi][2] }); fi++; } };
-  const draw = i => { ctx.clearRect(0, 0, C.w, C.h); ctx.drawImage(F.imgs[i], 0, 0, C.w, C.h); headAt(i); faceAt(i * 1000 / C.fps); };
+  const draw = i => { ctx.clearRect(0, 0, C.w, C.h); ctx.drawImage(F.imgs[i], sx, sy, C.w, C.h); headAt(i); faceAt(i * 1000 / C.fps); };
   const ahead = i => { for(let k = i + 1; k < Math.min(C.n, i + 6); k++){ const im = F.imgs[k]; if(im.decode && !im.__dec){ im.__dec = true; im.decode().catch(() => {}); } } };
   ahead(0);
   const clip = { name, canvas: cv, raf: 0, timer: 0, stopped: false };
@@ -157,10 +161,10 @@ function drClipPlay(m, name, done){
     clip.timer = setTimeout(() => { cv.remove(); if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE);
   };
   // the last frame blending into the first (DR_CLIP_BLEND): the head's track walks back to its first values too
-  const blend = k => { const a = F.imgs[C.n - 1], b = F.imgs[0]; ctx.clearRect(0, 0, C.w, C.h); ctx.globalAlpha = 1; ctx.drawImage(a, 0, 0, C.w, C.h); ctx.globalAlpha = k; ctx.drawImage(b, 0, 0, C.w, C.h); ctx.globalAlpha = 1;
+  const blend = k => { const a = F.imgs[C.n - 1], b = F.imgs[0]; ctx.clearRect(0, 0, C.w, C.h); ctx.globalAlpha = 1; ctx.drawImage(a, sx, sy, C.w, C.h); ctx.globalAlpha = k; ctx.drawImage(b, sx, sy, C.w, C.h); ctx.globalAlpha = 1;
     if(F.head && headEl){ const h0 = F.head[0], h1 = F.head[C.n - 1], p0 = (F.pose && F.pose[0]) || [0, 1], p1 = (F.pose && F.pose[C.n - 1]) || [0, 1];
       const mix = (u, v) => v + (u - v) * k, h = [mix(h0[0], h1[0]), mix(h0[1], h1[1])], p = [mix(p0[0], p1[0]), mix(p0[1], p1[1])];
-      const dx = (h[0] - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] - topRows - DR_CLIP_HEAD0[1]) * k2;
+      const dx = (h[0] + sx - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] + sy - topRows - DR_CLIP_HEAD0[1]) * k2;
       headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${p[0].toFixed(2)}deg) scale(${p[1].toFixed(3)})`; } };
   const tick = now => {
     if(clip.stopped) return;
