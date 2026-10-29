@@ -27,7 +27,7 @@ for wid,(t,pts) in W.items():
     elif 'highway' in t:
         ax.plot(xs,ys,'-',lw={'secondary':4,'tertiary':3,'residential':2}.get(t['highway'],1),color='#335' if t['highway'] not in('footway','service') else '#99a')
         if t.get('name'): ax.text(xs[len(xs)//2],ys[len(ys)//2],t['name'],fontsize=7,color='blue')
-        out['roads'].append({'id':wid,'name':t.get('name'),'hw':t['highway'],'pts':[[round(x,1),round(y,1)] for x,y in pts]})
+        out['roads'].append({'id':wid,'name':t.get('name'),'hw':t['highway'],'oneway':t.get('oneway')=='yes','pts':[[round(x,1),round(y,1)] for x,y in pts]})
     elif t:
         ax.plot(xs,ys,':',lw=1,color='g')
         if t.get('name'): ax.text(sum(xs)/len(xs),sum(ys)/len(ys),t['name'],fontsize=6,color='g')

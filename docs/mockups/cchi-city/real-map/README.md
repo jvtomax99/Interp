@@ -83,6 +83,41 @@ with crosswalks, walkers on sidewalks clear of buildings, benches, trees and col
 person meeting at a crosswalk or a corner, and two walkers passing at a corner. Cars giving way to people is the next
 step (Jose's traffic prompt).
 
+## Traffic (2026-10-29)
+
+Jose's prompt 2: "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of each
+street, slow down and stop at stop signs and crosswalks, turn on curves instead of sliding sideways, and never overlap
+each other. Use the map data for which streets are one-way." `traffic.js` (put in by the block "traffic" at the end of
+`build.py`) drives every car on the board in 3D; `life(t)` calls `traffic(t)` after the people have moved.
+
+- Routes: the map's lanes (`scene.json` paths, 0.65 right of each street's centre), cut and joined into whole trips,
+  corners rounded into arcs, heading along the curve. 13 routes: Prospect both ways, 2nd Street both ways, Atlantic
+  south (stop at 2nd, stop at Prospect, right onto Prospect), Atlantic north (a left or a right off Prospect, stop at
+  2nd), Essex south to the light and right onto Prospect, Prospect to the light and right onto Essex, the drive in (a
+  right off Prospect or a left across it), its drop-off, the turn round behind the fountain and out with a left, the
+  drive-through out with a right, the ambulance (in from Prospect, up Atlantic, round the ER's court, 12 s at the doors,
+  out down Atlantic). 16 vehicles take turns on them, with pauses off the board.
+- Speed: the Intelligent Driver Model (Treiber, Hennecke, Helbing 2000): speed up to the street's speed, slow for a bend,
+  keep a safe gap, and a line it must stop at counts as a car standing there.
+- Stops: stop signs (a full stop, then on); the light at Prospect and Essex, the map's one signal (node 103159193), a 31 s
+  cycle, a right on red after a stop for Essex; people where a walker's path crosses the route (a car waits for anyone on
+  it or about to step on); where two routes cross or merge, a car takes the crossing only when it is free, and from a stop
+  sign or across traffic only with a gap of 2.6 s in the other stream.
+- One-way, from the map (`osm_to_json.py` now keeps the tag): every public street on the board is two-way; the drive is
+  one-way (in on the east lane, out on the west) and so is the ER's court loop. **Assumed, not in the map:** the stop
+  signs (Atlantic at 2nd Street and at Prospect, the drive's exit). The map tags none here; check them on Street View.
+- `node traffic_check.cjs campus.html [seconds]` measures it: cars' outlines touching, a car over a person, a car moving
+  more than 12 deg off its heading, a stop sign passed without a stop, the light passed on red, a car stuck over 40 s.
+  2026-10-29, 300 s: all zero, every route finishing trips. `audit.cjs` takes the new cars too and skips cars off the
+  board; it still finds walkers passing close (prompt 3) and a paved apron that overlaps 2nd Street at x -31.5 (the old,
+  faster cars stepped over it).
+- How others do it: SUMO (the research simulator) uses car-following models like this one and right-of-way per junction;
+  Cities: Skylines reserves junction space and uses signs and lights; Mini Motorways only queues at junctions. Here it is
+  the real map's lanes and signal, and every crossing gives way to people, which the games mostly skip.
+- Not in this version: the card (`city/`): its cars still play fixed paths and were not re-rendered (a sprite has one
+  heading, so stopping or turning there needs new renders); the people do not wait for cars yet (prompt 3); lane changes,
+  overtaking, parking manoeuvres.
+
 ## The fit (`scene_export.py`)
 
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then

@@ -14,10 +14,10 @@ the campus chat (Blender card, real campus in 3D, Helena Theurer's height, the a
 
 Jose's prompts, in order (2026-10-29), each its own change:
 1. Audit every moving thing. **Done, live** (#173, b1029.1532).
-2. **Traffic (next):** "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of
+2. **Traffic: done in 3D** (2026-10-29, `claude/campus-traffic`, waiting for Jose's push; `real-map/traffic.js`, README "Traffic"). Was: "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of
    each street, slow down and stop at stop signs and crosswalks, turn on curves instead of sliding sideways, and never
    overlap each other. Use the map data for which streets are one-way."
-3. People: sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
+3. **People (next):** sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
    talking; never through walls, cars, trees or each other.
 4. Buildings checked against the real campus (height, floors, doors, garage entrances, bridges), with sources.
 
