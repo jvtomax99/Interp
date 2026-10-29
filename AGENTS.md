@@ -368,19 +368,8 @@ phone, even if he seems to be watching the chat.
 
 ### How Jose works with AI tools (Jose, 2026-10-29)
 
-Treat the AI as a junior developer he manages, not a genie. These hold on
-every request, for every tool:
-
-**Read it back first, for a new feature.** Before building a new feature
-or a big change, say his ask back in 2-3 plain lines (what changes, what
-it is for, what it leaves alone) and wait for his OK. If something is
-unclear, the one clarifying question goes in the same message. If the
-read-back is wrong, the code would have been too. Small fixes, wording
-and look tweaks get no read-back: just do them (the "Ambiguous request"
-rule above still applies). A phase Jose already picked in `docs/PLAN.md`
-counts as approved; a new chat's opening "2-3 lines of what it will do"
-(`docs/PLAN.md`) is its read-back (Jose, 2026-10-29: new features only,
-not every request).
+Treat the AI as a junior developer he manages, not a genie. These hold for
+every tool:
 
 **Spec before code for a new feature.** Write its note in
 `docs/features/` first: what it does, who it is for, and what it does
@@ -394,11 +383,6 @@ site), and say in the spec where ours can be better or should copy.
 **Challenge him.** Say plainly when an idea is weak, costly, off his goal
 or already covered by something in the app. No sugarcoating, no praise
 for its own sake. Disagree when he is wrong, then do what he decides.
-
-**Teach only when he asks.** Replies stay as short as the rule above. When
-he asks "explain X", explain it in plain words. Saying what a word means
-the first time (the plain-words rule above) still applies; that is not
-teaching.
 
 ## Not building (proposed 2026-10-29, waiting for Jose's OK)
 
