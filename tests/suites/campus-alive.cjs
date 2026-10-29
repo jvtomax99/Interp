@@ -33,7 +33,7 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
         idleBg: getComputedStyle(idle[0].firstElementChild).backgroundImage, cranes: cranes.length,
         atlases: [await load('./city/idlers.webp')], glow: q('.cp-glow').length, saved: localStorage.getItem('ih_campusLv') };
     });
-    ok(rest.idle === rest.want && rest.want >= 20 && rest.twoEach && rest.idleIn && /idlers\.webp/.test(rest.idleBg), 'the people about: one sprite each, two frames from idlers.webp, inside the picture', rest);
+    ok(rest.idle === rest.want && rest.want >= 12 && rest.twoEach && rest.idleIn && /idlers\.webp/.test(rest.idleBg), 'the people about: one sprite each, two frames from idlers.webp, inside the picture', rest);
     ok(rest.cranes === 0, 'nothing painted yet, and still no crane anywhere: no sign of construction', rest);
     ok(rest.atlases.every(w => w > 0), 'the picture behind them loads', rest.atlases);
     ok(rest.glow === 0 && rest.saved === JSON.stringify({ e:0, t:0, s:0, n:0, c:0 }), 'no lit windows at 0, and the levels drawn are kept', rest);
@@ -56,7 +56,8 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
     ok(JSON.stringify(rise.e) === JSON.stringify([['3', false, ''], ['4', true, '0'], ['5', true, '1'], ['6', true, '2'], ['7', true, '3']]),
       'Ethics: its old 3 tenths stay, then 4, 5, 6, 7 come in one after another', rise.e);
     ok(JSON.stringify(rise.t) === JSON.stringify([['9', false], ['10', true]]) && rise.sparks === 2, 'Terminology climbs its last tenth; a flash for each building that rose', rise);
-    ok(rise.glow.join() === './city/e-glow7.webp,./city/t-glow10.webp' && rise.glowRise.every(Boolean), 'lit windows on the painted floors, coming on after the climb', rise);
+    // (Helena Theurer, Terminology, is glass curtain wall on the real map: no separate windows to light, so no glow of its own)
+    ok(rise.glow.join() === './city/e-glow7.webp' && rise.glowRise.every(Boolean), 'lit windows on the painted floors, coming on after the climb', rise);
     ok(rise.cranes === 0 && rise.saved.e === 7 && rise.saved.t === 10, 'no cranes after the climb either; the new levels are kept', rise);
     await wait(3200); await page.screenshot({ path: O + device + '-risen.png' });
 

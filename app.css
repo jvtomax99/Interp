@@ -3939,8 +3939,8 @@
   .cp-amb img:last-child, .cp-heli img:last-child{ animation:cpBlink .36s steps(1) infinite; } .cp-amb img:first-child, .cp-heli img:first-child{ animation:cpBlink .36s steps(1) -.18s infinite; }
   .cp-heli img{ animation-duration:.1s; } .cp-heli img:first-child{ animation-delay:-.05s; }
   .cp-walk img:last-child{ animation:cpBlink .6s steps(1) infinite; } .cp-walk img:first-child{ animation:cpBlink .6s steps(1) -.3s infinite; }
-  /* round 2: the bay doors (three frames, run by campusLife with the ambulance), the lot car's two looks, people on the benches (a head turn now and then), the flock's wings */
-  .cp-bay{ position:absolute; pointer-events:none; } .cp-bay img{ position:absolute; top:0; height:100%; opacity:0; } .cp-bay img:first-child{ opacity:1; }
+  /* round 2: the ambulance's back doors (two frames over it at its stop, run by campusLife with it), the lot car's two looks, people on the benches (a head turn now and then), the flock's wings */
+  .cp-ambd{ position:absolute; pointer-events:none; } .cp-ambd img{ position:absolute; inset:0; width:100%; height:100%; opacity:0; }
   .cp-lot img:last-child{ opacity:0; }
   .cp-sit{ opacity:1; will-change:auto; } .cp-sit img:last-child{ animation:cpTurn 7s steps(1) infinite; animation-delay:calc(var(--i, 0) * -2.3s); }
   @keyframes cpTurn{ 0%,78%{ opacity:0; } 78.01%,100%{ opacity:1; } }
@@ -3951,7 +3951,7 @@
   .cp-dr .ds-art{ width:100%; height:100%; display:block; }
   @keyframes cpDrBob{ 50%{ transform:translateY(-4px); } }
   .cp-say p small{ display:block; font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:#98A1B3; margin-bottom:2px; }
-  .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-bay img{ animation-play-state:paused; }
+  .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-ambd img{ animation-play-state:paused; }
   .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:550;
     color:rgba(255,255,255,.9); background:rgba(255,255,255,.14); }
@@ -3969,9 +3969,9 @@
   .cp-go button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
-    .cp-paint, .cp-glow, .cp-paintw, .cp-idle i, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-bay img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
+    .cp-paint, .cp-glow, .cp-paintw, .cp-idle i, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-ambd img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
     .cp-spark{ display:none; } .cp-idle i:last-child{ opacity:0; }
-    .cp-sit img:first-child{ opacity:1; } .cp-sit img:last-child{ opacity:0; } .cp-bay img:first-child{ opacity:1 !important; } .cp-bay img:not(:first-child){ opacity:0 !important; }
+    .cp-sit img:first-child{ opacity:1; } .cp-sit img:last-child{ opacity:0; } .cp-ambd img{ opacity:0 !important; }
     .cp-go button{ transition:none; }
   }
 

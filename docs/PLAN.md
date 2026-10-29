@@ -145,6 +145,11 @@ under way, then what waits on Jose, then small leftovers.
       the old front (gone on the real map); Jose (2026-10-28): move them: the
       ambulance pulls up at the real ER on Atlantic Street with its doors opening, a
       car backs out of a spot in the Visitors parking court.
+      **Done 2026-10-29 (`claude/campus-card-blender`):** the card shows the real campus from Blender
+      (`real-map/card_*`, README "The card's pictures"). Both spots Jose placed are hidden from the card's
+      camera (checked with rays); his pick "move them into view": the ambulance stops at the curb on
+      Atlantic Street at the mouth of the ER's court, back doors opening; the lot car backs out on the
+      Visitors Parking garage's top deck. Next: `campus3d/` from the real map too (its own PR).
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

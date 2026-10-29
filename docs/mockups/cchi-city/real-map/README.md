@@ -39,6 +39,36 @@ page: `../live/livecheck.cjs`, or Playwright at iPhone size (393 x 852).
   whole board, two-finger pan with the target kept on the board, outline
   halos on the real footprints, badges kept on screen, the garden moved).
 
+## The card's pictures (2026-10-28)
+
+The CoreCHI Practice card's pictures (`city/`, `CAMPUS_MAP` in `features/campus.js`), rendered in Blender
+from this scene, from the card's camera (Jose's picks: Blender, the card, the moving things with it).
+
+```
+python3 build.py campus.html                                   # the preview page
+npm install --no-save three@0.160.0                            # in ../ (three.js for the page and the exporter)
+node card_capture.cjs campus.html cap                          # 1. scene, movers and paths (~2 min)
+python3.11 card_render.py cap renders 96                       # 2. Blender renders (~25 min on 4 CPUs)
+python3.11 card_build.py cap renders out --install             # 3. city/*.webp and CAMPUS_MAP (~2 min)
+```
+
+Python 3.11 with Blender's module: `pip download bpy==5.0.1 --no-deps --python-version 3.11
+--only-binary=:all:`, then a 3.11 venv with that wheel, numpy and Pillow.
+
+- `card_page.cjs`: loads the built page in headless Chromium with its moving things exposed (`window.__L`)
+  and frozen, and one roof spot of the Visitors Parking garage left empty (the lot car's).
+- `card_capture.cjs`: `base.glb` (the board, nothing that moves; the lamps' faint pools of light left out:
+  Blender draws them black), `m/*.glb` (each mover per frame, posed), `card.json` (camera, boxes, every
+  path with, per point, whether a ray from the camera reaches it), `spray*.png` (the fountain, three.js).
+- `card_render.py` (`toy_look.py` shared with `toy_render.py`): painted, clay, `mask-<k>.exr`,
+  `height.exr`, `glow.exr`, then every mover frame cropped with the board as holdout; `proj.json` (paths
+  and points as Blender's camera sees them). The ground's flat layers overlap in one plane, which Cycles
+  shades black; `flat_ground_apart` lifts each of their vertices by up to 0.004.
+- `card_build.py`: halves everything to 960 x 840, cuts each building's paint and lit windows in tenths
+  (its mask, below n/10 of its height, where the paint changes a pixel), shares one box between a mover's
+  frames, packs the people about into one atlas, and writes `entrance.json`; `--install` replaces `city/`
+  and the `CAMPUS_MAP` line.
+
 ## The fit (`scene_export.py`)
 
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then
@@ -232,8 +262,8 @@ where the map has houses.
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street
   (way 8921) and one at x 15.7 between the pavilion and the Visitors garage (way 8911). Not built yet; ask.
 - Whether the red sign on Imaging's canopy really reads EMERGENCY (too blurry in his shot).
-- The ambulance still drives to the bay on Link Pavilion's side, not the
-  real ED (Creamer) on Atlantic Street.
+- The ambulance still drives to the bay on Link Pavilion's side here (the card's pictures have it on Atlantic
+  Street: card_capture.cjs).
 - The front's ground, from the state's 2020 aerial (2026-10-28, Jose's pick "match it to real life"): the back
   island with the fountain at its head now runs z -0.2 to 4.8 on x 0.64 (it was a unit west, the fountain three
   units north), the front island is narrower and shorter (z 6.2 to 11.5), the entrance sign scaled to fit its mouth;
@@ -245,7 +275,6 @@ where the map has houses.
   it are placed, not known.
 - Domain weights on the cards are 9/25/9/45/12; the CoreCHI blueprint is
   22/22/22/15/19 (Ethics, Encounter, Terminology, US Systems, Culture). Ask.
-- Into the app: `campus3d/` (`gen.py --app`) and the card's pictures
-  (`builddiorama.cjs`, `city/`) still show the old campus. Wiring this in is
-  its own pull request once Jose OKs the look.
+- Into the app: the card's pictures are in (above); `campus3d/` (`gen.py --app`) still shows the old
+  campus. Wiring it in is its own pull request.
 - Map data © OpenStreetMap contributors (ODbL): the credit is on the page.
