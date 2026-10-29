@@ -35,7 +35,7 @@ LIVE_KEYS=set()
 # Link Pavilion's front: the map's outline takes in the canopy over its doors (a stub out to the drive); cut it off, so
 # its wall at the end of the drive runs straight and the diorama's canopy stands in front of it
 LINK_CUT=sbox(-2.4,-8.1,4.6,-6.0)
-DOM={'8888':('t',13),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',12)}
+DOM={'8888':('t',9),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',12)}
 DOOR_AT={'e':(1.1,-8.1),'s':(-9.0,10.2),'c':(13.0,9.7)}   # which wall gets the doors: the one nearest this point
 FLOORS={'8905':6,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':2,'8891':2,'8892':3,'8914':6,'8886':5,'8893':6}
 blds=[]
