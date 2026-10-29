@@ -59,18 +59,16 @@ before (Jose, 2026-10-24), each a few lines in simple words, never a
 big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
-**After every finished job, offer a new chat as buttons** (Jose,
-2026-10-25: "always give me clickable option for you to make a new chat
-for me and with a short summary of what is being worked on"; he picked
-"after each finished job" over every reply or only when heavy). Each reply
-that says "done" ends with `AskUserQuestion`: **"Start a new chat for me"**
-first, **"Keep going here"** second, and the question itself carries the
-summary (what is being worked on now and its goal, a few plain words).
-This is an offer, not the heavy-chat handover above: say which one you
-recommend (a light chat: keep going here). If he picks the new chat, do
-steps 1 to 4 above (the handoff first, then `create_session` with it and
-the two-part summary). Not during a job, not on progress replies. Where
-the buttons are missing, one plain line instead.
+**Offer a new chat only when the chat is extremely heavy** (Jose, 2026-10-28:
+not so constantly, only when the chat feels extremely heavy; this replaces the buttons after every finished job of
+2026-10-25). Heavy means what the handover above says: compacted, or many
+big file reads, long test output or fix rounds. Then, once, end the reply
+with `AskUserQuestion`: **"Start a new chat for me"** first, **"Keep going
+here"** second, the question carrying the summary (what is being worked on
+now and its goal, a few plain words). A finished job alone is no reason to
+ask. If he picks the new chat, do steps 1 to 4 above (the handoff first,
+then `create_session` with it and the two-part summary). Where the buttons
+are missing, one plain line instead.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -119,6 +117,39 @@ under way, then what waits on Jose, then small leftovers.
       where the real one is over HUMC for that date and hour (it lit the
       campus from the north before). `claude/campus-time`. Frame-rate
       reading still owed.
+   **2026-10-27/28 (Jose): the campus on the real map, front and back.**
+      Preview only, not in the app: every building from his OpenStreetMap
+      export at the same scale (2026-10-28: the front's three too, "still
+      not accurate"), the diorama's ground at the front refitted round
+      them; Terminology = Helena Theurer Pavilion (the map's "Patient
+      Pavilion"), Encounter = the real John Theurer across 2nd Street; the
+      corner of Atlantic and 2nd from his photos.
+      `docs/mockups/cchi-city/real-map/` (README: build, decisions, open
+      items), `claude/campus-real-map`. 60 fps on his iPhone (2026-10-28).
+      Next: his OK on the look, then wiring it into `campus3d/` and the
+      card's pictures (own PR).
+   **2026-10-28 (Jose): the card's pictures from Blender** (his picks: Blender for
+      pictures, "the CoreCHI Practice card", "together": the moving things re-made at
+      once). `claude/campus-card-blender`, own PR. Plan: (1) `card_capture.cjs` on
+      the built preview, camera = the card's (diorama.html's direction, pulled back to
+      the whole board, fov 18.77, 960 x 840 at 2x): every moving thing alone with the
+      rest as depth (clouds, flags, spray, cars, ambulance, helicopter, street cars,
+      walkers, sitters, birds, the people about), their paths projected; the domain
+      buildings' labels; the GLB with the moving things hidden. (2) `toy_render.py
+      card`: painted, clay, building-id, height and lit-window passes from that
+      camera. (3) `card_build.py`: near (clay), sky, far, each building's paint and
+      glow in tenths (id mask x height cut, occluded by the id pass), tap boxes, the
+      manifest into `CAMPUS_MAP`, files into `city/`. (4) `features/campus.js`
+      places renamed to the real buildings; the campus suites; the guide answer and a
+      New lately card. The ambulance bay doors and the backing-out car belonged to
+      the old front (gone on the real map); Jose (2026-10-28): move them: the
+      ambulance pulls up at the real ER on Atlantic Street with its doors opening, a
+      car backs out of a spot in the Visitors parking court.
+      **Done 2026-10-29 (`claude/campus-card-blender`):** the card shows the real campus from Blender
+      (`real-map/card_*`, README "The card's pictures"). Both spots Jose placed are hidden from the card's
+      camera (checked with rays); his pick "move them into view": the ambulance stops at the curb on
+      Atlantic Street at the mouth of the ER's court, back doors opening; the lot car backs out on the
+      Visitors Parking garage's top deck. Next: `campus3d/` from the real map too (its own PR).
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

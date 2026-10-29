@@ -1,51 +1,50 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat
-hands over"). This one: 2026-10-26, the third campus chat (#157, #164, #165).
+hands over"). This one: 2026-10-28, the real-map campus chat (claude.ai,
+moved into this repo as `claude/campus-real-map`), updated by the chat that
+rebuilt the front on the map.
 
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next 2, the campus),
-> `docs/handoff.md` and `docs/features/practice-dashboard.md` (the diorama,
-> the miniature-world kit, the campus in 3D). Then tell me what's being
-> worked on now and the goal, and what was worked on before, in a few short
-> lines each, say in 2-3 lines what you'll do next, and wait for my go.
-> Plain words, say "working on it" and "done".
+> `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md`. Then
+> tell me what's being worked on now and the goal, and what was worked on
+> before, in a few short lines each, say in 2-3 lines what you'll do next,
+> and wait for my go. Plain words, say "working on it" and "done".
 
 ## Now
 
-**Campus 3D: Jose's feedback from his phone.** Nothing is open. The campus
-in 3D is live (#165, b1026.2227): the **3D** button on the CoreCHI Practice
-card opens `campus3d/index.html` full screen (drag to turn, pinch to zoom,
-tap a building, "See it finished"). Ask Jose how it feels on his iPhone
-(smooth or choppy) and what he wants changed. If it's choppy, the levers are
-in `docs/mockups/cchi-city/live/runtime.js` (sharpness steps down under 42
-fps; shadows only on change) and `LITE` in `diorama.html` (simpler shapes);
-measure the triangles first (about 440k now). After that, `docs/PLAN.md`
-Next 2 lists what's left of his seven "alive and interactive" ideas: tap a
-person for a term (4), fireworks when a building is finished (5), friendly
-weather from the streak (6), and the campus drawn live in the card itself
-(step b), which waits on the phone result.
+**The CoreCHI Practice card's pictures, made in Blender from the real-map campus.** Branch
+`claude/campus-card-blender` (off `claude/campus-real-map`, PR #167, the preview source). Plan:
+`docs/PLAN.md`, Next 2, "the card's pictures from Blender" (steps 1-4 and Jose's picks). Jose
+OK'd the look from two mock-ups (whole board from the card's angle, finished and in progress).
 
-How to change the campus: the scene is `docs/mockups/cchi-city/diorama.html`.
-Pictures for the card: `node builddiorama.cjs <outdir>` (~10 min; copy the
-`.webp` files to `city/`, paste `entrance.json` over `CAMPUS_MAP` in
-`features/campus.js`; `sky.webp` alone: `window.__sky`). The 3D page:
-`python3 docs/mockups/cchi-city/live/gen.py --app` (writes `campus3d/`;
-needs `npm install --no-save three@0.160.0` in `docs/mockups/cchi-city`).
-The iPhone test page (Artifact https://claude.ai/artifact/NeozEx9yxi91dfJQscPDxX):
-`gen.py <out.html>`. Playwright in this container: link
-`tests/node_modules/playwright` to `/opt/node22/lib/node_modules/playwright`.
-Checks: `cd tests && node run.cjs campus-3d campus-pick campus-alive campus-life campus-depth guide`.
+What exists: `docs/mockups/cchi-city/real-map/toy_render.py` (Blender: toy plastic, rounded edges,
+soft sun, AgX, depth of field; `VIEWS=card`, `CARD_DIST=235`, `PROGRESS="e:0.8,..."`),
+`export_glb.cjs` (the built preview's scene to GLB in headless Chromium). Blender in this
+container: `pip download bpy` (5.0.1, cp311 wheel), `uv venv --python /usr/bin/python3.11`,
+`uv pip install` the wheel; renders ~100 s per 1 MP at 96 samples on 4 CPUs.
 
-## Before (this chat's changes, all live)
+How the card works now: `features/campus.js` (`CAMPUS_MAP` manifest, `renderCampus`), the
+motion `campusLife`/`campusDepth` in `index.html` ("Practice dashboard motion"), pictures in
+`city/` (1.8 MB, ~150 files) made by `docs/mockups/cchi-city/builddiorama.cjs` from
+`diorama.html`'s capture pipeline (`window.__run`: `alone()` renders one object with the rest as
+depth, `path()` projects a 3D path, `pack()` crops). That pipeline is cut out of the live page
+(`live/gen.py`), so the preview page has the moving objects (CAR_IN, CAR_OUT, CAR_IN2, AMB,
+HELI, STREET, WALKS, SITTERS, BIRDS, IDLE, FLAGS, CLOUDS, spray) but not the capture code.
+Suites: `tests/suites/campus-{pick,alive,life,depth,3d}.cjs` (life expects bay and lot).
 
-- **#157** the campus as a floating diorama (b1026.2005).
-- **#164** the real HUMC layout from OpenStreetMap, JTCC as Encounter, the
-  entrance sign in the median, the tall brick building behind Ethics,
-  Medical Plaza in brick, the miniature world (trees, flower beds, cute
-  people, entrances, pond fountain), soft daylight, no cranes (b1026.2044).
-- **#165** the campus in 3D, full screen (b1026.2227).
-- Lessons: GitHub's journey step "Term Review on 5" and a WebKit browser
-  crash in `dock-tuck` each failed once on a PR while passing on the same
-  code elsewhere; one re-run cleared them (PR comments say so).
+Idea for the build: Blender for near/paint/glow (passes: painted, clay, object-id, height,
+lit windows; each building's paint = id mask x height cut, cropped), three.js on the preview
+page for the moving sprites with the identical camera (fov 18.77 vertical, 960 x 840 at 2x, no
+view offset; Blender sensor fit vertical; three.js (x,y,z) = Blender (x,-z,y)).
+
+## Before
+
+- **#157** the campus as a floating diorama; **#164** the real HUMC layout
+  around the entrance; **#165** the campus in 3D, full screen; the time of
+  day with the real sun over HUMC (`claude/campus-time`). All live.
+- **This chat (claude.ai):** the real-map preview above, built step by step
+  with Jose from his map export, his Google 3D flyover and his photos (Street
+  View at 77 2nd St, his window at Theurer); moved into the repo here.

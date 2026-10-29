@@ -37,7 +37,7 @@ const SUITES = [
   ['spring-press.cjs',    'Springy press: Practice buttons squash, spring past, settle; flame flickers'],
   ['springs.cjs',         'S5 springs: plain taps settle with no overshoot (tab bar, section panel), the kept list'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
-  ['campus-life.cjs',     'Campus life 2: bay doors with the ambulance, the lot car, sitters, the flock, pauses, reduced motion'],
+  ['campus-life.cjs',     'Campus life 2: the ambulance and its doors, the lot car, sitters, the flock, pauses, reduced motion'],
   ['glossary-cv.cjs',     'Glossary taps: off-screen cards skip layout; same pixels; Back, a jump and a redraw land where they should'],
   ['campus-depth.cjs',    'Campus depth: sky, town and campus layers; scroll and drag slide the back ones, spring home, never pick'],
   ['campus-3d.cjs',      'Campus in 3D: the button, full screen, your progress by message, See it finished, Practise, the X'],

@@ -10,11 +10,13 @@ and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
 ask"). It offers to start that chat itself, with the handoff and a summary
 of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
 (`AskUserQuestion`), "I start it for you" first as the pick, never only
-as text to paste (Jose, 2026-10-25). **After every finished job** (each
-time a reply says "done"), the reply ends with the same clickable buttons,
+as text to paste (Jose, 2026-10-25). **Offer a new chat only when the chat is extremely
+heavy** (Jose, 2026-10-28: not so constantly,
+only when the chat feels extremely heavy; replaces the buttons after every
+finished job, 2026-10-25): then, and only then, the same clickable buttons,
 "Start a new chat for me" first and "Keep going here" second, over a short
-summary of what is being worked on (Jose, 2026-10-25); a new chat is made
-only when he picks it, with the handoff written first. Whenever a chat starts a new
+summary of what is being worked on; a new chat is made only when he picks
+it, with the handoff written first. Whenever a chat starts a new
 chat for Jose, it gives him a fresh summary in plain words, in two parts:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). It says it in
@@ -51,8 +53,8 @@ between assignments.
 | `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
 | `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
 | `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 30 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face; the last four, surprised, sad, worried and doubt, from `docs/art/dr-smiley-faces/`), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `features/smiley-engine.js` (moved out of `index.html` 2026-10-25). On Home, `home-polish.js` draws his lanyard as live cords over him |
-| `city/*.webp` | 102 files | Your HUMC campus on CoreCHI Practice: the main entrance as a floating diorama at golden hour, three depth layers (`sky` backdrop, `far` clouds, `near` the board, buildings faded, slid for parallax) + each building's paint in tenths (pre-rendered 3D; `renderCampus` in `features/campus.js`, `docs/mockups/cchi-city/diorama.html`) |
-| `campus3d/` | — | Your campus in 3D, full screen (the **3D** button on the CoreCHI Practice card; `openCampus3d` in `features/campus.js`): `index.html` is built by `docs/mockups/cchi-city/live/gen.py --app` from the same scene as `city/` (never edit it by hand), `three/` is three.js 0.160 (MIT, its `LICENSE` beside it). Loaded only when opened; your progress arrives by message |
+| `city/*.webp` | ~130 files | Your HUMC campus on CoreCHI Practice: the real campus (every building from the OpenStreetMap export) as a toy model in daylight, rendered in Blender from the card's camera: `sky` backdrop, `far` the board's shadow, `near` the board with the five domain buildings in white clay, each one's paint and lit windows in tenths, every moving thing's frames (`renderCampus` in `features/campus.js`; made by `docs/mockups/cchi-city/real-map/card_*.{cjs,py}`, its README) |
+| `campus3d/` | — | Your campus in 3D, full screen (the **3D** button on the CoreCHI Practice card; `openCampus3d` in `features/campus.js`): `index.html` is built by `docs/mockups/cchi-city/live/gen.py --app` from the hand-built diorama (never edit it by hand; still the old campus, while `city/` is the real map since 2026-10-28), `three/` is three.js 0.160 (MIT, its `LICENSE` beside it). Loaded only when opened; your progress arrives by message |
 | `media/` | — | The 1-minute video (`hub-promo.mp4`, 720p, 54.5 s; the 60 s cut from `promo/hub-blend/` played 10% faster, since 2026-10-26) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
 | `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
 | `promo/hub-blend/` | — | Source of the 3D promo remake (HyperFrames + Three.js); plan in its `BRIEF.md`. Not deployed (`.vercelignore`); only a rendered MP4 goes into `media/` |

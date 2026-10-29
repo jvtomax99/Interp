@@ -5773,7 +5773,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Explore your HUMC campus in 3D: turn it, zoom in, slide the time of day, and see every building finished' },
+  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Your campus is the whole real HUMC now, as a toy model: every building where it stands, and an ambulance pulling up at the ER' },
   { id:'promo',       tone:'gd-n1', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 1-minute film, in 3D, with a new narrator: notifications and your knowledge brain are in it now' },
   { id:'notifications', tone:'gd-n2', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
 ];
@@ -9594,9 +9594,10 @@ function practiceMotionKeys(root){
 }
 
 /* The campus comes alive: vehicles follow their projected paths (each sprite was rendered at one
-   reference point; the path gives screen points and a scale per point), the ambulance pulls in and
-   holds with its lights flashing, the helicopter lands and later lifts off, clouds drift, flags and
-   the fountain cycle their frames (lit windows and the people about flip in CSS).
+   reference point; the path gives screen points, a scale per point and whether it is seen there: a point
+   behind a building has 0, so a car or a walker fades out behind it and back in), the ambulance pulls up
+   and holds with its lights flashing while its back doors open, the helicopter lands and later lifts off,
+   flags and the fountain cycle their frames (lit windows and the people about flip in CSS).
    Web Animations, so they pause off screen. */
 let campusAnims = [];
 function campusLife(root){
@@ -9604,42 +9605,43 @@ function campusLife(root){
   const world = root.querySelector('.cp-world'); if (!world || reducedMotion()) return;
   const W = CAMPUS_MAP.w;
   const kf = el => { const ref = el.dataset.ref.split(',').map(Number), pts = el.dataset.pts.split(';').map(p => p.split(',').map(Number));
-    return pts.map(p => ({ transform: `translate(${((p[0]-ref[0])/W*100).toFixed(2)}cqw, ${((p[1]-ref[1])/W*100).toFixed(2)}cqw) scale(${p[2]})` })); };
+    return pts.map(p => ({ transform: `translate(${((p[0]-ref[0])/W*100).toFixed(2)}cqw, ${((p[1]-ref[1])/W*100).toFixed(2)}cqw) scale(${p[2]})`, opacity: p.length > 3 ? p[3] : 1 })); };
   const run = (el, frames, opts) => { const a = el.animate(frames, opts); campusAnims.push(a); return a; };
   const at = (f, k) => ({ ...f, offset: k });
   world.querySelectorAll('.cp-car').forEach((el, i) => { const f = kf(el);
-    run(el, [{ ...f[0], opacity:0 }, { ...f[0], opacity:1, offset:0.06 }, ...f.slice(1, -1).map((x, j) => at(x, 0.06 + 0.88*(j+1)/(f.length-1))), { ...f[f.length-1], opacity:1, offset:0.94 }, { ...f[f.length-1], opacity:0 }],
+    run(el, [{ ...f[0], opacity:0 }, { ...f[0], offset:0.06 }, ...f.slice(1, -1).map((x, j) => at(x, 0.06 + 0.88*(j+1)/(f.length-1))), { ...f[f.length-1], offset:0.94 }, { ...f[f.length-1], opacity:0 }],
       { duration: 9000 + i*2500, iterations: Infinity, delay: -i*4300, easing:'linear' }); });
   const amb = world.querySelector('.cp-amb'); if (amb){ const f = kf(amb), n = f.length;
-    run(amb, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.02 }, ...f.slice(1).map((x, j) => at(x, 0.02 + 0.30*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.78 }, { ...f[n-1], opacity:0, offset:0.82 }, { ...f[n-1], opacity:0, offset:1 }],
+    run(amb, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], offset:0.02 }, ...f.slice(1).map((x, j) => at(x, 0.02 + 0.30*(j+1)/(n-1))), { ...f[n-1], offset:0.78 }, { ...f[n-1], opacity:0, offset:0.82 }, { ...f[n-1], opacity:0, offset:1 }],
       { duration: 34000, iterations: Infinity, delay: -6000, easing:'linear' }); }
-  // the bay doors open as the ambulance arrives (its keyframes: in by 0.32, holds to 0.78, gone by 0.82), on the same clock.
+  // the ambulance's back doors swing open once it has pulled up (its keyframes: in by 0.32, holds to 0.78, gone by 0.82), on
+  // the same clock: half open, open, half, shut. Each frame is the whole ambulance at its stop, laid over it.
   // Frame swaps are linear keyframes 0.001 apart (34 ms): a steps() easing on the options would hold the whole run at 0.
-  const bay = world.querySelector('.cp-bay'); if (bay && amb){ const [closed, half, open] = bay.querySelectorAll('img');
+  const doors = world.querySelector('.cp-ambd'); if (doors && amb){ const [half, open] = doors.querySelectorAll('img');
     // one animation per frame (a second one on the same element would replace the first), each a list of [on, off] windows
     const show = (el, wins) => run(el, [{ opacity:0, offset:0 }, ...wins.flatMap(([on, off]) => [{ opacity:0, offset:on - 0.001 }, { opacity:1, offset:on }, { opacity:1, offset:off }, { opacity:0, offset:off + 0.001 }]), { opacity:0, offset:1 }], { duration: 34000, iterations: Infinity, delay: -6000, easing:'linear' });
-    run(closed, [{ opacity:1, offset:0 }, { opacity:1, offset:0.26 }, { opacity:0, offset:0.261 }, { opacity:0, offset:0.86 }, { opacity:1, offset:0.861 }, { opacity:1, offset:1 }], { duration: 34000, iterations: Infinity, delay: -6000, easing:'linear' });
-    show(half, [[0.26, 0.29], [0.84, 0.86]]); show(open, [[0.29, 0.84]]); }
-  // the lot car: parked, then backs out (reverse lights), then its second look noses east along the lot's lane to the drive and out to the street
+    show(half, [[0.36, 0.39], [0.72, 0.75]]); show(open, [[0.39, 0.72]]); }
+  // the lot car (on the Visitors Parking garage's top deck): parked, then backs out, then its second look heads down the aisle.
+  // The second look is drawn where it starts (ref2), so its moves are from there.
   const lot = world.querySelector('.cp-lot'); if (lot){ const [back, go] = lot.querySelectorAll('img');
-    const f1 = kf(lot), ref2 = lot.dataset.ref2.split(',').map(Number), ref = lot.dataset.ref.split(',').map(Number);
-    const f2 = lot.dataset.pts2.split(';').map(p => p.split(',').map(Number)).map(p => ({ transform: `translate(${((p[0]-ref[0])/W*100).toFixed(2)}cqw, ${((p[1]-ref[1])/W*100).toFixed(2)}cqw) scale(${p[2]})` }));
+    const f1 = kf(lot), ref2 = lot.dataset.ref2.split(',').map(Number);
+    const f2 = lot.dataset.pts2.split(';').map(p => p.split(',').map(Number)).map(p => ({ transform: `translate(${((p[0]-ref2[0])/W*100).toFixed(2)}cqw, ${((p[1]-ref2[1])/W*100).toFixed(2)}cqw) scale(${p[2]})`, opacity: p.length > 3 ? p[3] : 1 }));
     const n1 = f1.length, n2 = f2.length, T = 46000;
-    run(lot, [{ ...f1[0], opacity:0, offset:0 }, { ...f1[0], opacity:1, offset:0.03 }, { ...f1[0], opacity:1, offset:0.34 }, ...f1.slice(1).map((x, j) => at(x, 0.34 + 0.10*(j+1)/(n1-1))),
-        ...f2.slice(1).map((x, j) => at(x, 0.44 + 0.26*(j+1)/(n2-1))), { ...f2[n2-1], opacity:1, offset:0.70 }, { ...f2[n2-1], opacity:0, offset:0.72 }, { ...f2[n2-1], opacity:0, offset:1 }],
+    run(lot, [{ ...f1[0], opacity:0, offset:0 }, { ...f1[0], offset:0.03 }, { ...f1[0], offset:0.34 }, ...f1.slice(1).map((x, j) => at(x, 0.34 + 0.10*(j+1)/(n1-1))),
+        { ...f2[0], offset:0.4401 }, ...f2.slice(1).map((x, j) => at(x, 0.4401 + 0.2599*(j+1)/(n2-1))), { ...f2[n2-1], opacity:0, offset:0.72 }, { ...f2[n2-1], opacity:0, offset:1 }],
       { duration: T, iterations: Infinity, delay: -9000, easing:'linear' });
-    run(back, [{ opacity:1, offset:0 }, { opacity:1, offset:0.44 }, { opacity:0, offset:0.441 }, { opacity:0, offset:1 }], { duration: T, iterations: Infinity, delay: -9000, easing:'linear' });
-    run(go, [{ opacity:0, offset:0 }, { opacity:0, offset:0.44 }, { opacity:1, offset:0.441 }, { opacity:1, offset:1 }], { duration: T, iterations: Infinity, delay: -9000, easing:'linear' }); }
+    run(back, [{ opacity:1, offset:0 }, { opacity:1, offset:0.44 }, { opacity:0, offset:0.4401 }, { opacity:0, offset:1 }], { duration: T, iterations: Infinity, delay: -9000, easing:'linear' });
+    run(go, [{ opacity:0, offset:0 }, { opacity:0, offset:0.44 }, { opacity:1, offset:0.4401 }, { opacity:1, offset:1 }], { duration: T, iterations: Infinity, delay: -9000, easing:'linear' }); }
   // the flock crosses the sky, then nothing for a while
   const birds = world.querySelector('.cp-birds'); if (birds){ const f = kf(birds), n = f.length;
-    run(birds, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.02 }, ...f.slice(1, -1).map((x, j) => at(x, 0.02 + 0.40*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.42 }, { ...f[n-1], opacity:0, offset:0.44 }, { ...f[n-1], opacity:0, offset:1 }],
+    run(birds, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], offset:0.02 }, ...f.slice(1, -1).map((x, j) => at(x, 0.02 + 0.40*(j+1)/(n-1))), { ...f[n-1], offset:0.42 }, { ...f[n-1], opacity:0, offset:0.44 }, { ...f[n-1], opacity:0, offset:1 }],
       { duration: 64000, iterations: Infinity, delay: -14000, easing:'linear' }); }
   const heli = world.querySelector('.cp-heli'); if (heli){ const f = kf(heli), n = f.length, land = f.slice(0, n), lift = f.slice().reverse();
-    run(heli, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.02 }, ...land.slice(1).map((x, j) => at(x, 0.02 + 0.26*(j+1)/(n-1))), { ...f[n-1], offset:0.55 },
-        ...lift.slice(1).map((x, j) => at(x, 0.55 + 0.26*(j+1)/(n-1))), { ...f[0], opacity:1, offset:0.84 }, { ...f[0], opacity:0, offset:0.88 }, { ...f[0], opacity:0, offset:1 }],
+    run(heli, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], offset:0.02 }, ...land.slice(1).map((x, j) => at(x, 0.02 + 0.26*(j+1)/(n-1))), { ...f[n-1], offset:0.55 },
+        ...lift.slice(1).map((x, j) => at(x, 0.55 + 0.26*(j+1)/(n-1))), { ...f[0], offset:0.84 }, { ...f[0], opacity:0, offset:0.88 }, { ...f[0], opacity:0, offset:1 }],
       { duration: 48000, iterations: Infinity, delay: -20000, easing:'ease-in-out' }); }
   world.querySelectorAll('.cp-mv').forEach(el => { const f = kf(el), n = f.length, dur = +el.dataset.dur || 20000;
-    run(el, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], opacity:1, offset:0.03 }, ...f.slice(1, -1).map((x, j) => at(x, 0.03 + 0.94*(j+1)/(n-1))), { ...f[n-1], opacity:1, offset:0.97 }, { ...f[n-1], opacity:0, offset:1 }],
+    run(el, [{ ...f[0], opacity:0, offset:0 }, { ...f[0], offset:0.03 }, ...f.slice(1, -1).map((x, j) => at(x, 0.03 + 0.94*(j+1)/(n-1))), { ...f[n-1], offset:0.97 }, { ...f[n-1], opacity:0, offset:1 }],
       { duration: dur, iterations: Infinity, delay: +el.dataset.delay || 0, easing:'linear' }); });
   const clouds = world.querySelector('.cp-clouds'); if (clouds) run(clouds, [{ transform:'translateX(-1.2cqw)' }, { transform:'translateX(1.2cqw)' }], { duration: 70000, iterations: Infinity, direction:'alternate', easing:'ease-in-out' });
 }

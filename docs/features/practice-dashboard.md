@@ -42,6 +42,33 @@ on the pressed tile (touch) or hovered tile (mouse), only on the practice
 screen; release springs back via `--spring`. Nothing runs at rest; reduced
 motion turns the lean and squashes off.
 
+**The real campus, in Blender (2026-10-28; replaces the pictures described below; the card's code, the
+pick, the paint rising and the depth still work as below).** Jose's picks: Blender for the pictures, the
+CoreCHI Practice card first, the moving things re-made with it. The scene is the real-map preview
+(`docs/mockups/cchi-city/real-map/`, every building from his OpenStreetMap export), seen from the card's
+camera: diorama.html's direction pulled back to the whole board (`card_capture.cjs`: target -1,-3,-29,
+distance 235, fov 18.77, 960 x 840, rendered at 2x). Three steps, in the real-map README ("The card's
+pictures"): `card_capture.cjs` (the scene to GLB, every mover posed and exported on its own, each path with
+what the camera sees), `card_render.py` (Blender: the toy look; painted, clay, a coverage mask per domain
+building, height, lit windows; every mover frame alone with the board held out), `card_build.py` (cut into
+`city/`, the manifest into `CAMPUS_MAP`; `--install` does both). Unpainted is white clay (not faded colour);
+the paint is the painted render where the building shows and the pixel is below n/10 of its height.
+Daylight, no clouds; `far.webp` is the board's soft shadow. Paths carry a 4th value per point, seen (0
+where a building stands in front), which `campusLife` uses as opacity, so cars and walkers go out of sight
+behind buildings. The two Jose placed (2026-10-28) are hidden from this camera (traced with rays: the ER's
+court behind Women's and Children's, the Visitors parking court behind Medical Plaza); his pick, "move them
+into view": the ambulance drives up Atlantic Street's northbound lane and stops at the curb at the mouth of
+the ER's court, its back doors opening (`ambd0/1.webp`, `.cp-ambd`, on its 34 s clock: half 0.36, open 0.39,
+half 0.72, shut 0.75); the lot car backs out of a spot on the Visitors Parking garage's top deck (spot 45,
+left empty in the board) and heads down the aisle (its second look moves from where it is drawn, `ref2`).
+The bay doors are gone. Unpainted clay is (0.84, 0.83, 0.81), matte (glass made clay stayed a mirror and
+read as fog). Medical Plaza's badge point is moved 60 px left (`NUDGE` in `card_build.py`) so its chip
+leaves the lot car's spot clear. Helena Theurer (Terminology) is curtain wall with no separate windows, so
+it has no lit-window layers. Movers whose path the camera never sees, or whose pose is out of frame, are
+left out (`card_build.py`): 11 walkers, 8 street cars, 15 people about. Places in the say line: Link Pavilion, Helena Theurer Pavilion, the Jurist
+Research Center, John Theurer Cancer Center, Medical Plaza. The 3D button's campus (`campus3d/`) is still
+the old one until it is rebuilt from the real map too.
+
 **The floating diorama (2026-10-26; the board, camera and paint replace the scene below; the colours
 and golden-hour light below still hold).**
 Jose sent a video of soft pastel low-poly dioramas on rounded bases ("can we
