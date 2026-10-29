@@ -89,11 +89,15 @@ the swap. Filming on Home: `tests/tools/home-film.cjs` (30 fps, one PNG a frame,
 `BG='#ff00ff'` for a flat banner to count holes). `smiley-body-app.cjs` checks
 every track (a step budget per clip; the hop and jump move the head fast). Videos sent: the wave and the think, before/after.
 Details: `docs/features/dr-smiley.md`, "Clips", the paragraph "followed
-by his hair alone". Still open (not measured as faults, worth asking him):
-the thinking finger now rests a little below his chin (his head is
-smaller than the clip's, so its chin sits higher); the cheer's rest head
-is 3.7 px right of the rig's (`FIT`), a small shift at its cut; the
-clip's head turns a little (yaw) and his cannot. To redo a clip:
+by his hair alone". Then his head at the films' size (Jose's pick among three, 2026-10-29):
+the fingers touching his chin in the think had been cut away with the
+film's head (the stump plus the collar fill read as a blob under his
+chin), because his head was 10% smaller than the film's; `DR_BODY.head`
+and `rig.json` now scale it 1.10 about the chin (scale 1.1969, at 280.9,
+23.8; the picture's numbers kept beside). Still open (not measured as
+faults): the cheer's rest head is 3.7 px right of the rig's (`FIT`), a
+small shift at its cut; the clip's head turns a little (yaw) and his
+cannot. To redo a clip:
 `headtrack.py` on the keyed frames, then `behead.py <keyed> drsmiley/clips/<move>`.
 
 ## Where it stood (2026-10-29, seventh chat)

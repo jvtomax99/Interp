@@ -19,7 +19,11 @@
 
 const DR_BODY = {
   w: 1070, h: 1470, feetY: 1427,
-  head: { at: [307, 74.2], scale: 1.0881, grid: [480, 600] },
+  // his head drawn at the films' head size (2026-10-29, Jose's pick): base.webp's grid scaled 1.0881 to the picture, then
+  // 1.10 about the chin (the chin's point on the picture stays at 568, 578; the films draw his head 10% bigger than the
+  // picture does, and his own head rides their bodies: at the picture's size the fingers touching his chin were lost and the
+  // collar gaped; rig.json keeps both numbers)
+  head: { at: [280.9, 23.8], scale: 1.1969, grid: [480, 600] },
   neck: [547, 585],
   shoulder: { l: [353, 630], r: [759, 630] },
   elbow: { l: [340, 792], r: [743, 792] },

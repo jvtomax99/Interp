@@ -547,7 +547,14 @@ later", then placed on 2026-10-24: above); the viewer is `drsmiley/body.html`, n
   is the app's own (`head.webp`: `base.webp` above the chin, its sliver of
   coat removed, a skin neck tube behind, on the same 480 x 600 grid, so the
   face strip, the brows and the rank hats fit it unchanged; placed at scale
-  1.0881); the torso and legs with no arms (`body.webp`, the floor shadow
+  1.0881 to the picture, **then 1.10 about the chin** (scale 1.1969, at
+  280.9, 23.8; the chin's point stays at 568, 578): the films draw his head
+  10% bigger than the picture does, and his own head rides their bodies,
+  so at the picture's size the fingers touching his chin in the think were
+  cut away with the film's head and the collar gaped beside his jaw. Jose
+  chose the films' size everywhere over a head that grows into each move
+  (2026-10-29); `rig.json` keeps the picture's numbers as `pictureScale`
+  and `pictureAt`, and `headK`); the torso and legs with no arms (`body.webp`, the floor shadow
   keyed out, the coat's edge under each sleeve relit from the coat beside
   it); each arm as an upper arm and a forearm with round caps at the
   shoulder and elbow; each leg, its top repeated up under the coat. Drawn
