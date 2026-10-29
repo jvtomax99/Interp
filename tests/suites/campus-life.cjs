@@ -29,7 +29,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
         birds: q('.cp-birds img').length, birdsIn: q('.cp-birds').every(inside), anims: campusAnims.length,
         srcs: q('.cp-ambd img, .cp-lot img, .cp-sit img, .cp-birds img').map(i => i.getAttribute('src')), loaded: q('.cp-ambd img, .cp-lot img, .cp-sit img, .cp-birds img').every(i => i.complete && i.naturalWidth > 0) };
     });
-    ok(have.doors === 2 && have.doorsIn && have.lot === 2 && have.lotIn && have.sit === 3 && have.sitImgs === 6 && have.sitIn && have.birds === 2 && have.birdsIn, 'the ambulance's doors (2 frames), the lot car (2 looks), three sitters (2 frames each) and the flock are in the scene', have);
+    ok(have.doors === 2 && have.doorsIn && have.lot === 2 && have.lotIn && have.sit === 3 && have.sitImgs === 6 && have.sitIn && have.birds === 2 && have.birdsIn, 'the ambulance\'s doors (2 frames), the lot car (2 looks), three sitters (2 frames each) and the flock are in the scene', have);
     ok(have.loaded && have.srcs.every(s => /^\.\/city\/(ambd[01]|lot[01]|sit[0-2]-[01]|birds[01])\.webp$/.test(s)), 'their pictures load from city/', have.srcs);
     ok(have.sitSeen, 'the sitters are drawn at rest (not faded like the movers)', have);
 
