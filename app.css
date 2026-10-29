@@ -4847,6 +4847,66 @@
     .ff-mode, .ff-chip{ transition:none; }
   }
 
+  /* ---------- Sound-Alikes (features/sound-alikes.js) ----------
+     Built on the False Friends styles above (ff-card, ff-modes, ff-chip);
+     only what a card of spoken words adds is here. */
+  .sa-dot{ color:var(--ink-faint); font-weight:500; }
+  .ff-badge.sa-es{ --ff-color:#2E8BD0; }
+  .sa-all{
+    display:inline-flex; align-items:center; gap:6px; min-height:44px; margin:13px 0 0;
+    padding:6px 13px 6px 9px; border:1px solid var(--line); border-radius:999px;
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    font-size:13px; font-weight:550; cursor:pointer;
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  .sa-all svg, .sa-say svg, .sa-play svg{ width:20px; height:20px; flex-shrink:0; }
+  .sa-all:active, .sa-say:active, .sa-play:active{ transform:scale(.97); }
+  .sa-all.speaking, .sa-say.speaking, .sa-play.speaking{ background:var(--accent-soft); color:var(--accent); }
+  .sa-all.speaking svg, .sa-say.speaking svg, .sa-play.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
+  .sa-words{ list-style:none; margin:13px 0 0; padding:0; display:grid; gap:13px; }
+  .sa-word + .sa-word{ padding-top:13px; border-top:1px solid var(--line-soft); }
+  .sa-word-head{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; }
+  .sa-say{
+    display:inline-grid; place-items:center; width:44px; height:44px; flex-shrink:0;
+    border:1px solid var(--line); border-radius:999px; background:var(--paper);
+    color:var(--ink-soft); cursor:pointer;
+  }
+  .sa-w{ font-size:17px; font-weight:650; letter-spacing:-.015em; color:var(--ink); }
+  .sa-means{ font-size:14px; line-height:1.45; color:var(--ink-soft); }
+  .sa-to{ margin:6px 0 0 53px; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+  .sa-to b{ color:var(--accent); font-weight:650; }
+  .sa-example{ display:flex; gap:9px; align-items:flex-start; margin-top:9px; padding:9px 13px 9px 9px; }
+  .sa-say-line svg{ width:18px; height:18px; }
+  .sa-line-to{ margin:6px 0 0; font-size:13px; line-height:1.45; color:var(--ink-soft); }
+  .sa-hit{ font-weight:650; font-style:normal; color:var(--ink); background:color-mix(in srgb, var(--ff-color, var(--accent)) 14%, transparent); border-radius:4px; padding:0 3px; }
+  .sa-src{ margin:9px 0 0; font-size:12px; line-height:1.5; color:var(--ink-soft); }
+  .sa-src a{ color:inherit; text-decoration:underline; text-underline-offset:2px; }
+  .sa-unchecked{ margin:6px 0 0; font-size:12px; line-height:1.5; color:color-mix(in srgb, #B08D2A 70%, var(--ink)); }
+
+  .sa-play-row{ display:flex; flex-wrap:wrap; gap:9px; margin:0 0 13px; }
+  .sa-play{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-height:44px; padding:9px 17px; border:1px solid var(--line); border-radius:999px;
+    background:var(--paper); color:var(--ink); font-family:var(--sans);
+    font-size:15px; font-weight:550; cursor:pointer;
+    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  }
+  /* --paper is white in light and near-black in dark, where --navy turns light. */
+  .sa-play:first-child{ background:var(--navy); color:var(--paper); border-color:transparent; }
+  .sa-play:first-child.speaking{ background:var(--navy); color:var(--paper); box-shadow:0 0 0 3px var(--accent-soft); }
+  .sa-play[disabled]{ opacity:.5; cursor:default; }
+  .sa-blank{ display:inline-block; min-width:4.5em; border-bottom:2px solid var(--ink-faint); }
+  .sa-heard{ margin-bottom:13px; }
+  .sa-ask{ margin:0 0 9px; font-size:14px; line-height:1.45; color:var(--ink-soft); }
+  .sa-all:focus-visible, .sa-say:focus-visible, .sa-play:focus-visible, .sa-src a:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  @media (max-width:900px), (pointer: coarse){
+    #saSearch{ font-size:16px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sa-all.speaking svg, .sa-say.speaking svg, .sa-play.speaking svg{ animation:none; }
+    .sa-all:active, .sa-say:active, .sa-play:active{ transform:none; }
+  }
+
   /* ---------- Image lightbox ---------- */
   @keyframes lightboxIn{ from{opacity:0;} to{opacity:1;} }
   @keyframes lightboxImgIn{ from{opacity:0; transform:scale(.94);} to{opacity:1; transform:scale(1);} }

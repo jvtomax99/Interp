@@ -287,6 +287,12 @@ const GUIDE_TOPICS = [
     <p>Words that look like English but mean something else, like <i>embarazada</i> (pregnant, not embarrassed). Each one says what it looks like, what it really means and what to say instead.</p>
     <p>Open <b>False Friends</b> from Home or <b>More</b>. <b>Study</b> lists them all, and <b>Drill</b> quizzes you on them.</p>` },
 
+  { id:'soundalikes', section:'prep', k:'sound alikes soundalikes homophones sound the same heel heal ileum ilium vaso bazo hear listen drill speaker pronounce misheard hypotension hypertension', q:'What are Sound-Alikes?', a:`
+    <p>Words that sound the same, or nearly, but mean different things, like <i>ileum</i> (bowel) and <i>ilium</i> (hip bone), or <i>vaso</i> and <i>bazo</i>. When you hear one, context is all you have to pick the right meaning.</p>
+    <p>Open <b>Sound-Alikes</b> from Home or <b>More</b>. In <b>Study</b>, tap a speaker to hear a word or its sentence, or <b>Hear them all</b> to hear that the spellings match. Each one shows its meaning, the rendering and a hospital sentence.</p>
+    <p><b>Drill</b>: the phone says a sentence and you pick the right rendering for the sound-alike in it. <b>Hear again</b> and <b>Slower</b> replay it; <b>Show the words</b> shows the sentence with the word blanked out, for a noisy hallway or a phone with no voice.</p>
+    <p>It uses your phone's own voice, and nothing is saved. The renderings are marked until a staff interpreter has checked them.</p>` },
+
   { id:'lookup', section:'prep', k:'look up source medlineplus reference link definition web check card button', q:'What does “Look up” on a card do?', a:`
     <p>It searches trusted medical sites for that term right now, in English and Spanish, and shows the pages it found with a short preview. Use it to check a definition or find a patient-friendly page.</p>
     <p>If a teammate saved a link on the term, <b>Source</b> opens that exact page.</p>` },
