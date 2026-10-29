@@ -68,6 +68,11 @@ left out (`card_build.py`): 11 walkers, 8 street cars, 15 people about. Places i
 Research Center, John Theurer Cancer Center, Medical Plaza. The 3D button's campus (`campus3d/`) is the
 same real map since 2026-10-29 (`real-map/build.py --app`), moved round the Maps way (`nav.js`).
 
+**The audit (2026-10-29, `real-map/audit.cjs`).** Every mover checked against the board over two minutes of its
+clock; 269 problem spots fixed in `real-map/build.py` ("the audit's fixes"), the card's pictures and `campus3d/`
+rebuilt from it. The card's drive: carIn on the one lane in (x 2.75), carIn2 and carOut on the two out (x -1.25,
+-2.35); the ambulance stops at (-23.0, -26.2), out of Atlantic's lane in the mouth of the ER's court.
+
 **The floating diorama (2026-10-26; the board, camera and paint replace the scene below; the colours
 and golden-hour light below still hold).**
 Jose sent a video of soft pastel low-poly dioramas on rounded bases ("can we

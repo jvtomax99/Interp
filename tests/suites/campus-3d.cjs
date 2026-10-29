@@ -27,7 +27,8 @@ const MASTERY = () => { window.domainMastery = () => { const out = {};
 
   // The button: on the picture, a real tap target, the top layer where it sits.
   const btn = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), e = w.querySelector('.cp-3d'), r = e.getBoundingClientRect(), R = w.getBoundingClientRect();
-    return { h: r.height, inside: r.left >= R.left && r.right <= R.right && r.top >= R.top && r.bottom <= R.bottom, mine: document.elementFromPoint(r.left + r.width/2, r.top + r.height/2)?.closest('.cp-3d') === e,
+    // its laid-out height: the card may still be arriving (dash-in scales it), which a box measured mid-flight shows smaller
+    return { h: e.offsetHeight, inside: r.left >= R.left && r.right <= R.right && r.top >= R.top && r.bottom <= R.bottom, mine: document.elementFromPoint(r.left + r.width/2, r.top + r.height/2)?.closest('.cp-3d') === e,
       label: e.getAttribute('aria-label'), x: r.left + r.width/2, y: r.top + r.height/2 }; });
   ok(btn.h >= 44 && btn.inside && btn.mine && /3D/.test(btn.label), 'the 3D button sits on the campus picture, 44 px, takes its tap', btn);
   await page.screenshot({ path: O + 'card.png' });

@@ -151,6 +151,11 @@ under way, then what waits on Jose, then small leftovers.
       Atlantic Street at the mouth of the ER's court, back doors opening; the lot car backs out on the
       Visitors Parking garage's top deck. **Done 2026-10-29:** `campus3d/` from the real map too
       (`real-map/build.py --app`, Jose: the 3D button still showed the old campus).
+      **2026-10-29 (Jose): make the campus act like real life, in his four prompts, in order.** 1 the audit
+      (`real-map/audit.cjs`; done: 269 spots fixed, `claude/campus-audit`), 2 traffic (lanes, one-way streets, stops
+      at signs and crosswalks, turning, no overlaps), 3 people (sidewalks, crosswalks, doors, pairs, wheelchairs,
+      waiting), 4 the buildings checked against the real campus with sources. Live behaviour (giving way) is 3D only;
+      the card's movers follow fixed paths.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the

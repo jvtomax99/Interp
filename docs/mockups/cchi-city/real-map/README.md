@@ -70,6 +70,19 @@ Python 3.11 with Blender's module: `pip download bpy==5.0.1 --no-deps --python-v
   frames, packs the people about into one atlas, and writes `entrance.json`; `--install` replaces `city/`
   and the `CAMPUS_MAP` line.
 
+## The audit (2026-10-29)
+
+`node audit.cjs campus.html out.json` (`MAP=map.png` for a picture from above with each spot ringed): steps the live
+campus's clock over two minutes and flags every car and person that runs into something (a ray at body height along
+each step), stands inside a building's outline, drives off the road or walks along it away from a crosswalk (more than
+3 units: a driveway's mouth is fine), or comes too close to another mover; also the card's own two paths. Jose's ask:
+"some people walk into walls and some cars do the same". 269 spots before; the fixes are the block "the audit's fixes"
+in `build.py` (the drive's lanes and its turn round at the drop-off, the ambulance to the ER's court in 3D too, the
+parked ambulance off 2nd Street, Prospect's cars on the board and in step per lane, sidewalks cut where streets cross
+with crosswalks, walkers on sidewalks clear of buildings, benches, trees and columns). What it still finds: a car and a
+person meeting at a crosswalk or a corner, and two walkers passing at a corner. Cars giving way to people is the next
+step (Jose's traffic prompt).
+
 ## The fit (`scene_export.py`)
 
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then
