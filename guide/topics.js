@@ -287,10 +287,11 @@ const GUIDE_TOPICS = [
     <p>Words that look like English but mean something else, like <i>embarazada</i> (pregnant, not embarrassed). Each one says what it looks like, what it really means and what to say instead.</p>
     <p>Open <b>False Friends</b> from Home or <b>More</b>. <b>Study</b> lists them all, and <b>Drill</b> quizzes you on them.</p>` },
 
-  { id:'soundalikes', section:'prep', k:'sound alikes soundalikes homophones sound the same heel heal ileum ilium vaso bazo hear listen drill speaker pronounce misheard hypotension hypertension', q:'What are Sound-Alikes?', a:`
+  { id:'soundalikes', section:'prep', k:'sound alikes soundalikes homophones groups practise drill by ear study the list sound the same heel heal ileum ilium vaso bazo hear listen drill speaker pronounce misheard hypotension hypertension', q:'What are Sound-Alikes?', a:`
     <p>Words that sound the same, or nearly, but mean different things, like <i>ileum</i> (bowel) and <i>ilium</i> (hip bone), or <i>vaso</i> and <i>bazo</i>. When you hear one, context is all you have to pick the right meaning.</p>
-    <p>Open <b>Sound-Alikes</b> from Home or <b>More</b>. In <b>Study</b>, tap a speaker to hear a word or its sentence, or <b>Hear them all</b> to hear that the spellings match. Each one shows its meaning, the rendering and a hospital sentence.</p>
-    <p><b>Drill</b>: the phone says a sentence and you pick the right rendering for the sound-alike in it. <b>Hear again</b> and <b>Slower</b> replay it; <b>Show the words</b> shows the sentence with the word blanked out, for a noisy hallway or a phone with no voice.</p>
+    <p>Open <b>Sound-Alikes</b> from Home or <b>More</b>. The blue card at the top plays one pair: tap its speaker to hear that <i>ileum</i> and <i>ilium</i> match. <b>Drill by ear</b> drills every set, and <b>Study the list</b> shows them all.</p>
+    <p>Under <b>Your groups</b> there are three: <b>Sound the same</b>, <b>Sound close</b> and <b>Heard in Spanish</b>. <b>List</b> shows that group, and <b>Practise</b> drills just that group. In the list, tap a speaker to hear a word or its sentence, or <b>Hear them all</b>. <b>All groups</b> takes you back.</p>
+    <p>In a drill the phone says a sentence and you pick the right rendering for the sound-alike in it. <b>Hear again</b> and <b>Slower</b> replay it; <b>Show the words</b> shows the sentence with the word blanked out, for a noisy hallway or a phone with no voice. <b>Exit</b> leaves the drill.</p>
     <p>It uses your phone's own voice, and nothing is saved. The renderings are marked until a staff interpreter has checked them.</p>` },
 
   { id:'lookup', section:'prep', k:'look up source medlineplus reference link definition web check card button', q:'What does “Look up” on a card do?', a:`

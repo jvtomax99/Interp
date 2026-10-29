@@ -40,6 +40,34 @@ function standIns(){
     ok(home.tileAfterFF, 'tool tile right after False Friends', home);
     await page.evaluate(() => { const c = [...document.querySelectorAll('#content .qa-card')].find(x => /Sound-Alikes/.test(x.textContent)); c.scrollIntoView({ block: 'center' }); c.click(); });
     await wait(900);
+
+    // The front page, in CoreCHI Practice's look: the blue card, its chunky
+    // buttons, the three groups as domain rows, counts only (nothing stored).
+    const fp = await page.evaluate(() => {
+      const box = sel => { const e = document.querySelector(sel); if (!e) return null; e.scrollIntoView({ block: 'center' });
+        const q = e.getBoundingClientRect(), hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+        return { h: Math.round(q.height), w: Math.round(q.width), hit: !!hit && e.contains(hit) }; };
+      const rows = [...document.querySelectorAll('#content .sa-group')].map(r => ({ name: r.querySelector('.mastery-name').textContent, n: parseInt(r.querySelector('.mastery-pct').textContent, 10),
+        btns: r.querySelectorAll('.mastery-go').length }));
+      const go = [...document.querySelectorAll('#content .sa-group .mastery-go')].map(e => { e.scrollIntoView({ block: 'center' }); const q = e.getBoundingClientRect(),
+        hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return { h: Math.round(q.height), hit: !!hit && e.contains(hit) }; });
+      const out = { hero: !!document.querySelector('#content .cp-card.sa-hero'), play: box('.sa-hero .cp-play'), list: box('.sa-hero .cp-exam'), say: box('.sa-pair-say'),
+        rows, go, pct: /%/.test(document.getElementById('content').innerText), sideways: document.documentElement.scrollWidth - innerWidth,
+        heroBg: getComputedStyle(document.querySelector('.sa-hero')).backgroundImage.slice(0, 40), cchiBg: '' };
+      window.scrollTo(0, 0); return out;
+    });
+    ok(fp.hero && /gradient/.test(fp.heroBg), 'front page: CoreCHI\u2019s blue card', fp);
+    ok(fp.play && fp.play.h >= 44 && fp.play.hit && fp.list.h >= 44 && fp.list.hit && fp.say.h >= 44 && fp.say.hit, 'Drill by ear, Study the list and the pair\u2019s speaker: 44px and taking their tap', fp);
+    ok(fp.rows.length === 3 && fp.rows.reduce((n, r) => n + r.n, 0) === home.n && fp.rows.every(r => r.btns === 2), 'three groups, counts adding up to every set, List and Practise on each', fp.rows);
+    ok(fp.go.every(x => x.h >= 40 && x.hit), 'the group buttons take their own tap', fp.go);
+    ok(!fp.pct && fp.sideways <= 0, 'no percentages (nothing is scored) and no sideways scroll', fp);
+    const pairSpoke = await page.evaluate(() => { __sa.length = 0; document.querySelector('.sa-pair-say').click(); return __sa[0] && __sa[0].text; });
+    ok(pairSpoke === 'ileum. ilium.', 'the card\u2019s pair speaks both spellings', pairSpoke);
+    if (device === 'iphone') { await page.screenshot({ path: O + 'front-' + tag + '.png' });
+      await page.evaluate(() => window.scrollTo(0, document.querySelector('.mastery-list').getBoundingClientRect().top + scrollY - 120)); await wait(200);
+      await page.screenshot({ path: O + 'groups-' + tag + '.png' }); await page.evaluate(() => window.scrollTo(0, 0)); }
+    await page.evaluate(() => document.querySelector('.sa-hero .cp-exam').click()); await wait(300);
+
     const st = await page.evaluate(() => {
       const cards = document.querySelectorAll('#saList .sa-card');
       const words = SOUND_ALIKES.reduce((n, s) => n + s.words.length, 0);
@@ -89,14 +117,29 @@ function standIns(){
     ok(search.global === 1 && search.target === 'soundalikes', 'global search finds "ilium" under Sound-Alikes', search);
 
     // Drill
-    await page.evaluate(() => { __sa.length = 0; document.querySelectorAll('.ff-mode')[1].click(); }); await wait(300);
+    // Back to the front page from the list, then a group's Practise drills only that group.
+    const back = await page.evaluate(() => { [...document.querySelectorAll('.head-action')].find(b => b.textContent === 'All groups').click(); return !!document.querySelector('.sa-hero'); });
+    ok(back, 'All groups goes back to the front page', back);
+    const grp = await page.evaluate(() => { const r = [...document.querySelectorAll('.sa-group')].find(x => /Sound close/.test(x.textContent));
+      [...r.querySelectorAll('.mastery-go')].find(b => b.textContent === 'Practise').click();
+      return { n: saQuestions.length, all: saQuestions.every(q => { const s = SOUND_ALIKES.find(x => x.id === q.id); return s.kind === 'near' && s.lang === 'en'; }),
+        head: document.querySelector('.section-head h2').textContent, sub: document.querySelector('.section-head .sub').textContent }; });
+    ok(grp.n === 10 && grp.all && grp.head === 'Sound close' && grp.sub === '1 of 10', 'Practise on Sound close: ten questions, all from it, CoreCHI\u2019s header', grp);
+    const es = await page.evaluate(() => { saHome(); const r = [...document.querySelectorAll('.sa-group')].find(x => /Heard in Spanish/.test(x.textContent));
+      [...r.querySelectorAll('.mastery-go')].find(b => b.textContent === 'Practise').click();
+      return { n: saQuestions.length, langs: [...new Set(saQuestions.map(q => SOUND_ALIKES.find(x => x.id === q.id).lang))] }; });
+    ok(es.n === 8 && es.langs.join() === 'es', 'a group smaller than ten drills all of it (8 heard in Spanish)', es);
+    const exit = await page.evaluate(() => { [...document.querySelectorAll('.head-action')].find(b => b.textContent === 'Exit').click(); return !!document.querySelector('.sa-hero'); });
+    ok(exit, 'Exit leaves the drill for the front page', exit);
+    await page.evaluate(() => { __sa.length = 0; document.querySelector('.sa-hero .cp-play').click(); }); await wait(300);
     const d1 = await page.evaluate(() => {
       const q = saQuestions[0], s = SOUND_ALIKES.find(x => x.id === q.id), w = s.words[q.wi];
       const text = document.getElementById('content').innerText;
-      return { n: saQuestions.length, spoke: __sa[0] && __sa[0].text === w.line, lang: __sa[0] && __sa[0].lang, wantLang: s.lang === 'es' ? 'es-US' : 'en-US',
+      return { n: saQuestions.length, entering: !!document.querySelector('.quiz-card.is-entering'), spoke: __sa[0] && __sa[0].text === w.line, lang: __sa[0] && __sa[0].lang, wantLang: s.lang === 'es' ? 'es-US' : 'en-US',
         hidden: !text.includes(w.line), opts: q.options.length, own: s.words.every(x => q.options.includes(x.say)), word: w.w,
         play: (() => { const r = document.getElementById('saPlay').getBoundingClientRect(); return Math.round(r.height); })() };
     });
+    ok(d1.entering, 'the question card slides in, like CoreCHI\u2019s', d1);
     ok(d1.n === 10 && d1.opts === 4 && d1.own, 'ten questions, four options holding every spelling’s rendering', d1);
     ok(d1.spoke && d1.lang === d1.wantLang, 'opening the Drill speaks the first sentence in its language', d1);
     ok(d1.hidden && d1.play >= 44, 'the sentence is hidden; Hear again is 44px', d1);
@@ -108,8 +151,9 @@ function standIns(){
     ok(shown.blank && !shown.hasWord, 'Show the words: the sentence with the sound-alike blanked out', shown);
     if (device === 'iphone') await page.screenshot({ path: O + 'drill-' + tag + '.png' });
     const ans = await page.evaluate(() => { const q = saQuestions[0]; const lure = q.lures[0]; answerSA(lure);
-      const h = document.querySelector('.sa-heard'); return { lead: document.querySelector('.quiz-explain b').textContent, marked: !!(h && h.querySelector('.sa-hit')),
+      const h = document.querySelector('.sa-heard'); return { still: !document.querySelector('.quiz-card.is-entering'), lead: document.querySelector('.quiz-explain b').textContent, marked: !!(h && h.querySelector('.sa-hit')),
         right: document.querySelectorAll('.quiz-option.correct').length, wrong: document.querySelectorAll('.quiz-option.wrong').length }; });
+    ok(ans.still, 'answering doesn\u2019t replay the slide-in', ans);
     ok(ans.lead === 'That is the other spelling.' && ans.marked && ans.right === 1 && ans.wrong === 1, 'picking the other spelling: called out, the word marked in the sentence', ans);
     if (device === 'iphone') await page.screenshot({ path: O + 'answer-' + tag + '.png' });
     const res = await page.evaluate(async () => {

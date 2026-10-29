@@ -15,7 +15,7 @@ treatment).
 ## Who it is for
 
 The interpreter team, on a phone, between assignments. Same audience and
-pattern as False Friends: Study to read, Drill to test the reflex.
+pattern as False Friends (read, then drill the reflex), in the look of CoreCHI Practice.
 
 ## What it does (first version)
 
@@ -30,20 +30,33 @@ pattern as False Friends: Study to read, Drill to test the reflex.
   card shows "Spanish not yet checked" while it is false. Flip it per set
   when checked.
 - **Screen**: `features/sound-alikes.js` (`renderSoundAlikes`), styles in
-  the "Sound-Alikes" block of `app.css`. Study lists every set: each
-  spelling with a speaker button (`speakText`, the device voice, en-US or
-  es-US by the set's language), its meaning, its rendering and its
-  sentence. Search and a filter: All / Sound the same / Sound close /
-  Heard in Spanish.
-- **Drill**: ten questions. The phone speaks a sentence that contains one
-  of a set's words; the sentence is hidden. You pick the right rendering
-  from the set's own renderings (the other spellings are the lures) plus
-  one or two from other sets so a two-word set still has four options.
-  **Hear again** and **Slower** buttons (Duolingo and Quizlet both give a
-  replay and a slow replay). **Show the words** reveals the sentence with
-  the sound-alike blanked out, for a phone with no voice or a noisy
-  corridor. After answering, the full sentence and its rendering show.
-  The result counts how often a sound-alike lure caught you.
+  the "Sound-Alikes" block of `app.css`. Dressed like CoreCHI Practice
+  (Jose, 2026-10-29: "make it similar to the cchi section"; he picked "look
+  only", no progress kept), reusing its own classes:
+  - **Front page** (`renderSAHome`): CoreCHI's blue card (`cp-card`) with
+    one pair to hear (ileum / ilium, a big yellow speaker, sound bars that
+    move only while it speaks), the three groups' counts as its chips, and
+    its two chunky buttons: **Drill by ear** (every set) and **Study the
+    list**. Then **Your groups**, CoreCHI's domain rows (`mastery-row`,
+    candy `mastery-go` buttons): Sound the same, Sound close, Heard in
+    Spanish, each with its count, three sample pairs, **List** and
+    **Practise** (a drill of only that group). Counts only, never a
+    percentage or a ring: nothing is scored.
+  - **The list**: every set as a card with the same clay finish, a speaker
+    on each spelling and sentence and **Hear them all**, the filter and
+    search. **All groups** in the header goes back.
+- **Drill**: up to ten questions from the chosen group (all of it when it
+  has fewer, like the 8 heard in Spanish). CoreCHI's quiz header ("3 of
+  10", **Exit**) and its card, sliding in only on a new question. The
+  phone speaks a sentence that contains one of a set's words; the sentence
+  is hidden. You pick the right rendering from the set's own renderings
+  (the other spellings are the lures) plus one or two from other sets so a
+  two-word set still has four options. **Hear again** (CoreCHI's yellow
+  play button) and **Slower** (Duolingo and Quizlet both give a replay and
+  a slow replay). **Show the words** reveals the sentence with the
+  sound-alike blanked out, for a phone with no voice or a noisy corridor.
+  After answering, the full sentence and its rendering show. The result
+  counts how often a sound-alike lure caught you.
 - **Voice**: `saSpeak`, not `speakText`, for two reasons: the drill's
   Slower replay needs its own rate, and Spanish asks for a Latin American
   voice (es-US, es-MX, es-419) over a Spain one, because a Spain voice says
@@ -64,7 +77,10 @@ pattern as False Friends: Study to read, Drill to test the reflex.
   memory trainer.
 - Team-added sets, or anything in Firestore. Nothing is stored at all, not
   even drill results.
-- Dr. Smiley reactions.
+- Dr. Smiley reactions, or his speech bubble on the blue card.
+- Progress of any kind (CoreCHI's ring, learned / shaky / unseen, a score
+  chart): Jose chose the look without it, 2026-10-29.
+- CoreCHI's campus scene or its 3D view.
 - Recorded human audio (the device voice only).
 - Sound-alike **drug names** (the ISMP list). Worth a later version, but
   that list is ISMP's copyright and much longer.

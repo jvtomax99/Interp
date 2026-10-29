@@ -4860,9 +4860,9 @@
     box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
   }
   .sa-all svg, .sa-say svg, .sa-play svg{ width:20px; height:20px; flex-shrink:0; }
-  .sa-all:active, .sa-say:active, .sa-play:active{ transform:scale(.97); }
-  .sa-all.speaking, .sa-say.speaking, .sa-play.speaking{ background:var(--accent-soft); color:var(--accent); }
-  .sa-all.speaking svg, .sa-say.speaking svg, .sa-play.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
+  .sa-all:active, .sa-say:active{ transform:scale(.97); }
+  .sa-all.speaking, .sa-say.speaking{ background:var(--accent-soft); color:var(--accent); }
+  .sa-all.speaking svg, .sa-say.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
   .sa-words{ list-style:none; margin:13px 0 0; padding:0; display:grid; gap:13px; }
   .sa-word + .sa-word{ padding-top:13px; border-top:1px solid var(--line-soft); }
   .sa-word-head{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; }
@@ -4883,28 +4883,72 @@
   .sa-src a{ color:inherit; text-decoration:underline; text-underline-offset:2px; }
   .sa-unchecked{ margin:6px 0 0; font-size:12px; line-height:1.5; color:color-mix(in srgb, #B08D2A 70%, var(--ink)); }
 
-  .sa-play-row{ display:flex; flex-wrap:wrap; gap:9px; margin:0 0 13px; }
-  .sa-play{
-    display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    min-height:44px; padding:9px 17px; border:1px solid var(--line); border-radius:999px;
-    background:var(--paper); color:var(--ink); font-family:var(--sans);
-    font-size:15px; font-weight:550; cursor:pointer;
-    box-shadow:inset 0 1px 0 var(--finish-edge), var(--finish-shadow);
+  /* The drill's listen row: "Hear again" is CoreCHI's chunky yellow play
+     button, Slower and Show the words its candy buttons in the set's colour. */
+  .sa-play-row{ display:flex; flex-wrap:wrap; align-items:center; gap:9px 13px; margin:0 0 17px; }
+  .sa-play-row .sa-play{ min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:14px; }
+  .sa-play-row .cp-play{ flex:none; border:0; cursor:pointer; padding:0 17px; border-radius:16px; min-height:46px;
+    font-family:var(--sans); font-size:15px; font-weight:650; transition:transform .6s var(--spring-settle, var(--ease)), box-shadow .2s; }
+  .sa-play-row .cp-play:active, .sa-play-row .cp-play.is-pressed{ transform:translateY(3px) scale(1.02,.96); transition-duration:.08s; }
+  .sa-play-row .cp-play:focus-visible{ outline:2px solid var(--accent-2); outline-offset:3px; }
+  .sa-play-row .cp-play.speaking svg{ animation:speakPulse 1s ease-in-out infinite; }
+  .sa-play-row .mastery-go[disabled]{ opacity:.5; cursor:default; transform:none; }
+
+  /* ---- The front page: CoreCHI's blue card, with one pair to hear ---- */
+  .sa-hero{ padding:17px 17px 17px; }
+  .sa-hero .cp-hud{ max-width:none; }
+  .sa-pair{ position:relative; display:grid; grid-template-columns:auto 1fr; align-items:center; gap:6px 13px; margin:13px 0 9px; }
+  .sa-pair-say{
+    grid-row:span 2; display:grid; place-items:center; width:64px; height:64px; border:0; border-radius:50%; cursor:pointer;
+    color:#2a1a08; background:linear-gradient(180deg,#FFD58A,#FFB443);
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.7), 0 4px 0 #C9801E, 0 10px 18px -6px rgba(255,170,60,.6);
+    transition:transform .6s var(--spring-settle, var(--ease)), box-shadow .2s;
   }
-  /* --paper is white in light and near-black in dark, where --navy turns light. */
-  .sa-play:first-child{ background:var(--navy); color:var(--paper); border-color:transparent; }
-  .sa-play:first-child.speaking{ background:var(--navy); color:var(--paper); box-shadow:0 0 0 3px var(--accent-soft); }
-  .sa-play[disabled]{ opacity:.5; cursor:default; }
+  .sa-pair-say svg{ width:30px; height:30px; }
+  .sa-pair-say:active, .sa-pair-say.is-pressed{ transform:translateY(3px) scale(1.03,.95); transition-duration:.08s;
+    box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6), 0 1px 0 #C9801E, 0 4px 8px -4px rgba(255,170,60,.6); }
+  .sa-pair-say:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+  .sa-pair-words{ margin:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:0 9px;
+    font-size:28px; font-weight:650; letter-spacing:-.03em; line-height:1.15; color:#fff; }
+  .sa-pair-words span{ font-size:13px; font-weight:550; letter-spacing:0; color:rgba(255,255,255,.72); }
+  .sa-pair-means{ margin:0; font-size:13px; line-height:1.45; color:rgba(255,255,255,.88); }
+  /* Sound bars behind the words: still at rest, dancing while the pair speaks. */
+  .sa-wave{ position:absolute; right:0; top:-26px; display:flex; align-items:center; gap:4px; height:34px; pointer-events:none; }
+  .sa-wave i{ display:block; width:4px; height:calc(var(--h) * 2px); border-radius:2px; background:rgba(255,213,138,.75);
+    transform-origin:center; }
+  .sa-pair-say.speaking ~ .sa-wave i{ animation:saBar .9s ease-in-out infinite alternate; animation-delay:calc(var(--b) * -110ms); }
+  @keyframes saBar{ from{ transform:scaleY(.35); } to{ transform:scaleY(1.25); } }
+
+  /* ---- The groups: CoreCHI's domain rows ---- */
+  .sa-group .mastery-pct small{ font-size:12px; font-weight:550; letter-spacing:0; color:var(--ink-soft); }
+  .sa-group .mastery-name{ font-size:15px; }
+  .sa-group .mastery-weight{ font-size:12px; color:var(--ink-soft); }
+  .sa-samples{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 3px; }
+  .sa-sample{ padding:4px 9px; border-radius:999px; font-size:12px; font-weight:550; color:color-mix(in srgb, var(--dom) 62%, var(--ink));
+    background:color-mix(in srgb, var(--dom) 10%, transparent); }
+  .sa-group .mastery-foot{ font-size:12px; }
+  .sa-group .mastery-go{ min-height:40px; padding:0 17px; font-size:13px; }
+
+  /* ---- The list's cards take the same clay finish as the rows ---- */
+  .ff-card.sa-card{
+    border-color:transparent; border-radius:var(--r-lg);
+    background:radial-gradient(120% 90% at 0% 0%, var(--clay-warm), transparent 60%), linear-gradient(180deg, var(--clay-sheen), transparent 48%), var(--paper);
+    box-shadow:inset 0 2px 0 var(--clay-hi), inset 0 -3px 0 var(--clay-shade), inset 0 0 0 1px var(--line-soft),
+      0 2px 3px var(--clay-drop), 0 20px 32px -16px var(--clay-drop);
+  }
   .sa-blank{ display:inline-block; min-width:4.5em; border-bottom:2px solid var(--ink-faint); }
   .sa-heard{ margin-bottom:13px; }
   .sa-ask{ margin:0 0 9px; font-size:14px; line-height:1.45; color:var(--ink-soft); }
-  .sa-all:focus-visible, .sa-say:focus-visible, .sa-play:focus-visible, .sa-src a:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .sa-all:focus-visible, .sa-say:focus-visible, .sa-src a:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
   @media (max-width:900px), (pointer: coarse){
     #saSearch{ font-size:16px; }
   }
   @media (prefers-reduced-motion: reduce){
-    .sa-all.speaking svg, .sa-say.speaking svg, .sa-play.speaking svg{ animation:none; }
-    .sa-all:active, .sa-say:active, .sa-play:active{ transform:none; }
+    .sa-all.speaking svg, .sa-say.speaking svg{ animation:none; }
+    .sa-all:active, .sa-say:active{ transform:none; }
+    .sa-pair-say.speaking ~ .sa-wave i, .sa-play-row .cp-play.speaking svg{ animation:none; }
+    .sa-pair-say, .sa-play-row .cp-play{ transition:none; }
+    .sa-pair-say:active, .sa-pair-say.is-pressed, .sa-play-row .cp-play:active, .sa-play-row .cp-play.is-pressed{ transform:none; }
   }
 
   /* ---------- Image lightbox ---------- */
