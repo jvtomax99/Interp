@@ -149,7 +149,8 @@ under way, then what waits on Jose, then small leftovers.
       (`real-map/card_*`, README "The card's pictures"). Both spots Jose placed are hidden from the card's
       camera (checked with rays); his pick "move them into view": the ambulance stops at the curb on
       Atlantic Street at the mouth of the ER's court, back doors opening; the lot car backs out on the
-      Visitors Parking garage's top deck. Next: `campus3d/` from the real map too (its own PR).
+      Visitors Parking garage's top deck. **Done 2026-10-29:** `campus3d/` from the real map too
+      (`real-map/build.py --app`, Jose: the 3D button still showed the old campus).
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
