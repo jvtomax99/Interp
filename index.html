@@ -624,6 +624,7 @@
 <script src="./guide/topics.js"></script>
 <script src="./practice/questions.js"></script>
 <script src="./falsefriends/list.js"></script>
+<script src="./soundalikes/list.js"></script>
 <script src="./features/translate.js"></script>
 <script src="./features/3d-body.js"></script>
 <script src="./features/term-lookup.js"></script>
@@ -632,6 +633,7 @@
 <script src="./features/smiley-engine.js"></script>
 <script src="./features/campus.js"></script>
 <script src="./features/false-friends.js"></script>
+<script src="./features/sound-alikes.js"></script>
 <script src="./features/knowledge-brain.js"></script>
 <script src="./features/guide-front.js"></script>
 <script src="./features/doctor-sheets.js"></script>
@@ -4808,6 +4810,15 @@ function collectSearchMatches(q){
     }
   });
 
+  SOUND_ALIKES.forEach(sa=>{
+    const w = sa.words.find(x => hit(x.w) || hit(x.means) || hit(x.say));
+    if(w || hit(sa.tag)){
+      out.push({ group:'Sound-Alikes', icon:ICON_SPEAKER, color:'#7A5BA8',
+        title:sa.words.map(x => x.w).join(' \u00b7 '), sub:(w || sa.words[0]).means + ' \u00b7 ' + (w || sa.words[0]).say,
+        target:'soundalikes', rank: sa.words.some(x => starts(x.w)) ? 0 : 1 });
+    }
+  });
+
   CHAT_MESSAGES.forEach(m=>{
     if(hit(m.text) || hit(m.author)){
       out.push({ group:'Chat', icon:ICON_CHAT, color:'#2E8BD0',
@@ -5205,6 +5216,7 @@ function getToolTiles(){
     { id:'practice',  name:'CoreCHI Practice',     color:'#0F5FA6', icon: DOMAIN_ICONS.exam,   count: SEED_QUESTIONS.length + CUSTOM_QUESTIONS.length, label:'questions' },
     { id:'review',    name:'Term Review',          color:'#4E9E74', icon: DOMAIN_ICONS.review, count: dueReviewCount(), label: dueReviewCount()===1?'due':'due' },
     { id:'falsefriends', name:'False Friends',     color:'#A85468', icon: DOMAIN_ICONS.book,   count: FALSE_FRIENDS.length, label:'traps' },
+    { id:'soundalikes', name:'Sound-Alikes',       color:'#7A5BA8', icon: DOMAIN_ICONS.ear,    count: SOUND_ALIKES.length, label:'sets' },
     { id:'chat',      name:'Team Chat',            color:'#2E8BD0', icon: DOMAIN_ICONS.chat,   count: CHAT_MESSAGES.length, label: CHAT_MESSAGES.length===1?'message':'messages' },
     { id:'providers', name:'Provider Pictures',     color:'#6F97AC', icon: DOMAIN_ICONS.person, count: PROVIDERS.length, label: PROVIDERS.length===1?'provider':'providers' },
     { id:'find-doctor', name:'Find a Doctor',       color:'#0079BD', icon: DOMAIN_ICONS.search, count: null, label: '', externalUrl: 'https://doctors.hackensackmeridianhealth.org/' },
@@ -5773,9 +5785,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'soundalikes', tone:'gd-n2', pin:'pins/ent.webp',                eyebrow:'Sound-Alikes',          title:'Sound-Alikes: words that sound the same and mean different things. Hear them, then drill picking the right meaning by ear' },
   { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Your campus in 3D has real traffic now: cars keep right, stop at the stop signs and the light, and wait for people crossing' },
   { id:'promo',       tone:'gd-n1', pin:'pins/wave.webp',               eyebrow:'The video',             title:'A new 1-minute film, in 3D, with a new narrator: notifications and your knowledge brain are in it now' },
-  { id:'notifications', tone:'gd-n2', pin:'pins/updates.webp',           eyebrow:'Notifications',         title:'Real notifications, even with the Hub closed: Team Chat, new training, and messages from the team’s owners' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -7176,6 +7188,8 @@ function render(){
     showTopbar = false;
   } else if(activeCategory === 'translate'){
     showTopbar = false;
+  } else if(activeCategory === 'soundalikes'){
+    showTopbar = false;
   } else if(activeCategory === 'practice'){
     showTopbar = false;
   } else if(activeCategory === 'memory'){
@@ -8124,6 +8138,11 @@ function renderContent(){
 
   if(activeCategory === 'falsefriends'){
     content.innerHTML = renderFalseFriends();
+    return;
+  }
+
+  if(activeCategory === 'soundalikes'){
+    content.innerHTML = renderSoundAlikes();   // features/sound-alikes.js
     return;
   }
 
@@ -12173,6 +12192,7 @@ function renderHome(){
      exactly why the tool could not be found on the day it shipped. New
      tools go at the front until they are known. */
   const studyCards = [
+    qaCard('#7A5BA8', DOMAIN_ICONS.ear,      'Sound-Alikes',     'Same sound, other meaning',    `setCategory('soundalikes')`),
     qaCard('#A85468', DOMAIN_ICONS.book,     'False Friends',    'Words that betray you',        `setCategory('falsefriends')`),
     qaCard('#0F5FA6', DOMAIN_ICONS.exam,     'CoreCHI Practice', 'Practice for certification',   `setCategory('practice')`),
     qaCard('#4E9E74', DOMAIN_ICONS.review,   'Term Review',      'Study and reinforce',          `setCategory('review')`),

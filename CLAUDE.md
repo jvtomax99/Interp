@@ -70,6 +70,8 @@ between assignments.
 | `features/smiley-engine.js` | 1,135 | Dr. Smiley's engine: his art (`drSmileyArt`, `DR_FACE_SEQ`, `smileyAccessory`), the animation engine (`DrAnim`, `drAnim`, `drFacePlay`/`drFaceIdle`/`drFaceTalk`), how lively (`drMode`, `drStill`, `setSmileyMode`) and his task states (`drTask`, `drMind`, `drPerform`). Moved verbatim (2026-10-25), 4 sections; loads after `features/smiley-performances.js` (it reads `DR_PERF` at load). Three listeners stay in `index.html` (`drReduce`'s change, `offline`, `online`): they reach `index.html`'s names. `docs/features/dr-smiley.md` |
 | `features/campus.js` | 157 | Your HUMC campus on CoreCHI Practice: `CAMPUS_MAP`, `CAMPUS`, `renderCampus`, the building pick (`campusPick`, `campusGo`) and its Escape key. Moved verbatim (2026-10-24). Its motion (`campusLife`, `campusDepth`) stays in `index.html`, section "Practice dashboard motion" |
 | `features/false-friends.js` | 227 | The False Friends screen: `renderFalseFriends`, Study and Drill (`buildFFDrill`, `answerFF`), search and the risk filter (`FF_RISKS`). Moved verbatim (2026-10-24); the list is `falsefriends/list.js`. The Practice code that followed it in the same section (`renderPractice`, `startStudy`, the exam timer) stays in `index.html`, now under its own banner |
+| `soundalikes/list.js` | 540 | The Sound-Alikes list, `SOUND_ALIKES` (45 sets: words that sound the same or close; plain data, 2026-10-29). Loaded like `falsefriends/list.js`. The Spanish is marked unchecked per set (`esChecked`) until Jose checks it |
+| `features/sound-alikes.js` | 302 | The Sound-Alikes screen: Study (a speaker on every word and sentence), Drill (the phone says a sentence, you pick the rendering), `saSpeak` (es-US, a Latin American voice for seseo). `docs/features/sound-alikes.md` |
 | `features/knowledge-brain.js` | 223 | Your knowledge brain, the Hub's side: `knowledgeBrainData` (what `brain/you.html` draws), your record and the daily count (`kbLogNote`, `ih_knowledgeLog`), the small live brain atop Term Review (`kbMiniHtml`, `kbMiniStart`, `kbMiniFrame`). Moved verbatim (2026-10-24); `docs/features/knowledge-brain.md` |
 | `features/guide-front.js` | 232 | The User Guide's front page: `renderUserGuide`, the home of answers (`guideHomeHtml`, New lately), its sections, search (`setupGuideSearch`, `guideMarkWords`) and the install steps (`GUIDE_INSTALL_STEPS`). Moved verbatim (2026-10-24); the answers are `guide/topics.js`, the sheets and Show me stay in `index.html` |
 | `features/doctor-sheets.js` | 317 | The doctor and provider sheets' "Where" (the place picker: `openPlacePicker`, `pickPlace`, adding a place) and the doctor directory's add and edit sheet (`openAddDoctorDirModal`, `openEditDoctorDirModal`, the photo, `saveDoctorDirEntry`, delete). Moved verbatim (2026-10-25); `docs/features/places.md`. Places' data and `savePlace` stay in `index.html` ("Places (shared)") |
@@ -142,6 +144,8 @@ different places is what silently killed the coloured press glow: a
 | CoreCHI practice questions | `practice/questions.js` |
 | False Friends list | `falsefriends/list.js` |
 | False Friends screen (Study, Drill) | `features/false-friends.js` |
+| Sound-Alikes list | `soundalikes/list.js` |
+| Sound-Alikes screen (Study, Drill) | `features/sound-alikes.js` |
 | Your knowledge brain, the Hub's side (its data, the small brain on Term Review) | `features/knowledge-brain.js` |
 | Translate tool code | `features/translate.js` |
 | 3D Body's Hub side (the frame bridge) | `features/3d-body.js` |
@@ -257,6 +261,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
 - Notifications that reach a closed phone, the Notifications screen, owners' Send to the team (`pushTurnOn`, `pushSync`, `api/push.js`, `sw.js` push): `notifications.md`
 - The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
+- Sound-Alikes, words that sound the same (`SOUND_ALIKES`, `renderSoundAlikes`, `saSpeak`): `sound-alikes.md`
 - The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
 - CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
 - HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
