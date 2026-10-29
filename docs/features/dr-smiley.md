@@ -790,7 +790,33 @@ turns and sizes his head by them about the neck. The hand-off is a cut
 (a cross-fade of the rig's body and the clip's, both at rest but not the
 same drawing, showed for a frame as a ghost): the clip's first frame and
 the rig's body swap in one paint (`is-clip`), his head over both, and
-swap back at the end. The tests' harness serves `*.json` from the
+swap back at the end. **The rig settles to neutral before the swap and
+wakes from neutral after it** (2026-10-29, Jose's pick: the pop at a
+move's end; measured on a flat banner: the clip's rest and the rig's
+rest have the same box to the pixel, and what jumped at the swap was the
+rig's small life caught mid-cycle, the arms 1.6 degrees out, the chest
+1.2% taller, a sway; the film's first and last frames are the master's
+pose). `drClipPlay` eases every `.db-idle` wrapper and the breath group
+to no transform over `DR_CLIP_SETTLE` (150 ms; each wrapper's animated
+matrix frozen inline, then transitioned away) and only then swaps; at the
+end it restarts the stylesheet's animations from neutral (the head's and
+the sway's cycles begin at an extreme, so they get a negative delay to
+where they cross zero: -1.85 s and -2.825 s). And the film ends near
+the master's pose, not on it (it drifts: hands, sleeves), so its last
+frame blends into its own first frame on the canvas over `DR_CLIP_BLEND`
+(200 ms; the head's track walks back with it), both the film's drawing,
+before the swap. Measured on the wave at phone size (mean change per
+frame over his box; a frame of the clip itself changes by 1.7): the end
+cut 4.6 to 3.6, the blend's frames 1.3 to 1.5, the start cut 3.0 (it was
+always there; it used to fall before the first filmed frame). What
+remains at both cuts is the drawing: the film's coat and hands are drawn
+a hair differently from the rig's pieces (the hem longer, the hands
+narrower, the lapels and cuffs 1 to 3 px off; edge sharpness is the
+same, measured), a soft flick no player change removes. Two ways out,
+not built: pieces cut from the film's own first frame (the rig redone),
+or his rest body being the film's rest frame on the canvas, breathing by
+CSS, with the rig only for its own moves (the flick then moves to the
+wink, shrug, clipboard and doze). The tests' harness serves `*.json` from the
 checkout for the tracks. `keyclip.py` had to learn two things from the wave (2026-10-27,
 Jose: "make sure you don't make a mistake cropping him out"): the coat's
 shadowed front edge is nearly the wall's grey and read as a gap when the

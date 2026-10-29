@@ -70,7 +70,18 @@ biggest head step 1.7 px a frame (was 12). Then a second fault the flat
 banner showed: a wedge of background beside his chin at the scrubs' V
 when the clip's head dips (its bigger jaw had covered the collar);
 `behead.py` now carries the collar up behind the head (`FILL`, `SPAN`).
-Filming on Home: `tests/tools/home-film.cjs` (30 fps, one PNG a frame,
+Then Jose's pick among the open items: the pop at a move's end. Measured:
+the film's rest and the rig's rest match in size and place; the jump was
+the rig caught mid-breath (arms 1.6 degrees out, chest 1.2% taller, a
+sway). `drClipPlay` now settles the rig to neutral over 150 ms before the
+swap and wakes it from neutral after (`DR_CLIP_SETTLE`), and blends the
+film's last frame into its first over 200 ms before the swap
+(`DR_CLIP_BLEND`, the film drifts a little). The end cut's jump went from
+4.6 to 3.6 (the start cut is 3.0); what remains at both is the film's
+coat and hands drawn a hair off the rig's pieces, which no player change
+removes. Two ways out are written in `dr-smiley.md` (the rig's pieces
+from the film's first frame; or the film's rest frame as his rest body);
+neither started. Filming on Home: `tests/tools/home-film.cjs` (30 fps, one PNG a frame,
 `BG='#ff00ff'` for a flat banner to count holes). `smiley-body-app.cjs` checks
 every track (a step budget per clip; the hop and jump move the head fast). Videos sent: the wave and the think, before/after.
 Details: `docs/features/dr-smiley.md`, "Clips", the paragraph "followed
