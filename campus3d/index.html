@@ -351,9 +351,17 @@ function paveTex(){ const c = document.createElement('canvas'); c.width = c.heig
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t; }
 const PAVE_T = paveTex(), pave = (w, d) => { const t = PAVE_T.clone(); t.needsUpdate = true; t.repeat.set(w/1.3, d/1.3); return new THREE.MeshStandardMaterial({ map:t, roughness:0.85, envMapIntensity:0.1 }); };
 const asphalt = new THREE.MeshStandardMaterial({ map:ASPH_T, roughness:0.42, metalness:0.15, envMapIntensity:0.5 }), curb = M(0xe7d36a, { r:0.6 }), walk = M(0x9a99a6), grass = new THREE.MeshStandardMaterial({ map:GRASS_T, color:0xbfe8c4, roughness:0.95, envMapIntensity:0.08 }), paint = new THREE.MeshBasicMaterial({ color:0xe9e9f0 });
-box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.2, 15, 0.02, false);                                   // the street in front
-box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 15.1, 0.01, false);
-box(BW - 0.4, 0.1, 1.2, walk, BCX, 0.22, 12.7, 0.03, false); box(BW - 0.4, 0.1, 1.0, walk, BCX, 0.22, 17.3, 0.03, false);                                    // sidewalk
+box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.232, 15, 0.02, false);                                   // the street in front
+box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 15.1, 0.01, false);
+{ const cuts = z => { const out = [[-2.95, 3.65]];   // the drive's mouth
+    for (const r of ROADLINES){ if (r.hw === 'service') continue; for (let i = 1; i < r.pts.length; i++){ const [ax, az] = r.pts[i-1], [bx, bz] = r.pts[i];
+      if ((az - z)*(bz - z) > 0 || az === bz) continue; const x = ax + (bx - ax)*(z - az)/(bz - az), s = Math.abs(Math.hypot(bx - ax, bz - az)/(bz - az)); out.push([x - (r.w/2 + 0.9)*s, x + (r.w/2 + 0.9)*s]); } }
+    return out.sort((p, q) => p[0] - q[0]); };
+  for (const [z, d] of [[12.7, 1.2], [17.3, 1.0]]){ let x0 = BX0 + 0.2;
+    for (const [a, b] of [...cuts(z), [BX1 - 0.2, BX1 - 0.2]]){ if (a > x0 + 0.05) box(a - x0, 0.1, d, walk, (a + x0)/2, 0.22, z, 0.03, false); x0 = Math.max(x0, b);
+      if (b > a) for (let x = a + 0.2; x < b - 0.1; x += 0.42) box(0.24, 0.012, d - 0.1, paint, x, 0.272, z, 0.003, false); } }
+  box(6.6, 0.06, 1.3, asphalt, 0.35, 0.23, 12.75, 0.02, false);
+ }                                    // sidewalk
 box(6.6, 0.06, 20, asphalt, 0.35, 0.21, 2.5, 0.02, false); box(2.1, 0.06, 18.2, asphalt, -3.95, 0.21, 3.0, 0.02, false); box(0.4, 0.1, 18.2, walk, -5.1, 0.22, 3.0, 0.02, false);                                    // the drive
 for (let i=0;i<14;i++) box(0.22, 0.02, 1.1, paint, -2.75 + i*0.48, 0.25, 12.6, 0.01, false); // crosswalk
 for (let i=0;i<7;i++) box(1.0, 0.02, 0.24, paint, -7.0, 0.25, 13.55 + i*0.5, 0.01, false);   // and one across the street, west of the drive
@@ -380,7 +388,7 @@ glow(0.64, 1.0, -0.2, 2.6, 0x9fe8ff);
 const lampHead = new THREE.MeshBasicMaterial({ color:0xfff1c8 });
 function lamp(x, z){ add(new THREE.CylinderGeometry(0.05, 0.06, 1.8, 8), M(0x2c2c36), x, 1.2, z); add(new THREE.SphereGeometry(0.16, 12, 10), lampHead, x, 2.15, z, false); glow(x, 2.15, z, 1.4);
   const pool = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24), new THREE.MeshBasicMaterial({ color:0xffd59a, transparent:true, opacity:0.16 })); pool.rotation.x = -Math.PI/2; pool.position.set(x, 0.26, z); G.add(pool); }
-for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z); if (z > 9.9 || z < -1.9) lamp(3.4, z); }   // Medical Plaza's colonnade lines the right side
+for (let z = 11; z > -6; z -= 3.4){ lamp(-2.92, z); if (z > 9.9 || z < -1.9) lamp(3.4, z); }   // Medical Plaza's colonnade lines the right side
 for (let x = -42; x <= 40; x += 6) if (x && !blockedXZ(x, 13.4, 0.2)) lamp(x, 13.4);   // none at the drive's mouth: it would stand in front of the sign
 // trees: the big street trees in front, evergreens and red maples along the drive
 // ---- trees and flower beds: the miniature-world kit (Jose, 2026-10-26, his references): curved trunks with
@@ -1170,7 +1178,7 @@ function cherry(x, z, s=1){
   for (const [y, mat] of [[4.6, new THREE.MeshStandardMaterial({ map:usa, side:THREE.DoubleSide, roughness:0.8 })], [3.85, new THREE.MeshStandardMaterial({ color:0xf4f6fa, side:THREE.DoubleSide, roughness:0.8 })]]){
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.55, 12, 4), mat); fl.position.set(fx + 0.47, y, fz); fl.castShadow = true; G.add(fl); FLAGS.push(fl); }
 }
-pend.push(() => { const pa = vehicle('amb', 0xf4f6fa); pa.visible = true; pa.position.set(-28.6, 0.2, -51.3); pa.rotation.y = Math.PI/2; });   // an ambulance at the curb
+pend.push(() => { const pa = vehicle('amb', 0xf4f6fa); pa.visible = true; pa.position.set(-20.9, 0.2, -27.1); pa.rotation.y = Math.PI/2; });   // an ambulance at the curb
 // the Emergency sign on the lawn by the garage, facing the corner
 { const sx = -25.6, sz = -47.6, g = new THREE.Group(); g.position.set(sx, 0.27, sz); g.rotation.y = -0.5; G.add(g);
   for (const dx of [-0.35, 0.35]){ const p = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.9, 0.06), M(0x8d929c)); p.position.set(dx, 0.45, 0); p.castShadow = true; g.add(p); }
@@ -1299,10 +1307,10 @@ function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandar
     const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTex, color:0xfff1c8, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true })); gl.position.set(lx, 0.3, 1.15); gl.scale.set(0.6,0.6,1); g.add(gl); }
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 // a vehicle's front is its local +z, so rotation.y = +pi/2 noses it toward +x (round 1 had these the other way: the street cars drove backwards)
-const STREET = [ { g: vehicle('car', 0x6fb3e0), ry: Math.PI/2, z: 15.9, dir: 1, dur: 11000 }, { g: vehicle('car', 0xb83a3a), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 9500 },
-  { g: bus(), ry: Math.PI/2, z: 15.9, dir: 1, dur: 16000 }, { g: vehicle('car', 0xf3f5fb), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 12500 } ];
+const STREET = [ { g: vehicle('car', 0x6fb3e0), ry: Math.PI/2, z: 15.9, dir: 1, dur: 13000, off: 0 }, { g: vehicle('car', 0xb83a3a), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 11000, off: 0 },
+  { g: bus(), ry: Math.PI/2, z: 15.9, dir: 1, dur: 13000, off: 13000 }, { g: vehicle('car', 0xf3f5fb), ry: -Math.PI/2, z: 14.1, dir: -1, dur: 11000, off: 11000 } ];
 const CAR_IN2 = vehicle('car', 0x2b2f3a);
-const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlA',0x5b6170,17000],['atlB',0xc9583a,19000],['essexA',0xf2c94c,12000],['essexB',0x3aa6a0,13000]]
+const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlB',0xc9583a,16000],['essexA',0xf2c94c,12000],['essexB',0x3aa6a0,13000]]
   .map(([p, c, dur]) => ({ g: vehicle('car', c), path: SCN.paths[p].map(([x, z]) => [x, 0.2, z]), dur }));
 // the car that backs out of the surface lot: the same car twice (reversing, with its reverse lights on; then
 // nosed toward the drive), so the app can swap the look at the turn
@@ -1352,7 +1360,7 @@ function crane(key){ const b = BOX[key], g = new THREE.Group(), Y = M(0xf2b33d, 
   if (b.crane) g.position.set(b.crane[0], b.roof, b.crane[1]); else g.position.set(b.x - b.w*0.36, b.roof, b.z + b.d*0.34); g.userData.jib = jib; g.userData.a0 = 0.15;   // the swing (a0 +- 0.5) stays across the roof, never end-on to the camera
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 for (const [k,i,x,z,ry,f] of [['doctor',3,-1.45,-7.45,0.5],['nurse',1,-0.75,-7.85,-0.4],['wheel',2,0.55,-7.2,-0.5],['visitor',1,1.55,-7.55,-0.9,1],['kid',0,1.25,-6.95,-0.6],
-    ['visitor',2,-15,12.6,1.57,1],['elder',4,-12.4,12.9,-1.57],['visitor',0,-1.5,12.5,1.57,1],['nurse',1,1.0,12.8,-1.57,1],['doctor',2,6.5,12.4,1.57],['patient',3,13.5,12.7,-1.57,1],['visitor',4,16.8,12.5,1.57],
+    ['visitor',2,-15,12.25,1.57,1],['elder',4,-12.4,12.25,-1.57],['visitor',0,-4.2,12.25,1.57,1],['nurse',1,4.3,12.25,-1.57,1],['doctor',2,6.5,12.25,1.57],['patient',3,13.5,12.25,-1.57,1],['visitor',4,16.8,12.25,1.57],
     ['doctor',0,-5.6,-1.2,0],['nurse',3,-5.6,3.6,3.1,1],['visitor',1,-12.6,-10.2,0.6],['kid',2,-13.2,-13.6,2.4,1],['elder',0,-17.2,-9.6,-0.8],['patient',1,17.4,-5.2,1.2],['visitor',3,18.0,-4.6,-2.0],
     ['nurse',4,7.9,-9.6,0.2,1],['doctor',1,-5.4,-9.6,0.4],['kid',3,-6.4,10.3,0.9,1],
     ['hoodie',2,-11.8,-11.2,-1.2],['teal',3,-12.4,-12.3,-0.6,1],['doctor',1,8.6,-11.4,0.3],['sweater',4,9.3,-11.2,-2.7,1],['wheel',0,12.6,-9.3,0.6],['nurse',3,13.6,-9.1,-0.4,1],
@@ -1386,17 +1394,24 @@ for (const sx of [-1, 1]) bed([[sx*9.6, -9.9], [sx*12.4, -9.9], [sx*12.6, -9.3],
 for (const [x,z,s,k] of [[-17.8,-2.8,1.0,'round'],[-12.6,-1.4,0.75,'blossom'],[-17.4,13.6,0.8,'round'],[18.6,12.6,0.75,'blossom'],[19,5.2,0.85,'round'],
     [15.6,-12.8,0.8,'blossom'],[-6.4,-14.6,0.7,'round'],[7.2,-13.6,0.75,'blossom'],[-19.2,-22.6,0.9,'round'],[17.6,-23.6,0.8,'round']]) tree(x, z, s, k);
 // a low hedge of round bushes along the back edge
-const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],['atlR','sweater',4,70000],['essexL','visitor',1,50000],['atlL','nurse',0,72000]]
-  .map(([p, k, i, dur]) => ({ g: person(k, i), pts: SCN.walks[p].map(([x, z]) => [x, 0.12, z]), dur }));
+function densify(pts, step){ const out = []; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az)/step));
+    for (let k = 0; k < n; k++) out.push([ax + (bx - ax)*k/n, az + (bz - az)*k/n]); } out.push(pts[pts.length - 1]); return out; }
+function clearOfBuildings(pts){ const inB = (x, z) => SCN.blds.some(b => inside(b.pts, x, z));
+  const near = (x, z) => { let best = null, bd = 1e9; for (const r of ROADLINES) for (let i = 1; i < r.pts.length; i++){ const [ax, az] = r.pts[i-1], [bx, bz] = r.pts[i], dx = bx - ax, dz = bz - az, L2 = dx*dx + dz*dz || 1,
+      t = Math.max(0, Math.min(1, ((x - ax)*dx + (z - az)*dz)/L2)), px = ax + t*dx, pz = az + t*dz, d = Math.hypot(x - px, z - pz); if (d < bd){ bd = d; best = [px, pz]; } } return best; };
+  return pts.map(([x, z]) => { if (!inB(x, z)) return [x, z]; const [px, pz] = near(x, z), L0 = Math.hypot(px - x, pz - z) || 1;
+    for (let s = 0.05; s < 1.4; s += 0.05){ const qx = x + (px - x)/L0*s, qz = z + (pz - z)/L0*s; if (!inB(qx, qz)) return [qx + (px - x)/L0*0.12, qz + (pz - z)/L0*0.12]; } return [x, z]; }); }
+const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],['atlL','sweater',4,72000,36000],['essexR','visitor',1,50000],['atlL','nurse',0,72000,0]]
+  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(densify(SCN.walks[p], 0.5)).map(([x, z]) => [x, 0.12, z + (p === 'secondR' && x > -4 && x < 5 ? -0.38 : p === 'secondL' && (Math.abs(x + 30.32) < 0.7 || Math.abs(x + 8.13) < 0.7) ? 0.38 : 0)]), dur }));
 const WALKS = [
-  { g: person('visitor', 0), pts: [[-18,0.1,12.7],[-6,0.1,12.7],[4.5,0.1,12.7],[18,0.1,12.7]], dur: 42000 },
-  { g: person('patient', 1), pts: [[18,0.1,12.2],[6,0.1,12.2],[-6,0.1,12.2],[-18,0.1,12.2]], dur: 48000 },
-  { g: person('nurse', 2), pts: [[-14,0.1,11.2],[-5.0,0.1,11.0],[-4.9,0.1,4],[-4.9,0.1,-4],[-2.7,0.1,-6.4]], dur: 34000 },
-  { g: person('doctor', 3), pts: [[4.6,0.1,-6.6],[3.45,0.1,-4],[3.45,0.1,4],[3.45,0.1,10.6],[3.6,0.1,11.95],[9,0.1,11.95]], dur: 36000 },
-  { g: person('wheel', 4), pts: [[-13,0.1,11.4],[-4.9,0.1,11.2],[-4.9,0.1,5],[-4.9,0.1,-3],[-2.8,0.1,-6.0]], dur: 52000 },
-  { g: person('kid', 0), pts: [[7,0.1,12.9],[4.5,0.1,12.9],[-4.5,0.1,12.9],[-7.5,0.1,12.9]], dur: 20000 },
-  { g: person('elder', 1), pts: [[4.4,0.1,-7.6],[4.4,0.1,-6.2],[4.4,0.1,-7.6]], dur: 22000 },
-  { g: person('patient', 2), pts: [[3.45,0.1,-5.0],[3.45,0.1,2],[3.45,0.1,-5.0]], dur: 30000 },
+  { g: person('visitor', 0), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000 },
+  { g: person('patient', 1), pts: [[BX1 - 1,0.1,13.25],[BX0 + 1,0.1,13.25]], dur: 100000 },
+  { g: person('nurse', 2), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 0 },
+  { g: person('doctor', 3), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000, off: 45000 },
+  { g: person('wheel', 4), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 15000 },
+  { g: person('kid', 0), pts: [[BX1 - 1,0.1,12.98],[BX0 + 1,0.1,12.98]], dur: 100000, off: 5000 },
+  { g: person('elder', 1), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 0 },
+  { g: person('patient', 2), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 55000 },
 ];
 
 
@@ -1529,14 +1544,14 @@ const along = (pts, u) => { const seg = []; let L = 0; for (let i = 1; i < pts.l
   let d = u * L; for (let i = 0; i < seg.length; i++){ if (d <= seg[i] || i === seg.length - 1){ const f = seg[i] ? Math.min(1, d/seg[i]) : 0, a = pts[i], b = pts[i+1];
     return [a[0] + (b[0]-a[0])*f, a[1] + (b[1]-a[1])*f, a[2] + (b[2]-a[2])*f, Math.atan2(b[0]-a[0], b[2]-a[2])]; } d -= seg[i]; } };
 function life(t){ const loop = (dur, off=0) => ((t*1000 + off) % dur) / dur;
-  { const u = loop(9000); CAR_IN.position.set(2.5, 0.2, 15.5 - u*21); CAR_IN.rotation.y = Math.PI; }
-  { const u = loop(11000, 4000); CAR_OUT.position.set(-2.2, 0.2, -6.5 + u*22); CAR_OUT.rotation.y = 0; }
-  { const u = loop(13000, 7000); CAR_IN2.position.set(2.0, 0.2, 15.5 - u*22); CAR_IN2.rotation.y = Math.PI; }
-  { const u = loop(16000, 2000), p = along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0.2,-4],[4.6,0.2,-6.9],[6.6,0.2,-8.0],[7.4,0.2,-8.4]], Math.min(1, u*1.4)); AMB.position.set(p[0], 0.2, p[2]); AMB.rotation.y = p[3]; if ((t*2|0) !== AMB.userData.f){ AMB.userData.f = t*2|0; ambLights(AMB.userData.f % 2); } }
-  STREET.forEach((o, i) => { const u = loop(o.dur*2, i*3000); o.g.position.set((o.dir > 0 ? BX0 - 1 : BX1 + 1) + u*(BW + 2)*o.dir, 0.2, o.z); o.g.rotation.y = o.ry; });
+  { const p = along([[2.75,0.2,13.4],[2.75,0.2,-1.3],[2.35,0.2,-2.35],[1.4,0.2,-2.85],[0.0,0.2,-2.85],[-0.95,0.2,-2.35],[-1.25,0.2,-1.3],[-1.25,0.2,13.4]], loop(17000)); CAR_IN.position.set(p[0], 0.2, p[2]); CAR_IN.rotation.y = p[3]; }
+  { const u = loop(9000, 4000); CAR_OUT.position.set(-2.35, 0.2, -3.2 + u*16.6); CAR_OUT.rotation.y = 0; }
+  { const p = along([[2.75,0.2,13.4],[2.75,0.2,-1.3],[2.35,0.2,-2.35],[1.4,0.2,-2.85],[0.0,0.2,-2.85],[-0.95,0.2,-2.35],[-1.25,0.2,-1.3],[-1.25,0.2,13.4]], loop(17000, 8500)); CAR_IN2.position.set(p[0], 0.2, p[2]); CAR_IN2.rotation.y = p[3]; }
+  { const u = loop(26000, 2000), p = along([...SCN.paths.atlA.slice(1, 8).map(([x, z]) => [x, 0.2, z]), [-24.35, 0.2, -24.7], [-23.0, 0.2, -26.2]], Math.min(1, u*1.6)); AMB.position.set(p[0], 0.2, p[2]); AMB.rotation.y = p[3]; if ((t*2|0) !== AMB.userData.f){ AMB.userData.f = t*2|0; ambLights(AMB.userData.f % 2); } }
+  STREET.forEach((o, i) => { const u = loop(o.dur*2, o.off); o.g.position.set((o.dir > 0 ? BX0 + 0.4 : BX1 - 0.4) + u*(BW - 0.8)*o.dir, 0.2, o.z); o.g.rotation.y = o.ry; });
   BACKCARS.forEach((o, i) => { const p = along(o.path, loop(o.dur, i*2500)); o.g.position.set(p[0], 0.2, p[2]); o.g.rotation.y = p[3]; });
-  BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, i*7000)); w.g.position.set(p[0], p[1], p[2]); w.g.rotation.y = p[3]; stride(w.g, (t*3.2 + i) % 2 < 1 ? 1 : 0); });
-  WALKS.forEach((w, i) => { const u = loop(w.dur, i*5000), p = along(w.pts, u); w.g.position.set(p[0], p[1], p[2]); w.g.rotation.y = p[3]; stride(w.g, (t*3.2 + i) % 2 < 1 ? 1 : 0); });
+  BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, w.off != null ? w.off : i*7000)); w.g.position.set(p[0], p[1], p[2]); w.g.rotation.y = p[3]; stride(w.g, (t*3.2 + i) % 2 < 1 ? 1 : 0); });
+  WALKS.forEach((w, i) => { const u = loop(w.dur, w.off != null ? w.off : i*5000), p = along(w.pts, u); w.g.position.set(p[0], p[1], p[2]); w.g.rotation.y = p[3]; stride(w.g, (t*3.2 + i) % 2 < 1 ? 1 : 0); });
   IDLE.forEach((o, i) => o.set(((t + i*1.7) % 7) < 1.2 ? 1 : 0));
   HELI.position.set(PAD.x + Math.cos(t*0.25)*5, PAD.y + 3 + Math.sin(t*0.7)*0.4, PAD.z + Math.sin(t*0.25)*5); HELI.rotation.y = -t*0.25; HELI.userData.rotor.rotation.y = t*18;
   BIRDS.position.set(-30 + ((t*2.2) % 60), 14 + Math.sin(t*0.5), -10); BIRDS.rotation.y = Math.PI/2; flap(BIRDS, (t*4|0) % 2);

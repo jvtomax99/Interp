@@ -208,7 +208,7 @@ rep("{ const u = loop(16000, 2000), p = along([[2.6,0.2,15.5],[2.6,0.2,2],[2.7,0
 rep("pa.position.set(-28.6, 0.2, -51.3); pa.rotation.y = Math.PI/2;", "pa.position.set(-20.9, 0.2, -27.1); pa.rotation.y = Math.PI/2;")
 # Prospect's cars stay on the board (they ran out onto the soil past its ends) and on a street raised over the side
 # streets' sidewalks (Atlantic's and Essex's sidewalks crossed its asphalt); its centre lines with it
-rep("STREET.forEach((o, i) => { const u = loop(o.dur*2, i*3000); o.g.position.set((o.dir > 0 ? BX0 - 1 : BX1 + 1) + u*(BW + 2)*o.dir, 0.2, o.z);", "STREET.forEach((o, i) => { const u = loop(o.dur*2, o.off*2); o.g.position.set((o.dir > 0 ? BX0 + 0.4 : BX1 - 0.4) + u*(BW - 0.8)*o.dir, 0.2, o.z);")
+rep("STREET.forEach((o, i) => { const u = loop(o.dur*2, i*3000); o.g.position.set((o.dir > 0 ? BX0 - 1 : BX1 + 1) + u*(BW + 2)*o.dir, 0.2, o.z);", "STREET.forEach((o, i) => { const u = loop(o.dur*2, o.off); o.g.position.set((o.dir > 0 ? BX0 + 0.4 : BX1 - 0.4) + u*(BW - 0.8)*o.dir, 0.2, o.z);")
 rep("box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.2, 15, 0.02, false);", "box(BW - 0.4, 0.06, 3.4, asphalt, BCX, 0.232, 15, 0.02, false);")
 rep("box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.24, 15.1, 0.01, false);",
     "box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 14.9, 0.01, false); box(BW - 0.4, 0.02, 0.06, curb, BCX, 0.262, 15.1, 0.01, false);")
@@ -230,19 +230,19 @@ for a, b in [("['visitor',2,-15,12.6,", "['visitor',2,-15,12.25,"), ("['elder',4
     rep(a, b)
 # the people walking: on Prospect's sidewalks in two lanes (east on the inner, west on the outer), the kid beside the
 # patient; the nurse and the wheelchair out of Jurist's doors and down its walk to Link Pavilion's, the walk's lamps moved
-# to the drive's edge; the doctor along Prospect behind the visitor; the elder and another patient on the far sidewalk,
-# clear of its street trees
+# to the drive's edge; the doctor along Prospect behind the visitor; the elder and another patient one way along the far
+# sidewalk, half a loop apart, on its outer side clear of the street trees in it
 rep("for (let z = 11; z > -6; z -= 3.4){ lamp(-4.95, z);", "for (let z = 11; z > -6; z -= 3.4){ lamp(-2.92, z);")
 a = out.index("const WALKS = ["); b = out.index("];", a) + 2
 out = out[:a] + """const WALKS = [
-  { g: person('visitor', 0), pts: [[BX0 + 1,0.1,12.65],[BX1 - 1,0.1,12.65]], dur: 90000 },
-  { g: person('patient', 1), pts: [[BX1 - 1,0.1,13.2],[BX0 + 1,0.1,13.2]], dur: 100000 },
+  { g: person('visitor', 0), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000 },
+  { g: person('patient', 1), pts: [[BX1 - 1,0.1,13.25],[BX0 + 1,0.1,13.25]], dur: 100000 },
   { g: person('nurse', 2), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 0 },
-  { g: person('doctor', 3), pts: [[BX0 + 1,0.1,12.65],[BX1 - 1,0.1,12.65]], dur: 90000, off: 45000 },
+  { g: person('doctor', 3), pts: [[BX0 + 1,0.1,12.78],[BX1 - 1,0.1,12.78]], dur: 90000, off: 45000 },
   { g: person('wheel', 4), pts: [[-5.0,0.1,9.4],[-5.0,0.1,-4],[-3.7,0.1,-5.4]], dur: 30000, off: 15000 },
-  { g: person('kid', 0), pts: [[BX1 - 1,0.1,12.95],[BX0 + 1,0.1,12.95]], dur: 100000, off: 5000 },
-  { g: person('elder', 1), pts: [[BX0 + 1,0.1,16.9],[BX1 - 1,0.1,16.9]], dur: 120000 },
-  { g: person('patient', 2), pts: [[BX1 - 1,0.1,17.6],[BX0 + 1,0.1,17.6]], dur: 110000 },
+  { g: person('kid', 0), pts: [[BX1 - 1,0.1,12.98],[BX0 + 1,0.1,12.98]], dur: 100000, off: 5000 },
+  { g: person('elder', 1), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 0 },
+  { g: person('patient', 2), pts: [[BX0 + 3,0.1,17.6],[BX1 - 3,0.1,17.6]], dur: 110000, off: 55000 },
 ];""" + out[b:]
 rep("WALKS.forEach((w, i) => { const u = loop(w.dur, i*5000), p = along(w.pts, u);", "WALKS.forEach((w, i) => { const u = loop(w.dur, w.off != null ? w.off : i*5000), p = along(w.pts, u);")
 # the walkers along the side streets keep out of the buildings the map draws up to the curb: a point inside one moves
@@ -270,4 +270,12 @@ rep("const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],
     "const BACKWALKS = [['secondR','teal',2,60000],['secondL','hoodie',3,66000],['atlL','sweater',4,72000,36000],['essexR','visitor',1,50000],['atlL','nurse',0,72000,0]]")
 rep("  .map(([p, k, i, dur]) => ({ g: person(k, i), pts: clearOfBuildings(", "  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(")
 rep("BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, i*7000));", "BACKWALKS.forEach((w, i) => { const p = along(w.pts, loop(w.dur, w.off != null ? w.off : i*7000));")
+
+# (round 3) the two side-street walkers past things standing on their sidewalks step toward the road: on 2nd Street's
+# north side the bridge's grey columns, on its south side a sign and a tree
+rep("  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(SCN.walks[p]).map(([x, z]) => [x, 0.12, z]), dur }));",
+    """  .map(([p, k, i, dur, off]) => ({ g: person(k, i), off, pts: clearOfBuildings(densify(SCN.walks[p], 0.5)).map(([x, z]) => [x, 0.12, z + (p === 'secondR' && x > -4 && x < 5 ? -0.38 : p === 'secondL' && (Math.abs(x + 30.32) < 0.7 || Math.abs(x + 8.13) < 0.7) ? 0.38 : 0)]), dur }));""")
+rep("function clearOfBuildings(pts){", """function densify(pts, step){ const out = []; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az)/step));
+    for (let k = 0; k < n; k++) out.push([ax + (bx - ax)*k/n, az + (bz - az)*k/n]); } out.push(pts[pts.length - 1]); return out; }
+function clearOfBuildings(pts){""")
 open(OUT, 'w').write(out); print(OUT, len(out))

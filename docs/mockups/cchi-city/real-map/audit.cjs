@@ -16,8 +16,8 @@ const [HTML, OUT] = process.argv.slice(2);
     window.__freeze = true;
     const T = window.__T, L = window.__L, scene = L.scene;
     const movers = [['car in (drive)', L.CAR_IN, 'car'], ['car out (drive)', L.CAR_OUT, 'car'], ['car in 2 (drive)', L.CAR_IN2, 'car'], ['ambulance (3D)', L.AMB, 'car'],
-      ...L.STREET.map((o, i) => [`Prospect car ${i}`, o.g, 'car']), ...L.BACKCARS.map((o, i) => [`back car ${i} (${['2nd St A','2nd St B','Atlantic A','Atlantic B','Essex A','Essex B'][i]})`, o.g, 'car']),
-      ...L.WALKS.map((w, i) => [`front walker ${i}`, w.g, 'person']), ...L.BACKWALKS.map((w, i) => [`back walker ${i} (${['2nd St R','2nd St L','Atlantic R','Essex L','Atlantic L'][i]})`, w.g, 'person'])];
+      ...L.STREET.map((o, i) => [`Prospect car ${i}`, o.g, 'car']), ...L.BACKCARS.map((o, i) => [`back car ${i} (${['2nd St A','2nd St B','Atlantic B','Essex A','Essex B'][i]})`, o.g, 'car']),
+      ...L.WALKS.map((w, i) => [`front walker ${i}`, w.g, 'person']), ...L.BACKWALKS.map((w, i) => [`back walker ${i} (${['2nd St R','2nd St L','Atlantic L 1','Essex R','Atlantic L 2'][i]})`, w.g, 'person'])];
     const all = movers.map(m => m[1]);
     const moving = new Set(); all.forEach(g => g.traverse(o => moving.add(o)));
     [L.HELI, L.BIRDS, ...L.CLOUDS, L.petals, L.SPR].forEach(g => g && g.traverse(o => moving.add(o)));
@@ -59,7 +59,7 @@ const [HTML, OUT] = process.argv.slice(2);
           tr.run = road ? (tr.run || 0) + step : 0;
           if (road && tr.run > 3 && !tr.flagged){ note(who, 'ground', x, z, t, 'walks along the road (no sidewalk, no crosswalk)'); tr.flagged = true; } if (!road) tr.flagged = false; } } });
     // the card's own two paths
-    { const A = L.SCN.paths.atlA, pts = [...A.slice(0, 8), [-24.0, -25.45]]; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.ceil(Math.hypot(bx - ax, bz - az)/0.5);
+    { const A = L.SCN.paths.atlA, pts = [...A.slice(1, 8), [-24.35, -24.7], [-23.0, -26.2]]; for (let i = 1; i < pts.length; i++){ const [ax, az] = pts[i-1], [bx, bz] = pts[i], n = Math.ceil(Math.hypot(bx - ax, bz - az)/0.5);
         for (let k = 0; k <= n; k++){ const x = ax + (bx - ax)*k/n, z = az + (bz - az)*k/n, g = surf(below(x, 0.2, z)); if (!['road', 'paint', 'road line'].includes(g)) note('ambulance (card)', 'ground', x, z, 0, 'drives on ' + g); const b = inside(x, z); if (b) note('ambulance (card)', 'inside', x, z, 0, 'inside ' + b); } } }
     // group: one line per mover, kind and place (within 1.5 units)
     const groups = [];

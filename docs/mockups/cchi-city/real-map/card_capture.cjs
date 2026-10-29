@@ -68,8 +68,8 @@ fs.mkdirSync(path.join(OUT, 'm'), { recursive: true });
     // the ambulance: up Atlantic Street's northbound lane (the map's path) to the curb at the mouth of the court off
     // Atlantic, the ER's drop-off (Jose, 2026-10-28; the court's middle is hidden behind Women's and Children's), where it
     // stops, its lights still flashing, and its back doors open toward the camera
-    { const A = L.SCN.paths.atlA, stop = [-23.7, 0.2, -25.5], heading = Math.atan2(-24.05 - -29.25, -25.68 - -5.58);
-      const drive = [...A.slice(0, 8).map(([x, z]) => [x, 0.2, z]), stop];
+    { const A = L.SCN.paths.atlA, stop = [-23.0, 0.2, -26.2], heading = Math.atan2(-24.05 - -29.25, -25.68 - -5.58);
+      const drive = [...A.slice(1, 8).map(([x, z]) => [x, 0.2, z]), [-24.35, 0.2, -24.7], stop];
       const g = L.AMB; place(g, ...stop, heading);
       // two rear doors, hinged at the body's sides
       const dm = new T.MeshStandardMaterial({ color: 0xf4f6fa, roughness: 0.4 }), red = new T.MeshStandardMaterial({ color: 0xd43a3a, roughness: 0.5 }), inside = new T.MeshStandardMaterial({ color: 0xe6e9ee, roughness: 0.6 });
