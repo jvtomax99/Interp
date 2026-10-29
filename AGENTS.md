@@ -375,8 +375,12 @@ every request, for every tool:
 small fix, say his ask back in 2-3 plain lines (what changes, what it is
 for, what it leaves alone) and wait for his OK. If something is unclear,
 the one clarifying question goes in the same message. If the read-back is
-wrong, the code would have been too. Exception: fixing your own open
-change's failing checks or a reviewer's small note needs no read-back.
+wrong, the code would have been too. This takes in the "Ambiguous
+request" rule above: its one question rides in the read-back. A phase
+Jose already picked in `docs/PLAN.md` counts as approved; a new chat's
+opening "2-3 lines of what it will do" (`docs/PLAN.md`) is its read-back.
+Fixing your own open change's failing checks or a reviewer's small note
+needs no read-back.
 
 **Spec before code for a new feature.** Write its note in
 `docs/features/` first: what it does, who it is for, and what it does
@@ -392,7 +396,9 @@ or already covered by something in the app. No sugarcoating, no praise
 for its own sake. Disagree when he is wrong, then do what he decides.
 
 **Teach only when he asks.** Replies stay as short as the rule above. When
-he asks "explain X", explain it in plain words.
+he asks "explain X", explain it in plain words. Saying what a word means
+the first time (the plain-words rule above) still applies; that is not
+teaching.
 
 ## Not building (proposed 2026-10-29, waiting for Jose's OK)
 
@@ -406,6 +412,3 @@ before any work starts.
 - **Not a replacement for the hospital's official interpreting systems,**
   its scheduling or its records. It is a study and prep tool beside them.
 - **No app-store app.** It stays an installable web app.
-- **No new 3D scenes or large visual pieces until the `index.html` split
-  (`docs/split-index.md`) is finished.** Fixes and polish to what exists
-  are fine.
