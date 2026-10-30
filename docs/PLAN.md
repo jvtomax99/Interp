@@ -67,7 +67,12 @@ that says "done" ends with `AskUserQuestion`: **"Start a new chat for me"**
 first, **"Keep going here"** second, and the question itself carries the
 summary (what is being worked on now and its goal, a few plain words).
 This is an offer, not the heavy-chat handover above: say which one you
-recommend (a light chat: keep going here). If he picks the new chat, do
+recommend (a light chat: keep going here). **Once per chat** (Jose,
+2026-10-30, after being asked five times in one chat: "don't ask too many
+times if we should continue here"): offer it at the first finished job or
+when the chat first gets heavy; after a "Keep going here", later jobs say
+"done" and go on, and the question returns only if he asks for a new chat
+or the chat has grown too heavy to go on (said plainly, once). If he picks the new chat, do
 steps 1 to 4 above (the handoff first, then `create_session` with it and
 the two-part summary). Not during a job, not on progress replies. Where
 the buttons are missing, one plain line instead.

@@ -14,7 +14,13 @@ as text to paste (Jose, 2026-10-25). **After every finished job** (each
 time a reply says "done"), the reply ends with the same clickable buttons,
 "Start a new chat for me" first and "Keep going here" second, over a short
 summary of what is being worked on (Jose, 2026-10-25); a new chat is made
-only when he picks it, with the handoff written first. Whenever a chat starts a new
+only when he picks it, with the handoff written first. **Not too often**
+(Jose, 2026-10-30: "don't ask too many times if we should continue
+here"): the buttons are offered once in a chat, at the first finished job
+or when the chat first gets heavy; once he picks "Keep going here", later
+jobs just say "done" and go on, and the question comes back only when he
+asks for a new chat or the chat has grown too heavy to go on (said
+plainly, once). Whenever a chat starts a new
 chat for Jose, it gives him a fresh summary in plain words, in two parts:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). It says it in
