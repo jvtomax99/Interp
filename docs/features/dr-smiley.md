@@ -910,7 +910,24 @@ blur** (measured 2026-10-30, so no blur was put on his head for the fast
 frames): the outline's soft edge is 0.58 to 0.67 px wide in every frame
 of the hop, the cheer and the wave, whether the head moves 0 or 12 px a
 frame; the only sharpness dips inside the head are the blinks (the eye
-whites gone). A crisp head over the film is what the film itself is. The
+whites gone). A crisp head over the film is what the film itself is. **The neck
+stub is clean** (2026-10-30, Jose on the newest videos: "the head moves
+out of the body", every move): a 2x zoom on the neck seam in the flat-
+banner films showed thin dark vertical strokes on the film's lapels under
+his chin, in every frame, rest included, longer with each tilt. Not the
+beheading's collar fill (two rewrites of it changed nothing there): they
+were in `drsmiley/body/head.webp` itself, the piece `layers/export.py`
+cut from the master: two light grey tabs of the master's collar hanging
+off the neck stub's upper sides, with dark outlines, and dark rim lines
+down the stub's sides. Over the rig's own coat they lined up with its
+lapels and vanished; over a film's collar, drawn a few px differently,
+they stood out as the comb of streaks. The image is cleaned by hand (the
+tabs and their outlines removed, the stub's sides trimmed 2 px with a
+soft edge, rows under the jaw only); a re-export from the master would
+bring them back, so clean it again after one. The collar fill in
+`behead.py` is kept at its third form (the median of the first four
+pixels under the cut that are not dark; the stub's skin kept, which
+reads as his neck up the scrubs' V), measured no worse than the first. The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the

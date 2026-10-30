@@ -87,7 +87,16 @@ and checked frame by frame (the wave's blinks at 1.5 and 3.6 s, grin
 1.7 to 3.3 s; the think's blink at 4.0 s, grin 4.4 to 5.3 s); videos of
 the wave, think and wince sent. All suites passing (body-rig 160,
 smiley-body-app 22, smiley-gestures 114, smiley-quiz 19). Measured and left alone: the films have no motion blur (edge 0.6 px on
-every frame), so his head gets none. **Jose has not yet said whether any
+every frame), so his head gets none. Then Jose, on the newest videos:
+"the head moves out of the body", every move, head, face, start, end and
+body all ticked. A 2x zoom on the neck seam found dark vertical streaks
+on the lapels under his chin in every frame: they were in
+`drsmiley/body/head.webp` itself (two grey tabs of the master's collar
+and dark rim lines on the neck stub, invisible over the rig's own coat,
+a comb of dirt over a film's); the image is cleaned by hand (a re-export
+brings them back). `behead.py`'s fill was rewritten twice on the way
+(kept at its third form, no worse). Videos sent after: the wave and the
+think. **Jose has not yet said whether any
 of this is right.** Nothing else open.
 
 ## Where it stood (2026-10-29, eighth chat)

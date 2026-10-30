@@ -18,6 +18,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from headtrack i
 src, dst = sys.argv[1], sys.argv[2]; os.makedirs(dst, exist_ok=True)
 FILL = 20   # rows of the cut, above its bottom in each column, filled with the collar under it
 SPAN = 38   # and only within this many columns of the head's centre (the neck and the scrubs' V)
+SKIP = 16   # the fill's colour is read within this many rows under the cut
+DARK = 110  # pixels darker than this (an edge line, a seam's shadow) are passed over
+MED = 4     # the median of this many kept pixels, so the cloth's texture cannot streak
 fs = sorted(glob.glob(os.path.join(src, '*.webp')))
 head = json.load(open(os.path.join(src, 'head.json'))); pose = json.load(open(os.path.join(src, 'head-pose.json')))
 a0 = np.asarray(Image.open(fs[0]).convert('RGBA'), dtype=float); skin, hair = masks(a0)
@@ -41,15 +44,23 @@ for i, f in enumerate(fs):
     # measured on a flat banner: a wedge of background at the V). The lowest FILL rows of the cut, in each column, take
     # the colour of the first solid pixel under the cut (the collar, the lapel, the neck band) with the frame's own alpha,
     # so the coat stands up behind his head instead of a gap; his head covers all of it but the edge.
+    # The colour is the median of the first MED pixels under the cut that are not dark (2026-10-30: taken from the one
+    # first solid pixel, a column that met the lapel's dark edge line or the seam's shadow dragged it up 20 rows: thin dark
+    # streaks stood on the lapels under his chin in every frame, a comb of dirt at the neck seam, longer with each tilt).
+    # The neck stub's skin is kept (up the scrubs' V it reads as his neck; skipping it found the neckline's grey shadow
+    # and streaked that instead); a median over a short run calms the cloth's texture; nothing crosses columns (a
+    # median across them smeared the lapel into the blue).
     hard = soft > 0.02; H, W = hard.shape          # the cut with its feather: the half-clear seam along the lapel showed the background too
     for x in np.where(hard.any(0))[0]:
         if abs(x - cx) > SPAN: continue                        # only the neck's columns: wider, the lapel stood up as a white tab beside his cheek
         rows = np.where(hard[:, x])[0]; bottom = rows.max()
-        below = np.where(a[bottom + 1:min(H, bottom + 8), x, 3] > 128)[0]
-        if not len(below): continue
-        px = a[bottom + 1 + below[0], x]
+        col = a[bottom + 1:min(H, bottom + 1 + SKIP), x]
+        good = np.where((col[:, 3] > 128) & (col[:, :3].max(1) >= DARK))[0]
+        if not len(good): good = np.where(col[:, 3] > 128)[0]
+        if not len(good): continue
+        px = np.median(col[good[:MED], :3], axis=0)
         lo = max(rows.min(), bottom - FILL + 1); band = rows[rows >= lo]
-        out[band, x, :3] = px[:3]; out[band, x, 3] = a[band, x, 3]
+        out[band, x, :3] = px; out[band, x, 3] = a[band, x, 3]
     Image.fromarray(out.astype(np.uint8), 'RGBA').save(os.path.join(dst, os.path.basename(f)), quality=88, method=4)   # method 6 took 2 s a frame for the same size; 4 takes 0.02
 for j in ('head.json', 'head-pose.json'): shutil.copy(os.path.join(src, j), os.path.join(dst, j))
 print(f'{src} -> {dst}: {len(fs)} frames beheaded with one shape (chin row {chin}, centre {c0.round(1).tolist()})')
