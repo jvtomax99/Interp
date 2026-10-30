@@ -82,7 +82,11 @@ and re-timed to them (blinks where the film blinks, the grin open while
 its mouth is, the wince's eyes shut, the think's aha smile at 4.2 s where
 it had come at 5.7 s; a blink from a far face takes 200 ms to arrive, so
 those beats sit early; the wince's shut eyes are `blink2`, since `shut`
-smiles); `dr-smiley.md`, "His face is timed to the film's face". **Jose has not yet said whether any of this is right.** Nothing
+smiles); `dr-smiley.md`, "His face is timed to the film's face". Filmed
+and checked frame by frame (the wave's blinks at 1.5 and 3.6 s, grin
+1.7 to 3.3 s; the think's blink at 4.0 s, grin 4.4 to 5.3 s); videos of
+the wave, think and wince sent. All suites passing (body-rig 160,
+smiley-body-app 22, smiley-gestures 114, smiley-quiz 19). **Jose has not yet said whether any of this is right.** Nothing
 else open.
 
 ## Where it stood (2026-10-29, eighth chat)
