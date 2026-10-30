@@ -147,7 +147,8 @@ SCN.lots.length && SCN.cars.lots.forEach(([x, z, a], j) => parkedAt(x, z, a, j*3
 Object.assign(SCN.blds.find(b => b.key === 'x8902'), { floors:5, under: { floors:1.4,
   ground:[[-16.3,-24.48],[-16.3,-31.4],[-16.05,-31.74],[-9.97,-31.66],[-9.95,-24.51]],
   open:[[-16.96,-24.48],[-16.99,-25.04],[-17.62,-26.6],[-17.71,-27.45],[-17.57,-29.54],[-17.32,-30.42],[-16.88,-31.33],[-16.3,-31.4],[-16.3,-24.48]] } });   // over the court on a column (his photos)
-Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:5 });
+Object.assign(SCN.blds.find(b => b.key === 'x7562'), { kind:'plant', floors:4 });   // the central utility plant: "a new four-story
+// central utility plant across from the hospital" (ENR, 2023 Best Projects, the Helena Theurer Pavilion; 2026-10-30, it was 5)
 SCN.blds.find(b => b.key === 'x8892').floors = 4;   // Audrey Hepburn Children's House: four floors under its pitched roofs (Google 3D)   // a tall plant building with roof fans, not a house (Jose's photos, 2026-10-28)
 // drives under buildings (Jose's photos, 2026-10-28). Link Pavilion: its front entrance is a drive-through under the
 // building, the map's tunnel road (way 8933) at z -10, the lobby's glass behind it and the floors above reaching out over
@@ -162,6 +163,17 @@ Object.assign(SCN.blds.find(b => b.key === 'e'), { pts: (() => { const p = SCN.b
 Object.assign(SCN.blds.find(b => b.key === 'c'), { under: { floors:2, open:SCN.blds.find(b => b.key === 'c').pts,
   ground:[[6.35,8.62],[6.35,-2.75],[10.4,-2.6],[10.35,-0.3],[20.8,-0.1],[20.62,9.0]] } });
 for (const b of SCN.blds) realBuilding(b);
+// garage entrances where the map's driveways end at a garage wall (2026-10-30): the Employee Parking Garage's two on 2nd
+// Street, one right under the pavilion's bridge (ENR: "two entrances directly underneath the work zone"), and the
+// Visitors garage's second one on its south side. A dark mouth in the wall, a white lintel band, a red and white gate arm
+function garageMouth(key, x, z, w){ const B = BLD[key]; let best = null, bd = 1e9, bt = 0;
+  for (const e of B.E){ const t = Math.max(0, Math.min(e.L, (x - e.ax)*e.ux + (z - e.az)*e.uz)), [px, pz] = e.at(t), d = Math.hypot(px - x, pz - z); if (d < bd){ bd = d; best = e; bt = t; } }
+  const e = best, t = Math.max(w/2, Math.min(e.L - w/2, bt)), [px, pz] = e.at(t), oh = Math.min(0.46, B.fl*0.95);
+  add(new THREE.PlaneGeometry(w, oh), M(0x15171c, { r:0.9 }), px + e.nx*0.02, B.y0 + oh/2, pz + e.nz*0.02, false).rotation.y = e.a;
+  box(w + 0.2, 0.08, 0.06, M(0xe8e4dc, { r:0.6 }), px + e.nx*0.04, B.y0 + oh + 0.04, pz + e.nz*0.04, 0.01, false).rotation.y = e.a;
+  const ax = px + e.nx*0.3, az = pz + e.nz*0.3; box(0.1, 0.25, 0.1, M(0xe9c33a), ax - e.ux*(w/2 - 0.1), 0.31 + 0.12, az - e.uz*(w/2 - 0.1), 0.02);
+  for (let k = 0; k < 3; k++){ const tt = -w/2 + 0.25 + k*w*0.3; box(0.035, 0.035, w*0.28, M(k % 2 ? 0xffffff : 0xc8202a), ax + e.ux*tt, 0.31 + 0.24, az + e.uz*tt, 0.01, false).rotation.y = e.a + Math.PI/2; } }
+CUR = '_'; garageMouth('x8893', 1.27, -53.54, 2.2); garageMouth('x8893', 16.05, -53.21, 2.2); garageMouth('x8886', 17.49, -14.46, 2.2);
 // the machines on the hospital roofs, where the state's 2020 aerial shows them (aerial_roofs.py -> roofs.json): their
 // colours mostly greyed (the photo tints them) and rounded to a few shades, one merged mesh per shade
 { const byShade = {};

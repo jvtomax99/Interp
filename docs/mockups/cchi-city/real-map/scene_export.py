@@ -35,9 +35,9 @@ LIVE_KEYS=set()
 # Link Pavilion's front: the map's outline takes in the canopy over its doors (a stub out to the drive); cut it off, so
 # its wall at the end of the drive runs straight and the diorama's canopy stands in front of it
 LINK_CUT=sbox(-2.4,-8.1,4.6,-6.0)
-DOM={'8888':('t',9),'8895':('n',5),'8887':('e',6),'8884':('s',6),'8885':('c',12)}
+DOM={'8888':('t',9),'8895':('n',5),'8887':('e',6),'8884':('s',5),'8885':('c',9)}
 DOOR_AT={'e':(1.1,-8.1),'s':(-9.0,10.2),'c':(13.0,9.7)}   # which wall gets the doors: the one nearest this point
-FLOORS={'8905':6,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':2,'8891':2,'8892':3,'8914':6,'8886':5,'8893':6}
+FLOORS={'8905':6,'8907':3,'8902':4,'8899':6,'8894':4,'8889':3,'8890':4,'8891':2,'8892':3,'8914':6,'8886':5,'8893':6}
 blds=[]
 for b in d['buildings']:
     sid=b['id'][-4:]
@@ -66,11 +66,13 @@ for b in d['buildings']:
         blds[-1]['pts']=pts; blds[-1]['poly']=Polygon(pts)
 # Medical Plaza (Jose's photos from the Visitor Parking court, 2026-10-28): a tall maroon granite tower with light bands
 # rising from a 3-floor wing, the tower against the garage at the court's corner, the wing reaching toward the drive and
-# Prospect; it was a stepped pile with dark glass on top. 3 floors of wing (the ground one open on piers), 9 of tower.
+# Prospect; it was a stepped pile with dark glass on top. 3 floors of wing (the ground one open on piers), the tower 9 in all
+# (2026-10-30: HMH lists Room 400 on the Fourth Floor and suites up to 907, "the 9th floor"; none higher. It was 12,
+# the tower's 9 stacked on the wing's 3)
 for b in blds:
     if b['key']=='c':
         b['tiers']=[]
-        for g,fl,glass in [(Polygon([(6.45,-3.45),(11.1,-3.3),(11.05,-1.0),(15.5,-0.95),(15.5,4.5),(6.45,4.5)]),9,False)]:
+        for g,fl,glass in [(Polygon([(6.45,-3.45),(11.1,-3.3),(11.05,-1.0),(15.5,-0.95),(15.5,4.5),(6.45,4.5)]),6,False)]:
             tp=[[round(x,2),round(z,2)] for x,z in list(g.exterior.coords)[:-1]]
             a=sum(tp[i][0]*tp[(i+1)%len(tp)][1]-tp[(i+1)%len(tp)][0]*tp[i][1] for i in range(len(tp)))
             b['tiers'].append(dict(pts=tp[::-1] if a<0 else tp,floors=fl,glass=glass))

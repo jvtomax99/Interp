@@ -19,7 +19,8 @@ Jose's prompts, in order (2026-10-29), each its own change:
    overlap each other. Use the map data for which streets are one-way."
 3. **People: done in 3D** (2026-10-29, `real-map/people.js`, README "People"). Was: sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
    talking; never through walls, cars, trees or each other.
-4. **Buildings (next):** checked against the real campus (height, floors, doors, garage entrances, bridges), with sources.
+4. **Buildings: done in 3D** (2026-10-30, `claude/campus-buildings`, README "The buildings, against sources"). Card pictures rendered again. Open:
+   the unproven list there.
 
 Where things are:
 - The live scene's motion: `life(t)` in the built page; its movers and paths are set in
