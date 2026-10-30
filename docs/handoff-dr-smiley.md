@@ -63,7 +63,8 @@ easing was left on through the clip, so the head trailed the body by
 about 100 ms. Now it turns about its own centre and the easing comes
 off before the first frame; after, his hair's path is within 0.8 grid
 px of the film's on average (1.6 at worst). `smiley-body-app.cjs` checks
-the pivot, the easing and the neck pivot put back. Videos sent: the
+the pivot, the easing and the neck pivot put back (checks: body-rig 160,
+smiley-body-app 22, smiley-gestures 114, smiley-quiz 19, all passing). Videos sent: the
 wave before/after (real speed, then half), then the think after.
 Details: `dr-smiley.md`, "His head is turned about its own centre".
 **Jose has not yet said whether this is right.** Nothing else open.
