@@ -86,8 +86,9 @@ smiles); `dr-smiley.md`, "His face is timed to the film's face". Filmed
 and checked frame by frame (the wave's blinks at 1.5 and 3.6 s, grin
 1.7 to 3.3 s; the think's blink at 4.0 s, grin 4.4 to 5.3 s); videos of
 the wave, think and wince sent. All suites passing (body-rig 160,
-smiley-body-app 22, smiley-gestures 114, smiley-quiz 19). **Jose has not yet said whether any of this is right.** Nothing
-else open.
+smiley-body-app 22, smiley-gestures 114, smiley-quiz 19). Measured and left alone: the films have no motion blur (edge 0.6 px on
+every frame), so his head gets none. **Jose has not yet said whether any
+of this is right.** Nothing else open.
 
 ## Where it stood (2026-10-29, eighth chat)
 

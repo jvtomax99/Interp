@@ -905,7 +905,12 @@ before it had closed the eyes (the think's blink never showed); those
 `shut` beats now sit 200 ms before the film's blink and the next beat
 waits for it. And his `shut` face smiles a little, so through the
 wince's shut-eyed stretch it read calm, not pained; `blink2` (nearly
-shut, the mouth straight) stands in there. The
+shut, the mouth straight) stands in there. **The films carry no motion
+blur** (measured 2026-10-30, so no blur was put on his head for the fast
+frames): the outline's soft edge is 0.58 to 0.67 px wide in every frame
+of the hop, the cheer and the wave, whether the head moves 0 or 12 px a
+frame; the only sharpness dips inside the head are the blinks (the eye
+whites gone). A crisp head over the film is what the film itself is. The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the
