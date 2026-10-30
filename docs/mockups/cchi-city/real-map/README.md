@@ -358,7 +358,7 @@ footway bridges (ways 8911, 8921), the Sanzari Family Walkway's landing. Blocked
 goldmancopeland.com, audreymatlock.com, tradelineinc.com, web.archive.org. Heights are floors x the toy's floor (0.62
 units, about 2.7 m at 4.3 m to a unit), lower than a real hospital floor (about 4.5 m); the footprints are true size.
 
-The card's pictures (`city/`, Blender) still show Jurist at 6 and Medical Plaza at 12 until they are rendered again.
+The card's pictures (`city/`) were rendered again in Blender with these heights (2026-10-30).
 
 ## Open
 
