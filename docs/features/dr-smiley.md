@@ -877,7 +877,27 @@ worst; before, 4.6 and 9.5), the peak swing 12.2 against the film's
 13.0, and the fit sits 6 frames behind, the settle and the fade. The
 check: `smiley-body-app.cjs`, the origin, the easing and the pivot back.
 A script for the comparison is in the chat's scratchpad (`headcmp.py`:
-a flat-banner film's frames beside the keyed frames). The
+a flat-banner film's frames beside the keyed frames). **His face is timed to the film's face** (2026-10-30, the same day,
+Jose keeping the chat going with no new fault named): the beats
+(`DR_CLIP_FACES`) had been written by feel, and measured against the
+film's own face per frame on the keyed frames (the eye whites for open
+eyes, the pupils, the mouth's dark inside for an open mouth; the
+scratchpad's `facetl.py`) they were off the body: the wave's film blinks
+at 1.4 s, grins open-mouthed with wide eyes from 1.6 to 3.4 s as the arm
+comes up, blinks at 3.6 s and is at rest by 3.8 s, where his smile began
+at 0.9 s, never blinked and stayed to 4.7 s; the think's film narrows its
+eyes from 0.8 to 2.3 s, looks up wide from 2.4 to 3.9 s, blinks at 4.0 s
+and grins from 4.2 to 5.3 s with the aha, where his smile came at 5.7 s,
+the body already still; the wince's film shuts its eyes for the wince
+itself (1.8 to 2.6 s) and grimaces open-mouthed from 3.0 to 4.0 s, where
+his stayed open ("worried") through it; the hop's and the cheer's grins
+began 0.5 s after his and ended 1 s before. Now every beat sits on the
+film's frame: a `shut` where it blinks (a blink of 150 ms, the rig
+walking the in-betweens), `smile2` then `smile` where its grin opens,
+`shut` through the wince, `surprised` at its wide-eyed start, `lookDR`
+and `halfR` while the think's eyes are down, `lookU` and `lookUR` while
+they are up, and rest within 0.2 s of the film's rest. The cheer keeps
+Jose's rule: `laugh1` mostly, `laugh` (shut) only at the peak. The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the

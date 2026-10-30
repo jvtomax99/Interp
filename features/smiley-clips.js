@@ -61,11 +61,15 @@ const DR_CLIP_FADE = 100;
 // His face acts along with each clip, on his own head (the clip's face is under it): beats of
 // [at (ms from the clip's start), face, brow]. The times follow the clips' own acting.
 const DR_CLIP_FACES = {
-  greet:  [[0, 'rest', 'rest'], [500, 'smile1', 'up'], [900, 'smile', 'up'], [3400, 'smile2', 'rest'], [4300, 'smile1', 'rest'], [4700, 'rest', 'rest']],
-  cheer:  [[0, 'rest', 'rest'], [600, 'smile1', 'up'], [1300, 'smile', 'up'], [1800, 'laugh1', 'up'], [2200, 'laugh', 'up'], [2600, 'laugh1', 'up'], [3300, 'smile', 'up'], [3700, 'laugh1', 'up'], [4400, 'smile', 'up'], [5600, 'smile1', 'rest'], [6400, 'rest', 'rest']],
-  think:  [[0, 'rest', 'rest'], [600, 'blink1', 'focused'], [1200, 'lookUR', 'focused'], [3200, 'lookU', 'focused'], [4400, 'lookUR', 'focused'], [5300, 'rest', 'up'], [5700, 'smile', 'rest'], [6500, 'rest', 'rest']],
-  wince:  [[0, 'rest', 'rest'], [500, 'blink2', 'caring'], [900, 'worried', 'caring'], [2600, 'sad', 'caring'], [3600, 'smile1', 'rest'], [4400, 'smile', 'rest'], [5500, 'rest', 'rest']],
-  bounce: [[0, 'rest', 'rest'], [500, 'smile1', 'up'], [1100, 'smile', 'up'], [1900, 'laugh1', 'up'], [3200, 'smile', 'up'], [4800, 'smile1', 'rest'], [5500, 'rest', 'rest']],
+  // Timed to the film's own face (2026-10-30, measured per frame on the keyed frames: the eye whites, the pupils and
+  // the mouth's dark inside): his eyes blink where the film's blinked, his grin opens and closes where its mouth did.
+  // Before, the wave's smile came 0.7 s before the film's grin, with no blinks, and stayed 1 s after it; the think's
+  // aha smile came 1.5 s after the body's, once it was still again.
+  greet:  [[0, 'rest', 'rest'], [1350, 'shut', 'up'], [1500, 'smile2', 'up'], [1650, 'smile', 'up'], [3400, 'smile2', 'up'], [3550, 'shut', 'rest'], [3700, 'smile1', 'rest'], [3900, 'rest', 'rest']],
+  cheer:  [[0, 'rest', 'rest'], [1100, 'blink1', 'up'], [1500, 'smile1', 'up'], [1900, 'smile', 'up'], [2100, 'laugh1', 'up'], [2400, 'laugh', 'up'], [2800, 'laugh1', 'up'], [3400, 'smile', 'up'], [4800, 'smile1', 'rest'], [5300, 'rest', 'rest']],
+  think:  [[0, 'rest', 'rest'], [700, 'blink1', 'focused'], [900, 'lookDR', 'focused'], [1500, 'halfR', 'focused'], [2400, 'lookU', 'focused'], [3100, 'lookUR', 'focused'], [3950, 'shut', 'focused'], [4100, 'smile1', 'up'], [4250, 'smile', 'up'], [5300, 'smile1', 'rest'], [5600, 'rest', 'rest']],
+  wince:  [[0, 'rest', 'rest'], [600, 'surprised', 'up'], [1000, 'worried', 'caring'], [1600, 'blink2', 'caring'], [1800, 'shut', 'caring'], [2800, 'blink2', 'caring'], [3000, 'sad', 'caring'], [4350, 'shut', 'rest'], [4500, 'smile1', 'rest'], [5200, 'rest', 'rest']],
+  bounce: [[0, 'rest', 'rest'], [1350, 'shut', 'up'], [1500, 'smile2', 'up'], [1650, 'smile', 'up'], [2300, 'laugh1', 'up'], [2800, 'shut', 'up'], [3000, 'smile2', 'up'], [3200, 'smile', 'up'], [4200, 'smile1', 'up'], [4400, 'shut', 'rest'], [4550, 'rest', 'rest']],
 };
 const drClipFrames = new Map();   // name -> { imgs, head, ready: Promise, ok }
 function drClipPreload(name){
