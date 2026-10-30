@@ -331,6 +331,35 @@ where the map has houses.
   far; the card's real pictures (near/far/sky, each building's paint in tenths, glows, the moving sprites) are
   builddiorama.cjs's ~150 files, to be rendered from Blender in their own change.
 
+## The buildings, against sources (2026-10-30)
+
+Jose's prompt 4: every building checked for floors, doors, garage entrances and bridges, with sources. OpenStreetMap has
+names and outlines but no heights or levels for any of them. Pages read in full unless marked.
+
+| Building | Was | Now | Source |
+|---|---|---|---|
+| Helena Theurer Pavilion | 9 | 9 (kept) | HMH, its page: "a nine-story, 530,000-square-foot surgical and intensive care tower". ENR (2023 Best Projects): "The five-story patient tower, which sits atop the three-story surgical platform", "spans a public roadway and connects to an existing parking garage and four of the hospital's floors". The model's 4 platform floors read as ground + 3. Stantec says eight, Page ten, Introba eleven (snippets, not read) |
+| Medical Plaza (20 Prospect) | 12 (9-floor tower stacked on a 3-floor wing) | 9 (tower 6 over the wing's 3) | HMH: "20 Prospect Avenue – Room 400, Fourth Floor"; the highest suite listed anywhere is 907, "take the elevator to the 9th floor" (NJ Brain and Spine, snippet). None above the 9th. Jose's "9 floors over a 3-floor wing" (2026-10-28) is read as a 9-floor tower beside the wing |
+| Jurist Research Center | 6 | 5 | Tomorrows Children's Fund (tcfkid.org/OurFacilities/DavidJurist): "Rising five stories high, the center encompasses 55,000 square feet". The page is gone now (404); seen in the search index only |
+| Gabrellian Child Care and Learning Center | 2 | 4 | HMH, pediatric residency, Resident Life: "The four-story, 30,000-square foot facility" |
+| Central utility plant (map 7562, the silver one with roof fans) | 5 | 4 | ENR, same article: "a new four-story central utility plant across from the hospital". That map 7562 is the plant: HMH puts it "at Second and Atlantic streets" (snippet; the release is a 404 now) |
+| Women's and Children's Pavilion | 6 | 6 (kept) | Severud (structural engineer): "the upper six floors ... over three below-grade parking levels" |
+| Atlantic Street garage | 6 | 6 (kept) | Desman (its designer): "6-story precast", "going from a 3-story structure on the west end to a 6-story structure on the east end" with the grade. The board is flat and the roof deck level, so it stays 6 |
+
+Garage entrances (`garageMouth` in `back.js`): the Employee Parking Garage's two on 2nd Street where the map's driveways
+meet its wall, one right under the pavilion's bridge (ENR: "two entrances directly underneath the work zone"); the
+Visitors garage's second, on its west wall where the map's driveway from the south ends (map only; not in any source).
+
+Not proven (no source found; left as they were): Link Pavilion 6, John Theurer Cancer Center 5 (trade press for its 2010
+opening says "five-story", snippet only), Imus 6, the ED 5, Imaging 3, Johnson Hall 3, Hillcrest 4, Audrey Hepburn
+Children's House 4, the Visitors garage 5, the Employee garage 6 (HMH: pay kiosks "on the 1st and 5th floor", so 5 at
+least; snippet), the older tower behind the park 10, the Atlantic garage's entrance (the map has none), the two other
+footway bridges (ways 8911, 8921), the Sanzari Family Walkway's landing. Blocked sites that might settle some: langan.com,
+goldmancopeland.com, audreymatlock.com, tradelineinc.com, web.archive.org. Heights are floors x the toy's floor (0.62
+units, about 2.7 m at 4.3 m to a unit), lower than a real hospital floor (about 4.5 m); the footprints are true size.
+
+The card's pictures (`city/`, Blender) still show Jurist at 6 and Medical Plaza at 12 until they are rendered again.
+
 ## Open
 
 - Other skybridges: the map has two more footway bridges, from the Atlantic Street garage south over 2nd Street
