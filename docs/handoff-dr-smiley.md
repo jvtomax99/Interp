@@ -98,8 +98,15 @@ and `rig.json` now scale it 1.10 about the chin (scale 1.1969, at 280.9,
 jaw's shadow colour behind the head image (`.db-neck`), measured closed.
 Then the cheer's shift: its whole figure sat 5 px right and 3 px high of
 the master's (FIT), so his head hopped at its cut; `DR_CLIPS.cheer.shift`
-moves its frames and head track in the player. Still open: the clip's
-head turns a little (yaw) and his cannot. To redo a clip:
+moves its frames and head track in the player. The last item, the clip's head turning sideways while his cannot, was
+measured and closed without a change (2026-10-30): with the tilt
+removed the films' head turns at most about five degrees (the wince,
+the thumbs-up), a one-pixel face shift on the phone; the pupils travel
+1 to 4 px sideways. **Nothing from today's list is open.** What comes
+next must come from Jose's eyes on the videos (all on his phone: the
+wave, think and thumbs-up before/after, the wave's cuts slowed, the
+cheer's start slowed, the head size); the bigger roads if he still
+sees the swap are in `dr-smiley.md` ("Two ways out, not built"). To redo a clip:
 `headtrack.py` on the keyed frames, then `behead.py <keyed> drsmiley/clips/<move>`.
 
 ## Where it stood (2026-10-29, seventh chat)

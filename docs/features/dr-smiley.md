@@ -846,7 +846,14 @@ over mismatched poses). Measured on the wave at phone size (mean change
 per frame over his box; a frame of the clip itself changes by 1.7, the
 fastest by 4.3): the end cut was 4.6 at the start of the day, 3.6 with
 the settle and the blend, and is now 2.1 spread over three frames; the
-start cut 3.0 to 1.8. Both are now below the film's own motion. The
+start cut 3.0 to 1.8. Both are now below the film's own motion. **The films' head barely turns sideways** (measured 2026-10-30, so no
+fake turn was built): with the tilt removed, the head's outline is
+within 3 px of symmetric in the wave and think and about 7 px (five
+degrees) in the wince and thumbs-up, a one-pixel face shift on the
+phone; the pupils' sideways travel is 1 to 4 px, the rest of their
+apparent motion the brows entering the eye band. What the clip's face
+does that his should, the face beats (`DR_CLIP_FACES`) already carry.
+The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the
