@@ -853,7 +853,31 @@ degrees) in the wince and thumbs-up, a one-pixel face shift on the
 phone; the pupils' sideways travel is 1 to 4 px, the rest of their
 apparent motion the brows entering the eye band. What the clip's face
 does that his should, the face beats (`DR_CLIP_FACES`) already carry.
-The
+**His head is turned about its own centre, and placed with no easing**
+(2026-10-30, Jose, asked again where it reads wrong: every move, the
+head during the move). Two faults in the player, both measured on the
+flat banner with `home-film.cjs` against the keyed frames (the film's own
+head still on), the hair's centroid in each: the player turned and sized
+his head about the neck, 82 grid px below the centre the track follows,
+so the turn swung the centre sideways on top of the slide the track
+already asked for: in the wave his hair travelled 21.7 grid px where the
+film's travelled 13.0 and dropped 4 px more (the head slid off the neck);
+the think, wince and thumbs-up tilt 11 to 15 degrees, so there it was 16
+to 21 grid px, 8 to 10 px on the phone. And the settle's 150 ms easing
+(`transition` on the idle wrappers) was left on through the clip, so each
+frame's new place was eased, and his head trailed the film's body by
+about 100 ms (the best fit of his hair's path to the film's was 9 frames
+behind, where the settle alone accounts for 4 or 5) and slurred its fast
+moves. Now `headAt` and `blend` turn the head about its rest centre
+(`DR_CLIP_HEAD0` in the rig's units, 563.8 by 312.3) and `start` clears
+the easing before the first frame; the wrapper's own pivot (the neck,
+for the rig's idle drift) is put back at the end and on a stop. After:
+his hair's path is within 0.8 grid px of the film's on average (1.6 at
+worst; before, 4.6 and 9.5), the peak swing 12.2 against the film's
+13.0, and the fit sits 6 frames behind, the settle and the fade. The
+check: `smiley-body-app.cjs`, the origin, the easing and the pivot back.
+A script for the comparison is in the chat's scratchpad (`headcmp.py`:
+a flat-banner film's frames beside the keyed frames). The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the

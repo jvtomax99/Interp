@@ -48,7 +48,27 @@ the app shows him full-length yet, and a check keeps it that way
   ChatGPT on his phone (upload `body-master.png`, paste the opening, add
   one pose line). Not run yet.
 
-## Where it stands (2026-10-29, eighth chat): read this first
+## Where it stands (2026-10-30, ninth chat): read this first
+
+Asked which move and which moment still read wrong on his phone, Jose
+picked **every move, the head during the move**. Measured on the flat
+banner against the keyed frames (the hair's centroid in each, per frame),
+two faults in the player, both now fixed in `features/smiley-clips.js`:
+the head was turned about the neck, 82 grid px under the centre the
+track follows, so the turn swung it sideways on top of the track's slide
+(the wave: his hair travelled 21.7 grid px where the film's travelled
+13.0; the think, wince and thumbs-up, which tilt 11 to 15 degrees, were
+16 to 21 grid px off, 8 to 10 px on the phone); and the settle's 150 ms
+easing was left on through the clip, so the head trailed the body by
+about 100 ms. Now it turns about its own centre and the easing comes
+off before the first frame; after, his hair's path is within 0.8 grid
+px of the film's on average (1.6 at worst). `smiley-body-app.cjs` checks
+the pivot, the easing and the neck pivot put back. Videos sent: the
+wave before/after (real speed, then half), then the think after.
+Details: `dr-smiley.md`, "His head is turned about its own centre".
+**Jose has not yet said whether this is right.** Nothing else open.
+
+## Where it stood (2026-10-29, eighth chat)
 
 **Jose is not yet satisfied; nothing below is judged right until he says
 so.** Asked what reads wrong, he picked "head looks stuck on" (buttons:

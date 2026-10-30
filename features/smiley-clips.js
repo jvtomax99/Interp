@@ -126,11 +126,17 @@ function drClipPlay(m, name, done){
   const [sx, sy] = C.shift || [0, 0];   // the clip's frames and head track moved onto the master's figure (DR_CLIPS shift)
   // the head rides the clip's head and does what it did: its place (head.json), its tilt and its size (head-pose.json,
   // from the hair against the head's centre in the clip, before beheading; 2026-10-29: a head carried flat and level
-  // over a body that tilts its head 16 degrees in the wave read as a photo stuck on). Turned and sized about the neck.
+  // over a body that tilts its head 16 degrees in the wave read as a photo stuck on).
+  // Turned and sized about the head's own centre, the point the track follows (2026-10-30: turned about the neck,
+  // 82 grid px below it, the turn swung the centre sideways on top of the track's slide: in the wave his hair
+  // travelled 21 grid px where the film's travelled 13, and dropped 4 more; the head slid on the neck). The wrapper's
+  // own origin (the neck, for the rig's idle drift) is kept and put back after.
+  const origin0 = headEl ? headEl.style.transformOrigin : '';
+  const headOrigin = `${(DR_CLIP_HEAD0[0] * k2).toFixed(1)}px ${(DR_CLIP_HEAD0[1] * k2).toFixed(1)}px`;
   const headAt = i => { const h = F.head && F.head[i]; if(!h || !headEl) return;
     const dx = (h[0] + sx - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] + sy - topRows - DR_CLIP_HEAD0[1]) * k2;
     const p = (F.pose && F.pose[i]) || [0, 1], tilt = p[0], sc = p[1];
-    headEl.style.transformOrigin = '547px 585px';   // the neck, in the rig's units
+    headEl.style.transformOrigin = headOrigin;
     headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${tilt.toFixed(2)}deg) scale(${sc.toFixed(3)})`; };
   // his face along the clip: the next beat whose time has come (the rig walks the in-betweens itself)
   const faces = DR_CLIP_FACES[name] || []; let fi = 0;
@@ -156,7 +162,7 @@ function drClipPlay(m, name, done){
   const end = () => {
     if(clip.stopped) return;
     clip.stopped = true;
-    if(headEl) headEl.style.transform = ''; m.body.set({ face: 'rest', brow: 'rest' });
+    if(headEl){ headEl.style.transform = ''; headEl.style.transformOrigin = origin0; } m.body.set({ face: 'rest', brow: 'rest' });
     host.classList.remove('is-clip'); host.classList.remove('is-clip-fade'); wake();   // the rig's body back, at neutral, fading in over the solid canvas
     clip.timer = setTimeout(() => { cv.remove(); if(m.clip === clip) m.clip = null; if(done) done(); }, DR_CLIP_FADE);
   };
@@ -165,6 +171,7 @@ function drClipPlay(m, name, done){
     if(F.head && headEl){ const h0 = F.head[0], h1 = F.head[C.n - 1], p0 = (F.pose && F.pose[0]) || [0, 1], p1 = (F.pose && F.pose[C.n - 1]) || [0, 1];
       const mix = (u, v) => v + (u - v) * k, h = [mix(h0[0], h1[0]), mix(h0[1], h1[1])], p = [mix(p0[0], p1[0]), mix(p0[1], p1[1])];
       const dx = (h[0] + sx - DR_CLIP_HEAD0[0]) * k2, dy = (h[1] + sy - topRows - DR_CLIP_HEAD0[1]) * k2;
+      headEl.style.transformOrigin = headOrigin;
       headEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${p[0].toFixed(2)}deg) scale(${p[1].toFixed(3)})`; } };
   const tick = now => {
     if(clip.stopped) return;
@@ -173,12 +180,15 @@ function drClipPlay(m, name, done){
     if(i >= C.n - 1){ const k = (now - t0 - (C.n - 1) * step) / DR_CLIP_BLEND; if(k >= 1) end(); else { blend(Math.max(0, k)); clip.raf = requestAnimationFrame(tick); } }
     else clip.raf = requestAnimationFrame(tick);
   };
-  const start = () => { if(clip.stopped) return; draw(0); host.appendChild(cv); host.classList.add('is-clip-fade');   // the canvas solid under the pieces, the pieces fading out
+  // the settle's easing comes off before the first frame (2026-10-30: left on, it eased every frame's new place
+  // over 150 ms, so his head trailed the film's body by about 100 ms and slurred its fast moves)
+  const start = () => { if(clip.stopped) return; for(const el of life) el.style.transition = '';
+    draw(0); host.appendChild(cv); host.classList.add('is-clip-fade');   // the canvas solid under the pieces, the pieces fading out
     clip.timer = setTimeout(() => { if(!clip.stopped) host.classList.add('is-clip'); }, DR_CLIP_FADE);
     t0 = performance.now(); clip.raf = requestAnimationFrame(tick); };
   settle(); clip.timer = setTimeout(start, DR_CLIP_SETTLE);
   // stopped early: the pieces fade back over the canvas the same way, the canvas going once they are solid
-  clip.stop = () => { if(clip.stopped) return; clearTimeout(clip.timer); cancelAnimationFrame(clip.raf); clip.stopped = true; host.classList.remove('is-clip'); host.classList.remove('is-clip-fade'); if(headEl) headEl.style.transform = ''; wake(); if(m.clip === clip) m.clip = null;
+  clip.stop = () => { if(clip.stopped) return; clearTimeout(clip.timer); cancelAnimationFrame(clip.raf); clip.stopped = true; host.classList.remove('is-clip'); host.classList.remove('is-clip-fade'); if(headEl){ headEl.style.transform = ''; headEl.style.transformOrigin = origin0; } wake(); if(m.clip === clip) m.clip = null;
     if(cv.isConnected) setTimeout(() => cv.remove(), DR_CLIP_FADE); };
   return true;
 }
