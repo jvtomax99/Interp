@@ -64,8 +64,14 @@ about 100 ms. Now it turns about its own centre and the easing comes
 off before the first frame; after, his hair's path is within 0.8 grid
 px of the film's on average (1.6 at worst). `smiley-body-app.cjs` checks
 the pivot, the easing and the neck pivot put back (checks: body-rig 160,
-smiley-body-app 22, smiley-gestures 114, smiley-quiz 19, all passing). Videos sent: the
-wave before/after (real speed, then half), then the think after.
+smiley-body-app 22, smiley-gestures 114, smiley-quiz 19, all passing). All five measured the same way after the fix, his hair's path against
+the film's, mean and worst in grid px: wave 0.8 and 1.6, think 1.7 and
+3.0 (2 px high at the deepest lean: the rig head's pivot is not quite
+the hair's centre), cheer 0.9 (its one 12 px frame was the recorder
+repeating a frame, fixed in `home-film.cjs`: whole-ms steps of 33 and
+34 in turn), wince 1.2 and 2.7, hop 1.3 and 4.0 (the fast frames, a
+timing step). Videos sent: the wave before/after (real speed, then
+half), the think after, then the cheer, wince and hop after.
 Details: `dr-smiley.md`, "His head is turned about its own centre".
 **Jose has not yet said whether this is right.** Nothing else open.
 

@@ -30,10 +30,13 @@ const OUT = path.resolve(process.argv[2]), NAME = process.argv[3] || 'greet', DU
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   const played = await page.evaluate(n => window.homeBody.act(n), NAME); console.log('before', was);
   console.log('loaded', loaded, 'played', played, 'box', r);
+  // the clock steps whole ms, 33 or 34 in turn, so it stays on the film's 33.33 ms frames (2026-10-30: a flat 33 fell
+  // behind one film frame every 100, and the cheer's landing showed the same frame twice, a 12 px jump in the measure)
   for(let k = 0; k * STEP < DUR; k++){
     await page.screenshot({ path: path.join(dir, String(k).padStart(4, '0') + '.png'), clip: r });
-    await page.evaluate(ms => document.getAnimations().forEach(a => { try{ if(a.playState !== 'finished') a.currentTime = (a.currentTime || 0) + ms; }catch(e){} }), STEP);
-    await page.clock.runFor(Math.round(STEP));
+    const ms = Math.round((k + 1) * STEP) - Math.round(k * STEP);
+    await page.evaluate(ms => document.getAnimations().forEach(a => { try{ if(a.playState !== 'finished') a.currentTime = (a.currentTime || 0) + ms; }catch(e){} }), ms);
+    await page.clock.runFor(ms);
   }
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-framerate', '30', '-i', path.join(dir, '%04d.png'), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', path.join(OUT, NAME + '.mp4')]);
   if(page.__errors.length) console.log('page errors', page.__errors);
