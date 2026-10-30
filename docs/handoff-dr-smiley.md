@@ -96,7 +96,10 @@ and dark rim lines on the neck stub, invisible over the rig's own coat,
 a comb of dirt over a film's); the image is cleaned by hand (a re-export
 brings them back). `behead.py`'s fill was rewritten twice on the way
 (kept at its third form, no worse). Videos sent after: the wave and the
-think. **Jose has not yet said whether any
+think, then the cheer, wince and hop. Checks after: body-rig 160,
+smiley-body-app 22, smiley-quiz 19, smiley-gestures 114, all passing.
+Jose (2026-10-30): don't ask about a new chat after every job; the
+buttons once per chat (AGENTS.md, CLAUDE.md, PLAN.md). **Jose has not yet said whether any
 of this is right.** Nothing else open.
 
 ## Where it stood (2026-10-29, eighth chat)
