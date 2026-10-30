@@ -897,7 +897,15 @@ walking the in-betweens), `smile2` then `smile` where its grin opens,
 `shut` through the wince, `surprised` at its wide-eyed start, `lookDR`
 and `halfR` while the think's eyes are down, `lookU` and `lookUR` while
 they are up, and rest within 0.2 s of the film's rest. The cheer keeps
-Jose's rule: `laugh1` mostly, `laugh` (shut) only at the peak. The
+Jose's rule: `laugh1` mostly, `laugh` (shut) only at the peak. Two
+things the first filming of these showed: a far face walks through at
+most four in-betweens (`faceTo`, 40 ms each), so a blink asked from a
+grin or a look arrives 200 ms after its beat, and the next beat fired
+before it had closed the eyes (the think's blink never showed); those
+`shut` beats now sit 200 ms before the film's blink and the next beat
+waits for it. And his `shut` face smiles a little, so through the
+wince's shut-eyed stretch it read calm, not pained; `blink2` (nearly
+shut, the mouth straight) stands in there. The
 recorder (`tests/tools/home-film.cjs`) stops the move before it freezes
 the page's animations, or the stopped move's fade-back freezes at zero
 and the first frame shows no body (a recorder artefact, not the app). The tests' harness serves `*.json` from the

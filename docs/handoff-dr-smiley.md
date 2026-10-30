@@ -80,8 +80,9 @@ Then, Jose keeping the chat going with no fault named, his face beats
 (`DR_CLIP_FACES`) were measured against the films' own faces per frame
 and re-timed to them (blinks where the film blinks, the grin open while
 its mouth is, the wince's eyes shut, the think's aha smile at 4.2 s where
-it had come at 5.7 s); `dr-smiley.md`, "His face is timed to the film's
-face". **Jose has not yet said whether any of this is right.** Nothing
+it had come at 5.7 s; a blink from a far face takes 200 ms to arrive, so
+those beats sit early; the wince's shut eyes are `blink2`, since `shut`
+smiles); `dr-smiley.md`, "His face is timed to the film's face". **Jose has not yet said whether any of this is right.** Nothing
 else open.
 
 ## Where it stood (2026-10-29, eighth chat)
