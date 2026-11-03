@@ -372,6 +372,10 @@ as the pick and "Not yet" second; on "Push", the agent merges the change
 itself and then confirms it is live. Never leave him to find a merge
 button or a link. Where a tool has no buttons, list the two choices
 plainly.
+**Always a phone notification when something goes live** (Jose,
+2026-11-03): once a change is live (its deploy has completed on Vercel,
+with the `BUILD_ID` to find), notify his phone with which change went
+live and its `BUILD_ID`, even if he seems to be watching the chat.
 
 ### How Jose works with AI tools (Jose, 2026-10-29)
 
