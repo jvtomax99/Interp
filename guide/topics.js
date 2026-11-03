@@ -38,6 +38,9 @@ const GUIDE_TOPICS = [
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
     <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 
+  { id:'pins', section:'start', k:'pins pictures icons look new 3d soft changed different art heart brain picture style images', q:'Why do the pictures on Home look different?', a:`
+    <p>The pictures on Home, in the menu and in the guide (the heart, the brain, Translate, Team Chat and the rest) were redrawn in a new soft 3D style: rounded shapes, gentle light, the app's own colors. They still mean the same things and sit in the same places.</p>
+    <p>A few small icons, like the ones you pick for a new domain, keep the older look for now.</p>` },
   { id:'name', section:'start', k:'name who signature attribution credit initials identify myself profile photo picture avatar', q:'How do I put my name on my work?', a:`
     <p>So your teammates can see who added or changed something. You only do this once on each phone.</p>
     <ol>

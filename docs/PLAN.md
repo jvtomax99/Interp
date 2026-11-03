@@ -311,6 +311,16 @@ come from this alone.
   text pieces changed weight, 544 spacing (median .015em); 0.1-3% of pixels
   per screen. No guide change: nothing new to learn. PR #179.
 
+- 2026-11-03 New pins, Soft studio 3D (Jose's pick "02" from his own
+  example sheets, checked on the real Home first): all 41 `pins/*.webp`
+  replaced, same names and size (192 px), cut from four sheets Jose made
+  with his image tool (`docs/art/pin-prompts-soft-3d.md`, sources and
+  `cutsheet.py` in `docs/art/pin-sheets/`). Guide answer `pins` and a New
+  lately card. Left for a second round: the 30 icons still drawn from
+  `pin-icons-sheet.webp` (`pin(x,y)` in `pin-icons.js`, e.g. Add Term's
+  clipboard, the tab bar's house), and OB/GYN showing the cardiology heart
+  (asked Jose whether that's meant).
+
 - 2026-10-29 Sound-Alikes, first version (Jose approved the plan in the
   chat "Nesting feature application"): `soundalikes/list.js` (45 sets),
   `features/sound-alikes.js` (Study with a speaker on every word, Drill

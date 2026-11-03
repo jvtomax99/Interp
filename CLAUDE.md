@@ -496,6 +496,10 @@ design and anything touching data or rules stay with the main model.
   change is ready for his "push" (GitHub's checks passed), send
   `PushNotification` saying which change and that it needs "push", even
   if he seems to be in the chat.
+- **Always a phone notification when something goes live** (Jose,
+  2026-11-03; `AGENTS.md`): once Vercel reports the deploy of the bump
+  commit completed (see Deploying), send `PushNotification` naming the
+  change and its `BUILD_ID`, even if he seems to be in the chat.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

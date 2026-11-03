@@ -65,7 +65,9 @@ Python 3.11 with Blender's module: `pip download bpy==5.0.1 --no-deps --python-v
   `height.exr`, `glow.exr`, then every mover frame cropped with the board as holdout; `proj.json` (paths
   and points as Blender's camera sees them). The ground's flat layers overlap in one plane, which Cycles
   shades black; `flat_ground_apart` lifts each of their vertices by up to 0.004.
-- `card_build.py`: halves everything to 960 x 840, cuts each building's paint and lit windows in tenths
+- `card_build.py`: halves everything to 960 x 840 to find every place and size (the card's grid; `CAMPUS_MAP` is in it), but
+  saves each picture at `UP` (1.25) times the grid from the full-size render (2026-11-03, Jose's pick: 1200 wide, an
+  iPhone's own pixels at the card's width; the app places pictures by percentages, so nothing else changes), cuts each building's paint and lit windows in tenths
   (its mask, below n/10 of its height, where the paint changes a pixel), shares one box between a mover's
   frames, packs the people about into one atlas, and writes `entrance.json`; `--install` replaces `city/`
   and the `CAMPUS_MAP` line.
