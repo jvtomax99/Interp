@@ -71,6 +71,19 @@
   box-shadow:inset 0 1px 0 var(--finish-edge),var(--finish-shadow);
   border-radius:16px;min-width:0;
 }
+/* Home's rail cards in the bold glossary's look (Jose's pick, 2026-11-03,
+   matching All domains' tiles): the card's colour washed from the top
+   right, a shadow tinted to it, the pin big and tilted out of the top edge
+   (sizes in "Bold rails" at the end of this file). Resting state only, at
+   the resting rule's specificity, so the press glow below still wins. */
+#content.is-home .domain-family,#content.is-home .home-rail>.qa-card{
+  border-color:transparent;border-radius:22px;overflow:visible;
+  background:
+    radial-gradient(120% 100% at 100% 0%,color-mix(in srgb,var(--tile-color) 34%,var(--paper)) 0%,transparent 60%),
+    linear-gradient(160deg,color-mix(in srgb,var(--tile-color) 16%,var(--paper)),color-mix(in srgb,var(--tile-color) 5%,var(--paper)));
+  box-shadow:inset 0 1px 0 var(--finish-edge),0 1px 2px rgba(20,43,67,0.06),
+    0 14px 24px -14px color-mix(in srgb,var(--tile-color) 70%,rgba(22,55,90,0.3));
+}
 
 /* ---- The press glow, restored ----------------------------------------
    index.html paints the coloured press shadow on :active/.is-pressed at
@@ -1449,3 +1462,26 @@ body:not(.dock-has-smiley) .dock-smiley-bob{animation-play-state:paused;}
   .tg-sub-short{display:inline;}
   .tg-brand-sub{white-space:nowrap;}
 }
+
+/* ---- Bold rails (2026-11-03) ----------------------------------------
+   The pin on Home's rail cards: 64px, tilted, lifted out of the card's top
+   edge with a shadow in the card's colour, as on All domains' tiles. The
+   rail gets room above for it (a scroller clips what sticks out) and
+   below for the tinted shadow. .home-rail in the selector outranks the
+   per-width icon sizes earlier in this file. */
+#content.is-home .home-rail{padding-top:28px;padding-bottom:16px;margin-top:-16px;}
+#content.is-home .home-rail .domain-family-head{background:none;box-shadow:none;border:0;overflow:visible;}
+#content.is-home .home-rail .home-tile-icon,#content.is-home .home-rail>.qa-card .qa-icon{
+  width:64px;height:64px;margin:-30px 0 4px -4px;background:none;box-shadow:none;
+  transform:rotate(-6deg);filter:drop-shadow(0 10px 12px color-mix(in srgb,var(--tile-color) 55%,rgba(8,12,40,0.4)));
+  transition:transform .368s var(--spring0,var(--ease));
+}
+#content.is-home .home-rail .home-tile-icon .medical-pin,#content.is-home .home-rail .home-tile-icon .pin-sprite,#content.is-home .home-rail .home-tile-icon img,
+#content.is-home .home-rail>.qa-card .qa-icon .medical-pin,#content.is-home .home-rail>.qa-card .qa-icon .pin-sprite,#content.is-home .home-rail>.qa-card .qa-icon img{width:64px;height:64px;}
+#content.is-home .home-rail .domain-family:active .home-tile-icon,#content.is-home .home-rail .domain-family.is-pressed .home-tile-icon,
+#content.is-home .home-rail>.qa-card:active .qa-icon,#content.is-home .home-rail>.qa-card.is-pressed .qa-icon{transform:rotate(-2deg) translateY(-3px) scale(1.04);}
+#content.is-home .home-rail .home-term-count{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:650;
+  background:color-mix(in srgb,var(--paper) 75%,transparent);color:color-mix(in srgb,var(--tile-color) 70%,var(--ink));}
+@media (prefers-reduced-motion:reduce){ #content.is-home .home-rail .home-tile-icon,#content.is-home .home-rail>.qa-card .qa-icon{transition:none;} }
+/* Wide screens lay the rail out in rows: room between them for the lifted pins. */
+@media (min-width:820px){ #content.is-home .home-rail{row-gap:30px;} }
