@@ -1283,7 +1283,7 @@ function headParts(skin, style, hair, R=0.2){
 // what each kind wears: [top, bottom, extra]
 const WEAR = { doctor:[0xf6f7fa, 0x2c4a7a], nurse:[0x4a90d9, 0x4a90d9], teal:[0x3aa6a0, 0x3aa6a0], visitor:[0xc9583a, 0x3d5a8a], hoodie:[0x5f8f62, 0x34466e],
   patient:[0xa9d3f0, 0xa9d3f0], elder:[0xd9a441, 0x7a5a3a], kid:[0xf2c94c, 0x2f5fa6], sweater:[0xe9e2d0, 0x5a4a6a] };
-function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.visitor, skin = SKIN[i % SKIN.length], P = [];
+function bodyParts(kind, i, gesture, loose=false){ const [top, bottom] = WEAR[kind] || WEAR.visitor, skin = SKIN[i % SKIN.length], P = [];
   P.push(part(pill2(0.15, 0.17), top, [0, 0.47, 0], [0,0,0], [1, 1, 0.82]));                                        // torso
   if (kind === 'doctor'){ P.push(part(new THREE.CylinderGeometry(0.16, 0.19, 0.16, 16), top, [0, 0.36, 0], [0,0,0], [1, 1, 0.84]));   // the coat's hem
     P.push(part(new THREE.BoxGeometry(0.09, 0.13, 0.02), 0x2c4a7a, [0, 0.55, 0.127]));                                 // scrubs at the neck
@@ -1293,7 +1293,7 @@ function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.v
   if (kind === 'visitor' || kind === 'hoodie') P.push(part(new RoundedBoxGeometry(0.2, 0.24, 0.1, 2, 0.04), 0x7a5236, [0, 0.5, -0.15]));     // backpack
   if (kind === 'elder') P.push(part(new THREE.BoxGeometry(0.03, 0.2, 0.01), 0xb08030, [0, 0.47, 0.128]));                                // cardigan opening
   // arms: one may be raised in talk, holding something
-  for (const sx of [-1, 1]){ const up = gesture && sx === 1;
+  for (const sx of [-1, 1]){ const up = gesture && sx === 1; if (loose && !up) continue;   // loose: the hanging arms are their own meshes (armMesh), to swing
     const rot = up ? [-1.15, 0, -0.15] : [0.05, 0, sx*0.22], sleeve = kind === 'nurse' || kind === 'teal' ? top : top;
     const ax = sx*0.19, ay = 0.6, L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
     P.push(part(pill2(0.055, L), sleeve, [ax + dir.x*L*0.6, ay + dir.y*L*0.6, dir.z*L*0.6], rot));
@@ -1301,6 +1301,10 @@ function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.v
     if (up && kind === 'doctor') P.push(part(new THREE.BoxGeometry(0.13, 0.17, 0.02), 0xd9c29a, [ax + dir.x*0.22, ay + dir.y*0.22 - 0.04, dir.z*0.22 + 0.04], [-0.4, 0, 0]));   // clipboard
     if (up && (kind === 'nurse' || kind === 'teal')) P.push(part(new THREE.BoxGeometry(0.14, 0.1, 0.015), 0x22283a, [ax + dir.x*0.24, ay + dir.y*0.24, dir.z*0.24 + 0.03], [-0.6, 0, 0])); }   // tablet
   return P; }
+// a hanging arm as its own mesh, its origin at the shoulder (the same shape bodyParts bakes in), so a walk can swing it
+function armMesh(kind, i, sx){ const top = (WEAR[kind] || WEAR.visitor)[0], skin = SKIN[i % SKIN.length], rot = [0.05, 0, sx*0.22], L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
+  const m = bake([part(pill2(0.055, L), top, [dir.x*L*0.6, dir.y*L*0.6, dir.z*L*0.6], rot), part(sph(0.05, 8, 6), skin, [dir.x*(L + 0.06), dir.y*(L + 0.06), dir.z*(L + 0.06)])]);
+  m.position.set(sx*0.19, 0.6, 0); return m; }
 // a leg hangs from its hip (the mesh's origin), so a stride is a turn about it
 function leg(colour, shoe=0x2b2626){ return bake([part(pill2(0.062, 0.13), colour, [0, -0.12, 0]), part(sph(0.07, 10, 8), shoe, [0, -0.25, 0.03], [0,0,0], [1, 0.6, 1.4])]); }
 function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && i % 2 === 1){ const g = new THREE.Group(), k = kind === 'kid' ? 'kid' : kind, sc = kind === 'kid' ? 0.74 : 1;
@@ -1320,11 +1324,11 @@ function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && 
     pb.position.set(0, 0, -0.5); g.add(pb);
     const pHead = bake(headParts(SKIN[(i+1) % 5], 'bun', HAIRC[(i+1) % 5])); pHead.position.set(0, 0.84, -0.5); g.add(pHead);
     const legs = [-1, 1].map(sx => { const l = leg(WEAR.sweater[1]); l.position.set(sx*0.065, 0.27, -0.5); g.add(l); return l; });
-    g.userData.legs = legs; g.userData.h = 1.1; g.visible = false; scene.add(g); LIVE.push(g); return g; }
+    g.userData.legs = legs; g.userData.h = 1.1; g.userData.lift = [pb, pHead, ...legs]; g.visible = false; scene.add(g); LIVE.push(g); return g; }
   const body = bake(bodyParts(k, i, gesture)); g.add(body);
   const head = bake(headParts(SKIN[i % SKIN.length], style, hair)); head.position.y = 0.84; g.add(head);
   const legs = [-1, 1].map(sx => { const l = leg(WEAR[k] ? WEAR[k][1] : 0x3d5a8a); l.position.set(sx*0.065, 0.27, 0); g.add(l); return l; });
-  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head;
+  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head; g.userData.made = { k, i, gesture };
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function stride(g, f){ g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? 0.45 : -0.45) : 0; }); }
 function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandardMaterial({ color:0xf4f6fa, roughness:0.35, metalness:0.3 });
@@ -1584,6 +1588,26 @@ const along = (pts, u) => { const seg = []; let L = 0; for (let i = 1; i < pts.l
 // wait). A couple walks side by side on the far sidewalk, a child a step behind a parent, a wheelchair slowly with the
 // one pushing it. The people standing and talking (waiting at the main entrance, at the ER's doors, by the benches) are
 // IDLE's, not moved here. traffic.js steps them (makePeople is called from it) before the cars, so the cars see them.
+// ---- the walk (2026-11-03, Jose: "a smoother walk, keep their look") ----
+// The legs swing on a smooth wave instead of two poses, the step as long as the walk so the feet do not slide, and the
+// swing grows and fades with speed (slowing behind someone shortens it, a stop eases to standing). A tilted leg lifts its
+// foot, so the body drops by that much: the bob (lowest with the legs apart, highest as they pass) is what keeps the feet
+// on the ground, about 2% of height as in people. The hanging arms swing against the legs, the body leans a little over
+// the leg it stands on. A raised arm (clipboard, tablet) stays up; the one pushing the wheelchair keeps both hands on it.
+// stride() (two poses) stays for the card's walkers and the people standing.
+const WALK = { A: 0.42, ARM: 0.38, SWAY: 0.035, LF: 0.29 };   // leg swing (rad), arm swing, lean, hip to foot
+WALK.CYCLE = 4*WALK.LF*Math.sin(WALK.A);                      // two steps, each as long as the feet travel: 0.47
+function walkReady(g){ const u = g.userData; if (u.lift && u.lift[0].userData.y0 !== undefined) return g;
+  if (u.made){ const { k, i, gesture } = u.made, old = g.children[0];
+    g.remove(old); old.geometry.dispose(); g.add(bake(bodyParts(k, i, gesture, true)));
+    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx); g.add(m); return { m, sx }; });
+    u.lift = g.children.slice(); }
+  (u.lift || []).forEach(o => { o.userData.y0 = o.position.y; }); return g; }
+function walkPose(g, ph, a){ const u = g.userData, th = a*WALK.A*Math.sin(ph);
+  u.legs[0].rotation.x = -th; u.legs[1].rotation.x = th;
+  const bob = -WALK.LF*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
+  (u.arms || []).forEach(({ m, sx }) => { m.rotation.x = -sx*a*WALK.ARM*Math.sin(ph); });
+  g.rotation.z = u.arms ? -WALK.SWAY*a*Math.cos(ph) : 0; }
 function makePeople(){
   const STEP = 0.1, ZE = 13.06, ZW = 12.75, ZS = 17.6, XL = BX0 + 0.3, XR = BX1 - 0.3, CURB = 0.85, LOOKP = 1.5;
   const lerp = (a, b, f) => [a[0] + (b[0] - a[0])*f, a[1] + (b[1] - a[1])*f];
@@ -1645,8 +1669,8 @@ function makePeople(){
     [W[6].g, ['far'], [10], 0.55, partner('elder', 2, { side: -0.28, b: 0 })], [W[7].g, ['far'], [16], 0.7],
     [B[0].g, ['sec'], [5, 8], 0.9], [B[1].g, ['secN'], [9], 0.85], [B[2].g, ['atlHome'], [8], 0.85], [B[3].g, ['essex'], [7], 0.85], [B[4].g, ['atlMp'], [11], 0.95],
     [person('doctor', 4), ['west'], [9, 6], 0.95],
-  ].map(([g, rs, gaps, v0, pair], i) => { g.traverse(o => { o.castShadow = false; }); if (pair) pair.g.traverse(o => { o.castShadow = false; });
-    return { g, i, rs: rs.map(k => R[k]), gaps, v0, pair, ri: 0, gi: 0, on: false, next: i*2.3, s: 0, v: 0, r: null, x: 0, z: 0, h: 0, vx: 0, vz: 0, step: 0, done: new Set(), size: g === W[4].g ? 0.45 : 0.18 }; });   // the wheelchair and the one pushing it take more room
+  ].map(([g, rs, gaps, v0, pair], i) => { walkReady(g); if (pair) walkReady(pair.g); g.traverse(o => { o.castShadow = false; }); if (pair) pair.g.traverse(o => { o.castShadow = false; });
+    return { g, i, rs: rs.map(k => R[k]), gaps, v0, pair, ri: 0, gi: 0, on: false, next: i*2.3, s: 0, v: 0, r: null, x: 0, z: 0, h: 0, vx: 0, vz: 0, step: 0, amp: 0, done: new Set(), size: g === W[4].g ? 0.45 : 0.18 }; });   // the wheelchair and the one pushing it take more room
 
   // ---- where a walk crosses a car's lane: the crossings, grouped by street (a median between two is a place to wait) ----
   function crossWith(CR){
@@ -1707,12 +1731,13 @@ function makePeople(){
         if (!clearToCross(zn, cars)) v0 = Math.min(v0, Math.max(0, d - 0.02)*2.5); else if (d < 0.08) p.done.add(zn); break; }
       if (p.pair && p.pair.side) p.pair.b = Math.max(0, Math.min(1, p.pair.b + (sideBlocked(p) ? 2.5 : -1.5)*dt));
       const acc = v0 > p.v ? 1.6 : -4; p.v = v0 > p.v ? Math.min(v0, p.v + acc*dt) : Math.max(v0, p.v + acc*dt); }
-    for (const p of on){ p.s += p.v*dt; if (p.s >= p.r.L + (p.pair && p.pair.behind || 0)){ finish(p, t); continue; } if (p.s > p.r.L){ p.vx = p.vz = 0; continue; } const [ox, oz] = place(p); p.vx = (p.x - ox)/dt; p.vz = (p.z - oz)/dt; p.step += p.v*dt; } }
+    for (const p of on){ p.s += p.v*dt; if (p.s >= p.r.L + (p.pair && p.pair.behind || 0)){ finish(p, t); continue; } if (p.s > p.r.L){ p.vx = p.vz = 0; continue; } const [ox, oz] = place(p); p.vx = (p.x - ox)/dt; p.vz = (p.z - oz)/dt; p.step += p.v*dt; }
+    for (const p of on) p.amp += ((p.v > 0.05 ? Math.min(1, p.v/0.35) : 0) - p.amp)*Math.min(1, dt*8); }   // the swing follows the speed
   function draw(){ for (const p of P){ const all = p.pair ? [p.g, p.pair.g] : [p.g];
       if (!p.on){ all.forEach((g, k) => { g.visible = false; g.position.set(p.i*3 + k, -50, 5); }); continue; }
-      const f = p.v > 0.05 ? (Math.floor(p.step/0.22) % 2) : 0, y = p.r.y;
-      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; stride(p.g, f);
-      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; stride(p.pair.g, 1 - f); } } }
+      const ph = p.step/WALK.CYCLE*2*Math.PI, y = p.r.y;
+      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, ph, p.amp);
+      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, ph + Math.PI, p.amp); } } }
   function reset(t){ P.forEach(p => { p.on = false; p.ri = p.gi = 0; p.next = p.i*2.3 + t; }); }
   // everyone on the board now, partners included, for the cars to see
   const now = () => { const out = []; for (const p of P){ if (!p.on) continue; if (leaderOut(p)) out.push({ x: p.x, z: p.z, vx: p.vx, vz: p.vz });

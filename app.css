@@ -6693,7 +6693,7 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
 .dl-sortmenu b{ font-weight:550; color:var(--ink); }
 .dl-sortmenu-chev{ display:inline-flex; color:var(--ink-faint); }
 .dl-sortmenu-chev svg{ width:14px; height:14px; }
-.dl-sortmenu select{ position:absolute; inset:0; width:100%; opacity:0; font-size:16px; cursor:pointer; -webkit-appearance:none; appearance:none; }
+.dl-sortmenu select{ position:absolute; inset:0; width:100%; opacity:0; font-size:var(--fs-call); cursor:pointer; -webkit-appearance:none; appearance:none; }
 .dl-sortmenu:has(select:focus-visible){ outline:3px solid var(--accent-2); outline-offset:2px; border-radius:8px; }
 .dl-fold{ position:relative; flex:0 0 auto; min-height:36px; padding:0 2px; border:0; background:none; color:var(--accent);
   font:550 var(--fs-foot) var(--sans); cursor:pointer; }

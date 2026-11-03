@@ -9,6 +9,26 @@
 // wait). A couple walks side by side on the far sidewalk, a child a step behind a parent, a wheelchair slowly with the
 // one pushing it. The people standing and talking (waiting at the main entrance, at the ER's doors, by the benches) are
 // IDLE's, not moved here. traffic.js steps them (makePeople is called from it) before the cars, so the cars see them.
+// ---- the walk (2026-11-03, Jose: "a smoother walk, keep their look") ----
+// The legs swing on a smooth wave instead of two poses, the step as long as the walk so the feet do not slide, and the
+// swing grows and fades with speed (slowing behind someone shortens it, a stop eases to standing). A tilted leg lifts its
+// foot, so the body drops by that much: the bob (lowest with the legs apart, highest as they pass) is what keeps the feet
+// on the ground, about 2% of height as in people. The hanging arms swing against the legs, the body leans a little over
+// the leg it stands on. A raised arm (clipboard, tablet) stays up; the one pushing the wheelchair keeps both hands on it.
+// stride() (two poses) stays for the card's walkers and the people standing.
+const WALK = { A: 0.42, ARM: 0.38, SWAY: 0.035, LF: 0.29 };   // leg swing (rad), arm swing, lean, hip to foot
+WALK.CYCLE = 4*WALK.LF*Math.sin(WALK.A);                      // two steps, each as long as the feet travel: 0.47
+function walkReady(g){ const u = g.userData; if (u.lift && u.lift[0].userData.y0 !== undefined) return g;
+  if (u.made){ const { k, i, gesture } = u.made, old = g.children[0];
+    g.remove(old); old.geometry.dispose(); g.add(bake(bodyParts(k, i, gesture, true)));
+    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx); g.add(m); return { m, sx }; });
+    u.lift = g.children.slice(); }
+  (u.lift || []).forEach(o => { o.userData.y0 = o.position.y; }); return g; }
+function walkPose(g, ph, a){ const u = g.userData, th = a*WALK.A*Math.sin(ph);
+  u.legs[0].rotation.x = -th; u.legs[1].rotation.x = th;
+  const bob = -WALK.LF*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
+  (u.arms || []).forEach(({ m, sx }) => { m.rotation.x = -sx*a*WALK.ARM*Math.sin(ph); });
+  g.rotation.z = u.arms ? -WALK.SWAY*a*Math.cos(ph) : 0; }
 function makePeople(){
   const STEP = 0.1, ZE = 13.06, ZW = 12.75, ZS = 17.6, XL = BX0 + 0.3, XR = BX1 - 0.3, CURB = 0.85, LOOKP = 1.5;
   const lerp = (a, b, f) => [a[0] + (b[0] - a[0])*f, a[1] + (b[1] - a[1])*f];
@@ -70,8 +90,8 @@ function makePeople(){
     [W[6].g, ['far'], [10], 0.55, partner('elder', 2, { side: -0.28, b: 0 })], [W[7].g, ['far'], [16], 0.7],
     [B[0].g, ['sec'], [5, 8], 0.9], [B[1].g, ['secN'], [9], 0.85], [B[2].g, ['atlHome'], [8], 0.85], [B[3].g, ['essex'], [7], 0.85], [B[4].g, ['atlMp'], [11], 0.95],
     [person('doctor', 4), ['west'], [9, 6], 0.95],
-  ].map(([g, rs, gaps, v0, pair], i) => { g.traverse(o => { o.castShadow = false; }); if (pair) pair.g.traverse(o => { o.castShadow = false; });
-    return { g, i, rs: rs.map(k => R[k]), gaps, v0, pair, ri: 0, gi: 0, on: false, next: i*2.3, s: 0, v: 0, r: null, x: 0, z: 0, h: 0, vx: 0, vz: 0, step: 0, done: new Set(), size: g === W[4].g ? 0.45 : 0.18 }; });   // the wheelchair and the one pushing it take more room
+  ].map(([g, rs, gaps, v0, pair], i) => { walkReady(g); if (pair) walkReady(pair.g); g.traverse(o => { o.castShadow = false; }); if (pair) pair.g.traverse(o => { o.castShadow = false; });
+    return { g, i, rs: rs.map(k => R[k]), gaps, v0, pair, ri: 0, gi: 0, on: false, next: i*2.3, s: 0, v: 0, r: null, x: 0, z: 0, h: 0, vx: 0, vz: 0, step: 0, amp: 0, done: new Set(), size: g === W[4].g ? 0.45 : 0.18 }; });   // the wheelchair and the one pushing it take more room
 
   // ---- where a walk crosses a car's lane: the crossings, grouped by street (a median between two is a place to wait) ----
   function crossWith(CR){
@@ -132,12 +152,13 @@ function makePeople(){
         if (!clearToCross(zn, cars)) v0 = Math.min(v0, Math.max(0, d - 0.02)*2.5); else if (d < 0.08) p.done.add(zn); break; }
       if (p.pair && p.pair.side) p.pair.b = Math.max(0, Math.min(1, p.pair.b + (sideBlocked(p) ? 2.5 : -1.5)*dt));
       const acc = v0 > p.v ? 1.6 : -4; p.v = v0 > p.v ? Math.min(v0, p.v + acc*dt) : Math.max(v0, p.v + acc*dt); }
-    for (const p of on){ p.s += p.v*dt; if (p.s >= p.r.L + (p.pair && p.pair.behind || 0)){ finish(p, t); continue; } if (p.s > p.r.L){ p.vx = p.vz = 0; continue; } const [ox, oz] = place(p); p.vx = (p.x - ox)/dt; p.vz = (p.z - oz)/dt; p.step += p.v*dt; } }
+    for (const p of on){ p.s += p.v*dt; if (p.s >= p.r.L + (p.pair && p.pair.behind || 0)){ finish(p, t); continue; } if (p.s > p.r.L){ p.vx = p.vz = 0; continue; } const [ox, oz] = place(p); p.vx = (p.x - ox)/dt; p.vz = (p.z - oz)/dt; p.step += p.v*dt; }
+    for (const p of on) p.amp += ((p.v > 0.05 ? Math.min(1, p.v/0.35) : 0) - p.amp)*Math.min(1, dt*8); }   // the swing follows the speed
   function draw(){ for (const p of P){ const all = p.pair ? [p.g, p.pair.g] : [p.g];
       if (!p.on){ all.forEach((g, k) => { g.visible = false; g.position.set(p.i*3 + k, -50, 5); }); continue; }
-      const f = p.v > 0.05 ? (Math.floor(p.step/0.22) % 2) : 0, y = p.r.y;
-      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; stride(p.g, f);
-      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; stride(p.pair.g, 1 - f); } } }
+      const ph = p.step/WALK.CYCLE*2*Math.PI, y = p.r.y;
+      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, ph, p.amp);
+      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, ph + Math.PI, p.amp); } } }
   function reset(t){ P.forEach(p => { p.on = false; p.ri = p.gi = 0; p.next = p.i*2.3 + t; }); }
   // everyone on the board now, partners included, for the cars to see
   const now = () => { const out = []; for (const p of P){ if (!p.on) continue; if (leaderOut(p)) out.push({ x: p.x, z: p.z, vx: p.vx, vz: p.vz });

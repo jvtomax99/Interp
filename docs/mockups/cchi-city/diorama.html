@@ -523,7 +523,7 @@ function headParts(skin, style, hair, R=0.2){
 // what each kind wears: [top, bottom, extra]
 const WEAR = { doctor:[0xf6f7fa, 0x2c4a7a], nurse:[0x4a90d9, 0x4a90d9], teal:[0x3aa6a0, 0x3aa6a0], visitor:[0xc9583a, 0x3d5a8a], hoodie:[0x5f8f62, 0x34466e],
   patient:[0xa9d3f0, 0xa9d3f0], elder:[0xd9a441, 0x7a5a3a], kid:[0xf2c94c, 0x2f5fa6], sweater:[0xe9e2d0, 0x5a4a6a] };
-function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.visitor, skin = SKIN[i % SKIN.length], P = [];
+function bodyParts(kind, i, gesture, loose=false){ const [top, bottom] = WEAR[kind] || WEAR.visitor, skin = SKIN[i % SKIN.length], P = [];
   P.push(part(pill2(0.15, 0.17), top, [0, 0.47, 0], [0,0,0], [1, 1, 0.82]));                                        // torso
   if (kind === 'doctor'){ P.push(part(new THREE.CylinderGeometry(0.16, 0.19, 0.16, 16), top, [0, 0.36, 0], [0,0,0], [1, 1, 0.84]));   // the coat's hem
     P.push(part(new THREE.BoxGeometry(0.09, 0.13, 0.02), 0x2c4a7a, [0, 0.55, 0.127]));                                 // scrubs at the neck
@@ -533,7 +533,7 @@ function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.v
   if (kind === 'visitor' || kind === 'hoodie') P.push(part(new RoundedBoxGeometry(0.2, 0.24, 0.1, 2, 0.04), 0x7a5236, [0, 0.5, -0.15]));     // backpack
   if (kind === 'elder') P.push(part(new THREE.BoxGeometry(0.03, 0.2, 0.01), 0xb08030, [0, 0.47, 0.128]));                                // cardigan opening
   // arms: one may be raised in talk, holding something
-  for (const sx of [-1, 1]){ const up = gesture && sx === 1;
+  for (const sx of [-1, 1]){ const up = gesture && sx === 1; if (loose && !up) continue;   // loose: the hanging arms are their own meshes (armMesh), to swing
     const rot = up ? [-1.15, 0, -0.15] : [0.05, 0, sx*0.22], sleeve = kind === 'nurse' || kind === 'teal' ? top : top;
     const ax = sx*0.19, ay = 0.6, L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
     P.push(part(pill2(0.055, L), sleeve, [ax + dir.x*L*0.6, ay + dir.y*L*0.6, dir.z*L*0.6], rot));
@@ -541,6 +541,10 @@ function bodyParts(kind, i, gesture){ const [top, bottom] = WEAR[kind] || WEAR.v
     if (up && kind === 'doctor') P.push(part(new THREE.BoxGeometry(0.13, 0.17, 0.02), 0xd9c29a, [ax + dir.x*0.22, ay + dir.y*0.22 - 0.04, dir.z*0.22 + 0.04], [-0.4, 0, 0]));   // clipboard
     if (up && (kind === 'nurse' || kind === 'teal')) P.push(part(new THREE.BoxGeometry(0.14, 0.1, 0.015), 0x22283a, [ax + dir.x*0.24, ay + dir.y*0.24, dir.z*0.24 + 0.03], [-0.6, 0, 0])); }   // tablet
   return P; }
+// a hanging arm as its own mesh, its origin at the shoulder (the same shape bodyParts bakes in), so a walk can swing it
+function armMesh(kind, i, sx){ const top = (WEAR[kind] || WEAR.visitor)[0], skin = SKIN[i % SKIN.length], rot = [0.05, 0, sx*0.22], L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
+  const m = bake([part(pill2(0.055, L), top, [dir.x*L*0.6, dir.y*L*0.6, dir.z*L*0.6], rot), part(sph(0.05, 8, 6), skin, [dir.x*(L + 0.06), dir.y*(L + 0.06), dir.z*(L + 0.06)])]);
+  m.position.set(sx*0.19, 0.6, 0); return m; }
 // a leg hangs from its hip (the mesh's origin), so a stride is a turn about it
 function leg(colour, shoe=0x2b2626){ return bake([part(pill2(0.062, 0.13), colour, [0, -0.12, 0]), part(sph(0.07, 10, 8), shoe, [0, -0.25, 0.03], [0,0,0], [1, 0.6, 1.4])]); }
 function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && i % 2 === 1){ const g = new THREE.Group(), k = kind === 'kid' ? 'kid' : kind, sc = kind === 'kid' ? 0.74 : 1;
@@ -560,11 +564,11 @@ function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && 
     pb.position.set(0, 0, -0.5); g.add(pb);
     const pHead = bake(headParts(SKIN[(i+1) % 5], 'bun', HAIRC[(i+1) % 5])); pHead.position.set(0, 0.84, -0.5); g.add(pHead);
     const legs = [-1, 1].map(sx => { const l = leg(WEAR.sweater[1]); l.position.set(sx*0.065, 0.27, -0.5); g.add(l); return l; });
-    g.userData.legs = legs; g.userData.h = 1.1; g.visible = false; scene.add(g); LIVE.push(g); return g; }
+    g.userData.legs = legs; g.userData.h = 1.1; g.userData.lift = [pb, pHead, ...legs]; g.visible = false; scene.add(g); LIVE.push(g); return g; }
   const body = bake(bodyParts(k, i, gesture)); g.add(body);
   const head = bake(headParts(SKIN[i % SKIN.length], style, hair)); head.position.y = 0.84; g.add(head);
   const legs = [-1, 1].map(sx => { const l = leg(WEAR[k] ? WEAR[k][1] : 0x3d5a8a); l.position.set(sx*0.065, 0.27, 0); g.add(l); return l; });
-  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head;
+  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head; g.userData.made = { k, i, gesture };
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function stride(g, f){ g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? 0.45 : -0.45) : 0; }); }
 function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandardMaterial({ color:0xf4f6fa, roughness:0.35, metalness:0.3 });
