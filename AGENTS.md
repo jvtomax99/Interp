@@ -366,7 +366,12 @@ so he can come back and review. Not for routine progress, only when there
 is something to review or decide. **Always a phone notification when
 something is ready for his "push"** (Jose, 2026-10-24): every time a
 change is waiting for his OK to go live (its checks passed), notify his
-phone, even if he seems to be watching the chat.
+phone, even if he seems to be watching the chat. **And "push" is always
+a button** (Jose, 2026-11-03): ask with a clickable choice, "Push" first
+as the pick and "Not yet" second; on "Push", the agent merges the change
+itself and then confirms it is live. Never leave him to find a merge
+button or a link. Where a tool has no buttons, list the two choices
+plainly.
 **Always a phone notification when something goes live** (Jose,
 2026-11-03): once a change is live (its deploy has completed on Vercel,
 with the `BUILD_ID` to find), notify his phone with which change went
