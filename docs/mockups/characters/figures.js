@@ -135,12 +135,12 @@ function faceGeo(){
 
 // ---------- hair: a fitted cap with sculpted locks over it ----------
 function hairCap(front, side, back, thick = 0.035){
-  const thMax = ph => { const c = Math.cos(ph); return c >= 0 ? side + (front - side)*c : side + (back - side)*(-c); };
+  const thMax = ph => { const c = Math.cos(ph); return c >= 0 ? side + (front - side)*Math.pow(c, 1.6) : side + (back - side)*Math.pow(-c, 0.45); };   // full behind the ears, down to the nape
   return gridGeo((s, t) => { const ph = -Math.PI + s*TAU, th = t*thMax(ph); return headP(th, ph, thick*(1 - smooth(0.8, 1, t)) + 0.002); }, 72, 26); }
 function hairStyle(style){
   const G = [];   // geometries
   if (style === 'swept'){   // chestnut, swept across the forehead to the figure's left
-    G.push(hairCap(0.95, 1.5, 2.2));
+    G.push(hairCap(0.95, 1.62, 2.35));
     for (let k = 0; k < 9; k++){ const p0 = -0.95 + k*0.2, sw = 0.3 + 0.05*k;
       G.push(lock([[0.28, p0*0.5, 0.02], [0.75, p0 + sw*0.4, 0.07], [1.12, p0 + sw*0.8, 0.06], [1.3 - 0.03*Math.abs(k - 4), p0 + sw, 0.03]], 0.12 - 0.004*Math.abs(k - 4), 0.42)); }
     for (const sx of [-1, 1]) for (let k = 0; k < 3; k++){ const p = sx*(1.15 + k*0.22);   // over the temples and down to the ear's top
@@ -150,7 +150,7 @@ function hairStyle(style){
     for (let k = 0; k < 4; k++) G.push(lock([[0.05, k*1.6, 0.03], [0.32, k*1.6 + 0.3, 0.085], [0.62, k*1.6 + 0.55, 0.06]], 0.13, 0.5, 14));   // crown volume
   }
   if (style === 'bun'){   // black: a fringe, the sides drawn back, a high bun
-    G.push(hairCap(1.0, 1.5, 2.25));
+    G.push(hairCap(1.0, 1.6, 2.35));
     for (let k = 0; k < 8; k++){ const p0 = -0.7 + k*0.2, dir = k < 3 ? -1 : 1, sw = dir*(0.22 + 0.06*Math.abs(k - 2.5));
       G.push(lock([[0.38, p0*0.4, 0.02], [0.8, p0 + sw*0.4, 0.06], [1.12, p0 + sw*0.8, 0.055], [1.28 - 0.02*Math.abs(k - 3.5), p0 + sw, 0.028]], 0.11, 0.42)); }
     for (const sx of [-1, 1]) for (let k = 0; k < 4; k++){ const p = sx*(1.15 + k*0.32);   // drawn back toward the bun
@@ -159,7 +159,7 @@ function hairStyle(style){
       G.push(lock([[2.25, p, 0.02], [1.6, p*1 + 0.0, 0.05], [0.9, Math.PI + (k - 2.5)*0.15, 0.05], [0.45, Math.PI + (k - 2.5)*0.05, 0.04]], 0.13, 0.38)); }
   }
   if (style === 'curls'){   // orange, grouped curls
-    G.push(hairCap(0.92, 1.72, 2.25, 0.05));
+    G.push(hairCap(0.92, 1.75, 2.4, 0.05));
     const curl = (th, ph, R, turns = 1.35, lift = 0.05, spin = 1, a0 = 0) => {
       const c = headP(th, ph, lift), n = headNormal(th, ph), t1 = V(0, 1, 0).cross(n).normalize(); if (t1.lengthSq() < 1e-6) t1.set(1, 0, 0);
       const t2 = V().crossVectors(n, t1).normalize(), pts = [], nrm = [], N = 30;
