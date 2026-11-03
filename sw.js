@@ -79,7 +79,6 @@ const PRECACHE = [
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
   // sheets these replaced were 9 MB and were cut up again on every launch.
-  './pin-icons-sheet.webp',
   './pins/genetics.webp',
   './pins/oncology.webp',
   './pins/hematology.webp',

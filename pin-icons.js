@@ -1,23 +1,23 @@
 (() => {
   'use strict';
 
-  const CELL = 14.2857142857;
-  const pin = (x, y, extra = '') => `<span class="pin-sprite${extra ? ' ' + extra : ''}" style="--pin-x:${x};--pin-y:${y}" aria-hidden="true"></span>`;
+  // A pin from its own file (pins/<key>.webp, Soft studio 3D, 2026-11-03), in the
+  // .pin-sprite box so every size rule below still applies. The 8 x 8 sheet
+  // these used to be cut from (pin-icons-sheet.webp) is no longer drawn.
+  const pinFile = key => `<span class="pin-sprite pin-file" style="background-image:url('./pins/${key}.webp')" aria-hidden="true"></span>`;
 
   const css = `
-/* Exact enamel-pin artwork supplied for Interpreter Hub. Artwork only: no badge/bubble behind it. */
+/* Pin artwork for Interpreter Hub, one file each in pins/. Artwork only: no badge/bubble behind it.
+   The files carry their own soft navy shadow. */
 .pin-sprite{
   display:inline-block;
   width:32px;
   height:32px;
   flex:0 0 auto;
-  background-image:url('./pin-icons-sheet.webp');
   background-repeat:no-repeat;
-  image-rendering:auto;
-  background-size:800% 800%;
-  background-position:calc(var(--pin-x) * ${CELL}%) calc(var(--pin-y) * ${CELL}%);
+  background-size:contain;
+  background-position:center;
   vertical-align:middle;
-  filter:drop-shadow(0 1.2px 1.2px rgba(70,45,25,.14));
 }
 .home-tile-icon,.qa-icon,.qa-tile-icon{
   background:transparent !important;
@@ -41,66 +41,66 @@
 
   if (typeof DOMAIN_ICONS !== 'undefined') {
     Object.assign(DOMAIN_ICONS, {
-      bag:          pin(7,0), // All Tools
-      clipboard:    pin(0,7), // Checklists
-      nurse:        pin(2,0), // Doctor
-      doctor:       pin(2,0), // Doctor
-      ambulance:    pin(2,2), // Emergency
-      stethoscope:  pin(2,0), // Doctor
-      pulse:        pin(0,4), // Procedures
-      helicopter:   pin(2,2), // Emergency
-      flask:        pin(6,3), // Lab Results
-      pill:         pin(2,4), // Medications
-      iv:           pin(3,3), // Infusion
-      monitor:      pin(0,4), // Procedures
-      shield:       pin(6,4), // Infection Control
-      phone:        pin(3,7), // Contacts
-      chat:         pin(4,5), // Phrases
-      apple:        pin(4,7), // Self Care
-      ribbon:       pin(7,1), // Oncology
-      heart:        pin(0,1), // Cardiology
-      brain:        pin(2,1), // Neurology
-      dna:          pin(5,4), // Genetics
-      lungs:        pin(1,1), // Pulmonology
-      bone:         pin(6,1), // Orthopedics
-      ear:          pin(5,2), // ENT
-      book:         pin(3,5), // Education
-      search:       pin(5,0), // Search
-      calendar:     pin(5,6), // Calendar
-      grid:         pin(7,0), // All Tools
-      link:         pin(2,6), // References
-      bell:         pin(0,6), // Tips
-      layers:       pin(2,7), // Templates
-      sparkle:      pin(4,0), // Favorites
-      globe:        pin(6,5), // Interpreter Resources
-      compass:      pin(4,6), // Locations
-      exam:         pin(1,4), // Clinical Notes
-      person:       pin(2,0), // Doctor
-      review:       pin(2,5)  // Spanish ↔ English
+      bag:          pinFile('all-tools'), // All Tools
+      clipboard:    pinFile('notes'), // Checklists
+      nurse:        pinFile('doctor-prep'), // Doctor
+      doctor:       pinFile('doctor-prep'), // Doctor
+      ambulance:    pinFile('emergency'), // Emergency
+      stethoscope:  pinFile('doctor-prep'), // Doctor
+      pulse:        pinFile('procedures'), // Procedures
+      helicopter:   pinFile('emergency'), // Emergency
+      flask:        pinFile('laboratory'), // Lab Results
+      pill:         pinFile('pharmacy'), // Medications
+      iv:           pinFile('infusion'), // Infusion
+      monitor:      pinFile('procedures'), // Procedures
+      shield:       pinFile('infection-control'), // Infection Control
+      phone:        pinFile('contacts'), // Contacts
+      chat:         pinFile('chat'), // Phrases
+      apple:        pinFile('self-care'), // Self Care
+      ribbon:       pinFile('oncology'), // Oncology
+      heart:        pinFile('cardiology'), // Cardiology
+      brain:        pinFile('neurology'), // Neurology
+      dna:          pinFile('genetics'), // Genetics
+      lungs:        pinFile('pulmonology'), // Pulmonology
+      bone:         pinFile('orthopedics'), // Orthopedics
+      ear:          pinFile('ent'), // ENT
+      book:         pinFile('education'), // Education
+      search:       pinFile('search'), // Search
+      calendar:     pinFile('events'), // Calendar
+      grid:         pinFile('all-tools'), // All Tools
+      link:         pinFile('directory'), // References
+      bell:         pinFile('tips'), // Tips
+      layers:       pinFile('templates'), // Templates
+      sparkle:      pinFile('favorites'), // Favorites
+      globe:        pinFile('globe'), // Interpreter Resources
+      compass:      pinFile('locations'), // Locations
+      exam:         pinFile('notes'), // Clinical Notes
+      person:       pinFile('doctor-prep'), // Doctor
+      review:       pinFile('translate') // Spanish ↔ English
     });
   }
 
+  // Names of files in pins/ (2026-11-03: the old sheet's cells are no longer used).
   const chromePins = {
-    Home: [1,0],
-    Search: [5,0],
-    Chat: [4,5],
-    More: [6,7]
+    Home: 'home',
+    Search: 'search',
+    Chat: 'chat',
+    More: 'more'
   };
 
   const quickPins = {
-    'Doctor Prep': [2,0],
-    'Doctor Directory': [7,0],
-    'Provider Pictures': [2,0],
-    'Find a Doctor': [5,0],
-    'MediFind': [5,0]
+    'Doctor Prep': 'doctor-prep',
+    'Doctor Directory': 'doctor-directory',
+    'Provider Pictures': 'providers',
+    'Find a Doctor': 'find-doctor',
+    'MediFind': 'medifind'
   };
 
-  function setPin(el, coords){
-    if(!el || !coords || el.querySelector('.medical-pin')) return;
-    const wanted = `${coords[0]},${coords[1]}`;
-    if(el.dataset.exactPin === wanted && el.querySelector('.pin-sprite')) return;
-    el.innerHTML = pin(coords[0], coords[1]);
-    el.dataset.exactPin = wanted;
+  function setPin(el, key){
+    if(!el || !key || el.querySelector('.medical-pin')) return;
+    if(el.dataset.exactPin === key && el.querySelector('.pin-sprite')) return;
+    el.innerHTML = pinFile(key);
+    el.dataset.exactPin = key;
   }
 
   function applyExactPins(){
