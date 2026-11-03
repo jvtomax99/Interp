@@ -1,39 +1,45 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-03,
-the campus upgrade chat (sharper card, Kenney cars in 3D, free people and trees tested).
+the doctor list / bold look chat.
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md`
-> ("Cars: Kenney's Car Kit", "Free people and trees, tested and dropped", "People"). Work on branch
-> `claude/smoother-walk`. Tell me what's being worked on now and what was worked on before, in a few short lines,
-> then write the plan for a smoother walk for the campus people and wait for my go. Plain words, say "working on it"
-> and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `DESIGN.md`, `docs/PLAN.md` and `docs/handoff.md`. Work on branch
+> `claude/next-after-bold`. Tell me what's being worked on now and what was worked on before, in a few short lines.
+> Then ask me with buttons which of the "Next" items below to mock up first. Mockup before any code. Plain words,
+> say "working on it" and "done".
 
-## Now: a smoother walk for our campus people (3D view)
+## Now: the bold look, next screens
 
-Jose's pick (2026-11-03), after free people packs lost to ours. Goal: keep our people's look (round, soft, hospital
-roles), make the walk read as walking instead of a two-pose flicker.
+Jose asked for "big visual changes"; the calm first mockup was "too plain". The bold look is now live on the glossary
+and Home rails. Pick one of these next (mockup first, his OK, then code, own PR):
 
-Where it is:
-- `stride(g, f)` in `docs/mockups/cchi-city/diorama.html` (~line 569): two poses only, legs at +-0.45 rad or straight.
-- `people.js` line ~138 picks the pose: `f = p.v > 0.05 ? Math.floor(p.step/0.22) % 2 : 0`; pairs get `1 - f`.
-- `person()` (~line 546): body, head, two legs as meshes, coloured per vertex; the arms are merged into the body, so
-  an arm swing needs the arms as their own meshes (more draws: measure).
-- The card's walkers are 2-frame sprites (`card_build.py`); leave the card alone in this change.
+- **Stronger term cards.** The colour wash on term cards (`.card[data-term-id]`, `app.css`) is faint for pale domains
+  (Genetics). Raise it; keep definitions whole (a card has no tap to open it).
+- **Doctor pages.** The doctor list and the doctor's page in the same hero style (big pin or photo, colour hero).
+  `docs/features/doctor-page.md` first.
+- **Home banner.** Busy (cloud bubble, Watch, the sign). Jose's banner rules are strict: CLAUDE.md "The Home banner
+  photo is set per mode" and "Hello banner lettering". Mock carefully, ask before touching.
+- Small things still open from the doctor list review: the search box's icon is a text glyph; a lighter panel with a
+  hard top edge behind search; data typos "155 Polify Road" (likely Polifly), "Don IMUS"; a teddy bear icon on a
+  street address. The Gastroenterology pin (a cup) reads small: its art needs a redraw, not code.
 
-Ideas to plan from (not decided): a continuous phase (sine) for the legs instead of 0/1, speed-matched so feet don't
-slide; a small bob and sway of the body; arms as two meshes swinging opposite the legs; reduced motion keeps today's.
-Spec first with "not in this version" (`AGENTS.md`), measure draws and triangles before and after (`count.cjs` way in
-README), `traffic_check.cjs` must stay all zero, campus-3d suite, before/after screenshots at phone size.
+## Before: what this chat did (all live)
 
-## Where things stand
+- **Doctor list cleanup, #188, live b1103.1859.** One count (no numbers on region tabs), Needs info as a chip,
+  "Sort: Place" menu, groups of 1-2 merged into "Other places".
+- **Top bar, #189, live b1103.1943.** Phones say "Hackensack UMC" on one line; bar back to 45px.
+- **Bold glossary, #192, live b1103.2036.** Colour hero per domain with the 3D pin big, glass search, cards in the
+  domain colour; long names step down in size.
+- **All domains tiles, #193, live b1103.2225.** One colour tile per top-level domain, tap opens, Back returns; a
+  search still lists terms.
+- **Home rails, #194, live b1103.2342.** Rail cards with big tilted pins and colour wash; press glow kept.
 
-- Live: sharper CoreCHI card (#177, b1103.1246); Kenney cars in 3D (#184, b1103.1529); notes "push is a button" (#181).
-- Open changes: none. Check-ins: none.
-- New rules this chat (in `AGENTS.md`/`CLAUDE.md`): "push" is always a clickable button, and Claude merges on Push;
-  a phone notification when something goes live (from main, #180).
-- Learned: the card capture pins the clock to noon NY (`card_page.cjs`), else windows render lit. Blender here: `pip
-  install bpy==5.0.1` in a Python 3.11 venv. The tests' pinned Playwright needs `executablePath:
-  '/opt/pw-browsers/chromium'` in cloud sessions (a `-r` preload that patches `chromium.launch`).
+## Learned, not elsewhere yet
+
+- A helper ran `npm install` in `tests/` once, which installed a Playwright without its browser: every browser suite
+  crashed at launch. `tests/node_modules` is git-ignored; delete it and the machine's Playwright is used again.
+- Don't switch branches while a full test run is going in the same checkout: the run reads files mid-way.
+- Mockups that patch the live page (`page.addStyleTag` / swapping a function by `eval`) are honest and quick; keep
+  them in the scratchpad, never in the repo.
