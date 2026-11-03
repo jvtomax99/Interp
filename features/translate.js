@@ -247,7 +247,7 @@ async function runTranslate(){
            <p class="tr-target">${escapeHtml(mt)}</p>
            ${back ? `<p class="tr-note"><b>Translated back:</b> "${escapeHtml(back)}"${
               drift
-                ? ` — <span style="color:var(--danger);font-weight:600;">this differs from what you typed, so treat the translation with caution.</span>`
+                ? ` — <span style="color:var(--danger);font-weight:650;">this differs from what you typed, so treat the translation with caution.</span>`
                 : ` — round-trips cleanly, a reasonable sign it held its meaning.`
             }</p>` : ''}
            <p class="tr-note">Automatically generated. Confirm before relying on it, and consider adding a verified entry to the glossary.</p>`
