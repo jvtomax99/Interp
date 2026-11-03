@@ -1,46 +1,39 @@
 # Handoff
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-10-29,
-the campus chat (Blender card, real campus in 3D, Helena Theurer's height, the audit).
+Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-03,
+the campus upgrade chat (sharper card, Kenney cars in 3D, free people and trees tested).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next 2, the campus, "make the campus act like real life"),
-> `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md` ("The card's pictures", "The audit"). Work on
-> branch `claude/campus-traffic`. Tell me what's being worked on now and what was worked on before, in a few short
-> lines, then start prompt 2 (traffic). Plain words, say "working on it" and "done".
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md`
+> ("Cars: Kenney's Car Kit", "Free people and trees, tested and dropped", "People"). Work on branch
+> `claude/smoother-walk`. Tell me what's being worked on now and what was worked on before, in a few short lines,
+> then write the plan for a smoother walk for the campus people and wait for my go. Plain words, say "working on it"
+> and "done". "Push" is always a button.
 
-## Now: prompt 2 of 4, traffic
+## Now: a smoother walk for our campus people (3D view)
 
-Jose's prompts, in order (2026-10-29), each its own change:
-1. Audit every moving thing. **Done, live** (#173, b1029.1532).
-2. **Traffic: done in 3D** (2026-10-29, `claude/campus-traffic`, waiting for Jose's push; `real-map/traffic.js`, README "Traffic"). Was: "Make the cars drive like real traffic: stay in the right-hand lane, follow the real direction of
-   each street, slow down and stop at stop signs and crosswalks, turn on curves instead of sliding sideways, and never
-   overlap each other. Use the map data for which streets are one-way."
-3. **People: done in 3D** (2026-10-29, `real-map/people.js`, README "People"). Was: sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing and
-   talking; never through walls, cars, trees or each other.
-4. **Buildings (next):** checked against the real campus (height, floors, doors, garage entrances, bridges), with sources.
+Jose's pick (2026-11-03), after free people packs lost to ours. Goal: keep our people's look (round, soft, hospital
+roles), make the walk read as walking instead of a two-pose flicker.
 
-Where things are:
-- The live scene's motion: `life(t)` in the built page; its movers and paths are set in
-  `docs/mockups/cchi-city/real-map/build.py` (block "the audit's fixes" and the rounds after it; `along()` gives
-  position and heading on a polyline). The street cars: `STREET` (Prospect), `BACKCARS` (2nd St, Atlantic B, Essex;
-  paths from `scene.json` `paths`, made by `scene_export.py` from the OSM export, which has the one-way tags).
-- Checker: `node audit.cjs campus.html out.json` (`MAP=map.png` for the picture). What it still flags: a car and a
-  person meeting at a crosswalk or corner (cars must give way: that is prompt 2), two walkers passing at a corner.
-- In 3D (`campus3d/`, `python3 build.py --app`) things move live, so giving way, stopping and queueing are possible
-  there. The card (`city/`, Blender, `card_capture.cjs` + `card_render.py` + `card_build.py --install`, ~40 min)
-  only plays fixed paths: a car's sprite has one heading per leg, so turns are cut between legs.
-- Blender here: `pip download bpy==5.0.1 --no-deps --python-version 3.11 --only-binary=:all:`, a 3.11 venv
-  (`uv venv --python /usr/bin/python3.11`) with that wheel, numpy and Pillow. three.js: `npm install --no-save
-  three@0.160.0` in `docs/mockups/cchi-city/`.
-- Gotchas found: Cycles draws coplanar ground layers black (`flat_ground_apart` in `toy_look.py`); a camera
-  projection of points goes wrong in the preview (nav.js), so the audit map draws rings in the scene instead;
-  `pgrep -f` in a wait loop matches itself.
+Where it is:
+- `stride(g, f)` in `docs/mockups/cchi-city/diorama.html` (~line 569): two poses only, legs at +-0.45 rad or straight.
+- `people.js` line ~138 picks the pose: `f = p.v > 0.05 ? Math.floor(p.step/0.22) % 2 : 0`; pairs get `1 - f`.
+- `person()` (~line 546): body, head, two legs as meshes, coloured per vertex; the arms are merged into the body, so
+  an arm swing needs the arms as their own meshes (more draws: measure).
+- The card's walkers are 2-frame sprites (`card_build.py`); leave the card alone in this change.
 
-## Before (this chat, all live)
+Ideas to plan from (not decided): a continuous phase (sine) for the legs instead of 0/1, speed-matched so feet don't
+slide; a small bob and sway of the body; arms as two meshes swinging opposite the legs; reduced motion keeps today's.
+Spec first with "not in this version" (`AGENTS.md`), measure draws and triangles before and after (`count.cjs` way in
+README), `traffic_check.cjs` must stay all zero, campus-3d suite, before/after screenshots at phone size.
 
-- #168 the CoreCHI Practice card's pictures rendered in Blender from the real-map campus, every mover re-made.
-- #169 the 3D button opens the real campus too (`build.py --app`).
-- #170 Helena Theurer Pavilion 9 floors at 1.3x (it was 13 at 1.65x; Jose's pick).
-- #173 the audit and its fixes (269 problem spots down to crosswalk meetings).
+## Where things stand
+
+- Live: sharper CoreCHI card (#177, b1103.1246); Kenney cars in 3D (#184, b1103.1529); notes "push is a button" (#181).
+- Open changes: none. Check-ins: none.
+- New rules this chat (in `AGENTS.md`/`CLAUDE.md`): "push" is always a clickable button, and Claude merges on Push;
+  a phone notification when something goes live (from main, #180).
+- Learned: the card capture pins the clock to noon NY (`card_page.cjs`), else windows render lit. Blender here: `pip
+  install bpy==5.0.1` in a Python 3.11 venv. The tests' pinned Playwright needs `executablePath:
+  '/opt/pw-browsers/chromium'` in cloud sessions (a `-r` preload that patches `chromium.launch`).

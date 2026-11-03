@@ -131,6 +131,17 @@ puts `cars.js` (with the data) just before `const CAR_IN`: `vehicle()` builds th
 swaps the body for the model. `ambLights` reads `AMB.userData.lamps`. `traffic_check.cjs` (300 s): all zero; wider
 cars (0.61) clipped each other at the drive's mouth, hence the width cap.
 
+## Free people and trees, tested and dropped (2026-11-03)
+
+Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front
+street, the closest zoom and closer): **Kenney Mini Characters** (CC0, kenney.nl's own download; 12 people, 723
+triangles each, 32 animations incl. walk, sit, wheelchair; blocky square heads, a texture atlas) and **Kenney Nature
+Kit** trees (CC0; 50-400 triangles, flat teal blobs). Both looked plainer than ours, and ours carry the hospital roles
+from Jose's references (doctor's coat, nurse's badge, patient, elder, wheelchair pushed by a visitor). Kept ours; Jose's
+pick next: a smoother walk for our own people. Earlier the same day: Quaternius trees dropped, Kenney cars kept
+("Cars: Kenney's Car Kit" above). Kenney's downloads: `GET https://kenney.nl/download-link/<hex of "assets/<slug>">`
+returns a signed zip URL (the site's own Download button; a browser User-Agent is needed).
+
 ## People (2026-10-29)
 
 Jose's prompt 3: "sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing
@@ -156,6 +167,17 @@ and talking; never through walls, cars, trees or each other." `people.js` (put i
   `audit.cjs` (walls, trees, poles, buildings, roads): one known spot, the walk from Jurist's walk across the
   drive-through's mouth to Link's outer sidewalk, about 3.5 units of driveway with no crosswalk in the scene.
 - Not in this version: the card's walkers (fixed paths, not re-rendered); people going into buildings past the door.
+- The walk (2026-11-03, Jose: "a smoother walk, keep their look"): `walkPose` in `people.js` replaces the two poses for
+  the walkers. Legs on a smooth wave, one cycle per 0.47 walked (two steps as long as the feet travel at 0.42 rad, so no
+  sliding); the swing follows the speed (`p.amp`: shorter behind someone, eased to standing at a stop). A tilted leg lifts
+  its foot, so the body drops by that much (0.29 x (1 - cos)): the bob, about 2% of height as in people (3.8 cm in a
+  gait study), highest as the legs pass. The hanging arms are their own meshes (`armMesh`, `bodyParts(..., loose)`),
+  swinging 0.38 rad against the legs; a raised arm (clipboard, tablet) stays up, the one pushing the wheelchair keeps
+  both hands on it (legs and bob only). A lean of 0.035 rad over the standing leg; partners half a cycle apart.
+  Reduced motion: the page already stops all motion (`if (!REDUCE) life(t)`). `stride()` stays for the card and the
+  people standing. Measured: meshes drawn 684 to 707 (+23, the arms; walkers cast no shadows), triangles unchanged
+  (424,364); `traffic_check.cjs` 300 s all zero. Not in this version: the card's walkers, smoothing the turn at
+  corners, knees and elbows, the people standing or sitting.
 
 ## The fit (`scene_export.py`)
 
