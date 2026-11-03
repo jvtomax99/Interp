@@ -6729,6 +6729,24 @@ html[data-theme="dark"] .dl-mine button{ background:rgba(46,139,208,.16); color:
 html[data-theme="dark"] .dl-fold, html[data-theme="dark"] .dl-letters button{ color:#8FC3EE; }
 @media (prefers-reduced-motion: reduce){ .dl-sort-btn, .dl-recent-btn, .dl-mine button{ transition:none; } }
 
+/* Needs info: the count beside things to tidy, the filter's note, and what
+   each card is missing. */
+.dl-tools{ display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:0 0 var(--sp-3); }
+.dl-tools .dl-tidy{ margin:0; }
+.dl-need{ display:inline-flex; align-items:center; min-height:44px; padding:0 15px; border:0; border-radius:999px; background:var(--paper); color:var(--navy);
+  font:650 var(--fs-sub) var(--sans); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .18s var(--ease), background .2s var(--ease), color .2s var(--ease); }
+.dl-need.is-on{ background:var(--navy); color:#fff; }
+.dl-need:active, .dl-need.is-pressed{ transform:scale(.96); }
+.dl-need:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.dl-need-note{ margin:-4px 0 var(--sp-3); font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dl-miss{ margin-top:2px; font-size:var(--fs-foot); font-weight:550; line-height:1.3; color:#8A5A12; overflow-wrap:break-word; }
+html[data-theme="dark"] .dl-need{ background:#2A3350; color:#fff; box-shadow:var(--sh-1); }
+html[data-theme="dark"] .dl-need.is-on{ background:#C9D3FF; color:#151C2C; }
+html[data-theme="dark"] .dl-miss{ color:#D9BF8A; }
+@media (prefers-reduced-motion: reduce){ .dl-need{ transition:none; } }
+
 /* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
    five tiers and the team's own terms don't fit. */
 .dp-tabs.ds-mode-seg{ margin:13px 0 9px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch;

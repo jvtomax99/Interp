@@ -17,7 +17,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `guide.cjs` | User Guide: search, answers, steps, Show me, deep links |
 | `destination-labels.cjs` | Doctor Prep and Doctors entrances, Provider Pictures labels, route and scroll restoration, glossary state, separate appointment briefing, guide targets |
 | `doctor-page.cjs` | The doctor list (cards, labels, + Prep terms, + Add, things to tidy, Delete in the sheet) and the doctor's page: header, bento, tier tabs, terms read aloud, 44px targets, the glass bar's three buttons, Team tips (add, edit, delete your own, a stale save keeps everyone's), Back, dark mode |
-| `doctor-list.cjs` | The doctor list's arrangement: Recent (newest first, namesakes told apart), Sort by Place / Specialty / A to Z kept per phone, specialty groups, last-name order, the letter strip's jump, headings as labels, the specialty's slash break, the one-line region question, 44px targets, dark mode |
+| `doctor-list.cjs` | The doctor list's arrangement and Needs info (the count, the filter, what each card is missing, no "No floor yet"): Recent (newest first, namesakes told apart), Sort by Place / Specialty / A to Z kept per phone, specialty groups, last-name order, the letter strip's jump, headings as labels, the specialty's slash break, the one-line region question, 44px targets, dark mode |
 | `journey.cjs` | End to end: Ask the Hub, briefing, Term Review, offline and storage-refused cases |
 | `smiley-gaze.cjs` | Dr. Smiley's eyes, lean and moods |
 | `smiley-brows.cjs` | Dr. Smiley's brows: follow the face, held poses, Focused, Still |

@@ -107,7 +107,7 @@ async function targets(page) {
           const ar = add && add.getBoundingClientRect();
           const tidy = document.querySelector('#content .dl-tidy');
           return { leslie: tags(leslie), lesliePin: leslie && leslie.querySelector('.dl-ph img').getAttribute('src'), ini: leslie && leslie.querySelector('.dl-ini').textContent,
-            floor: leslie && leslie.querySelector('.dl-floor').textContent, loveFloor: love && love.querySelector('.dl-floor').textContent,
+            floor: leslie && leslie.querySelector('.dl-floor').textContent, loveFloor: love && (love.querySelector('.dl-floor') ? love.querySelector('.dl-floor').textContent : null),
             loveTags: tags(love), prep: !!prep, prepHit,
             sameRow: row ? Math.abs(row[0].top - row[1].top) < 2 && row[1].left > row[0].right : null,
             add: add && { h: Math.round(ar.height), bg: getComputedStyle(add).backgroundColor, own: owns(add, ar.left + ar.width / 2, ar.top + ar.height / 2) },
@@ -117,7 +117,7 @@ async function targets(page) {
         });
         ok(JSON.stringify(list.leslie) === JSON.stringify(['10 terms', '1 trap', '1 tip']) && /leukemia/.test(list.lesliePin) && list.ini === 'LL',
           'a card: pin tile, initials, terms (research + team), traps, tips', list);
-        ok(list.floor === '4th fl · Suite 401' && list.loveFloor === 'No floor yet', 'the floor, or "No floor yet"', list);
+        ok(list.floor === '4th fl · Suite 401' && list.loveFloor === null, 'the floor, or no floor line (Needs info counts it)', list);
         ok(list.prep && list.loveTags.length === 0 && list.prepHit.every(Boolean), 'no research: "+ Prep terms", 44px to hit', list);
         if (!desktop) ok(list.sameRow, 'two cards to a row on a phone', list.sameRow);
         ok(list.add && list.add.h >= 44 && list.add.bg === 'rgb(37, 46, 109)' && list.add.own && !list.topbarAdd, 'navy "+ Add" by the title, the old "+ Add doctor" gone', list);

@@ -141,6 +141,34 @@ async function load(page, sort, extra) {
         });
         ok(words.split === 1, '"Oncology" stays on one line', words);
 
+        // Needs info: no "No floor yet" on cards; a count; the filter.
+        await page.evaluate(() => { localStorage.setItem('ih_doctorSort', 'place'); doctorNeedsOnly = false;
+          const d = DOCTOR_DIRECTORY.find(x => x.id === 'dl1'); d.locationDetails = '4th fl'; d._n = { terms: 5, traps: 0 };
+          renderContent(); });
+        await pause(page);
+        s = await page.evaluate(() => {
+          const want = DOCTOR_DIRECTORY.filter(d => doctorMissing(d).length).length;
+          const btn = document.querySelector('#content .dl-need');
+          return { noFloorText: document.querySelector('#content').textContent.includes('No floor yet'), btn: btn && btn.textContent, want,
+            missPatel: doctorMissing(DOCTOR_DIRECTORY.find(x => x.id === 'dl1')), missBlank: doctorMissing(DOCTOR_DIRECTORY.find(x => x.id === 'dl3')) };
+        });
+        ok(!s.noFloorText, 'cards no longer say "No floor yet"');
+        ok(s.btn === `${s.want} need info` && s.want > 0 && s.want < 25, 'the button counts the doctors missing something', s);
+        ok(s.missPatel.length === 0, 'a doctor with a place, floor and terms needs nothing', s.missPatel);
+        ok(s.missBlank.join() === 'place,floor,research', 'no place, no floor, no terms: all three listed', s.missBlank);
+        await page.click('#content .dl-need'); await pause(page);
+        s = await page.evaluate(() => ({ cards: document.querySelectorAll('#content .dl-card').length, miss: document.querySelectorAll('#content .dl-miss').length,
+          first: document.querySelector('#content .dl-miss')?.textContent, recent: !!document.querySelector('#content .dl-recent'),
+          note: !!document.querySelector('#content .dl-need-note'), btn: document.querySelector('#content .dl-need')?.textContent,
+          pressed: document.querySelector('#content .dl-need')?.getAttribute('aria-pressed') }));
+        ok(s.cards === s.miss && s.cards > 0 && /^Missing: /.test(s.first), 'filter on: only those doctors, each says what is missing', s);
+        ok(!s.recent && s.note && s.btn === 'Show all doctors' && s.pressed === 'true', 'filter on: note, way back, no Recent', s);
+        const needHit = await page.evaluate(() => { const el = document.querySelector('#content .dl-need'), r = el.getBoundingClientRect();
+          return r.height >= 44 && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === el; });
+        ok(needHit, 'the button is 44px and nothing covers it');
+        await page.click('#content .dl-need'); await pause(page);
+        ok(await page.evaluate(() => document.querySelectorAll('#content .dl-card').length === DOCTOR_DIRECTORY.length && !doctorNeedsOnly), 'Show all doctors brings everyone back');
+
         // Dark mode keeps the chips readable.
         await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark')); await pause(page, 400);
         const dark = await page.evaluate(() => { const b = document.querySelector('#content .dl-sort-btn.is-on'); const cs = getComputedStyle(b); return [cs.color, cs.backgroundColor]; });
