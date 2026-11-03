@@ -23,7 +23,7 @@ const vars = page => page.evaluate(() => { const w = document.querySelector('#co
       const w = document.querySelector('#content .cp-world'), kids = [...w.children];
       const sky = w.querySelector('.cp-d-sky'), far = w.querySelector('.cp-d-far'), near = w.querySelector('.cp-ground');
       const ix = el => kids.indexOf(el), firstLit = kids.findIndex(el => el.classList.contains('cp-paintw'));
-      return { srcs: [sky, far, near].map(i => i && i.getAttribute('src')), loaded: [sky, far, near].every(i => i && i.complete && i.naturalWidth === 960),
+      return { srcs: [sky, far, near].map(i => i && i.getAttribute('src')), loaded: [sky, far].every(i => i && i.complete && i.naturalWidth === 960) && near && near.complete && near.naturalWidth === 1200,   // the campus at an iPhone's own pixels (card_build.py UP, 2026-11-03)
         order: [ix(sky), ix(far), ix(near)], before: firstLit < 0 || ix(near) < firstLit, pe: [sky, far, near].map(i => getComputedStyle(i).pointerEvents),
         touch: getComputedStyle(w).touchAction };
     });

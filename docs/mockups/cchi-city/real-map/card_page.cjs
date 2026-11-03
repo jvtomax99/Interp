@@ -27,6 +27,9 @@ async function open(file, { w = 960, h = 840, query = '', skipRoof = '' } = {}){
   const page = await b.newPage({ viewport: { width: w, height: h } });
   page.on('pageerror', e => console.log('ERR', e.message));
   await page.addInitScript(k => { window.__skipRoof = k; }, skipRoof);
+  // noon in New York: the page lights its windows by the real clock (runtime.js), and the card is daylight; a capture made
+  // before dawn there came out with every window lit (2026-11-03)
+  await page.clock.setFixedTime(new Date('2026-06-21T16:00:00Z'));
   await page.goto(`http://localhost:${srv.address().port}/?${query}`);
   await page.waitForFunction(() => document.body.classList.contains('ready') && window.__L, null, { timeout: 300000 });
   return { page, close: async () => { await b.close(); srv.close(); } };
