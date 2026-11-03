@@ -234,8 +234,7 @@ Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
 
 **Doctor list, next ideas** (from the 2026-11-03 review; Jose picks):
 compact rows instead of two-column cards (mock up first: it reverses D3's
-cards), a "Needs info" filter (no floor, research or photo) replacing the
-"No floor yet" line on cards, and search that also finds a doctor's terms
+cards), and search that also finds a doctor's terms
 and short forms (GI, cardio, peds).
 
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
@@ -306,6 +305,13 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-11-03 Doctor list D5, Needs info (Jose's pick): "No floor yet" gone
+  from cards; "N need info" counts doctors missing a place, floor or prep
+  terms (not photos); tapped, only them, each card saying what's missing.
+  Guide: new answer `doctorgaps` and a New lately card (Sound-Alikes card
+  dropped), the directory answer's floor line. `doctor-page.md` "Needs
+  info"; checks in `doctor-list.cjs` (66).
 
 - 2026-11-03 Doctor list D4, arrangement (Jose's pick from the directory
   review, "Trim + Recent + Sort"): Recent (last 5 opened, per phone), Sort
