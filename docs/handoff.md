@@ -32,6 +32,8 @@ adds them. If the balance call still fails, stop and tell Jose; do not retry in 
 proxy reaches Tripo and the key itself is refused). Nothing made or spent. Likely causes, unproven: the key belongs to
 Tripo's studio site and not the API platform (platform.tripo3d.ai, its own credits), the key was replaced or deleted,
 or "Bearer" doubled. Jose is checking or replacing the key on platform.tripo3d.ai; the next chat starts after he saves it.
+2026-11-03, fourth chat (after Jose re-saved the key): balance call still 401 "Authentication failed" (code 1002).
+The proxy lists api.tripo3d.ai as "Allow + inject", so the header goes out; Tripo refuses the key. Stopped, nothing spent.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
 Steps:
