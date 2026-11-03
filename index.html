@@ -5785,9 +5785,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'directory',   tone:'gd-n1', pin:'pins/doctor-directory.webp',  eyebrow:'Doctor Directory',      title:'Doctor Directory: your recent doctors at the top, and sort by place, specialty or A to Z by last name' },
-  { id:'pins',        tone:'gd-n2', pin:'pins/cardiology.webp',         eyebrow:'New look',              title:'New pictures across the app: every Home pin redrawn in soft 3D, from the heart to Team Chat' },
-  { id:'soundalikes', tone:'gd-n3', pin:'pins/ent.webp',                eyebrow:'Sound-Alikes',          title:'Sound-Alikes: words that sound the same and mean different things. Hear them, then drill picking the right meaning by ear' },
+  { id:'doctorgaps',  tone:'gd-n1', pin:'pins/find-doctor.webp',       eyebrow:'Doctor Directory',      title:'Find the doctors still missing a place, a floor or prep terms, and see exactly what each one needs' },
+  { id:'directory',   tone:'gd-n2', pin:'pins/doctor-directory.webp',  eyebrow:'Doctor Directory',      title:'Doctor Directory: your recent doctors at the top, and sort by place, specialty or A to Z by last name' },
+  { id:'pins',        tone:'gd-n3', pin:'pins/cardiology.webp',         eyebrow:'New look',              title:'New pictures across the app: every Home pin redrawn in soft 3D, from the heart to Team Chat' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -10524,7 +10524,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-sort-btn, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sort-btn, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -12584,6 +12584,14 @@ function renderDoctorDirectory(q){
     return `<div class="empty"><div class="glyph">${ICON_GRID}</div>${msg}</div>`;
   }
 
+  // Needs info: counted in this view (region, search), then shown alone if on.
+  const needN = list.filter(d => doctorMissing(d).length).length;
+  if(doctorNeedsOnly){
+    list = list.filter(d => doctorMissing(d).length);
+    if(!list.length)
+      return `<div class="section-head dl-head"><h2>Doctor Directory</h2>${DOCTOR_ADD_BTN}</div>${doctorRegionChipsHtml(view, !!q)}${doctorToolsHtml(0)}`
+        + `<div class="empty"><div class="glyph">${ICON_GRID}</div>Every doctor here has a place, a floor and prep terms.</div>`;
+  }
   const searching = !!q;
   const sort = doctorSortView();
   let groups;
@@ -12610,8 +12618,9 @@ function renderDoctorDirectory(q){
   html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
-  html += doctorTidyButtonHtml();
-  if(!searching) html += doctorRecentHtml();
+  html += doctorToolsHtml(needN);
+  if(doctorNeedsOnly) html += `<p class="dl-need-note">Doctors missing a place, a floor or prep terms. Tap one, then the pencil, to fill it in.</p>`;
+  if(!searching && !doctorNeedsOnly) html += doctorRecentHtml();
   html += doctorSortChipsHtml(sort, groups, searching);
   if(document.getElementById('doctorTidyOverlay')?.classList.contains('show')) setTimeout(renderDoctorTidy);
   html += `<div class="dl-list is-${sort}">`;
@@ -12670,9 +12679,45 @@ function doctorListCard(d){
       ${ph}
       <div class="dl-name">${escapeHtml(d.name)}</div>
       ${d.specialty ? `<div class="dl-spec"><span>${escapeHtml(d.specialty).replace(/\//g, '/<wbr>')}</span></div>` : ''}
-      <div class="dl-floor${floor ? '' : ' is-none'}">${floor ? escapeHtml(floor) : 'No floor yet'}</div>
+      ${doctorNeedsOnly ? doctorMissingHtml(d) : floor ? `<div class="dl-floor">${escapeHtml(floor)}</div>` : ''}
       ${tags || prep ? `<div class="dl-tags">${tags}${prep}</div>` : ''}
     </div>`;
+}
+
+/* Needs info: doctors missing a specific place, a floor or prep terms, so
+   the team can fill the gaps. Cards no longer say "No floor yet"; this
+   button counts them instead, and when on, the list shows only them, each
+   card saying what's missing. Photos don't count: most doctors may never
+   have one, and a count covering everyone would mean nothing. Research is
+   only judged once the directory has loaded (the saved copy can't tell).
+   Per visit, like the region chips. */
+let doctorNeedsOnly = false;
+const DOCTOR_MISSING_LABEL = { place: 'place', floor: 'floor', research: 'prep terms' };
+function doctorMissing(d){
+  const out = [];
+  const place = locationGroupName(d, d.hospitalLocation);
+  if(place === NO_LOCATION_LABEL || place === HMH_NETWORK_LABEL) out.push('place');
+  if(!(d.locationDetails || '').trim()) out.push('floor');
+  if(DOCTOR_DIR_STATE === 'ok' && !doctorListCounts(d).researched) out.push('research');
+  return out;
+}
+function doctorMissingHtml(d){
+  const m = doctorMissing(d);
+  return m.length ? `<div class="dl-miss">Missing: ${m.map(k => DOCTOR_MISSING_LABEL[k]).join(', ')}</div>` : '';
+}
+function setDoctorNeedsOnly(on){
+  doctorNeedsOnly = !!on;
+  renderContent();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+// The row under the region chips: things to tidy, and Needs info.
+function doctorToolsHtml(needN){
+  const tidy = doctorTidyButtonHtml();
+  const banner = tierBackfill.running ? tidy : '';
+  const pill = banner ? '' : tidy;
+  const need = needN || doctorNeedsOnly
+    ? `<button type="button" class="dl-need${doctorNeedsOnly ? ' is-on' : ''}" aria-pressed="${doctorNeedsOnly}" onclick="setDoctorNeedsOnly(${!doctorNeedsOnly})">${doctorNeedsOnly ? 'Show all doctors' : `${needN} need${needN === 1 ? 's' : ''} info`}</button>` : '';
+  return banner + (pill || need ? `<div class="dl-tools">${pill}${need}</div>` : '');
 }
 
 /* Duplicates and doctors on the old terminology: one "N things to tidy"

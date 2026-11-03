@@ -131,6 +131,17 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   domains were not used for Specialty: headings like "Peds ENT, Urology,
   Endocrinology & Nephrology" read badly in a directory. Checked by
   `tests/suites/doctor-list.cjs`.
+- **Needs info** (2026-11-03, Jose's pick): cards no longer say "No floor
+  yet" (no floor, no line). `doctorToolsHtml` puts "N need info" beside
+  things to tidy; it counts the doctors in this view (region, search)
+  missing a specific place (`NO_LOCATION_LABEL` or `HMH_NETWORK_LABEL`), a
+  floor, or prep terms (`doctorMissing`; research judged only once the
+  directory has loaded). Tapped (`setDoctorNeedsOnly`, per visit, not
+  saved), the list shows only them, each card with "Missing: ..."
+  (`doctorMissingHtml`) in place of the floor, a note on how to fill it in,
+  no Recent, and "Show all doctors" to go back. Photos don't count: most
+  doctors may never have one, so a count including them would cover nearly
+  everyone.
 - Navy "+ Add" (`DOCTOR_ADD_BTN`) at the end of the section head; the
   topbar has no add button on this screen.
 - Duplicates and old terminology: one "N things to tidy" button
