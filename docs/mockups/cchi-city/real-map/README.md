@@ -179,6 +179,21 @@ and talking; never through walls, cars, trees or each other." `people.js` (put i
   (424,364); `traffic_check.cjs` 300 s all zero. Not in this version: the card's walkers, smoothing the turn at
   corners, knees and elbows, the people standing or sitting.
 
+## Adult proportions (2026-11-03)
+
+Jose: "people look goofy". Free detailed people were tried first: Microsoft Rocketbox (MIT; 115 rigged people, 8 of
+them medical, 417 animations; two converted with Blender, posed mid-walk, textures cut to 512: about 0.45 MB and
+8,000 polygons each) beside ours as they were and ours with adult proportions (B). Rocketbox looked lifelike up
+close but thin and pasted-in next to the toy buildings; Quaternius's Universal Base Characters (CC0) could not be
+fetched (itch.io is blocked from the cloud sessions). At the 3D view's opening zoom a person is about 3 pixels tall.
+Jose's pick: B. `ADULT` in `diorama.html`: the head 0.6 of the old size, legs 0.22 longer (`leg(..., ext)`) with the
+body raised to meet them, shoulders 12% wider; a child's head 0.78 and legs 0.12 longer; the people seated and in
+the wheelchair the same heads. The walk takes each figure's own hip-to-foot (`userData.lf`, 0.51 for an adult) for
+its step, so feet still do not slide; swing 0.36 rad. `stride()` turns long legs 0.3 rad, not 0.45, so the standing
+people's feet stay down. Measured: the same meshes and triangles (707, 424,364); `traffic_check.cjs` 300 s all zero.
+Not in this version: the card's walkers (pictures from before, still the old shape); Rocketbox (kept as the next step
+if the buildings ever go realistic too).
+
 ## The fit (`scene_export.py`)
 
 Map turned 112 deg so Prospect runs across the front, 9 m to a unit, then
