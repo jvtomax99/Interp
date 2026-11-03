@@ -35,6 +35,7 @@ or "Bearer" doubled. Jose is checking or replacing the key on platform.tripo3d.a
 2026-11-03, fourth chat (after Jose re-saved the key): balance call still 401 "Authentication failed" (code 1002).
 The proxy lists api.tripo3d.ai as "Allow + inject", so the header goes out; Tripo refuses the key. Stopped, nothing spent.
 Same chat, later: balance call 200 OK, key works. Balance 0 credits, so Jose tops up on platform.tripo3d.ai before the nurse.
+Nurse made (same chat): task `a46f35c3-09dd-4440-a750-d1e294fe800a`, 30 credits, 970 left, model v2.5. Download host `tripo-data.rg1.data.tripo3d.com` blocked by the network policy; Jose adds it. Download links expire in about 10 min: ask `GET /v2/openapi/task/<id>` again for fresh ones (no new generation needed).
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
 Steps:
