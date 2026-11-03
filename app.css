@@ -6685,15 +6685,16 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
 .dl-recent-ph img{ width:28px; height:28px; object-fit:contain; }
 .dl-recent-ph img.is-photo{ width:100%; height:100%; object-fit:cover; }
 
-/* Sort: Place, Specialty, A-Z, and Collapse all at the end of the row. */
-.dl-sort{ display:flex; align-items:center; justify-content:space-between; gap:9px; margin:0 0 var(--sp-2); }
-.dl-sort-chips{ display:flex; align-items:center; gap:6px; min-width:0; }
-.dl-sort-lbl{ font-size:var(--fs-foot); font-weight:550; color:var(--ink-faint); margin-right:2px; }
-.dl-sort-btn{ position:relative; min-height:36px; padding:0 13px; border:0; border-radius:999px; background:var(--line-soft); color:var(--ink-soft);
-  font:550 var(--fs-foot) var(--sans); cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
-  transition:background .2s var(--ease), color .2s var(--ease), transform .18s var(--ease); }
-.dl-sort-btn::after{ content:""; position:absolute; inset:-4px -2px; }
-.dl-sort-btn.is-on{ background:var(--navy); color:#fff; }
+/* Sort is a small menu at the end of the tools row ("Sort: Place"), a
+   native select laid over the words; Collapse all after it. */
+.dl-tools-end{ display:flex; align-items:center; gap:9px; margin-left:auto; }
+.dl-sortmenu{ position:relative; display:inline-flex; align-items:center; gap:3px; min-height:44px; padding:0;
+  font:400 var(--fs-foot) var(--sans); color:var(--ink-soft); white-space:nowrap; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.dl-sortmenu b{ font-weight:550; color:var(--ink); }
+.dl-sortmenu-chev{ display:inline-flex; color:var(--ink-faint); }
+.dl-sortmenu-chev svg{ width:14px; height:14px; }
+.dl-sortmenu select{ position:absolute; inset:0; width:100%; opacity:0; font-size:16px; cursor:pointer; -webkit-appearance:none; appearance:none; }
+.dl-sortmenu:has(select:focus-visible){ outline:3px solid var(--accent-2); outline-offset:2px; border-radius:8px; }
 .dl-fold{ position:relative; flex:0 0 auto; min-height:36px; padding:0 2px; border:0; background:none; color:var(--accent);
   font:550 var(--fs-foot) var(--sans); cursor:pointer; }
 .dl-fold::after{ content:""; position:absolute; inset:-4px -6px; }
@@ -6710,6 +6711,8 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
 .dl-list .group-head-name{ font-size:var(--fs-head); letter-spacing:var(--tr-head); }
 .dl-list .group-head-count{ font-size:var(--fs-cap); }
 .dl-spec-head .group-mark{ cursor:default; }
+.dl-list .group-toggle.is-static{ cursor:default; }
+.dl-list .group-toggle.is-static:active{ transform:none; }
 @media (hover:hover){ .dl-spec-head .group-mark:hover{ background:transparent; } }
 .dl-letter-head{ margin:var(--sp-4) 0 var(--sp-2) 2px; font-size:var(--fs-sub); color:var(--ink-soft); scroll-margin-top:96px; }
 .dl-list .dl-letter-head:first-child{ margin-top:var(--sp-2); }
@@ -6720,30 +6723,37 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
   touch-action:none; max-height:min(70vh, 520px); }
 .dl-letters button{ width:24px; flex:1 1 auto; min-height:14px; max-height:22px; padding:0; border:0; background:none; color:var(--accent);
   font:650 var(--fs-cap2)/1 var(--sans); cursor:pointer; }
-.dl-sort-btn:active, .dl-sort-btn.is-pressed, .dl-recent-btn:active, .dl-recent-btn.is-pressed, .dl-mine button:active, .dl-mine button.is-pressed{ transform:scale(.96); }
-.dl-sort-btn:focus-visible, .dl-fold:focus-visible, .dl-recent-btn:focus-visible, .dl-mine button:focus-visible, .dl-letters button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.dl-recent-btn:active, .dl-recent-btn.is-pressed, .dl-mine button:active, .dl-mine button.is-pressed{ transform:scale(.96); }
+.dl-fold:focus-visible, .dl-recent-btn:focus-visible, .dl-mine button:focus-visible, .dl-letters button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
 html[data-theme="dark"] .dl-recent-btn{ background:#2A3350; color:#fff; box-shadow:var(--sh-1); }
-html[data-theme="dark"] .dl-sort-btn{ background:rgba(255,255,255,.07); color:#C9D3FF; }
-html[data-theme="dark"] .dl-sort-btn.is-on{ background:#C9D3FF; color:#151C2C; }
+html[data-theme="dark"] .dl-sortmenu b{ color:#fff; }
 html[data-theme="dark"] .dl-mine button{ background:rgba(46,139,208,.16); color:#C9D3FF; }
 html[data-theme="dark"] .dl-fold, html[data-theme="dark"] .dl-letters button{ color:#8FC3EE; }
-@media (prefers-reduced-motion: reduce){ .dl-sort-btn, .dl-recent-btn, .dl-mine button{ transition:none; } }
+@media (prefers-reduced-motion: reduce){ .dl-recent-btn, .dl-mine button{ transition:none; } }
 
 /* Needs info: the count beside things to tidy, the filter's note, and what
    each card is missing. */
-.dl-tools{ display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:0 0 var(--sp-3); }
+.dl-tools{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 9px; margin:0 0 var(--sp-2); }
 .dl-tools .dl-tidy{ margin:0; }
-.dl-need{ display:inline-flex; align-items:center; min-height:44px; padding:0 15px; border:0; border-radius:999px; background:var(--paper); color:var(--navy);
-  font:650 var(--fs-sub) var(--sans); cursor:pointer; -webkit-tap-highlight-color:transparent;
-  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
-  transition:transform .18s var(--ease), background .2s var(--ease), color .2s var(--ease); }
-.dl-need.is-on{ background:var(--navy); color:#fff; }
+/* Needs info is a chip, not a navy pill: navy is for + Add alone. Off, a
+   white chip with an amber dot; on, accent-soft with a close mark. */
+.dl-need{ position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 12px; border:1px solid var(--line); border-radius:999px;
+  background:var(--paper); color:var(--ink); font:550 var(--fs-foot) var(--sans); cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+  transition:transform .18s var(--ease), background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease); }
+.dl-need::after{ content:""; position:absolute; inset:-5px -2px; }
+.dl-need-dot{ width:7px; height:7px; border-radius:50%; background:#C98A2E; }
+.dl-need.is-on{ background:var(--accent-soft); border-color:#B9D3EC; color:var(--accent); }
+.dl-need-x{ display:inline-flex; margin-left:1px; opacity:.8; }
+.dl-need-x svg{ width:12px; height:12px; }
 .dl-need:active, .dl-need.is-pressed{ transform:scale(.96); }
 .dl-need:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
-.dl-need-note{ margin:-4px 0 var(--sp-3); font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dl-need-note{ margin:0 0 var(--sp-2); font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
+.dl-need-pen{ display:inline-flex; vertical-align:-2px; }
+.dl-need-pen svg{ width:15px; height:15px; }
+.dl-place{ margin-top:2px; font-size:var(--fs-foot); line-height:1.3; color:var(--ink-soft); overflow-wrap:break-word; }
 .dl-miss{ margin-top:2px; font-size:var(--fs-foot); font-weight:550; line-height:1.3; color:#8A5A12; overflow-wrap:break-word; }
-html[data-theme="dark"] .dl-need{ background:#2A3350; color:#fff; box-shadow:var(--sh-1); }
-html[data-theme="dark"] .dl-need.is-on{ background:#C9D3FF; color:#151C2C; }
+html[data-theme="dark"] .dl-need{ background:#2A3350; border-color:rgba(255,255,255,.08); color:#fff; }
+html[data-theme="dark"] .dl-need.is-on{ background:rgba(46,139,208,.2); border-color:rgba(143,195,238,.35); color:#C9D3FF; }
 html[data-theme="dark"] .dl-miss{ color:#D9BF8A; }
 @media (prefers-reduced-motion: reduce){ .dl-need{ transition:none; } }
 

@@ -1117,8 +1117,8 @@ function groupByLocation(list, keyOf){
 
 // `searching` forces everything open: hiding a match inside a folded group
 // looks exactly like the search returning nothing.
-function groupHeaderHtml(scope, group, searching){
-  const collapsed = !searching && isGroupCollapsed(scope, group.name);
+function groupHeaderHtml(scope, group, searching, fixedOpen){
+  const collapsed = !fixedOpen && !searching && isGroupCollapsed(scope, group.name);
   const enc = encGroup(group.name);
   const n = group.items.length;
   const noun = scope === 'providers' ? 'provider' : 'doctor';
@@ -1129,14 +1129,19 @@ function groupHeaderHtml(scope, group, searching){
         title="Change the icon for ${escapeAttr(group.name)}" aria-label="Change icon">
         ${groupIconHtml(groupIconKeyFor(group.name))}
       </button>
-      <button class="group-toggle" onclick="toggleGroup('${scope}', '${enc}')"
+      ${fixedOpen ? `<div class="group-toggle is-static">
+        <span class="group-head-text">
+          <span class="group-head-name">${escapeHtml(group.name)}</span>
+          <span class="group-head-count">${n} ${n === 1 ? noun : noun + 's'}</span>
+        </span>
+      </div>` : `<button class="group-toggle" onclick="toggleGroup('${scope}', '${enc}')"
         aria-expanded="${collapsed ? 'false' : 'true'}">
         <span class="group-head-text">
           <span class="group-head-name">${escapeHtml(group.name)}</span>
           <span class="group-head-count">${n} ${n === 1 ? noun : noun + 's'}</span>
         </span>
         <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
-      </button>
+      </button>`}
     </div>`;
 }
 
@@ -10524,7 +10529,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sort-btn, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -12400,10 +12405,11 @@ function doctorRegionView(){ return doctorRegionPick || myRegion() || 'all'; }
 function setDoctorRegionView(v){ doctorRegionPick = v; renderContent(); }
 function doctorRegionChipsHtml(view, searching){
   if(searching) return `<p class="rg-note">Searching every region.</p>`;
-  const count = r => r === 'all' ? DOCTOR_DIRECTORY.length
-    : DOCTOR_DIRECTORY.filter(d => { const x = doctorRegion(d); return !x || x === r; }).length;
+  // No counts on the tabs: a doctor with no place is listed in both
+  // regions, so North + South never added up to All. The title's one
+  // number is what's on screen.
   const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All' }]
-    .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)} <span>${count(c.id)}</span></button>`).join('');
+    .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)}</button>`).join('');
   // Not picked yet: one short line instead of the full North / South card.
   const ask = myRegion() ? '' : `<p class="dl-mine">Open on your region next time?
       ${REGIONS.map(r => `<button type="button" onclick="setMyRegion('${r.id}')">${escapeHtml(r.name)}</button>`).join('')}</p>`;
@@ -12472,17 +12478,40 @@ function doctorLastName(name){
 function doctorSortKey(d){ return foldText(doctorLastName(d.name)) + ' ' + foldText(d.name); }
 function doctorLetter(d){ const c = foldText(doctorLastName(d.name)).charAt(0).toUpperCase(); return /[A-Z]/.test(c) ? c : '#'; }
 
-function doctorSortChipsHtml(view, groups, searching){
-  const chips = DOCTOR_SORTS.map(([id, name]) =>
-    `<button type="button" class="dl-sort-btn${id === view ? ' is-on' : ''}" aria-pressed="${id === view}" onclick="setDoctorSort('${id}')">${name}</button>`).join('');
-  // Collapse all sits on this row now, only where groups fold.
-  let fold = '';
-  if(view !== 'az' && !searching && groups.length > 1){
-    const scope = view === 'specialty' ? 'doctors-spec' : 'doctors';
-    const anyOpen = groups.some(g => !isGroupCollapsed(scope, g.name));
-    fold = `<button type="button" class="dl-fold" onclick="setAllGroups('${scope}', '${groups.map(g => encGroup(g.name)).join(',')}', ${anyOpen})">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`;
-  }
-  return `<div class="dl-sort"><div class="dl-sort-chips" role="group" aria-label="Sort doctors by"><span class="dl-sort-lbl">Sort</span>${chips}</div>${fold}</div>`;
+// Sort is a small menu ("Sort: Place"), on one row with Needs info, so the
+// doctors start higher. A native select: the phone's own picker, labelled.
+function doctorSortMenuHtml(view){
+  const opts = DOCTOR_SORTS.map(([id, name]) => `<option value="${id}"${id === view ? ' selected' : ''}>${name}</option>`).join('');
+  const name = (DOCTOR_SORTS.find(s => s[0] === view) || DOCTOR_SORTS[0])[1];
+  return `<label class="dl-sortmenu">Sort: <b>${name}</b><span class="dl-sortmenu-chev" aria-hidden="true">${ICON_CHEVRON_DOWN}</span>`
+    + `<select onchange="setDoctorSort(this.value)" aria-label="Sort doctors by">${opts}</select></label>`;
+}
+// Collapse all, only where three or more groups fold (groups of 1-2 stay open).
+function doctorFoldHtml(view, groups, searching){
+  if(view === 'az' || searching) return '';
+  const folding = groups.filter(g => g.items.length > 2);
+  if(folding.length < 3) return '';
+  const scope = view === 'specialty' ? 'doctors-spec' : 'doctors';
+  const anyOpen = folding.some(g => !isGroupCollapsed(scope, g.name));
+  return `<button type="button" class="dl-fold" onclick="setAllGroups('${scope}', '${folding.map(g => encGroup(g.name)).join(',')}', ${anyOpen})">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`;
+}
+
+/* Places (or specialties) with one or two doctors share one group at the
+   end, "Other places", each card naming its place: a heading per doctor
+   cost a tap to see one name and left half the row empty. A lone small
+   group stays as it is, open. "No location listed" always keeps its own. */
+const OTHER_PLACES_LABEL = 'Other places';
+function mergeSmallDoctorGroups(groups, otherName, keepLast){
+  const small = groups.filter(g => g.items.length < 3 && !keepLast.includes(g.name) && g.name !== otherName);
+  if(small.length < 2) return groups;
+  const rest = groups.filter(g => !small.includes(g));
+  const known = rest.find(g => g.name === otherName);
+  const items = small.flatMap(g => g.items);
+  const other = known ? Object.assign(known, { items: known.items.concat(items), merged: true })
+    : { name: otherName, items, merged: true, pin: 'medifind' };
+  const head = rest.filter(g => g !== other && !keepLast.includes(g.name));
+  const tail = rest.filter(g => g !== other && keepLast.includes(g.name));
+  return [...head, other, ...tail];
 }
 
 /* The doctors you opened last on this phone (ih_recentDoctors, newest
@@ -12514,20 +12543,24 @@ function doctorRecentHtml(){
   return `<div class="dl-recent"><h3 class="dl-recent-h">Recent</h3><div class="dl-recent-row">${items}</div></div>`;
 }
 
-// One group's heading in the Specialty and A-Z views (Place keeps its own,
-// with the place icon you can change).
-function doctorSpecHeadHtml(group, searching){
-  const collapsed = !searching && isGroupCollapsed('doctors-spec', group.name);
+// One group's heading in the Specialty view, and Place's "Other places"
+// (Place keeps its own for real places, with the icon you can change).
+// A group of one or two never folds: no chevron, nothing to tap.
+function doctorGroupFolds(group){ return group.items.length > 2; }
+function doctorSpecHeadHtml(group, searching, scope = 'doctors-spec'){
+  const folds = doctorGroupFolds(group);
+  const collapsed = folds && !searching && isGroupCollapsed(scope, group.name);
   const n = group.items.length;
-  return `<div class="group-head dl-spec-head${collapsed ? ' is-collapsed' : ''}">
-      <span class="group-mark" aria-hidden="true"><img class="group-pin" src="pins/${group.pin}.webp" alt="" loading="lazy" onerror="markLogoFallback(this)"></span>
-      <button class="group-toggle" onclick="toggleGroup('doctors-spec', '${encGroup(group.name)}')" aria-expanded="${collapsed ? 'false' : 'true'}">
-        <span class="group-head-text">
+  const text = `<span class="group-head-text">
           <span class="group-head-name">${escapeHtml(group.name)}</span>
           <span class="group-head-count">${n} ${n === 1 ? 'doctor' : 'doctors'}</span>
-        </span>
+        </span>`;
+  return `<div class="group-head dl-spec-head${collapsed ? ' is-collapsed' : ''}">
+      <span class="group-mark" aria-hidden="true"><img class="group-pin" src="pins/${group.pin || 'medifind'}.webp" alt="" loading="lazy" onerror="markLogoFallback(this)"></span>
+      ${folds ? `<button class="group-toggle" onclick="toggleGroup('${scope}', '${encGroup(group.name)}')" aria-expanded="${collapsed ? 'false' : 'true'}">
+        ${text}
         <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
-      </button>
+      </button>` : `<div class="group-toggle is-static">${text}</div>`}
     </div>`;
 }
 
@@ -12604,6 +12637,7 @@ function renderDoctorDirectory(q){
     });
     const last = n => n === NO_SPECIALTY_LABEL ? 2 : n === OTHER_SPECIALTY_LABEL ? 1 : 0;
     groups = [...map.values()].sort((a, b) => last(a.name) - last(b.name) || a.name.localeCompare(b.name));
+    groups = mergeSmallDoctorGroups(groups, OTHER_SPECIALTY_LABEL, [NO_SPECIALTY_LABEL]);
   } else if(sort === 'az'){
     list.sort((a, b) => doctorSortKey(a).localeCompare(doctorSortKey(b)));
     const map = new Map();
@@ -12611,17 +12645,19 @@ function renderDoctorDirectory(q){
     groups = [...map.entries()].map(([name, items]) => ({ name, items }))
       .sort((a, b) => (a.name === '#') - (b.name === '#') || a.name.localeCompare(b.name));
   } else {
-    groups = groupByLocation(list, d => d.hospitalLocation);
+    groups = mergeSmallDoctorGroups(groupByLocation(list, d => d.hospitalLocation), OTHER_PLACES_LABEL, [NO_LOCATION_LABEL]);
   }
 
-  let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span>${DOCTOR_ADD_BTN}</div>`;
+  // One number on screen, and it's what the list shows.
+  const n = list.length;
+  const sub = doctorNeedsOnly ? `${n} need${n === 1 ? 's' : ''} info` : `${n} doctor${n === 1 ? '' : 's'}`;
+  let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${sub}</span>${DOCTOR_ADD_BTN}</div>`;
   html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
-  html += doctorToolsHtml(needN);
-  if(doctorNeedsOnly) html += `<p class="dl-need-note">Doctors missing a place, a floor or prep terms. Tap one, then the pencil, to fill it in.</p>`;
+  html += doctorToolsHtml(needN, sort, groups, searching);
+  if(doctorNeedsOnly) html += `<p class="dl-need-note">Missing a place, floor or prep terms. Tap one, then <span class="dl-need-pen" role="img" aria-label="the pencil">${ICON_EDIT}</span>.</p>`;
   if(!searching && !doctorNeedsOnly) html += doctorRecentHtml();
-  html += doctorSortChipsHtml(sort, groups, searching);
   if(document.getElementById('doctorTidyOverlay')?.classList.contains('show')) setTimeout(renderDoctorTidy);
   html += `<div class="dl-list is-${sort}">`;
   groups.forEach(group=>{
@@ -12629,12 +12665,14 @@ function renderDoctorDirectory(q){
       html += `<h3 class="dl-letter-head" id="dl-letter-${group.name === '#' ? 'num' : group.name}">${group.name}</h3>`;
     } else if(sort === 'specialty'){
       html += doctorSpecHeadHtml(group, searching);
-      if(!searching && isGroupCollapsed('doctors-spec', group.name)) return;
+      if(!searching && doctorGroupFolds(group) && isGroupCollapsed('doctors-spec', group.name)) return;
     } else {
-      html += groupHeaderHtml('doctors', group, searching);
-      if(!searching && isGroupCollapsed('doctors', group.name)) return;
+      html += group.merged ? doctorSpecHeadHtml(group, searching, 'doctors') : groupHeaderHtml('doctors', group, searching, !doctorGroupFolds(group));
+      if(!searching && doctorGroupFolds(group) && isGroupCollapsed('doctors', group.name)) return;
     }
-    html += `<div class="dl-grid">${group.items.map(doctorListCard).join('')}</div>`;
+    // In "Other places" each card says where; elsewhere the heading does.
+    const showPlace = sort === 'place' && group.merged;
+    html += `<div class="dl-grid">${group.items.map(d => doctorListCard(d, showPlace)).join('')}</div>`;
   });
   html += `</div>`;
   // The letter strip only earns its place once the list runs long.
@@ -12656,7 +12694,7 @@ function doctorResearchCounts(r){
   const tiers = researchTiers(r);
   return { terms: tiers.reduce((n, t) => n + t.terms.length, 0), traps: (tiers.find(t => t.key === 'falsefriends') || { terms: [] }).terms.length };
 }
-function doctorListCard(d){
+function doctorListCard(d, showPlace){
   const id = escapeAttr(d.id);
   const place = locationGroupName(d, d.hospitalLocation);
   const c = doctorListCounts(d);
@@ -12679,6 +12717,7 @@ function doctorListCard(d){
       ${ph}
       <div class="dl-name">${escapeHtml(d.name)}</div>
       ${d.specialty ? `<div class="dl-spec"><span>${escapeHtml(d.specialty).replace(/\//g, '/<wbr>')}</span></div>` : ''}
+      ${showPlace ? `<div class="dl-place">${escapeHtml(place)}</div>` : ''}
       ${doctorNeedsOnly ? doctorMissingHtml(d) : floor ? `<div class="dl-floor">${escapeHtml(floor)}</div>` : ''}
       ${tags || prep ? `<div class="dl-tags">${tags}${prep}</div>` : ''}
     </div>`;
@@ -12710,14 +12749,18 @@ function setDoctorNeedsOnly(on){
   renderContent();
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
-// The row under the region chips: things to tidy, and Needs info.
-function doctorToolsHtml(needN){
+// The one row under the region tabs: Needs info (a chip, so navy stays
+// for + Add), things to tidy, then Sort and Collapse all at the end.
+function doctorToolsHtml(needN, sort, groups, searching){
   const tidy = doctorTidyButtonHtml();
   const banner = tierBackfill.running ? tidy : '';
   const pill = banner ? '' : tidy;
-  const need = needN || doctorNeedsOnly
-    ? `<button type="button" class="dl-need${doctorNeedsOnly ? ' is-on' : ''}" aria-pressed="${doctorNeedsOnly}" onclick="setDoctorNeedsOnly(${!doctorNeedsOnly})">${doctorNeedsOnly ? 'Show all doctors' : `${needN} need${needN === 1 ? 's' : ''} info`}</button>` : '';
-  return banner + (pill || need ? `<div class="dl-tools">${pill}${need}</div>` : '');
+  const need = !(needN || doctorNeedsOnly) ? ''
+    : doctorNeedsOnly
+      ? `<button type="button" class="dl-need is-on" aria-pressed="true" aria-label="Needs info, ${needN}. Show all doctors" onclick="setDoctorNeedsOnly(false)">Needs info · ${needN}<span class="dl-need-x" aria-hidden="true">${ICON_X_TC}</span></button>`
+      : `<button type="button" class="dl-need" aria-pressed="false" onclick="setDoctorNeedsOnly(true)"><span class="dl-need-dot" aria-hidden="true"></span>${needN} need${needN === 1 ? 's' : ''} info</button>`;
+  const end = sort ? `<span class="dl-tools-end">${doctorSortMenuHtml(sort)}${doctorFoldHtml(sort, groups || [], searching)}</span>` : '';
+  return banner + `<div class="dl-tools">${pill}${need}${end}</div>`;
 }
 
 /* Duplicates and doctors on the old terminology: one "N things to tidy"
