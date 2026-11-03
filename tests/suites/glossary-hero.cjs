@@ -31,6 +31,33 @@ function ok(c, m, d) { if (c) { passed++; console.log('  PASS', m); } else { fai
           ok(!s.broken.length && !s.overPin && s.inside && s.hs <= 0, `${id}: "${s.name}" fits, no word broken, clear of the pin`, s);
           ok(s.moreHit, `${id}: ••• is on top and tappable`);
         }
+        // All domains at rest: one colour tile per top-level domain, no word
+        // broken; a tap opens it, Back returns; a search lists terms instead.
+        await go(page, 'all', 900);
+        const t = await page.evaluate(() => {
+          const tiles = [...document.querySelectorAll('#content .dt-tile')];
+          const broken = [];
+          tiles.forEach(x => { const n = x.querySelector('.dt-tile-name'), txt = n.firstChild; let i = 0;
+            for (const w of txt.data.split(' ')) { const r = document.createRange(); r.setStart(txt, i); r.setEnd(txt, i + w.length);
+              if (new Set([...r.getClientRects()].map(q => Math.round(q.top))).size > 1) broken.push(w); i += w.length + 1; } });
+          const first = tiles[0].getBoundingClientRect(), hit = document.elementFromPoint(first.left + first.width / 2, first.top + first.height / 2);
+          return { n: tiles.length, tops: DATA.categories.filter(c => !c.parentId).length, broken, folds: document.querySelectorAll('#content .sec-fold').length,
+            hit: !!hit && tiles[0].contains(hit), h: Math.round(first.height) };
+        });
+        ok(t.n === t.tops && !t.folds && t.h >= 44, 'All domains: one tile per top-level domain', t);
+        ok(!t.broken.length, 'All domains: no tile name broken inside a word', t.broken);
+        ok(t.hit, 'All domains: the first tile takes its own tap');
+        const id = await page.evaluate(() => document.querySelectorAll('#content .dt-tile')[2].id.replace('domain-', ''));
+        await page.click('#content .dt-tile >> nth=2'); await page.waitForTimeout(700);
+        const opened = await page.evaluate(() => activeCategory);
+        await page.evaluate(() => goBack()); await page.waitForTimeout(700);
+        const back = await page.evaluate(() => ({ cat: activeCategory, tiles: document.querySelectorAll('#content .dt-tile').length }));
+        ok(opened === id && back.cat === 'all' && back.tiles === t.n, 'a tile opens its domain; Back returns to the tiles', { id, opened, back });
+        await page.evaluate(() => { searchQuery = 'heart'; renderContent(); }); await page.waitForTimeout(400);
+        const sr = await page.evaluate(() => ({ tiles: document.querySelectorAll('#content .dt-tile').length, cards: document.querySelectorAll('#content .card').length }));
+        ok(!sr.tiles && sr.cards > 0, 'a search on All domains lists matching terms, not tiles', sr);
+        await page.evaluate(() => { searchQuery = ''; renderContent(); });
+
         await go(page, 'genetics', 900);
         const c = await page.evaluate(() => {
           const card = document.querySelector('#content .card[data-term-id]'), cs = getComputedStyle(card);
