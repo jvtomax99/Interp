@@ -367,6 +367,10 @@ is something to review or decide. **Always a phone notification when
 something is ready for his "push"** (Jose, 2026-10-24): every time a
 change is waiting for his OK to go live (its checks passed), notify his
 phone, even if he seems to be watching the chat.
+**Always a phone notification when something goes live** (Jose,
+2026-11-03): once a change is live (its deploy has completed on Vercel,
+with the `BUILD_ID` to find), notify his phone with which change went
+live and its `BUILD_ID`, even if he seems to be watching the chat.
 
 ### How Jose works with AI tools (Jose, 2026-10-29)
 
