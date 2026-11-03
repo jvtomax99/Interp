@@ -312,7 +312,7 @@ come from this alone.
   at 360, 393 and 1440px: no clipped text, no sideways scroll, no new
   input under 16px; the one newly "covered" button per narrow screen is a
   row now sitting behind the floating tab bar at rest (scrolls into view).
-  No guide change. PR TBD.
+  No guide change. PR #185.
 
 - 2026-11-03 Type tidy + `DESIGN.md` (Jose's pick, after reading a
   Cloudflare-style DESIGN.md he found: its type discipline, not its look).
