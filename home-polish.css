@@ -246,6 +246,12 @@
   .topbar-global{height:auto;min-height:calc(44px + env(safe-area-inset-top,0px));padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;}
   .tg-brand-name{font-size:var(--fs-sub);line-height:1.15;}
   .tg-brand-sub{font-size:var(--fs-cap2);line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;}
+  /* Phones say the hospital's short name, "Hackensack UMC" (Jose's pick D,
+     2026-11-03). The full name fit one line only at 10px; on the type scale
+     (11px, nothing smaller) it wrapped to two lines, three with Back, and
+     the bar grew to 55-69px. The short name is one line on every phone and
+     screen, so the bar is the buttons' 45px. Never ellipsis: a cut-off
+     hospital name was rejected before. Computers keep the full name. */
   .tg-icon-btn,.tg-avatar{width:36px;height:36px;}
   .tg-right{gap:6px;}
   /* ---------- Split dock ----------
@@ -1434,3 +1440,12 @@ body:not(.dock-has-smiley) .dock-smiley-bob{animation-play-state:paused;}
    padding and backdrop in index.html; nothing here touches press or focus. */
 .overlay.brain-ov{padding:0;background:#02040B;-webkit-backdrop-filter:none;backdrop-filter:none;align-items:stretch;justify-content:stretch;overflow:hidden;}
 .overlay.brain-ov iframe{flex:1 1 auto;display:block;width:100%;height:100%;border:0;background:#02040B;}
+
+/* The hospital's name in the top bar: full on computers and tablets,
+   short on phones (see the max-width:900px block's note above). */
+.tg-sub-short{display:none;}
+@media (max-width:520px){
+  .tg-sub-full{display:none;}
+  .tg-sub-short{display:inline;}
+  .tg-brand-sub{white-space:nowrap;}
+}

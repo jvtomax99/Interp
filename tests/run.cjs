@@ -46,6 +46,7 @@ const SUITES = [
   ['campus-3d.cjs',      'Campus in 3D: the button, full screen, your progress by message, See it finished, Practise, the X'],
   ['campus-alive.cjs',    'Campus alive: people about, cranes until painted, lit windows, the paint rising after practice'],
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
+  ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
 ];
 const only = process.argv.slice(2);
