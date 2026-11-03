@@ -257,6 +257,13 @@ come from this alone.
 
 ## Later (only when the trigger happens)
 
+- **Type sizes onto the scale (from the type tidy, 2026-11-03).** Trigger:
+  Jose wants the next look pass. ~900 font sizes in plain px over 36
+  values (12/12.5/13 all used) onto the seven `--fs-*`; visible, so
+  before/after screenshots for his OK. Same method as the tidy: census,
+  scripted rewrite by band, a guard in `type-tokens.cjs`. Also his call:
+  the serif-era headings still at 400 (`DESIGN.md`, Known gaps).
+
 - **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
   the app slow on his phone. Home's first draw is the worst startup task
   (~720-890 ms at 4x on the S3b machine): script ~half, style + layout of
@@ -293,6 +300,16 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-11-03 Type tidy + `DESIGN.md` (Jose's pick, after reading a
+  Cloudflare-style DESIGN.md he found: its type discipline, not its look).
+  Letter spacing from seven `--tr-*` tokens by size band (was 37 values),
+  Inter weights 400/500/550/650 (was 9: 600 to 650, 700-900 to 650, 450 to
+  500; `b`/`strong`/bare headings 650), `--fs-subhead` (doesn't exist) fixed
+  to `--fs-sub`. Guard: `tests/suites/type-tokens.cjs`. `DESIGN.md` at the
+  root, pointed to from `AGENTS.md` and `CLAUDE.md`. Measured: 766 of 6,252
+  text pieces changed weight, 544 spacing (median .015em); 0.1-3% of pixels
+  per screen. No guide change: nothing new to learn. PR #179.
 
 - 2026-11-03 New pins, Soft studio 3D (Jose's pick "02" from his own
   example sheets, checked on the real Home first): all 41 `pins/*.webp`
@@ -985,6 +1002,16 @@ come from this alone.
   block. Same mocked-API check. #30 (Jose asked for it in the same PR).
 
 ## Facts (so nobody re-checks)
+
+- **Type (measured 2026-11-03).** Body text is weight 500 (`body` in
+  `app.css`), about 2,000 visible pieces; moving it is not a tidy. Google
+  Fonts serves Inter 100-700 only (no opsz axis asked), so 750/800 render
+  as 700. The browser's `b` is "bolder": 700 under 500, 900 under 650.
+  Inter's dynamic-metrics page moved: rsms.me/inter/dynmetrics is gone,
+  the v3 formula is in the repo at tag v3.19 (`docs/dynmetrics/index.html`):
+  tracking = -0.0223 + 0.185·e^(-0.1745·px) em. The Hub sets ~.01em
+  tighter than it at every size. Dark theme `--sh-*` are black, `rgba(0,0,0,x)`,
+  unlike the navy rule; why is not written down anywhere.
 
 - **Kept from the old Next list when it was tidied (2026-10-23).**
   Knowledge brain data (K1, 2026-10-21): the only per-term, per-person
