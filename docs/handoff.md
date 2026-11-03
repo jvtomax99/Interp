@@ -28,6 +28,10 @@ Set up already (Jose, 2026-11-03):
 call, so nothing was made or spent. Jose was asked to check the secret's value (only the `tsk_` key, no "Bearer" in it,
 no spaces) and re-save it. `docs.tripo3d.ai` and `platform.tripo3d.ai` are blocked (proxy 403); not needed unless Jose
 adds them. If the balance call still fails, stop and tell Jose; do not retry in a loop.
+2026-11-03, third chat: still 401 on the balance call, also with a placeholder `Authorization: Bearer` header (so the
+proxy reaches Tripo and the key itself is refused). Nothing made or spent. Likely causes, unproven: the key belongs to
+Tripo's studio site and not the API platform (platform.tripo3d.ai, its own credits), the key was replaced or deleted,
+or "Bearer" doubled. Jose is checking or replacing the key on platform.tripo3d.ai; the next chat starts after he saves it.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
 Steps:
