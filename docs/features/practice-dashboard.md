@@ -47,7 +47,8 @@ pick, the paint rising and the depth still work as below).** Jose's picks: Blend
 CoreCHI Practice card first, the moving things re-made with it. The scene is the real-map preview
 (`docs/mockups/cchi-city/real-map/`, every building from his OpenStreetMap export), seen from the card's
 camera: diorama.html's direction pulled back to the whole board (`card_capture.cjs`: target -1,-3,-29,
-distance 235, fov 18.77, 960 x 840, rendered at 2x). Three steps, in the real-map README ("The card's
+distance 235, fov 18.77, 960 x 840, rendered at 2x; the pictures are saved at 1.25x that grid, 1200 x 1050,
+an iPhone's own pixels at the card's width, since 2026-11-03: at 960 the phone stretched them 12% and they went soft). Three steps, in the real-map README ("The card's
 pictures"): `card_capture.cjs` (the scene to GLB, every mover posed and exported on its own, each path with
 what the camera sees), `card_render.py` (Blender: the toy look; painted, clay, a coverage mask per domain
 building, height, lit windows; every mover frame alone with the board held out), `card_build.py` (cut into
