@@ -20,7 +20,9 @@ Background: transparent (if not possible, plain flat white #FFFFFF, no
 gradient, no texture).
 
 Look: smooth rounded 3D shapes like soft vinyl toys, satin finish, gentle
-highlights, no outlines, no gold rims, no faces, no text unless listed.
+highlights, no outlines, no gold rims, no text unless listed. No faces on
+organs or objects; people and the teddy bear get simple, friendly faces
+(small dark eyes, a gentle smile).
 Soft studio light from the top left. A very soft shadow below each icon,
 tinted navy blue (never black or gray). Same slight 3/4 camera angle for
 every icon. Simple, bold silhouettes that are still clear at 32 pixels.
@@ -88,17 +90,22 @@ Keys, in order: translate, chat, updates, events, doctor-prep,
 providers, doctor-directory, find-doctor, medifind, directory, ethics,
 practice
 
-## Sheet 4 (5)
+## Sheet 4 (7: five new, two redone)
 
 ```
-Use a grid of 3 columns and 2 rows; leave the last cell empty.
+Use a grid of 4 columns and 2 rows; leave the last cell empty.
 Row 1: open book with letters "A" and "Z" and a stethoscope across it;
 two flashcards with a circular refresh arrow badge (teal cards, navy
-badge); open book with a small compass on it (sky blue).
-Row 2: three stacked books with a bookmark ribbon (blue, coral, teal),
-no words on them; waving hand, palm out, warm medium-brown skin.
+badge); open book with a small compass on it (sky blue);
+three stacked books with a bookmark ribbon (blue, coral, teal), no words
+on them.
+Row 2: waving hand, palm out, warm medium-brown skin;
+brown teddy bear wearing a teal stethoscope, with a friendly face;
+surgeon in teal cap and mask, with friendly eyes, beside an anesthesia
+mask.
 ```
-Keys, in order: medical-terminology, review, userguide, resources, wave
+Keys, in order: medical-terminology, review, userguide, resources, wave,
+pediatrics, surgery-anesthesia
 
 ## Not covered yet
 
