@@ -168,9 +168,18 @@ on the kit ambulance's light bar. Baked by `real-map/cars_bake.py` into `cars.js
 paint and the rest), put in by `cars.js` through `build.py`; built at once, no loader. Measured: front view 538
 draws before and after, 339.6k to 349.9k triangles; `traffic_check.cjs` 300 s all zero; the 3D page 100 to 185 KB
 compressed. Tested and dropped: Quaternius's free trees (textured leaf cards that clash with the clay look, 4-12k
-triangles each against our 2.7k, 16-23 MB each with their textures). Not in this version: the 157 parked cars
-(lots, garage roofs) and the 6 in the drive's lot stay boxes; the bus and helicopter; turning wheels; opening
-ambulance doors (the kit has them as parts); the CoreCHI card's pictures (its car frames change at its next render).
+triangles each against our 2.7k, 16-23 MB each with their textures). Not in this version: the bus and helicopter;
+turning wheels; opening ambulance doors (the kit has them as parts); the CoreCHI card's pictures (its car frames
+change at its next render).
+**Parked cars in 3D: the same kit** (Jose, 2026-11-03, his pick of the free CC0 add-ons; Epic's free City Sample was
+ruled out, its licence is Unreal Engine only). Every parked car (the lots, the three garage roofs, the drive's curb,
+the Visitor Parking court: 163) is `kitParked` in `real-map/cars.js`: sedan, SUV, hatchback, van in turn, in the
+parked colours (`CARC`). They are the kit's slimmed copies, `KIT.park` from `cars_bake.py`: the old box car's size
+(0.95 long, 0.48 wide at most), no faces underneath, each wheel a 10-sided drum with its hub outside (776-924
+triangles against the moving cars' 1.8-2.2k). Their colours are one material each, since the board's merge keeps
+only position, normal and uv. `cars.js` now goes in with `back.js`'s first part, before anything is parked.
+Measured (phone size, front view): 350k to 448k triangles a frame (median), the 3D page 186 to 209 KB compressed. The card's
+pictures are not re-rendered: its parked cars stay boxes until the next render.
 **The campus in 3D** (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to
 preview how the buildings would look once they are completed"; his pick: a 3D
 button opening it full screen, the card stays the fast picture). `.cp-3d` on
