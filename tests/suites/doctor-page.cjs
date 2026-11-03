@@ -54,7 +54,10 @@ async function targets(page) {
       const r = el.getBoundingClientRect();
       if (!r.width || r.top < 0 || r.bottom > innerHeight) continue;
       const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      if (el.closest('.dp-tabs') && (r.left < 0 || r.right > innerWidth)) continue;
+      // A tier tab running off its sideways-scrolling row (the row's own edge, which
+      // is rounded, not only the screen's) is reached by scrolling the row.
+      const row = el.closest('.dp-tabs'), rr = row && row.getBoundingClientRect();
+      if (row && (r.left < Math.max(0, rr.left) || r.right > Math.min(innerWidth, rr.right))) continue;
       const own = y => { const h = document.elementFromPoint(cx, y); return h && (h === el || el.contains(h)); };
       // A control under the glass bar is covered on purpose until it scrolls out.
       const bar = page.querySelector('.dp-bar').getBoundingClientRect();
@@ -193,7 +196,7 @@ async function targets(page) {
         });
         ok(row.en === 'staging' && row.enF === '17px/650', 'English 17/650', row);
         ok(row.es === 'estadificación' && row.esF === '17px/550' && row.esC === hex(row.navy), 'Spanish 17/550 navy', row);
-        ok(row.defF === '14px' && row.defC === hex(row.soft), 'definition 14 ink-soft', row);
+        ok(row.defF === '15px' && row.defC === hex(row.soft), 'definition 15 ink-soft (14 until the type sizes moved onto the scale, 2026-11-03)', row);
 
         // D1b (Jose, 2026-10-20; layout A kept): the trust line over research
         // rows, the glossary as a pill under EN / ES, the tabs stay under the top bar.
