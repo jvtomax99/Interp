@@ -107,8 +107,30 @@ mask.
 Keys, in order: medical-terminology, review, userguide, resources, wave,
 pediatrics, surgery-anesthesia
 
+## Sheet 5 (16: the small icons, round 2)
+
+```
+Use a grid of 4 columns and 4 rows.
+Row 1: house with a small coral heart on the door (sky blue roof, white
+walls); magnifying glass (navy rim, pale blue glass); wooden-style
+signpost with two arrows (teal and blue); four rounded tiles in a 2 by 2
+grid (coral, cyan, deep blue, sunny yellow).
+Row 2: monitor screen showing a pulse line (navy frame, cyan line);
+light bulb (sunny yellow); folder (sunny yellow); phone handset
+(deep blue).
+Row 3: star (sunny yellow); coffee cup with a small heart in the steam
+(cream cup, coral heart); folded map with a location pin (teal map,
+coral pin); shield with a white cross (teal shield).
+Row 4: globe (sky blue sea, teal land); clipboard with a few note lines,
+no checkmarks, no pencil (navy board, cream paper); graduation cap on a
+closed book (navy cap, coral book); trash can with a lid (soft white,
+navy accents).
+```
+Keys, in order: home, search, more, all-tools, procedures, tips,
+templates, contacts, favorites, self-care, locations, infection-control,
+globe, notes, education, trash
+
 ## Not covered yet
 
-The 30 older icons drawn from `pin-icons-sheet.webp` (`pin(x,y)` in
-`pin-icons.js`: All Tools, Checklists, Procedures and others) keep the old
-look until a second round. Claude lists them when the 41 are in.
+Nothing after sheet 5: with it, every icon in `pin-icons.js` is a file in
+`pins/` and `pin-icons-sheet.webp` is no longer drawn.
