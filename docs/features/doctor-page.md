@@ -36,7 +36,7 @@ whichever of the two scrolls.
   (`terms` with no `tiers`) is one "Terms" tab plus the "Older research"
   prompt. The active tab is `activeResearchTier.detail`. The tabs are
   sticky 62px down, right under the top bar.
-- Rows: English 17/650, Spanish 17/550 navy, definition 14 ink-soft;
+- Rows: English 17/650, Spanish 17/550 navy, definition 15 ink-soft (14 until 2026-11-03);
   EN / ES buttons (`speakText`, en-US / es-US), 34px to see and 44px to hit
   (`::after`), 12px apart so the hit areas never touch. Under them the
   glossary pill (`.dp-gl`, 30px, 44px to hit, 14px below ES): "+ Glossary"
@@ -151,3 +151,7 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   and closes when nothing is left. Finding and merging duplicates:
   `features/duplicate-doctors.js`; the old-terminology update:
   `features/backfill.js` (both moved out of `index.html` 2026-10-25).
+
+On a computer the tier tabs don't fit their row (662px of tabs in 608px since
+the sizes moved onto the scale, 632 before) and scroll sideways, as on a phone.
+The tap check skips a tab that runs past the row's own edge.

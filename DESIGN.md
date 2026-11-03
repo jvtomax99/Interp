@@ -57,7 +57,6 @@ anything asked above 700 renders as 700.
 
 | Token | Value | Sizes |
 |---|---|---|
-| `--tr-xs` | `.02em` | under 11px |
 | `--tr-sm` | `0` | 11 to 13px |
 | `--tr-body` | `-.015em` | 14 to 16px |
 | `--tr-head` | `-.02em` | 17 to 18px |
@@ -85,17 +84,20 @@ else, and the banner's own weights and spacing are outside the token rule.
 
 ### Type scale
 
-Tokens `--fs-*` in the "Visual refinement" block of `app.css`. "Weights seen": the most common, measured on 17 screens, phone and desktop (2026-11-03); 17px and up is always 650.
+**Every size is one of these ten steps** (Apple's iPhone type scale, which the Hub's look is built on); `tests/suites/type-tokens.cjs` fails on any other, except display sizes of 36px and up (the Home hello name, big numerals). Nothing is under 11px, Apple's smallest. Tokens `--fs-*` in the "Visual refinement" block of `app.css`. "Weights seen": the most common, measured on 17 screens, phone and desktop (2026-11-03); 17px and up is always 650.
 
 | Role | Token | Size | Weights seen | Spacing |
 |---|---|---|---|---|
+| caption 2 | `--fs-cap2` | 11px | 550, 650 | `--tr-sm` |
 | caption | `--fs-cap` | 12px | 650, 500 | `--tr-sm` |
 | footnote | `--fs-foot` | 13px | 650, 500 | `--tr-sm` |
 | subhead | `--fs-sub` | 15px | 650, 500 | `--tr-body` |
+| callout | `--fs-call` | 16px | 650, 500 | `--tr-body` |
 | headline | `--fs-head` | 17px | 650 | `--tr-head` |
 | title 3 | `--fs-t3` | 20px | 650 | `--tr-title` |
 | title 2 | `--fs-t2` | 22px | 650 | `--tr-title` |
 | title 1 | `--fs-t1` | 28px | 650 | `--tr-big` |
+| large title | `--fs-large` | 34px | (not on those screens) | `--tr-big` |
 
 **Inputs are never under 16px** (iOS zooms the page in on anything smaller).
 
@@ -168,6 +170,6 @@ box-shadow:
 
 ## Known gaps
 
-- **Sizes are not on the scale yet.** About 900 font sizes are plain pixels, over 36 distinct values (12, 12.5 and 13 all in use); only about 65 use a `--fs-*` token. Moving them is a later phase, a visible change that needs Jose's eye.
+- **Sizes set from script:** 8 inline `font-size` values in `index.html`, `features/csv.js` and `features/translate.js` are still plain pixels; the stylesheets are all on the scale (2026-11-03).
 - **Spacing:** padding, margin and gap use a token about 99 times against about 1,737 pixel values. When you touch a component, move it onto the scale rather than adding to the tail.
 - **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`, `.doc-card-name`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
