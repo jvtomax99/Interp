@@ -19,4 +19,4 @@ only the solid pin (alpha 150 to 235 ramps in) and adds its own shadow.
 | 1 (12 organs) | Received 2026-11-03, cuts checked on Home |
 | 2 (12 specialties) | Received 2026-11-03, cut clean. Teddy bear and surgeon came out with blank faces: redone in sheet 4 |
 | 3 (12 tools and people) | Received 2026-11-03, cut clean |
-| 4 | Waiting |
+| 4 (7: books, hand, bear and surgeon redone) | Received 2026-11-03, cut clean. All 41 in `pins/` |
