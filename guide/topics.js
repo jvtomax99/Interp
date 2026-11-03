@@ -314,7 +314,7 @@ const GUIDE_TOPICS = [
 
   { id:'add', section:'change', k:'add new create enter put in word term', q:'How do I add a word?', a:`
     <ol>
-      <li>Open the domain it belongs to and tap <b>+ Add</b> in its colored banner. Or tap <b>Add Term</b> on Home.</li>
+      <li>Open the domain it belongs to and tap <b>+ Add</b>, beside the search box at the bottom of its colored banner. Or tap <b>Add Term</b> on Home.</li>
       <li>Fill in the English, the Spanish, and a short definition.</li>
       <li>Check the domain is right, then tap <b>Save</b>.</li>
     </ol>
