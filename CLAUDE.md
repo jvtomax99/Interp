@@ -82,6 +82,7 @@ between assignments.
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
+| `DESIGN.md` | — | The design reference: colors with roles, type scale, letter spacing by size (`--tr-*`), weights, shadows, motion, do's and don'ts. Any tool reads it before a visual change |
 | `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
 | `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `features/knowledge-brain.js` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
@@ -346,6 +347,12 @@ lost concurrent edits. Do not reintroduce that.
 
 ## Design system
 
+**`DESIGN.md` at the repo root is the reference for every value** (colors with
+their roles, type scale, letter spacing by size, weights, shadows, motion,
+do's and don'ts), written 2026-11-03 so ChatGPT and Jose's other tools work
+from the same page. This section keeps the history behind the rules; when
+a value changes, change `DESIGN.md` too.
+
 Jose's bar is "high end", "dynamic", "alive", and he will notice if a new
 feature does not match. Inherit the existing system rather than inventing:
 CSS custom properties, dark navy sidebar on desktop, floating capsule tab bar
@@ -387,7 +394,9 @@ banner titles and section heads used to be serif. Scale, as tokens in the
 15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
 6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
 cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
-weights 550 and 650. IBM Plex Serif is reserved for quoted human speech (Ask
+weights 550 and 650 (2026-11-03, the type tidy: Inter uses only 400, 500
+for body text, 550 and 650, and letter spacing comes from the `--tr-*`
+token for the size; `tests/suites/type-tokens.cjs` holds it). IBM Plex Serif is reserved for quoted human speech (Ask
 answers, review lines). The Home hello banner is the one exception, Jose's
 pick ("style 8"): the name in Parisienne, the quote in Lora italic, the author
 in small Inter capitals behind a short rule, over two soft local shadings

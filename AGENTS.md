@@ -122,6 +122,11 @@ before `index.html`'s script has run, so it must not read `index.html`'s
 names until then (guard with `typeof`); `tests/suites/load-order.cjs`
 checks that gap.
 
+**`DESIGN.md` (repo root) is the design reference:** colors and their roles,
+the type scale, letter spacing by size (`--tr-*`), the weights (400, 500,
+550, 650), shadows, motion, do's and don'ts. Read it before any visual
+change; change it in the same commit when a value changes.
+
 **The shared design scale** (type `--fs-*`, spacing `--sp-*`, icon sizes
 `--ic-*`) lives in the "Visual refinement" block at the end of `app.css`; Home's half is the block of the same name at the end of
 `home-polish.css`. Use those values instead of new one-off sizes. The

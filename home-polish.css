@@ -26,7 +26,7 @@
 #content.is-home .home-quick-section{margin-top:0;margin-bottom:21px;}
 #content.is-home .home-sec-head{align-items:center;gap:9px;min-height:37px;margin-bottom:7px;}
 #content.is-home .home-sec-head::after{display:none;}
-#content.is-home .home-sec-head h3{min-width:0;font-size:19px;font-weight:600;line-height:1.25;letter-spacing:-.025em;}
+#content.is-home .home-sec-head h3{min-width:0;font-size:19px;font-weight:650;line-height:1.25;letter-spacing:var(--tr-title);}
 #content.is-home .home-sec-more{
   display:inline-flex;align-items:center;gap:4px;padding:9px 0 9px 7px;min-height:44px;
   background:transparent;box-shadow:none;border-radius:9px;font-size:12px;font-weight:500;
@@ -50,7 +50,7 @@
   border:1px solid color-mix(in srgb,var(--section-color,var(--accent)) 32%,var(--line));
   background:color-mix(in srgb,var(--section-color,var(--accent)) 10%,var(--paper));
   color:color-mix(in srgb,var(--section-color,var(--accent)) 62%,var(--ink));
-  font:550 12px/1 var(--sans);letter-spacing:-.005em;
+  font:550 12px/1 var(--sans);letter-spacing:var(--tr-sm);
   transition:transform .15s var(--ease),background .15s var(--ease);
 }
 #content.is-home .home-sec-add-pill svg{width:12px;height:12px;}
@@ -110,7 +110,7 @@
   min-height:143px;padding:14px 13px 11px;gap:8px;
 }
 #content.is-home .home-tile-name,#content.is-home .qa-title,.home-section-grid .qa-title{
-  min-height:2.6em;margin-bottom:0;font-size:14px;font-weight:650;line-height:1.3;letter-spacing:-.015em;
+  min-height:2.6em;margin-bottom:0;font-size:14px;font-weight:650;line-height:1.3;letter-spacing:var(--tr-body);
   white-space:normal;overflow:visible;display:flex;align-items:center;-webkit-line-clamp:unset;
   overflow-wrap:anywhere;
   color:color-mix(in srgb,var(--tile-color,var(--accent)) 56%,var(--ink));
@@ -190,7 +190,7 @@
 #content.is-home .qa-grid{gap:8px;}
 #content.is-home .qa-tile{min-height:81px;padding:10px 3px 9px;gap:8px;border-radius:16px;}
 #content.is-home .qa-tile-icon,#content.is-home .qa-tile-icon .medical-pin{width:29px;height:29px;}
-#content.is-home .qa-tile-label{font-size:12px;line-height:1.25;font-weight:500;white-space:nowrap;letter-spacing:-.015em;}
+#content.is-home .qa-tile-label{font-size:12px;line-height:1.25;font-weight:500;white-space:nowrap;letter-spacing:var(--tr-sm);}
 .home-rail-dots{display:none;justify-content:center;align-items:center;gap:4px;height:7px;}
 .home-rail-dots span{width:4px;height:4px;background:var(--line);border-radius:9px;transition:width .18s var(--ease),background .18s var(--ease);}
 .home-rail-dots span.is-current{width:15px;background:var(--accent-2);}
@@ -209,7 +209,7 @@
   width:34px;height:34px;background:transparent;border:0;box-shadow:none;border-radius:0;
 }
 #domainFolder .folder-icon .medical-pin,#homeSectionOverlay .folder-icon .medical-pin{width:34px;height:34px;}
-#domainFolder .folder-head h3,#homeSectionOverlay .folder-head h3{font-size:20px;line-height:1.2;font-weight:600;letter-spacing:-.025em;}
+#domainFolder .folder-head h3,#homeSectionOverlay .folder-head h3{font-size:20px;line-height:1.2;font-weight:650;letter-spacing:var(--tr-title);}
 #domainFolder .folder-close,#homeSectionOverlay .folder-close{min-width:44px;min-height:44px;border:1px solid var(--line);background:var(--paper);}
 #domainFolder .folder-sub,#homeSectionOverlay .folder-sub{font-size:12px;}
 .home-section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;}
@@ -316,12 +316,12 @@
   .dock-smiley .ask-face{position:absolute;display:block;left:-.4%;top:-4.4%;width:88%;height:88%;margin:0;}
   .dock-smiley .ask-face svg{display:block;width:100%;height:100%;filter:none;clip-path:path('M-60 -90 H140 V37.55 H53.22 A24 24 0 0 1 5.26 37.55 H-60 Z');}
   .dock-smiley .ask-face{filter:drop-shadow(0 2px 3px rgba(5,15,40,.3));}
-  .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:750;line-height:14px;
-    letter-spacing:.02em;color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
+  .dock-smiley-tag{position:absolute;bottom:-5px;left:50%;translate:-50% 0;padding:0 6px;border-radius:7px;font-size:9.5px;font-weight:650;line-height:14px;
+    letter-spacing:var(--tr-xs);color:var(--accent);background:var(--paper);box-shadow:0 0 0 1px var(--line);transition:opacity .2s;}
   .dock-smiley:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
   /* Idle emotes (smileyRider in index.html): the face for each is picked in
      index.html (.is-wink, .is-happy, .is-giggle); a doze sends two z's up. */
-  .dock-smiley-z{position:absolute;right:-3px;top:-7px;font:800 13px/1 var(--sans);color:var(--accent);opacity:0;pointer-events:none;}
+  .dock-smiley-z{position:absolute;right:-3px;top:-7px;font:650 13px/1 var(--sans);color:var(--accent);opacity:0;pointer-events:none;}
   .dock-smiley-z + .dock-smiley-z{right:-11px;top:-17px;font-size:10px;}
   .dock-smiley.is-dozing .dock-smiley-z{animation:dockZ 2.6s ease-out .4s both;}
   .dock-smiley.is-dozing .dock-smiley-z + .dock-smiley-z{animation-delay:1.1s;}
@@ -349,7 +349,7 @@
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
   body.dock-mini .tabbar-btn.is-active,
   body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
-    padding:0;font-size:14px;font-weight:700;letter-spacing:-.01em;color:#0F5FA6;white-space:nowrap;}
+    padding:0;font-size:14px;font-weight:650;letter-spacing:var(--tr-body);color:#0F5FA6;white-space:nowrap;}
   /* The tab's name. Aimed by its class, never a bare span (S7b): a rule
      whose last part is only "span" made every tuck restyle every span on
      the page (~270 of ~490 elements restyled per tuck, Chrome trace).
@@ -554,7 +554,7 @@
      truncation it replaced. break-word only splits a word that genuinely
      cannot fit, and hyphens:auto puts a hyphen in when it has to. */
   #domainFolder .folder-tile-name{
-    font-size:11px; line-height:1.32; font-weight:550; letter-spacing:-.012em;
+    font-size:11px; line-height:1.32; font-weight:550; letter-spacing:var(--tr-sm);
     margin:0; overflow-wrap:break-word; -webkit-hyphens:auto; hyphens:auto;
     /* The tile is a column flexbox with align-items:flex-start, so without
        this the name sizes to its own content and a long word pushes straight
@@ -950,7 +950,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   filter:none;transition:opacity .3s var(--ease);}
 #content.is-home .home-ask-tag{position:absolute;left:50%;top:70px;pointer-events:auto;transform:translateX(-50%);transform-origin:50% -16px;box-sizing:border-box;height:24px;
   display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 9px 0 4px;
-  border-radius:7px;z-index:2;background:rgba(255,255,255,.95);color:#252E6D;font:650 13px/1 var(--sans);letter-spacing:.01em;white-space:nowrap;
+  border-radius:7px;z-index:2;background:rgba(255,255,255,.95);color:#252E6D;font:650 13px/1 var(--sans);letter-spacing:var(--tr-sm);white-space:nowrap;
   box-shadow:0 0 0 1px rgba(255,255,255,.55),0 4px 10px rgba(8,20,48,.34);
   transition:opacity .3s var(--ease),scale .16s var(--ease);}
 #content.is-home .home-ask-tag-mark{width:18px;height:18px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 1px rgba(37,46,109,.1);}
@@ -1007,12 +1007,12 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .smw:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px;}
 #content.is-home .smw-wait{visibility:hidden;}
 #content.is-home .smw-top{display:flex;align-items:center;gap:6px;width:100%;}
-#content.is-home .smw-eyebrow{font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
-#content.is-home .smw-big{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:650;letter-spacing:-.02em;color:var(--ink);}
+#content.is-home .smw-eyebrow{font-size:12px;font-weight:650;letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--ink-faint);}
+#content.is-home .smw-big{display:flex;align-items:center;gap:6px;font-size:17px;font-weight:650;letter-spacing:var(--tr-head);color:var(--ink);}
 #content.is-home .smw-sub{display:block;max-width:100%;font-size:13px;color:var(--ink-soft);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #content.is-home .smw-ok{width:22px;height:22px;border-radius:50%;background:#fff;color:#1D7A4F;display:grid;place-items:center;flex:none;box-shadow:0 1px 2px rgba(20,43,67,.10);}
 #content.is-home .smw-ok svg{width:14px;height:14px;}
-#content.is-home .smw-q{width:22px;height:22px;border-radius:50%;background:#fff;color:#B4610E;display:grid;place-items:center;font:700 13px var(--sans);flex:none;box-shadow:0 1px 2px rgba(20,43,67,.10);}
+#content.is-home .smw-q{width:22px;height:22px;border-radius:50%;background:#fff;color:#B4610E;display:grid;place-items:center;font:650 13px var(--sans);flex:none;box-shadow:0 1px 2px rgba(20,43,67,.10);}
 
 /* Warm-up: tinted like the quick tiles. */
 #content.is-home .smw-warm{background:linear-gradient(150deg,#FFF6E5,#FFE9C7);border-color:#F2D9A8;}
@@ -1037,7 +1037,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
 #content.is-home .smw-rank{display:flex;align-items:center;gap:9px;min-width:0;max-width:100%;}
 #content.is-home .smw-rank > span{min-width:0;}
 #content.is-home .smw-ring{width:52px;height:52px;flex:none;filter:drop-shadow(0 0 6px rgba(1,184,230,.55));}
-#content.is-home .smw-ring text{font:700 20px var(--sans);fill:#fff;}
+#content.is-home .smw-ring text{font:650 20px var(--sans);fill:#fff;}
 #content.is-home .smw-dark .smw-sub{white-space:normal;}
 @media (max-width:359px){#content.is-home .smw-ring{width:44px;height:44px;}}
 #content.is-home .smw-thanks{font-size:12px;font-weight:550;color:#7FE3FF;line-height:1.3;}
@@ -1098,9 +1098,9 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
 #content.is-home .home-tile-icon,#content.is-home .qa-icon,.home-section-grid .qa-icon,
 #content.is-home .home-tile-icon .medical-pin,#content.is-home .qa-icon .medical-pin,.home-section-grid .qa-icon .medical-pin,
 #content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:32px;height:32px;}
-#content.is-home .home-tile-name,#content.is-home .qa-title{font-size:15px;font-weight:650;line-height:1.25;letter-spacing:-.015em;}
+#content.is-home .home-tile-name,#content.is-home .qa-title{font-size:15px;font-weight:650;line-height:1.25;letter-spacing:var(--tr-body);}
 #content.is-home .home-tile-count,#content.is-home .qa-desc,.home-section-grid .qa-desc{font-size:12px;}
-#content.is-home .home-sec-head h3{font-size:20px;font-weight:650;letter-spacing:-.022em;}
+#content.is-home .home-sec-head h3{font-size:20px;font-weight:650;letter-spacing:var(--tr-title);}
 #content.is-home .home-sec-more{font-size:13px;font-weight:550;}
 /* Quick tools: the same tile everywhere, the label one step larger. */
 #content.is-home .qa-tile{min-height:84px;border-radius:17px;}
@@ -1136,7 +1136,7 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .home-search{height:54px;font-size:16px;}
   /* Quick tools read as a row of actions: icon and label side by side. */
   #content.is-home .qa-tile{flex-direction:row;justify-content:flex-start;gap:13px;min-height:64px;padding:13px 17px;}
-  #content.is-home .qa-tile-label{font-size:15px;font-weight:600;text-align:left;}
+  #content.is-home .qa-tile-label{font-size:15px;font-weight:650;text-align:left;}
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:16px;}
   #content.is-home .home-tile-count,#content.is-home .qa-desc{font-size:13px;}
   #content.is-home .home-tile-icon,#content.is-home .qa-icon,
@@ -1411,7 +1411,7 @@ body:not(.dock-has-smiley) .dock-smiley-bob{animation-play-state:paused;}
   border:2px solid #fff; box-shadow:0 2px 6px rgba(1,90,140,0.5); }
 #content.is-home .home-promo-play svg{ width:11px; height:11px; fill:#fff; margin-left:1.5px; }
 /* on a dark glass chip: the banner's bottom fades pale here, too light for white type alone */
-#content.is-home .home-promo-label{ font-size:12px; font-weight:650; letter-spacing:.01em; line-height:1;
+#content.is-home .home-promo-label{ font-size:12px; font-weight:650; letter-spacing:var(--tr-sm); line-height:1;
   padding:3px 9px 4px; border-radius:999px; background:rgba(14,20,56,0.62);
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.16); }
 #content.is-home .home-promo-btn:active,
