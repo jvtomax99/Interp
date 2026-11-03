@@ -257,12 +257,10 @@ come from this alone.
 
 ## Later (only when the trigger happens)
 
-- **Type sizes onto the scale (from the type tidy, 2026-11-03).** Trigger:
-  Jose wants the next look pass. ~900 font sizes in plain px over 36
-  values (12/12.5/13 all used) onto the seven `--fs-*`; visible, so
-  before/after screenshots for his OK. Same method as the tidy: census,
-  scripted rewrite by band, a guard in `type-tokens.cjs`. Also his call:
-  the serif-era headings still at 400 (`DESIGN.md`, Known gaps).
+- **Leftovers from the type work (2026-11-03).** Trigger: the next look
+  pass. 8 inline `font-size` px in script (`index.html`, `features/csv.js`,
+  `features/translate.js`); the serif-era headings at 400 (`DESIGN.md`,
+  Known gaps, Jose's call).
 
 - **Startup, draw less at first (from S3b).** Trigger: Jose finds opening
   the app slow on his phone. Home's first draw is the worst startup task
@@ -300,6 +298,21 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-11-03 Type sizes onto the scale (Jose's picks: 14px to 15, tiny
+  text up to 11). Every stylesheet font size is now one of ten `--fs-*`
+  steps, Apple's iPhone scale: the old seven plus `--fs-cap2` 11,
+  `--fs-call` 16, `--fs-large` 34 (display sizes of 36px and up, and the
+  Home hello banner, left as they were). 315 sizes moved (14 to 15 x108,
+  12.5 to 13 x43, 11.5 to 12 x38, under 11 to 11 x55, the rest by the
+  nearest step, ties upward), 482 already exact became tokens.
+  `--fs-footnote` (didn't exist, a second one) fixed. Letter spacing
+  re-matched to the new sizes (5 rules); `--tr-xs` gone (nothing under 11
+  any more). Guard extended in `type-tokens.cjs`. Measured on 17 screens
+  at 360, 393 and 1440px: no clipped text, no sideways scroll, no new
+  input under 16px; the one newly "covered" button per narrow screen is a
+  row now sitting behind the floating tab bar at rest (scrolls into view).
+  No guide change. PR TBD.
 
 - 2026-11-03 Type tidy + `DESIGN.md` (Jose's pick, after reading a
   Cloudflare-style DESIGN.md he found: its type discipline, not its look).

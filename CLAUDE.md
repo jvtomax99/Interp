@@ -391,7 +391,9 @@ box-shadow:
 **Type.** Inter (variable) for all interface text — headings included; the
 banner titles and section heads used to be serif. Scale, as tokens in the
 "Visual refinement" block of `app.css`: caption 12, footnote 13, subhead
-15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`). Spacing
+15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`), and since
+2026-11-03 Apple's other three, caption2 11, callout 16, large title 34;
+every stylesheet size is one of the ten (36px and up excepted). Spacing
 6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
 cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
 weights 550 and 650 (2026-11-03, the type tidy: Inter uses only 400, 500
@@ -435,7 +437,9 @@ Rules that hold across the whole app:
   overshooting `cubic-bezier`; `tests/suites/springs.cjs` lists the kept ones.
 
 **Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
-is not. The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
+is not. (Type is done since 2026-11-03: sizes, spacing between letters and
+weights all come from tokens. The numbers below are spacing's, and type's
+as they were.) The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
 but little uses them. Measured in `index.html`'s CSS (now `app.css`) on 2026-10-20:
 font-size is set with a token 65 times and with a plain px value about 900
 times, over 36 distinct sizes (12/12.5/13 and 14/14.5/15 all still there,
