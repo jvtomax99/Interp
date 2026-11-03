@@ -24,6 +24,12 @@ Set up already (Jose, 2026-11-03):
 - `tripo3d.ai` and `www.tripo3d.ai` are allowed too, but the website itself answers automated reads with a
   Cloudflare check: do not try to get past it. Read the API docs at docs.tripo3d.ai instead, if reachable.
 
+2026-11-03, second chat: the key was loaded but Tripo still answered 401 "Authentication failed" to the balance
+call, so nothing was made or spent. Jose was asked to check the secret's value (only the `tsk_` key, no "Bearer" in it,
+no spaces) and re-save it. `docs.tripo3d.ai` and `platform.tripo3d.ai` are blocked (proxy 403); not needed unless Jose
+adds them. If the balance call still fails, stop and tell Jose; do not retry in a loop.
+Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
+
 Steps:
 1. Check the flow against Tripo's API docs before spending (from memory, unverified: `POST /v2/openapi/upload` with the
    image gives a token; `POST /v2/openapi/task` `{type:"image_to_model", file:{type:"png", file_token}}` gives a task
