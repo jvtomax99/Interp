@@ -16,17 +16,17 @@
 // on the ground, about 2% of height as in people. The hanging arms swing against the legs, the body leans a little over
 // the leg it stands on. A raised arm (clipboard, tablet) stays up; the one pushing the wheelchair keeps both hands on it.
 // stride() (two poses) stays for the card's walkers and the people standing.
-const WALK = { A: 0.42, ARM: 0.38, SWAY: 0.035, LF: 0.29 };   // leg swing (rad), arm swing, lean, hip to foot
-WALK.CYCLE = 4*WALK.LF*Math.sin(WALK.A);                      // two steps, each as long as the feet travel: 0.47
+const WALK = { A: 0.36, ARM: 0.38, SWAY: 0.035 };   // leg swing (rad), arm swing, lean; hip to foot is each figure's own (userData.lf)
 function walkReady(g){ const u = g.userData; if (u.lift && u.lift[0].userData.y0 !== undefined) return g;
   if (u.made){ const { k, i, gesture } = u.made, old = g.children[0];
-    g.remove(old); old.geometry.dispose(); g.add(bake(bodyParts(k, i, gesture, true)));
-    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx); g.add(m); return { m, sx }; });
+    g.remove(old); old.geometry.dispose(); const nb = bake(bodyParts(k, i, gesture, true)); nb.position.copy(old.position); nb.scale.copy(old.scale); g.add(nb);
+    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx, u.made.up || 0); g.add(m); return { m, sx }; });
     u.lift = g.children.slice(); }
   (u.lift || []).forEach(o => { o.userData.y0 = o.position.y; }); return g; }
-function walkPose(g, ph, a){ const u = g.userData, th = a*WALK.A*Math.sin(ph);
+// s: the distance walked; one cycle is two steps, each as long as the feet travel (4 x hip-to-foot x sin A, in the board's units); half: the other foot first
+function walkPose(g, s, a, half){ const u = g.userData, lf = u.lf || 0.29, ph = s/(4*lf*g.scale.y*Math.sin(WALK.A))*2*Math.PI + (half ? Math.PI : 0), th = a*WALK.A*Math.sin(ph);
   u.legs[0].rotation.x = -th; u.legs[1].rotation.x = th;
-  const bob = -WALK.LF*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
+  const bob = -lf*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
   (u.arms || []).forEach(({ m, sx }) => { m.rotation.x = -sx*a*WALK.ARM*Math.sin(ph); });
   g.rotation.z = u.arms ? -WALK.SWAY*a*Math.cos(ph) : 0; }
 function makePeople(){
@@ -156,9 +156,9 @@ function makePeople(){
     for (const p of on) p.amp += ((p.v > 0.05 ? Math.min(1, p.v/0.35) : 0) - p.amp)*Math.min(1, dt*8); }   // the swing follows the speed
   function draw(){ for (const p of P){ const all = p.pair ? [p.g, p.pair.g] : [p.g];
       if (!p.on){ all.forEach((g, k) => { g.visible = false; g.position.set(p.i*3 + k, -50, 5); }); continue; }
-      const ph = p.step/WALK.CYCLE*2*Math.PI, y = p.r.y;
-      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, ph, p.amp);
-      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, ph + Math.PI, p.amp); } } }
+      const y = p.r.y;
+      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, p.step, p.amp);
+      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, p.step, p.amp, true); } } }
   function reset(t){ P.forEach(p => { p.on = false; p.ri = p.gi = 0; p.next = p.i*2.3 + t; }); }
   // everyone on the board now, partners included, for the cars to see
   const now = () => { const out = []; for (const p of P){ if (!p.on) continue; if (leaderOut(p)) out.push({ x: p.x, z: p.z, vx: p.vx, vz: p.vz });

@@ -1302,11 +1302,15 @@ function bodyParts(kind, i, gesture, loose=false){ const [top, bottom] = WEAR[ki
     if (up && (kind === 'nurse' || kind === 'teal')) P.push(part(new THREE.BoxGeometry(0.14, 0.1, 0.015), 0x22283a, [ax + dir.x*0.24, ay + dir.y*0.24, dir.z*0.24 + 0.03], [-0.6, 0, 0])); }   // tablet
   return P; }
 // a hanging arm as its own mesh, its origin at the shoulder (the same shape bodyParts bakes in), so a walk can swing it
-function armMesh(kind, i, sx){ const top = (WEAR[kind] || WEAR.visitor)[0], skin = SKIN[i % SKIN.length], rot = [0.05, 0, sx*0.22], L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
+function armMesh(kind, i, sx, up=0){ const top = (WEAR[kind] || WEAR.visitor)[0], skin = SKIN[i % SKIN.length], rot = [0.05, 0, sx*0.22], L = 0.2, dir = new THREE.Vector3(0, -1, 0).applyEuler(new THREE.Euler(...rot));
   const m = bake([part(pill2(0.055, L), top, [dir.x*L*0.6, dir.y*L*0.6, dir.z*L*0.6], rot), part(sph(0.05, 8, 6), skin, [dir.x*(L + 0.06), dir.y*(L + 0.06), dir.z*(L + 0.06)])]);
-  m.position.set(sx*0.19, 0.6, 0); return m; }
-// a leg hangs from its hip (the mesh's origin), so a stride is a turn about it
-function leg(colour, shoe=0x2b2626){ return bake([part(pill2(0.062, 0.13), colour, [0, -0.12, 0]), part(sph(0.07, 10, 8), shoe, [0, -0.25, 0.03], [0,0,0], [1, 0.6, 1.4])]); }
+  m.position.set(sx*0.19*ADULT.wide, 0.6 + up, 0); return m; }
+// a leg hangs from its hip (the mesh's origin), so a stride is a turn about it; ext makes it longer
+function leg(colour, shoe=0x2b2626, ext=0){ return bake([part(pill2(0.062, 0.13 + ext), colour, [0, -0.12 - ext/2, 0]), part(sph(0.07, 10, 8), shoe, [0, -0.25 - ext, 0.03], [0,0,0], [1, 0.6, 1.4])]); }
+// adult proportions (Jose, 2026-11-03: "people look goofy"; his pick B of three mocks): the head 0.6 of the old size,
+// the legs 0.22 longer with the body raised to meet them, shoulders 12% wider. A child keeps a bigger head, as children
+// have. The card's walkers are pictures made before this and keep the old shape.
+const ADULT = { up: 0.22, head: 0.6, wide: 1.12, kidUp: 0.12, kidHead: 0.78 };
 function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && i % 2 === 1){ const g = new THREE.Group(), k = kind === 'kid' ? 'kid' : kind, sc = kind === 'kid' ? 0.74 : 1;
   const style = kind === 'elder' ? 'bob' : ['short', 'bun', 'curly', 'long', 'short'][i % 5], hair = kind === 'elder' ? 0xc9c4bc : HAIRC[i % HAIRC.length];
   if (kind === 'wheel'){   // a patient in a wheelchair, pushed by a visitor (as in Jose's reference)
@@ -1318,19 +1322,20 @@ function person(kind, i=0, gesture = (kind === 'doctor' || kind === 'nurse') && 
     C.push(part(pill2(0.14, 0.12), WEAR.elder[0], [0, 0.55, -0.04], [0,0,0], [1, 1, 0.82]), part(pill2(0.06, 0.18), WEAR.elder[1], [-0.07, 0.43, 0.1], [Math.PI/2, 0, 0]), part(pill2(0.06, 0.18), WEAR.elder[1], [0.07, 0.43, 0.1], [Math.PI/2, 0, 0]));
     for (const sx of [-1, 1]) C.push(part(pill2(0.06, 0.12), 0x7a5a3a, [sx*0.07, 0.28, 0.24]), part(sph(0.06, 8, 6), 0x2b2626, [sx*0.07, 0.17, 0.27], [0,0,0], [1, 0.6, 1.3]), part(pill2(0.05, 0.14), WEAR.elder[0], [sx*0.17, 0.55, 0.05], [0.6, 0, 0]));
     const chair = bake(C); g.add(chair);
-    const ph = bake(headParts(SKIN[(i+3) % 5], 'bob', 0xd6d1c9)); ph.position.set(0, 0.86, -0.02); g.add(ph);
+    const ph = bake(headParts(SKIN[(i+3) % 5], 'bob', 0xd6d1c9)); ph.scale.setScalar(ADULT.head); ph.position.set(0, 0.82, -0.02); g.add(ph);
     // the one pushing
-    const pb = bake(bodyParts('sweater', i+1, false).concat([part(pill2(0.055, 0.2), WEAR.sweater[0], [-0.17, 0.62, 0.17], [1.25, 0, 0]), part(pill2(0.055, 0.2), WEAR.sweater[0], [0.17, 0.62, 0.17], [1.25, 0, 0])]));
-    pb.position.set(0, 0, -0.5); g.add(pb);
-    const pHead = bake(headParts(SKIN[(i+1) % 5], 'bun', HAIRC[(i+1) % 5])); pHead.position.set(0, 0.84, -0.5); g.add(pHead);
-    const legs = [-1, 1].map(sx => { const l = leg(WEAR.sweater[1]); l.position.set(sx*0.065, 0.27, -0.5); g.add(l); return l; });
-    g.userData.legs = legs; g.userData.h = 1.1; g.userData.lift = [pb, pHead, ...legs]; g.visible = false; scene.add(g); LIVE.push(g); return g; }
-  const body = bake(bodyParts(k, i, gesture)); g.add(body);
-  const head = bake(headParts(SKIN[i % SKIN.length], style, hair)); head.position.y = 0.84; g.add(head);
-  const legs = [-1, 1].map(sx => { const l = leg(WEAR[k] ? WEAR[k][1] : 0x3d5a8a); l.position.set(sx*0.065, 0.27, 0); g.add(l); return l; });
-  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = 1.1*sc; g.userData.head = head; g.userData.made = { k, i, gesture };
+    const pb = bake(bodyParts('sweater', i+1, false).concat([part(pill2(0.055, 0.2), WEAR.sweater[0], [-0.16, 0.52, 0.17], [1.15, 0, 0]), part(pill2(0.055, 0.2), WEAR.sweater[0], [0.16, 0.52, 0.17], [1.15, 0, 0])]));   // hands on the handles
+    pb.position.set(0, ADULT.up, -0.5); pb.scale.set(ADULT.wide, 1, 1.05); g.add(pb);
+    const pHead = bake(headParts(SKIN[(i+1) % 5], 'bun', HAIRC[(i+1) % 5])); pHead.scale.setScalar(ADULT.head); pHead.position.set(0, 1.02, -0.5); g.add(pHead);
+    const legs = [-1, 1].map(sx => { const l = leg(WEAR.sweater[1], undefined, ADULT.up); l.position.set(sx*0.07, 0.27 + ADULT.up, -0.5); g.add(l); return l; });
+    g.userData.legs = legs; g.userData.h = 1.16; g.userData.lf = 0.29 + ADULT.up; g.userData.lift = [pb, pHead, ...legs]; g.visible = false; scene.add(g); LIVE.push(g); return g; }
+  const up = kind === 'kid' ? ADULT.kidUp : ADULT.up, hs = kind === 'kid' ? ADULT.kidHead : ADULT.head;
+  const body = bake(bodyParts(k, i, gesture)); body.position.y = up; body.scale.set(ADULT.wide, 1, 1.05); g.add(body);
+  const head = bake(headParts(SKIN[i % SKIN.length], style, hair)); head.scale.setScalar(hs); head.position.y = 0.705 + up + 0.2*hs - 0.03; g.add(head);
+  const legs = [-1, 1].map(sx => { const l = leg(WEAR[k] ? WEAR[k][1] : 0x3d5a8a, undefined, up); l.position.set(sx*0.07, 0.27 + up, 0); g.add(l); return l; });
+  g.scale.setScalar(sc); g.userData.legs = legs; g.userData.h = (head.position.y + 0.2*hs + 0.02)*sc; g.userData.lf = 0.29 + up; g.userData.head = head; g.userData.made = { k, i, gesture, up };
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
-function stride(g, f){ g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? 0.45 : -0.45) : 0; }); }
+function stride(g, f){ const a = (g.userData.lf || 0.29) > 0.4 ? 0.3 : 0.45; g.userData.legs.forEach((l, k) => { l.rotation.x = f ? (k ? a : -a) : 0; }); }   // longer legs, a smaller angle: the same step, feet down
 function bus(){ const g = new THREE.Group(); const paint = new THREE.MeshStandardMaterial({ color:0xf4f6fa, roughness:0.35, metalness:0.3 });
   const b1 = new THREE.Mesh(new RoundedBoxGeometry(0.62,0.5,2.2,2,0.08), paint); b1.position.y = 0.42; b1.castShadow = true; g.add(b1);
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.63,0.1,2.2), M(0x2f5fa6)); stripe.position.y = 0.3; g.add(stripe);
@@ -1358,7 +1363,7 @@ function sitter(kind, i=0){ const g = new THREE.Group(), sc = kind === 'kid' ? 0
     P.push(part(pill2(0.052, 0.17), top, [sx*0.18, 0.22, 0.05], [0.5, 0, sx*0.1]), part(sph(0.048, 8, 6), skin, [sx*0.17, 0.12, 0.15])); }
   g.add(bake(P));
   const style = kind === 'elder' ? 'bob' : ['short', 'bun', 'curly', 'long', 'short'][i % 5], hair = kind === 'elder' ? 0xc9c4bc : HAIRC[i % HAIRC.length];
-  const head = bake(headParts(skin, style, hair)); head.position.y = 0.58; g.add(head);
+  const hs = kind === 'kid' ? ADULT.kidHead : ADULT.head, head = bake(headParts(skin, style, hair)); head.scale.setScalar(hs); head.position.y = 0.455 + 0.2*hs - 0.03; g.add(head);
   g.scale.setScalar(sc); g.userData.head = head; g.userData.hair = new THREE.Object3D();
   g.visible = false; scene.add(g); LIVE.push(g); return g; }
 function turnHead(g, f){ const a = f ? 0.55 : 0; g.userData.head.rotation.y = a; g.userData.hair.rotation.y = a; g.userData.hair.position.x = f ? 0.012 : 0; }
@@ -1595,17 +1600,17 @@ const along = (pts, u) => { const seg = []; let L = 0; for (let i = 1; i < pts.l
 // on the ground, about 2% of height as in people. The hanging arms swing against the legs, the body leans a little over
 // the leg it stands on. A raised arm (clipboard, tablet) stays up; the one pushing the wheelchair keeps both hands on it.
 // stride() (two poses) stays for the card's walkers and the people standing.
-const WALK = { A: 0.42, ARM: 0.38, SWAY: 0.035, LF: 0.29 };   // leg swing (rad), arm swing, lean, hip to foot
-WALK.CYCLE = 4*WALK.LF*Math.sin(WALK.A);                      // two steps, each as long as the feet travel: 0.47
+const WALK = { A: 0.36, ARM: 0.38, SWAY: 0.035 };   // leg swing (rad), arm swing, lean; hip to foot is each figure's own (userData.lf)
 function walkReady(g){ const u = g.userData; if (u.lift && u.lift[0].userData.y0 !== undefined) return g;
   if (u.made){ const { k, i, gesture } = u.made, old = g.children[0];
-    g.remove(old); old.geometry.dispose(); g.add(bake(bodyParts(k, i, gesture, true)));
-    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx); g.add(m); return { m, sx }; });
+    g.remove(old); old.geometry.dispose(); const nb = bake(bodyParts(k, i, gesture, true)); nb.position.copy(old.position); nb.scale.copy(old.scale); g.add(nb);
+    u.arms = [-1, 1].filter(sx => !(gesture && sx === 1)).map(sx => { const m = armMesh(k, i, sx, u.made.up || 0); g.add(m); return { m, sx }; });
     u.lift = g.children.slice(); }
   (u.lift || []).forEach(o => { o.userData.y0 = o.position.y; }); return g; }
-function walkPose(g, ph, a){ const u = g.userData, th = a*WALK.A*Math.sin(ph);
+// s: the distance walked; one cycle is two steps, each as long as the feet travel (4 x hip-to-foot x sin A, in the board's units); half: the other foot first
+function walkPose(g, s, a, half){ const u = g.userData, lf = u.lf || 0.29, ph = s/(4*lf*g.scale.y*Math.sin(WALK.A))*2*Math.PI + (half ? Math.PI : 0), th = a*WALK.A*Math.sin(ph);
   u.legs[0].rotation.x = -th; u.legs[1].rotation.x = th;
-  const bob = -WALK.LF*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
+  const bob = -lf*(1 - Math.cos(th)); (u.lift || []).forEach(o => { o.position.y = o.userData.y0 + bob; });
   (u.arms || []).forEach(({ m, sx }) => { m.rotation.x = -sx*a*WALK.ARM*Math.sin(ph); });
   g.rotation.z = u.arms ? -WALK.SWAY*a*Math.cos(ph) : 0; }
 function makePeople(){
@@ -1735,9 +1740,9 @@ function makePeople(){
     for (const p of on) p.amp += ((p.v > 0.05 ? Math.min(1, p.v/0.35) : 0) - p.amp)*Math.min(1, dt*8); }   // the swing follows the speed
   function draw(){ for (const p of P){ const all = p.pair ? [p.g, p.pair.g] : [p.g];
       if (!p.on){ all.forEach((g, k) => { g.visible = false; g.position.set(p.i*3 + k, -50, 5); }); continue; }
-      const ph = p.step/WALK.CYCLE*2*Math.PI, y = p.r.y;
-      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, ph, p.amp);
-      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, ph + Math.PI, p.amp); } } }
+      const y = p.r.y;
+      p.g.visible = leaderOut(p); p.g.position.set(p.x, y, p.z); p.g.rotation.y = p.h; walkPose(p.g, p.step, p.amp);
+      if (p.pair){ const [x, z, h] = partnerAt(p); p.pair.g.visible = partnerOut(p); p.pair.g.position.set(x, y, z); p.pair.g.rotation.y = h; walkPose(p.pair.g, p.step, p.amp, true); } } }
   function reset(t){ P.forEach(p => { p.on = false; p.ri = p.gi = 0; p.next = p.i*2.3 + t; }); }
   // everyone on the board now, partners included, for the cars to see
   const now = () => { const out = []; for (const p of P){ if (!p.on) continue; if (leaderOut(p)) out.push({ x: p.x, z: p.z, vx: p.vx, vz: p.vz });
