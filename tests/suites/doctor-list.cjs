@@ -45,7 +45,10 @@ async function load(page, sort, extra) {
         // Default: Place, no Recent until a doctor is opened.
         await load(page, null, []);
         let s = await page.evaluate(() => ({
-          on: [...document.querySelectorAll('#content .dl-sort-btn')].map(b => b.textContent + ':' + b.getAttribute('aria-pressed')),
+          on: document.querySelector('#content .dl-sortmenu select')?.value + ':' + document.querySelector('#content .dl-sortmenu b')?.textContent,
+          tabs: [...document.querySelectorAll('#content .rg-filter button')].map(b => b.textContent.trim()),
+          sub: document.querySelector('#content .dl-head .sub')?.textContent,
+          foldInRow: !!document.querySelector('#content .dl-tools .dl-fold'),
           recent: !!document.querySelector('#content .dl-recent'),
           heads: [...document.querySelectorAll('#content .dl-list .group-head-name')].map(e => e.textContent),
           headBg: getComputedStyle(document.querySelector('#content .dl-list .group-head')).backgroundColor,
@@ -55,15 +58,16 @@ async function load(page, sort, extra) {
           mine: [...document.querySelectorAll('#content .dl-mine button')].map(b => b.textContent),
           bigAsk: !!document.querySelector('#content .rg-ask'),
         }));
-        ok(s.on.join() === 'Place:true,Specialty:false,A–Z:false', 'opens sorted by Place', s.on);
+        ok(s.on === 'place:Place', 'opens sorted by Place, said in the Sort menu', s.on);
+        ok(s.tabs.join() === 'North,South,All' && s.sub === '25 doctors', 'region tabs carry no numbers; the title has the one that is listed', s);
         ok(!s.recent, 'no Recent before any doctor is opened');
         ok(s.heads[0] === 'Hackensack University Medical Center' && s.heads.at(-1) === 'No location listed', 'Place groups as before, no place last', s.heads);
         ok(/rgba\(0, 0, 0, 0\)|transparent/.test(s.headBg) && s.headShadow === 'none', 'place headings are labels, not cards', [s.headBg, s.headShadow]);
-        ok(s.fold === 'Collapse all' && !s.oldFold, 'Collapse all sits on the Sort row', s);
+        ok(s.fold === 'Collapse all' && s.foldInRow && !s.oldFold, 'Collapse all sits on the one tools row', s);
         ok(s.mine.join() === 'North,South' && !s.bigAsk, 'region asked in one short line', s);
 
         // Every new control: 44px to hit, and nothing else on top of it.
-        const bad = await page.evaluate(() => [...document.querySelectorAll('#content .dl-sort-btn, #content .dl-fold, #content .dl-mine button')].filter(el => {
+        const bad = await page.evaluate(() => [...document.querySelectorAll('#content .dl-sortmenu, #content .dl-fold, #content .dl-mine button')].filter(el => {
           const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
           const own = y => { const h = document.elementFromPoint(cx, y); return h && (h === el || el.contains(h)); };
           return r.height < 30 || !own(cy) || !own(cy - 19) || !own(cy + 19);
@@ -80,7 +84,7 @@ async function load(page, sort, extra) {
         await page.evaluate(() => closeDoctorDirDetail());
 
         // Specialty.
-        await page.click('#content .dl-sort-btn:has-text("Specialty")'); await pause(page);
+        await page.selectOption('#content .dl-sortmenu select', 'specialty'); await pause(page);
         s = await page.evaluate(() => {
           const groups = {};
           document.querySelectorAll('#content .dl-list .group-head').forEach(h => {
@@ -93,14 +97,15 @@ async function load(page, sort, extra) {
         ok(s.groups['Neurology']?.includes('Dr. Maria Kim'), 'Pediatric Neurology files under Neurology', s.groups['Neurology']);
         ok(s.groups['Oncology & Hematology']?.includes('Dr. Luis Patel'), 'Hematology/Oncology files under Oncology & Hematology', s.groups);
         ok(s.groups['Orthopedics & Rehab']?.includes('Dr. David Garcia'), 'Orthopedic Surgery under Orthopedics, not Surgery', s.groups['Orthopedics & Rehab']);
-        ok(s.groups['Mental Health'] && s.groups['Radiology'], 'Psychiatry and Radiology get their own groups', s.names);
+        ok(!s.groups['Mental Health'] && s.groups['Other specialties']?.includes('Dr. Rosa Shah') && s.groups['Other specialties']?.includes('Dr. James Lopez'),
+          'specialties with 1-2 doctors join Other specialties', s.groups);
         ok(s.names.at(-2) === 'Other specialties' && s.names.at(-1) === 'No specialty listed', 'unknown and blank specialties last', s.names);
         await page.evaluate(() => toggleGroup('doctors-spec', encGroup('Cardiology'))); await pause(page);
         ok(await page.evaluate(() => { const h = [...document.querySelectorAll('#content .dl-spec-head')].find(x => x.textContent.includes('Cardiology')); return h.classList.contains('is-collapsed') && !h.nextElementSibling.classList.contains('dl-grid'); }), 'a specialty folds away');
         await page.evaluate(() => toggleGroup('doctors-spec', encGroup('Cardiology')));
 
         // A-Z by last name, with the letter strip.
-        await page.click('#content .dl-sort-btn:has-text("A–Z")'); await pause(page);
+        await page.selectOption('#content .dl-sortmenu select', 'az'); await pause(page);
         s = await page.evaluate(() => ({
           letters: [...document.querySelectorAll('#content .dl-letter-head')].map(e => e.textContent),
           first: [...document.querySelectorAll('#content .dl-name')].slice(0, 3).map(e => e.textContent),
@@ -160,19 +165,48 @@ async function load(page, sort, extra) {
         s = await page.evaluate(() => ({ cards: document.querySelectorAll('#content .dl-card').length, miss: document.querySelectorAll('#content .dl-miss').length,
           first: document.querySelector('#content .dl-miss')?.textContent, recent: !!document.querySelector('#content .dl-recent'),
           note: !!document.querySelector('#content .dl-need-note'), btn: document.querySelector('#content .dl-need')?.textContent,
+          sub: document.querySelector('#content .dl-head .sub')?.textContent,
+          noteLines: (() => { const n = document.querySelector('#content .dl-need-note'); return n ? Math.round(n.getBoundingClientRect().height / parseFloat(getComputedStyle(n).lineHeight)) : 0; })(),
           pressed: document.querySelector('#content .dl-need')?.getAttribute('aria-pressed') }));
         ok(s.cards === s.miss && s.cards > 0 && /^Missing: /.test(s.first), 'filter on: only those doctors, each says what is missing', s);
-        ok(!s.recent && s.note && s.btn === 'Show all doctors' && s.pressed === 'true', 'filter on: note, way back, no Recent', s);
-        const needHit = await page.evaluate(() => { const el = document.querySelector('#content .dl-need'), r = el.getBoundingClientRect();
-          return r.height >= 44 && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === el; });
-        ok(needHit, 'the button is 44px and nothing covers it');
+        ok(!s.recent && s.note && s.btn === `Needs info · ${s.cards}` && s.pressed === 'true', 'filter on: a chip with the count and a close mark, a note, no Recent', s);
+        ok(s.sub === `${s.cards} need info`, 'filter on: the title says how many need info', s.sub);
+        if (device === 'iphone') ok(s.noteLines === 1, 'the note is one line on a phone', s.noteLines);
+        const needHit = await page.evaluate(() => { const el = document.querySelector('#content .dl-need'), r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          const own = y => { const h = document.elementFromPoint(cx, y); return h && (h === el || el.contains(h)); };
+          return own(cy) && own(cy - 21) && own(cy + 21) && getComputedStyle(el).backgroundColor !== 'rgb(37, 46, 109)'; });
+        ok(needHit, 'the chip is 44px to hit, nothing covers it, and it is not navy');
         await page.click('#content .dl-need'); await pause(page);
         ok(await page.evaluate(() => document.querySelectorAll('#content .dl-card').length === DOCTOR_DIRECTORY.length && !doctorNeedsOnly), 'Show all doctors brings everyone back');
 
+        // Small places: one "Other places" group, each card naming its place;
+        // a lone small group stays open with nothing to fold. All on one row.
+        const SMALL = ['Hackensack University Medical Center', 'Hackensack University Medical Center', 'Hackensack University Medical Center',
+          '155 Polifly Road', '20 Prospect Ave', '20 Prospect Ave', 'Teaneck office', ''].map((p, i) => ({ id: 'sm' + i, name: 'Dr. Small ' + 'ABCDEFGH'[i],
+          specialty: 'Cardiology', hospitalLocation: p, locationDetails: '', region: 'north', customTerms: [] }));
+        await load(page, 'place', []);
+        await page.evaluate(ds => { DOCTOR_DIRECTORY.length = 0; ds.forEach(d => DOCTOR_DIRECTORY.push(d)); renderContent(); }, SMALL);
+        await pause(page);
+        s = await page.evaluate(() => {
+          const heads = [...document.querySelectorAll('#content .dl-list .group-head')];
+          const other = heads.find(h => h.textContent.includes('Other places'));
+          const grid = other && other.nextElementSibling;
+          const noLoc = heads.find(h => h.textContent.includes('No location listed'));
+          const row = document.querySelector('#content .dl-tools'), first = row && [...row.children];
+          return { names: heads.map(h => h.querySelector('.group-head-name').textContent),
+            places: grid ? [...grid.querySelectorAll('.dl-place')].map(e => e.textContent) : [],
+            noLocToggle: noLoc && !!noLoc.querySelector('button.group-toggle'), noLocCards: noLoc && noLoc.nextElementSibling?.classList.contains('dl-grid'),
+            oneRow: first && new Set(first.map(c => Math.round(c.getBoundingClientRect().top + c.getBoundingClientRect().height / 2))).size === 1 };
+        });
+        ok(s.names.join('|') === 'Hackensack University Medical Center|Other places|No location listed', 'places with 1-2 doctors share Other places, before No location listed', s.names);
+        ok(s.places.join('|') === '155 Polifly Road|20 Prospect Ave|20 Prospect Ave|Teaneck office', 'each card in Other places names its place', s.places);
+        ok(s.noLocToggle === false && s.noLocCards, 'a group of one is open, with nothing to fold', s);
+        ok(s.oneRow, 'Needs info and Sort share one row', s);
+
         // Dark mode keeps the chips readable.
         await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark')); await pause(page, 400);
-        const dark = await page.evaluate(() => { const b = document.querySelector('#content .dl-sort-btn.is-on'); const cs = getComputedStyle(b); return [cs.color, cs.backgroundColor]; });
-        ok(dark[0] !== dark[1] && dark[1] !== 'rgb(37, 46, 109)', 'dark mode: the picked sort is light on dark page', dark);
+        const dark = await page.evaluate(() => { const b = document.querySelector('#content .dl-need'); const cs = getComputedStyle(b); return [cs.color, cs.backgroundColor]; });
+        ok(dark[0] !== dark[1] && dark[1] !== 'rgb(255, 255, 255)', 'dark mode: the Needs info chip is light on dark', dark);
         await page.evaluate(() => document.documentElement.removeAttribute('data-theme'));
 
         ok(!errors.length, 'no page errors', errors);

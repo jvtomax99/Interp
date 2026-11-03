@@ -115,7 +115,7 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   opened on this phone, newest first (`ih_recentDoctors`, 8 kept, written by
   `openDoctorDirDetail` via `noteRecentDoctor`); "Dr. " + last name, with the
   first initial when two share one; hidden while searching. Then **Sort**
-  (`doctorSortChipsHtml`, `ih_doctorSort`, default Place): Place
+  (`doctorSortMenuHtml`, `ih_doctorSort`, default Place): Place
   (`groupByLocation`, as before), Specialty (`doctorSpecialtyGroup`: the
   `SPECIALTY_GROUPS` list, specialty regex to a plain name and a pin, organ
   first so Pediatric Neurology is Neurology and Orthopedic Surgery is
@@ -123,8 +123,8 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   scope `doctors-spec`), A to Z (`doctorLastName`: title, middle initials
   and credentials dropped, the last word; one heading per letter; the
   letter strip `doctorLettersHtml` on the right edge, tap or slide, only
-  past 20 doctors and 3 letters, never while searching). Collapse all is on
-  the Sort row (`dl-fold`) in Place and Specialty. Group headings in the
+  past 20 doctors and 3 letters, never while searching). Collapse all (`dl-fold`)
+  ends the tools row, only when three or more groups fold. Group headings in the
   list are labels (`.dl-list .group-head`: no card, 17px name). The region
   question here is one line (`dl-mine`), not the full card. The specialty
   on a card breaks at its slash (`<wbr>`), never inside a word. Glossary
@@ -142,6 +142,21 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   no Recent, and "Show all doctors" to go back. Photos don't count: most
   doctors may never have one, so a count including them would cover nearly
   everyone.
+- **Cleanup** (2026-11-03, Jose's pick "Mock up fixes 1-4", mockup OK'd
+  in chat): the region tabs carry no numbers (a doctor with no place is in
+  both North and South, so the three never added up); the title's one
+  number is the list on screen, "25 doctors" or "17 need info". One row
+  under the tabs (`doctorToolsHtml`): the Needs info chip (white with an
+  amber dot; on, accent-soft "Needs info · N ✕", never navy: navy is for
+  + Add), things to tidy, then "Sort: Place" (`doctorSortMenuHtml`, a
+  native select laid over the words; the sort chips are gone) and Collapse
+  all. The filter's note is one line, the pencil drawn. Groups of 1-2
+  doctors never fold (`doctorGroupFolds`: a static heading, no chevron);
+  two or more of them merge (`mergeSmallDoctorGroups`) into "Other places"
+  after the big places, before "No location listed", each card naming its
+  place (`.dl-place`), or into "Other specialties" in Specialty. Left out:
+  the topbar's three lines on phones, the search glyph, the panel behind
+  search, data typos ("155 Polify Road", "Don IMUS").
 - Navy "+ Add" (`DOCTOR_ADD_BTN`) at the end of the section head; the
   topbar has no add button on this screen.
 - Duplicates and old terminology: one "N things to tidy" button
