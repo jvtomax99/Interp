@@ -7070,7 +7070,12 @@ function domainBannerHtml(cat){
     : `${count} term${count === 1 ? '' : 's'}${kids ? ` · ${kids} subgroup${kids === 1 ? '' : 's'}` : ''}`;
   const parent = !isAll && cat.parentId ? DATA.categories.find(c => c.id === cat.parentId) : null;
   const icon = isAll ? DOMAIN_ICONS.layers : (DOMAIN_ICONS[cat.icon] || DOMAIN_ICONS.sparkle);
-  return `<section class="domain-banner" style="--dom:${color};" aria-label="${escapeAttr(name)}">
+  // The big title steps down for a long name, so it never breaks mid-word
+  // beside the pin: 34px up to 11 letters, 28px up to 18, else 22px with a
+  // smaller pin ("Peds ENT, Urology, Endocrinology & Nephrology").
+  const longestWord = Math.max(...name.split(/\s+/).map(w => w.length));
+  const size = name.length <= 11 && longestWord <= 11 ? '' : name.length <= 18 && longestWord <= 11 ? ' is-long' : ' is-longer';
+  return `<section class="domain-banner${size}" style="--dom:${color};" aria-label="${escapeAttr(name)}">
       <div class="domain-banner-row">
         <span class="domain-banner-pin" aria-hidden="true">${icon}</span>
         <div class="domain-banner-text">
