@@ -309,7 +309,7 @@ come from this alone.
   to `--fs-sub`. Guard: `tests/suites/type-tokens.cjs`. `DESIGN.md` at the
   root, pointed to from `AGENTS.md` and `CLAUDE.md`. Measured: 766 of 6,252
   text pieces changed weight, 544 spacing (median .015em); 0.1-3% of pixels
-  per screen. No guide change: nothing new to learn. PR TBD.
+  per screen. No guide change: nothing new to learn. PR #179.
 
 - 2026-10-29 Sound-Alikes, first version (Jose approved the plan in the
   chat "Nesting feature application"): `soundalikes/list.js` (45 sets),
