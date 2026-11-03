@@ -160,6 +160,17 @@ reflections and a few warm rooms, roof parapets. Daylight is the default
 (`?dusk` for the golden hour); the card's colours in `app.css` and
 `sky.webp` (`window.__sky`) match it. `LITE` (the live 3D test) uses plainer
 stones and simpler spheres: ~440k triangles instead of ~940k.
+**Cars in 3D: Kenney's Car Kit** (Jose, 2026-11-03: free online models to "upscale" the campus; his pick, cars on
+the road only). Every moving car and ambulance (`vehicle('car'|'amb')`) is a model from Kenney's Car Kit (CC0,
+`docs/mockups/cchi-city/assets/kenney-car-kit/`): sedan, SUV, hatchback and van in turn, the yellow cars taxis,
+repainted in each car's own colour, no wider than the hand-made car was (0.52; ambulance 0.64), its flashing lamps
+on the kit ambulance's light bar. Baked by `real-map/cars_bake.py` into `cars.json` (191 KB; each model two meshes,
+paint and the rest), put in by `cars.js` through `build.py`; built at once, no loader. Measured: front view 538
+draws before and after, 339.6k to 349.9k triangles; `traffic_check.cjs` 300 s all zero; the 3D page 100 to 185 KB
+compressed. Tested and dropped: Quaternius's free trees (textured leaf cards that clash with the clay look, 4-12k
+triangles each against our 2.7k, 16-23 MB each with their textures). Not in this version: the 157 parked cars
+(lots, garage roofs) and the 6 in the drive's lot stay boxes; the bus and helicopter; turning wheels; opening
+ambulance doors (the kit has them as parts); the CoreCHI card's pictures (its car frames change at its next render).
 **The campus in 3D** (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to
 preview how the buildings would look once they are completed"; his pick: a 3D
 button opening it full screen, the card stays the fast picture). `.cp-3d` on
