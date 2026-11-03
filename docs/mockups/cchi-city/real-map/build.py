@@ -111,6 +111,9 @@ rep("function stand(kind, i, x, z, ry=0, f=0){ ","function stand(kind, i, x, z, 
 # the garden moves into the open court between Link Pavilion and the Patient Pavilion
 # (the pond garden is dropped above: back.js builds the real little park beside the pavilion in its place)
 # traffic: Prospect's cars run the board's full width; cars on 2nd Street, Atlantic and Essex; walkers on their sidewalks
+# the moving cars and ambulances: Kenney's Car Kit (cars.js, its data cars.json from cars_bake.py)
+rep("for (const [i,[lx,ly,lz]] of [[-0.17,0.63,0.55],[0.17,0.63,0.55]].entries())", "for (const [i,[lx,ly,lz]] of (AMB.userData.lamps || [[-0.17,0.63,0.55],[0.17,0.63,0.55]]).entries())")   # on the kit ambulance's light bar
+rep("const CAR_IN = vehicle('car', 0xf2c94c), CAR_OUT", open(os.path.join(HERE, 'cars.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "const CAR_IN = vehicle('car', 0xf2c94c), CAR_OUT")
 rep("const CAR_IN2 = vehicle('car', 0x2b2f3a);","""const CAR_IN2 = vehicle('car', 0x2b2f3a);
 const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlA',0x5b6170,17000],['atlB',0xc9583a,19000],['essexA',0xf2c94c,12000],['essexB',0x3aa6a0,13000]]
   .map(([p, c, dur]) => ({ g: vehicle('car', c), path: SCN.paths[p].map(([x, z]) => [x, 0.2, z]), dur }));""")

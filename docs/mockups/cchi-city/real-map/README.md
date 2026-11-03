@@ -120,6 +120,17 @@ each other. Use the map data for which streets are one-way." `traffic.js` (put i
   heading, so stopping or turning there needs new renders); the people do not wait for cars yet (prompt 3); lane changes,
   overtaking, parking manoeuvres.
 
+## Cars: Kenney's Car Kit (2026-11-03)
+
+Jose's ask: use free models from online to upscale the campus; his pick after a test in this scene, cars on the road only
+(Quaternius's free trees looked worse than ours and weigh more). `python3 cars_bake.py` reads the six models in
+`../assets/kenney-car-kit/` (CC0, `LICENSE.md` there) and writes `cars.json`: per model its paint and the rest as two
+meshes (positions on a 16-bit grid, welded, the rest coloured per vertex), turned to face +z, no wider than the
+hand-made car (0.52, ambulance 0.64), wheels at y 0.1; the ambulance also gets its light bar's two lamps. `build.py`
+puts `cars.js` (with the data) just before `const CAR_IN`: `vehicle()` builds the hand-made car with its lights, then
+swaps the body for the model. `ambLights` reads `AMB.userData.lamps`. `traffic_check.cjs` (300 s): all zero; wider
+cars (0.61) clipped each other at the drive's mouth, hence the width cap.
+
 ## People (2026-10-29)
 
 Jose's prompt 3: "sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing
