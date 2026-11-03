@@ -304,8 +304,11 @@ lost concurrent edits. Do not reintroduce that.
   pill is explicit up-navigation; the Back button does pure history retracing.
   This broke three times — do not "simplify" it.
 - **Subgroups start collapsed.** A parent domain lists its subgroups first,
-  as headings, then its own General terms; All domains lists every domain the
-  same way. A search or a Slang filter opens whichever sections have matches.
+  as headings, then its own General terms. All domains at rest is a grid of
+  colour tiles, one per top-level domain (`domainTilesHtml`; a tap is
+  `setCategory`, so Back retraces it, 2026-11-03); while searching or with a
+  Slang filter it lists every domain as headings, as before. A search or a
+  Slang filter opens whichever sections have matches.
   `domainRenderOrder()` follows that order (open subgroups, then the parent).
 - **Press feedback on touch** comes from the `LIFTS` list in `index.html`
   (the `.is-pressed` class). A domain family card is marked as a whole, not

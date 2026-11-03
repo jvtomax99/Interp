@@ -8399,6 +8399,15 @@ function renderContent(){
   const foldIcons = activeCategory === 'all' ? new Map(getDomainTiles().map(t => [t.id, t.icon])) : null;
   const slangActive = DATA.categories.find(c => c.id === activeCategory);
   if(isSlangDomain(slangActive)) html += renderSlangPanel(slangActive);
+  // All domains at rest is a grid of colour tiles (Jose's pick, 2026-11-03):
+  // each top-level domain once, its pin big, tap to open it (setCategory, so
+  // Back retraces it). Its subgroups are inside it, as headings with Open.
+  // A search or a Slang filter still lists the matching terms as before.
+  const slangFiltering = typeof slangFilter !== 'undefined' && (slangFilter !== 'all' || !!slangCountry);
+  if(activeCategory === 'all' && !q && !slangFiltering && DATA.categories.some(c => !c.parentId)){
+    content.innerHTML = html + domainTilesHtml(foldIcons);
+    return;
+  }
   // Export and import live in the banner's ⋯ menu (openDomainMenu).
   html += `<div class="print-only-title">
     <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
@@ -10534,7 +10543,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -13343,6 +13352,26 @@ function sectionFoldHead(cat, count, open, shown, icons){
     </button>
     <button type="button" class="sec-fold-open" onclick="setCategory('${cat.id}')" aria-label="Open ${escapeAttr(cat.name)}">Open</button>
   </div>`;
+}
+/* All domains as tiles: the domain's colour washed across the tile, its pin
+   big and breaking out of the top edge, the name, and its terms counted with
+   its subgroups'. The id matches the old heading's, so a jump to
+   #domain-<id> still lands on it. */
+function domainTilesHtml(icons){
+  const tops = orderedCategoriesWithSubgroups().filter(c => !c.parentId);
+  const tiles = tops.map(cat => {
+    const kids = DATA.categories.filter(c => c.parentId === cat.id);
+    const n = cat.terms.length + kids.reduce((t, k) => t + k.terms.length, 0);
+    const pin = (icons && icons.get(cat.id)) || '';
+    const meta = `${n} term${n === 1 ? '' : 's'}`;
+    return `<button type="button" class="dt-tile" id="domain-${cat.id}" style="--fold-color:${cat.color || 'var(--accent)'}" onclick="setCategory('${cat.id}')"
+        aria-label="${escapeAttr(cat.name)}, ${meta}${kids.length ? `, ${kids.length} subgroup${kids.length === 1 ? '' : 's'}` : ''}">
+        <span class="dt-tile-pin" aria-hidden="true">${pin}</span>
+        <span class="dt-tile-name">${escapeHtml(cat.name)}</span>
+        <span class="dt-tile-meta"><span class="dt-tile-count">${meta}</span>${kids.length ? `<span class="dt-tile-subs">+${kids.length}</span>` : ''}</span>
+      </button>`;
+  }).join('');
+  return `<div class="dt-grid">${tiles}</div>`;
 }
 function toggleSection(id){
   const a = document.activeElement;

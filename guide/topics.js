@@ -204,14 +204,15 @@ const GUIDE_TOPICS = [
     </ol>
     <p>Still nothing? It may not be there yet. That makes it a good one to add.</p>` },
 
-  { id:'subgroups', section:'find', k:'subgroup subgroups folder section heading collapsed open hematology leukemia closed hidden up to parent', q:'Where are the smaller groups inside a domain?', a:`
+  { id:'subgroups', section:'find', k:'subgroup subgroups folder section heading collapsed open hematology leukemia closed hidden up to parent all domains tiles tile grid', q:'Where are the smaller groups inside a domain?', a:`
     <p>Some domains have subgroups. Oncology, for example, has Hematology, Leukemia and Radiation. They're listed first, as headings, and start closed.</p>
     <ul>
       <li>Tap a <b>heading</b> to peek at its words right there.</li>
       <li>Tap <b>Open</b> on the heading to go into that subgroup.</li>
       <li>Inside one, <b>Up to Oncology</b> takes you to the parent. The arrow in the top-left still goes back one step.</li>
     </ul>
-    <p>When you search, the groups with matches open by themselves.</p>` },
+    <p>When you search, the groups with matches open by themselves.</p>
+    <p><b>All domains</b> shows each domain as a colour tile with its picture. A <b>+</b> number on a tile counts its subgroups, and its terms count includes theirs. Tap a tile to open the domain; the arrow in the top-left brings you back to the tiles.</p>` },
 
   { id:'hear', section:'find', k:'hear listen audio sound speak pronounce pronunciation voice out loud', q:'How do I hear a word out loud?', a:`
     <p>Tap the small <b>speaker</b> button on the term's card. English and Spanish each have their own.</p>` },

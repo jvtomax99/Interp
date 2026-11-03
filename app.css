@@ -7041,8 +7041,40 @@ b, strong, h1, h2, h3, h4, h5, h6, th{ font-weight:650; }
   .section-head h2{ font-size:var(--fs-t2); }
 }
 
+/* All domains as tiles (the bold glossary, 2026-11-03): two columns on a
+   phone, the domain's colour washed from the top right, the 3D pin big and
+   tilted out of the tile's top edge, one tap opens the domain. */
+.dt-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:26px 13px; padding-top:22px; }
+.dt-tile{
+  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; min-width:0;
+  padding:0 14px 15px; border:0; border-radius:22px; cursor:pointer; text-align:left; font-family:var(--sans);
+  -webkit-tap-highlight-color:transparent;
+  background:
+    radial-gradient(120% 100% at 100% 0%, color-mix(in srgb, var(--fold-color) 38%, var(--paper)) 0%, transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--fold-color) 16%, var(--paper)), color-mix(in srgb, var(--fold-color) 6%, var(--paper)));
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.9), 0 1px 2px rgba(20,43,67,0.06),
+    0 14px 24px -14px color-mix(in srgb, var(--fold-color) 70%, rgba(22,55,90,0.3));
+  transition:transform .368s var(--spring0, var(--ease)), box-shadow .2s var(--ease);
+}
+.dt-tile-pin{ width:72px; height:72px; margin:-26px 0 2px -4px; display:flex; align-items:center; justify-content:center;
+  transform:rotate(-6deg); filter:drop-shadow(0 12px 14px color-mix(in srgb, var(--fold-color) 55%, rgba(8,12,40,0.4)));
+  transition:transform .368s var(--spring0, var(--ease)); }
+.dt-tile-pin img, .dt-tile-pin svg, .dt-tile-pin .pin-sprite, .dt-tile-pin .medical-pin{ width:72px; height:72px; background-size:contain; }
+.dt-tile-name{ font-size:var(--fs-call); font-weight:650; letter-spacing:var(--tr-body); line-height:1.2; color:var(--ink); overflow-wrap:break-word; hyphens:auto; max-width:100%; }
+.dt-tile-meta{ display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:3px; }
+.dt-tile-count, .dt-tile-subs{ padding:3px 9px; border-radius:999px; font-size:var(--fs-foot); font-weight:650;
+  background:color-mix(in srgb, var(--paper) 75%, transparent); color:color-mix(in srgb, var(--fold-color) 70%, var(--ink)); }
+.dt-tile:active, .dt-tile.is-pressed{ transform:scale(.97); }
+.dt-tile:active .dt-tile-pin, .dt-tile.is-pressed .dt-tile-pin{ transform:rotate(-2deg) translateY(-3px) scale(1.04); }
+@media (hover:hover){ .dt-tile:hover .dt-tile-pin{ transform:rotate(-2deg) translateY(-3px) scale(1.04); } }
+.dt-tile:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+html[data-theme="dark"] .dt-tile-name{ color:#fff; }
+html[data-theme="dark"] .dt-tile-count, html[data-theme="dark"] .dt-tile-subs{ background:rgba(255,255,255,0.1); color:color-mix(in srgb, var(--fold-color) 45%, #fff); }
+@media (prefers-reduced-motion: reduce){ .dt-tile, .dt-tile-pin{ transition:none; } }
+@media (max-width:380px){ .dt-tile{ padding:0 11px 13px; } .dt-tile-name{ font-size:var(--fs-sub); letter-spacing:var(--tr-body); } }
+
 /* ---- Collapsible sections: a parent's subgroups, and every domain on
-   All domains. A heading row you can open in place, plus Open for the page. */
+   All domains while searching. A heading row you can open in place, plus Open for the page. */
 .sec-fold{
   display:flex; align-items:center; gap:var(--sp-1); margin:0 0 var(--sp-2);
   background:var(--paper); border-radius:var(--r-md); position:relative;
