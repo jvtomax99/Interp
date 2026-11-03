@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hub Figures</title>
+<style>
+  :root { --bg-top:#f3f0fb; --bg-bot:#e4def4; --ink:#252E6D; --pill:rgba(255,255,255,0.78); }
+  html, body { margin:0; height:100%; background:linear-gradient(var(--bg-top), var(--bg-bot)); overflow:hidden; font-family:Inter, system-ui, -apple-system, sans-serif; color:var(--ink); }
+  canvas { display:block; width:100vw; height:100vh; touch-action:none; }
+  .bar { position:fixed; left:50%; transform:translateX(-50%); display:flex; gap:6px; padding:6px; border-radius:999px; background:var(--pill);
+         backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:saturate(180%) blur(20px);
+         box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
+  .bar.top { top:max(12px, env(safe-area-inset-top)); } .bar.bot { bottom:max(14px, env(safe-area-inset-bottom)); }
+  button { font:inherit; font-size:15px; font-weight:550; color:var(--ink); background:transparent; border:0; border-radius:999px; padding:8px 13px; min-height:36px; cursor:pointer; }
+  button[aria-pressed="true"] { background:var(--ink); color:#fff; }
+  button:focus-visible { outline:2px solid #2E8BD0; outline-offset:2px; }
+</style>
+<script type="importmap">{ "imports": { "three": "../../../campus3d/three/three.module.min.js", "three/addons/": "../../../campus3d/three/addons/" } }</script>
+</head><body>
+<div class="bar top" role="group" aria-label="Who"><button data-focus="all" aria-pressed="true">All</button><button data-focus="doctor">Doctor</button><button data-focus="nurse">Nurse</button><button data-focus="visitor">Visitor</button></div>
+<div class="bar bot" role="group" aria-label="View"><button data-view="front" aria-pressed="true">Front</button><button data-view="three">¾</button><button data-view="side">Side</button><button data-view="back">Back</button></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { makeCharacter, CAST } from './figures.js';
+
+const Q = new URLSearchParams(location.search), STILL = Q.has('still') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const capDpr = () => Math.min(devicePixelRatio || 1, innerWidth < 700 ? 1.75 : 2);   // mobile: never the full 3x
+renderer.setPixelRatio(capDpr()); renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;   // the figures' colours as chosen
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.45;
+// soft studio light: a warm key from the front, a lavender fill, a rim behind; faces lit evenly
+scene.add(new THREE.HemisphereLight(0xfaf6ff, 0xd9cfe8, 0.75));
+const key = new THREE.DirectionalLight(0xfff4ea, 1.55); key.position.set(1.6, 4.2, 5.5); key.castShadow = true;
+key.shadow.mapSize.set(innerWidth < 700 ? 1024 : 2048, innerWidth < 700 ? 1024 : 2048); key.shadow.radius = 6; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+Object.assign(key.shadow.camera, { left: -3, right: 3, top: 3.5, bottom: -0.5, near: 1, far: 15 }); scene.add(key);
+const fill = new THREE.DirectionalLight(0xe6e0ff, 0.7); fill.position.set(-5, 2.2, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(0, 3.5, -5); scene.add(rim);
+const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 64), new THREE.ShadowMaterial({ color: 0x5a4f80, opacity: 0.16 }));
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+
+const figs = {}, X = { doctor: -1.2, nurse: 0, visitor: 1.2 };
+for (const k of ['doctor', 'nurse', 'visitor']){ const f = makeCharacter(CAST[k]); f.position.x = X[k]; scene.add(f); figs[k] = f; }
+
+const cam = new THREE.PerspectiveCamera(28, innerWidth/innerHeight, 0.1, 60);
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 16; controls.maxPolarAngle = Math.PI*0.56;
+let focus = Q.get('focus') || 'all', view = Q.get('view') || 'front';
+const ANG = { front: 0, three: 0.68, side: Math.PI/2, back: Math.PI };
+function frame(){   // fit who is in focus to the screen, from the chosen side
+  const box = new THREE.Box3(); (focus === 'all' ? Object.values(figs) : [figs[focus]]).forEach(f => box.expandByObject(f));
+  const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  const vf = THREE.MathUtils.degToRad(cam.fov), hf = 2*Math.atan(Math.tan(vf/2)*cam.aspect);
+  const wide = focus === 'all' ? size.x : Math.max(size.x, size.z), d = Math.max((size.y*1.12)/2/Math.tan(vf/2), (wide*1.14)/2/Math.tan(hf/2)) + size.z/2;
+  const a = ANG[view] ?? 0; controls.target.set(c.x, c.y*0.98, c.z);
+  cam.position.set(c.x + Math.sin(a)*d, c.y + d*0.12, c.z + Math.cos(a)*d); controls.update();
+  document.querySelectorAll('[data-focus]').forEach(b => b.setAttribute('aria-pressed', b.dataset.focus === focus));
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view)); }
+document.querySelectorAll('[data-focus]').forEach(b => b.onclick = () => { focus = b.dataset.focus; frame(); });
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { view = b.dataset.view; frame(); });
+addEventListener('resize', () => { renderer.setPixelRatio(capDpr()); renderer.setSize(innerWidth, innerHeight); cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); frame(); });
+cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); frame();
+
+const clock = new THREE.Clock();
+if (STILL) Object.values(figs).forEach(f => f.userData.still());
+renderer.setAnimationLoop(() => { const dt = clock.getDelta(), t = clock.elapsedTime;
+  if (!STILL) Object.values(figs).forEach(f => f.userData.tick(t, dt));
+  controls.update(); renderer.render(scene, cam); });
+window.__figs = figs; window.__cam = cam; window.__controls = controls; window.__ready = true;
+</script>
+</body></html>
