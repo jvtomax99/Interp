@@ -299,10 +299,14 @@ come from this alone.
   replaced, same names and size (192 px), cut from four sheets Jose made
   with his image tool (`docs/art/pin-prompts-soft-3d.md`, sources and
   `cutsheet.py` in `docs/art/pin-sheets/`). Guide answer `pins` and a New
-  lately card. Left for a second round: the 30 icons still drawn from
-  `pin-icons-sheet.webp` (`pin(x,y)` in `pin-icons.js`, e.g. Add Term's
-  clipboard, the tab bar's house), and OB/GYN showing the cardiology heart
-  (asked Jose whether that's meant).
+  lately card (#178, live b1103.1233). Round 2 the same day: the 32 icons
+  still cut from `pin-icons-sheet.webp` (DOMAIN_ICONS, tab bar, side menu,
+  quick cards) now name files in `pins/`: 18 reuse round 1's pins, 16 new
+  from sheet 5 (home, search, more, all-tools, procedures, tips, templates,
+  contacts, favorites, self-care, locations, infection-control, globe,
+  notes, education, trash); Recently deleted gets `TRASH_PIN`; the old
+  sheet is no longer drawn or precached. Still open: OB/GYN shows the
+  cardiology heart (asked Jose whether that's meant).
 
 - 2026-10-29 Sound-Alikes, first version (Jose approved the plan in the
   chat "Nesting feature application"): `soundalikes/list.js` (45 sets),
