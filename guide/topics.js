@@ -257,10 +257,11 @@ const GUIDE_TOPICS = [
     </ul>
     <p>If you want to research someone now, choose <b>Doctor Prep</b> directly on Home or under <b>More</b>. For a specialty-based appointment briefing, ask Dr. Smiley to prep you for that specialty.</p>` },
 
-  { id:'directory', section:'prep', k:'doctor directory list doctors notes', q:'What is the Doctor Directory?', a:`
+  { id:'directory', section:'prep', k:'doctor directory list doctors notes sort specialty a-z alphabetical last name recent letters group', q:'What is the Doctor Directory?', a:`
     <p>A shared list of every doctor your team has looked up. Open <b>Doctors</b> → <b>Doctor Directory</b>, or choose <b>Doctor Directory</b> under <b>More</b>.</p>
     <p>It opens on your region's doctors. Tap <b>North</b>, <b>South</b> or <b>All</b> above the list to switch; a search always looks through every region. A doctor's region comes from where they work: tap the pencil, then <b>Where</b>.</p>
-    <p>Doctors are grouped by where they work, two to a row. Each card shows their picture (or their specialty’s pin with their initials), specialty, floor, and how many <b>terms</b>, <b>traps</b> (false friends, in red) and <b>tips</b> they have. No research yet? Tap <b>+ Prep terms</b> to look them up in Doctor Prep.</p>
+    <p><b>Recent</b> at the top shows the last doctors you opened on this phone; tap one to go straight to their page. Under it, <b>Sort</b> arranges the list three ways: <b>Place</b> groups doctors by where they work, <b>Specialty</b> groups them by what they practice (a pediatric neurologist is under Neurology), and <b>A–Z</b> lists them by last name. In a long A–Z list, tap or slide along the letters on the right edge to jump. Your choice is kept on this phone. In Place and Specialty, tap a heading to fold it away, or <b>Collapse all</b> at the end of the Sort row.</p>
+    <p>Two to a row, each card shows their picture (or their specialty’s pin with their initials), specialty, floor, and how many <b>terms</b>, <b>traps</b> (false friends, in red) and <b>tips</b> they have. No research yet? Tap <b>+ Prep terms</b> to look them up in Doctor Prep.</p>
     <p>Tap <b>+ Add</b> beside the title to add a doctor. If the list finds possible duplicates or doctors on the old terminology, a yellow <b>things to tidy</b> button opens them in one place. To delete a doctor, open their page, tap the pencil, then <b>Delete</b>.</p>
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
