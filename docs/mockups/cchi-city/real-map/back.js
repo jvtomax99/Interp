@@ -78,10 +78,8 @@ const STYLE = {
 const HOUSE_COLS = ['#d9c8a8', '#c7d1d8', '#e6d6c0', '#b9c7b0', '#d8b8a8', '#e8e2d4', '#c9b8a0'];
 const GARAGE = { col:'#cfcac0', band:'#dcd7ce', glass:'#3d404c' };
 const BLD = {}, DOORW = {};
-const CARB = CARC.map(c => new THREE.MeshStandardMaterial({ color:c, roughness:0.35, metalness:0.4 })), CARG = new THREE.MeshStandardMaterial({ color:0x1f2633, roughness:0.1, metalness:0.6, envMapIntensity:1.5 });
-function parkedAt(x, z, rot, ci, y){   // a parked car baked into the board (lots, garage roofs)
-  add(placed(new RoundedBoxGeometry(0.48, 0.18, 0.95, 1, 0.07), x, y + 0.11, z, rot), CARB[ci % CARB.length], 0, 0, 0, true);
-  add(placed(new RoundedBoxGeometry(0.42, 0.15, 0.5, 1, 0.06), x, y + 0.27, z, rot), CARG, 0, 0, 0, false); }
+function parkedAt(x, z, rot, ci, y){   // a parked car baked into the board (lots, garage roofs): a Car Kit model (cars.js), on the old box car's floor
+  kitParked(x, y + 0.02, z, rot, CARC[ci % CARC.length]); }
 function realBuilding(b){
   const dom = b.key[0] !== 'x', k = dom ? b.key : '_', o = STYLE[b.key] || (b.kind === 'house' ? { col:HOUSE_COLS[(+b.id) % HOUSE_COLS.length], band:'#f2ece0', roof:0x8f8a92 } : b.kind === 'garage' ? GARAGE : { col:'#9a5444', band:'#e6d8c2' });
   const fl = b.kind === 'garage' ? 0.5 : b.key === 't' ? htpFL() : FL, y0 = 0.3, h = b.floors*fl, E = edgesOf(b.pts);   // the pavilion's hospital floors run tall

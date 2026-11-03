@@ -131,6 +131,14 @@ puts `cars.js` (with the data) just before `const CAR_IN`: `vehicle()` builds th
 swaps the body for the model. `ambLights` reads `AMB.userData.lamps`. `traffic_check.cjs` (300 s): all zero; wider
 cars (0.61) clipped each other at the drive's mouth, hence the width cap.
 
+The parked cars too (2026-11-03): `cars.json` also holds `park`, slimmed copies of sedan, SUV, hatchback and van at the
+old box car's size (0.95 long, 0.48 wide at most), with no faces underneath and each wheel a 10-sided drum, its hub on
+the outside (776-924 triangles each). `kitParked(x, yGround, z, rot, col)` in `cars.js` stands one on the board; `back.js`'s
+`parkedAt` (lots, garage roofs, the court) and the diorama's six on the drive's curb (a `rep` in `build.py`) call it.
+Each colour of a parked car is its own material: `runtime.js`'s merge keeps only position, normal and uv, so per-vertex
+colours would turn white there. `build.py` now puts `cars.js` in with `back.js`'s first part (after `let wr = 41;`),
+since the parked cars are built before the movers.
+
 ## Free people and trees, tested and dropped (2026-11-03)
 
 Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front

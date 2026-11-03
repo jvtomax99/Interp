@@ -49,7 +49,8 @@ src[pad] = ("// ---- the helipad on Link Pavilion's roof, where the map puts it 
  "add(new THREE.RingGeometry(1.04, 1.16, 32), new THREE.MeshBasicMaterial({ color:0xf4f6fa, side:THREE.DoubleSide }), PAD.x, PAD.y+0.035, PAD.z, false).rotation.x = -Math.PI/2;\n"
  "for (const [w,h,dx] of [[0.12,0.72,-0.25],[0.12,0.72,0.25],[0.42,0.12,0]]) add(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:0xf4f6fa }), PAD.x+dx, PAD.y+0.04, PAD.z, false).rotation.x = -Math.PI/2;\n"
  "CUR = '_';\nfor (let i=0;i<8;i++){ const a = i/8*Math.PI*2; glow(PAD.x+Math.cos(a)*1.2, PAD.y+0.08, PAD.z+Math.sin(a)*1.2, 0.5, i%2 ? 0x8fe3ff : 0xffb070); }")
-i = at('let wr = 41;'); src[i] += '\n' + back_pre
+# the Car Kit (cars.js, its data cars.json from cars_bake.py) first: back.js parks its cars with it, and the movers use it
+i = at('let wr = 41;'); src[i] += '\n' + open(os.path.join(HERE, 'cars.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + '\n' + back_pre
 i = at('// ---- the living things, built once each'); src[i] = back_main + '\n' + src[i]
 out='\n'.join(x for x in src if x is not None)
 def rep(a,b,cnt=1):
@@ -113,7 +114,8 @@ rep("function stand(kind, i, x, z, ry=0, f=0){ ","function stand(kind, i, x, z, 
 # traffic: Prospect's cars run the board's full width; cars on 2nd Street, Atlantic and Essex; walkers on their sidewalks
 # the moving cars and ambulances: Kenney's Car Kit (cars.js, its data cars.json from cars_bake.py)
 rep("for (const [i,[lx,ly,lz]] of [[-0.17,0.63,0.55],[0.17,0.63,0.55]].entries())", "for (const [i,[lx,ly,lz]] of (AMB.userData.lamps || [[-0.17,0.63,0.55],[0.17,0.63,0.55]]).entries())")   # on the kit ambulance's light bar
-rep("const CAR_IN = vehicle('car', 0xf2c94c), CAR_OUT", open(os.path.join(HERE, 'cars.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "const CAR_IN = vehicle('car', 0xf2c94c), CAR_OUT")
+# (cars.js goes in with back.js's first part, above: the parked cars are built from the same kit before the movers)
+rep("for (let i=0;i<6;i++) parked(-4.3, 0.5 + i*1.25, 0, CARC[i%CARC.length]);", "for (let i=0;i<6;i++) kitParked(-4.3, 0.3, 0.5 + i*1.25, 0, CARC[i%CARC.length]);")   # the drive's curb: kit cars too
 rep("const CAR_IN2 = vehicle('car', 0x2b2f3a);","""const CAR_IN2 = vehicle('car', 0x2b2f3a);
 const BACKCARS = [['secondA',0x2f5fa6,16000],['secondB',0xe9e2d0,18000],['atlA',0x5b6170,17000],['atlB',0xc9583a,19000],['essexA',0xf2c94c,12000],['essexB',0x3aa6a0,13000]]
   .map(([p, c, dur]) => ({ g: vehicle('car', c), path: SCN.paths[p].map(([x, z]) => [x, 0.2, z]), dur }));""")
