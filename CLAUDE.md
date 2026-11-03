@@ -486,7 +486,11 @@ design and anything touching data or rules stay with the main model.
   2026-10-24; `AGENTS.md`; he wants this in every project): whenever a
   change is ready for his "push" (GitHub's checks passed), send
   `PushNotification` saying which change and that it needs "push", even
-  if he seems to be in the chat.
+  if he seems to be in the chat. **"Push" is always clickable** (Jose,
+  2026-11-03; `AGENTS.md`): ask with `AskUserQuestion`, "Push
+  (Recommended)" then "Not yet"; on "Push", merge the pull request
+  yourself (`merge_pull_request`, the head SHA pinned), then verify the
+  deploy as in Deploying. Never only a link to GitHub's merge button.
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the
