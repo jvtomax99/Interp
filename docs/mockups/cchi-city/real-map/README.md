@@ -131,6 +131,17 @@ puts `cars.js` (with the data) just before `const CAR_IN`: `vehicle()` builds th
 swaps the body for the model. `ambLights` reads `AMB.userData.lamps`. `traffic_check.cjs` (300 s): all zero; wider
 cars (0.61) clipped each other at the drive's mouth, hence the width cap.
 
+## Free people and trees, tested and dropped (2026-11-03)
+
+Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front
+street, the closest zoom and closer): **Kenney Mini Characters** (CC0, kenney.nl's own download; 12 people, 723
+triangles each, 32 animations incl. walk, sit, wheelchair; blocky square heads, a texture atlas) and **Kenney Nature
+Kit** trees (CC0; 50-400 triangles, flat teal blobs). Both looked plainer than ours, and ours carry the hospital roles
+from Jose's references (doctor's coat, nurse's badge, patient, elder, wheelchair pushed by a visitor). Kept ours; Jose's
+pick next: a smoother walk for our own people. Earlier the same day: Quaternius trees dropped, Kenney cars kept
+("Cars: Kenney's Car Kit" above). Kenney's downloads: `GET https://kenney.nl/download-link/<hex of "assets/<slug>">`
+returns a signed zip URL (the site's own Download button; a browser User-Agent is needed).
+
 ## People (2026-10-29)
 
 Jose's prompt 3: "sidewalks, crosswalks, real doors, waiting at the ER and main entrance, pairs, wheelchairs, standing
