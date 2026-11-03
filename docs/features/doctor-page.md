@@ -110,6 +110,27 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
 - The whole card opens the page (role=button, Enter/Space). Edit is the
   page's pencil; Delete is in the doctor's sheet (`deleteDoctorFromSheet`,
   hidden when adding).
+- **Arrangement** (2026-11-03, Jose's pick from the directory review): under
+  the region chips, **Recent** (`doctorRecentHtml`): the last 5 doctors
+  opened on this phone, newest first (`ih_recentDoctors`, 8 kept, written by
+  `openDoctorDirDetail` via `noteRecentDoctor`); "Dr. " + last name, with the
+  first initial when two share one; hidden while searching. Then **Sort**
+  (`doctorSortChipsHtml`, `ih_doctorSort`, default Place): Place
+  (`groupByLocation`, as before), Specialty (`doctorSpecialtyGroup`: the
+  `SPECIALTY_GROUPS` list, specialty regex to a plain name and a pin, organ
+  first so Pediatric Neurology is Neurology and Orthopedic Surgery is
+  Orthopedics; then "Other specialties", "No specialty listed"; folds under
+  scope `doctors-spec`), A to Z (`doctorLastName`: title, middle initials
+  and credentials dropped, the last word; one heading per letter; the
+  letter strip `doctorLettersHtml` on the right edge, tap or slide, only
+  past 20 doctors and 3 letters, never while searching). Collapse all is on
+  the Sort row (`dl-fold`) in Place and Specialty. Group headings in the
+  list are labels (`.dl-list .group-head`: no card, 17px name). The region
+  question here is one line (`dl-mine`), not the full card. The specialty
+  on a card breaks at its slash (`<wbr>`), never inside a word. Glossary
+  domains were not used for Specialty: headings like "Peds ENT, Urology,
+  Endocrinology & Nephrology" read badly in a directory. Checked by
+  `tests/suites/doctor-list.cjs`.
 - Navy "+ Add" (`DOCTOR_ADD_BTN`) at the end of the section head; the
   topbar has no add button on this screen.
 - Duplicates and old terminology: one "N things to tidy" button

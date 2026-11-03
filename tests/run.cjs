@@ -19,6 +19,7 @@ const SUITES = [
   ['guide.cjs',           'User Guide: search, answers, Show me'],
   ['destination-labels.cjs', 'Doctor tools: labels, entrances, Back, guide targets'],
   ['doctor-page.cjs',     'Doctor page: header, bento, tabs, terms aloud, glass bar'],
+  ['doctor-list.cjs',     'Doctor list: Recent, Sort by Place / Specialty / A-Z, letter strip'],
   ['provider-where.cjs',  'Provider Pictures: the Where picker, unit, saved record, card'],
   ['journey.cjs',         'End-to-end journey: Ask, briefing, review, offline'],
   ['smiley-gaze.cjs',     'Dr. Smiley: eyes, lean, moods'],

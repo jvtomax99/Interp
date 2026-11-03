@@ -6660,6 +6660,74 @@ html[data-theme="dark"] .dl-tag.is-ff{ background:rgba(240,138,155,.14); color:#
 html[data-theme="dark"] .dl-tag.is-tip, html[data-theme="dark"] .dl-tidy{ background:#2C2617; border-color:#4A3D22; color:#D9BF8A; }
 html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #fff); }
 @media (prefers-reduced-motion: reduce){ .dl-card, .dl-add, .dl-tidy{ transition:none; } }
+/* Break a specialty at its slash, never inside a word ("Oncolo / gy"). */
+.dl-spec > span{ min-width:0; overflow-wrap:break-word; }
+.dl-name{ overflow-wrap:break-word; }
+
+/* Region not picked yet: one line, not the full card. */
+.dl-mine{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 9px; margin:-4px 0 var(--sp-3); font-size:var(--fs-foot); color:var(--ink-soft); }
+.dl-mine button{ position:relative; min-height:32px; padding:0 13px; border:0; border-radius:999px; background:var(--paper); color:var(--navy);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  font:650 var(--fs-foot) var(--sans); cursor:pointer; transition:transform .18s var(--ease); }
+.dl-mine button::after{ content:""; position:absolute; inset:-6px -2px; }
+
+/* Recent: the doctors last opened on this phone. */
+.dl-recent{ margin:0 0 var(--sp-3); }
+.dl-recent-h, .dl-letter-head{ margin:0 0 var(--sp-1); font:650 var(--fs-cap) var(--sans); letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--ink-faint); }
+.dl-recent-row{ display:flex; gap:9px; overflow-x:auto; scrollbar-width:none; padding:4px 2px 13px; margin:-4px -2px -13px; }
+.dl-recent-row::-webkit-scrollbar{ display:none; }
+.dl-recent-btn{ flex:0 0 auto; display:inline-flex; align-items:center; gap:9px; min-height:48px; padding:0 15px 0 6px; border:0; border-radius:999px;
+  background:var(--paper); color:var(--ink); font:650 var(--fs-sub) var(--sans); letter-spacing:var(--tr-body); white-space:nowrap; cursor:pointer;
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .18s var(--ease); -webkit-tap-highlight-color:transparent; }
+.dl-recent-ph{ width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  background:color-mix(in srgb, var(--dp-sp) 13%, var(--paper)); }
+.dl-recent-ph img{ width:28px; height:28px; object-fit:contain; }
+.dl-recent-ph img.is-photo{ width:100%; height:100%; object-fit:cover; }
+
+/* Sort: Place, Specialty, A-Z, and Collapse all at the end of the row. */
+.dl-sort{ display:flex; align-items:center; justify-content:space-between; gap:9px; margin:0 0 var(--sp-2); }
+.dl-sort-chips{ display:flex; align-items:center; gap:6px; min-width:0; }
+.dl-sort-lbl{ font-size:var(--fs-foot); font-weight:550; color:var(--ink-faint); margin-right:2px; }
+.dl-sort-btn{ position:relative; min-height:36px; padding:0 13px; border:0; border-radius:999px; background:var(--line-soft); color:var(--ink-soft);
+  font:550 var(--fs-foot) var(--sans); cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+  transition:background .2s var(--ease), color .2s var(--ease), transform .18s var(--ease); }
+.dl-sort-btn::after{ content:""; position:absolute; inset:-4px -2px; }
+.dl-sort-btn.is-on{ background:var(--navy); color:#fff; }
+.dl-fold{ position:relative; flex:0 0 auto; min-height:36px; padding:0 2px; border:0; background:none; color:var(--accent);
+  font:550 var(--fs-foot) var(--sans); cursor:pointer; }
+.dl-fold::after{ content:""; position:absolute; inset:-4px -6px; }
+
+/* Group headings in the list are labels, not cards, so a heading never
+   reads as one more doctor. */
+.dl-list .group-head{ margin:var(--sp-4) 0 var(--sp-2); padding:0; background:none; box-shadow:none; border-radius:0; }
+.dl-list .group-head:first-child{ margin-top:var(--sp-2); }
+.dl-list .group-head.is-collapsed{ background:none; box-shadow:none; }
+.dl-list .group-head.is-collapsed .group-head-name{ color:var(--ink-soft); }
+@media (hover:hover){ .dl-list .group-head:hover{ box-shadow:none; } }
+.dl-list .group-mark{ margin:0; }
+.dl-list .group-toggle{ min-height:44px; padding:0 4px 0 6px; }
+.dl-list .group-head-name{ font-size:var(--fs-head); letter-spacing:var(--tr-head); }
+.dl-list .group-head-count{ font-size:var(--fs-cap); }
+.dl-spec-head .group-mark{ cursor:default; }
+@media (hover:hover){ .dl-spec-head .group-mark:hover{ background:transparent; } }
+.dl-letter-head{ margin:var(--sp-4) 0 var(--sp-2) 2px; font-size:var(--fs-sub); color:var(--ink-soft); scroll-margin-top:96px; }
+.dl-list .dl-letter-head:first-child{ margin-top:var(--sp-2); }
+
+/* The letter strip in A-Z, down the right edge. */
+.dl-letters{ position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:40; display:flex; flex-direction:column; align-items:center;
+  padding:6px 0; border-radius:12px 0 0 12px; background:var(--glass-bg); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+  touch-action:none; max-height:min(70vh, 520px); }
+.dl-letters button{ width:24px; flex:1 1 auto; min-height:14px; max-height:22px; padding:0; border:0; background:none; color:var(--accent);
+  font:650 var(--fs-cap2)/1 var(--sans); cursor:pointer; }
+.dl-sort-btn:active, .dl-sort-btn.is-pressed, .dl-recent-btn:active, .dl-recent-btn.is-pressed, .dl-mine button:active, .dl-mine button.is-pressed{ transform:scale(.96); }
+.dl-sort-btn:focus-visible, .dl-fold:focus-visible, .dl-recent-btn:focus-visible, .dl-mine button:focus-visible, .dl-letters button:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+html[data-theme="dark"] .dl-recent-btn{ background:#2A3350; color:#fff; box-shadow:var(--sh-1); }
+html[data-theme="dark"] .dl-sort-btn{ background:rgba(255,255,255,.07); color:#C9D3FF; }
+html[data-theme="dark"] .dl-sort-btn.is-on{ background:#C9D3FF; color:#151C2C; }
+html[data-theme="dark"] .dl-mine button{ background:rgba(46,139,208,.16); color:#C9D3FF; }
+html[data-theme="dark"] .dl-fold, html[data-theme="dark"] .dl-letters button{ color:#8FC3EE; }
+@media (prefers-reduced-motion: reduce){ .dl-sort-btn, .dl-recent-btn, .dl-mine button{ transition:none; } }
 
 /* Tier tabs: Dr. Smiley's segmented control, scrolling sideways when the
    five tiers and the team's own terms don't fit. */

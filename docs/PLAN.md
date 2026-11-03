@@ -232,6 +232,12 @@ Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
 - **M5, auto-marking (#91):** one memory-trainer round with Auto-mark on,
   and one with Record me on too.
 
+**Doctor list, next ideas** (from the 2026-11-03 review; Jose picks):
+compact rows instead of two-column cards (mock up first: it reverses D3's
+cards), a "Needs info" filter (no floor, research or photo) replacing the
+"No floor yet" line on cards, and search that also finds a doctor's terms
+and short forms (GI, cardio, peds).
+
 **Doctors redesign (Jose approved 2026-10-14).** Mockups:
 `docs/mockups/doctors/list.png` and `page.png` (HTML beside them). Rule from
 Jose: it must look like the rest of the app (light background and mesh,
@@ -314,6 +320,16 @@ come from this alone.
   row now sitting behind the floating tab bar at rest (scrolls into view).
   No guide change. PR #185.
 
+- 2026-11-03 Doctor list D4, arrangement (Jose's pick from the directory
+  review, "Trim + Recent + Sort"): Recent (last 5 opened, per phone), Sort
+  by Place / Specialty / A to Z by last name (per phone), a letter strip in
+  long A to Z lists, Collapse all on the Sort row, group headings as labels
+  instead of cards, the region question in one line, the specialty broken
+  at its slash ("Oncolo / gy" fixed). Measured at 393x759, 26 doctors,
+  region not picked, Recent full: first card 530px (was 552px with no
+  Recent); the strip itself is the fast path. Guide: the Doctor Directory
+  answer and its steps rewritten, a New lately card (Campus card dropped).
+  `doctor-page.md` "Arrangement"; checks `tests/suites/doctor-list.cjs`.
 - 2026-11-03 Type tidy + `DESIGN.md` (Jose's pick, after reading a
   Cloudflare-style DESIGN.md he found: its type discipline, not its look).
   Letter spacing from seven `--tr-*` tokens by size band (was 37 values),

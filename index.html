@@ -5785,9 +5785,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'pins',        tone:'gd-n1', pin:'pins/cardiology.webp',         eyebrow:'New look',              title:'New pictures across the app: every Home pin redrawn in soft 3D, from the heart to Team Chat' },
-  { id:'soundalikes', tone:'gd-n2', pin:'pins/ent.webp',                eyebrow:'Sound-Alikes',          title:'Sound-Alikes: words that sound the same and mean different things. Hear them, then drill picking the right meaning by ear' },
-  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',           eyebrow:'Your campus',           title:'Your campus in 3D acts like real life now: cars keep right and stop for people, people use the crosswalks and real doors' },
+  { id:'directory',   tone:'gd-n1', pin:'pins/doctor-directory.webp',  eyebrow:'Doctor Directory',      title:'Doctor Directory: your recent doctors at the top, and sort by place, specialty or A to Z by last name' },
+  { id:'pins',        tone:'gd-n2', pin:'pins/cardiology.webp',         eyebrow:'New look',              title:'New pictures across the app: every Home pin redrawn in soft 3D, from the heart to Team Chat' },
+  { id:'soundalikes', tone:'gd-n3', pin:'pins/ent.webp',                eyebrow:'Sound-Alikes',          title:'Sound-Alikes: words that sound the same and mean different things. Hear them, then drill picking the right meaning by ear' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -5907,7 +5907,7 @@ const GUIDE_STEPS = {
     'Use the Back arrow to retrace your route and return to where you were.'],
     note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
   directory: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctors')} → ${GUIDE_UI.pill('Doctor Directory')}, or choose ${GUIDE_UI.pill('Doctor Directory')} under ${GUIDE_UI.pill('More')}.`,
-    'Tap a doctor to open their page.', `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in. Every teammate can add their own.`],
+    `Find them under ${GUIDE_UI.pill('Recent')}, or tap ${GUIDE_UI.pill('Place')}, ${GUIDE_UI.pill('Specialty')} or ${GUIDE_UI.pill('A–Z')} beside Sort, then tap the doctor to open their page.`, `Tap ${GUIDE_UI.pill('Add tip')} at the bottom to add what your teammates would want to know before walking in. Every teammate can add their own.`],
     note: 'Doctor Prep saves its research here. Your team’s tips and terms stay separate from that research.' }),
   doctorpage: () => ({ steps: [`Open ${GUIDE_UI.pill('Doctor Directory')} and tap a doctor.`,
     'Tap a tab (Core, Procedures, Drugs, Anatomy, False friends, Team terms) to see those terms. Tap EN or ES to hear one.',
@@ -10524,7 +10524,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dp-gl, .kb-mini';
+  const LIFTS = '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-sort-btn, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -10554,8 +10554,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1103.1432';
-const BUILD_TIME = '2026-11-03 14:32 UTC';
+const BUILD_ID = 'b1103.1529';
+const BUILD_TIME = '2026-11-03 15:29 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -12404,8 +12404,153 @@ function doctorRegionChipsHtml(view, searching){
     : DOCTOR_DIRECTORY.filter(d => { const x = doctorRegion(d); return !x || x === r; }).length;
   const chips = [...REGIONS.map(r => ({ id: r.id, name: r.name })), { id: 'all', name: 'All' }]
     .map(c => `<button type="button" role="radio" aria-checked="${c.id === view}" onclick="setDoctorRegionView('${c.id}')">${escapeHtml(c.name)} <span>${count(c.id)}</span></button>`).join('');
-  return `<div class="ds-mode-seg rg-filter" role="radiogroup" aria-label="Show doctors from">${chips}</div>`
-    + (myRegion() ? '' : regionAskHtml('The directory will open on it.'));
+  // Not picked yet: one short line instead of the full North / South card.
+  const ask = myRegion() ? '' : `<p class="dl-mine">Open on your region next time?
+      ${REGIONS.map(r => `<button type="button" onclick="setMyRegion('${r.id}')">${escapeHtml(r.name)}</button>`).join('')}</p>`;
+  return `<div class="ds-mode-seg rg-filter" role="radiogroup" aria-label="Show doctors from">${chips}</div>` + ask;
+}
+
+/* How the list is arranged (per phone, ih_doctorSort): by place (the
+   building you're sent to), by specialty, or A to Z by last name with a
+   letter strip. Specialty groups come from the specialty text itself, with
+   plain names; the glossary's domains ("Peds ENT, Urology, Endocrinology &
+   Nephrology") would be odd headings for a directory. */
+const DOCTOR_SORTS = [['place', 'Place'], ['specialty', 'Specialty'], ['az', 'A–Z']];
+const DOCTOR_SORT_KEY = 'ih_doctorSort';
+function doctorSortView(){
+  let v = '';
+  try{ v = localStorage.getItem(DOCTOR_SORT_KEY) || ''; }catch(e){}
+  return DOCTOR_SORTS.some(s => s[0] === v) ? v : 'place';
+}
+function setDoctorSort(v){
+  try{ localStorage.setItem(DOCTOR_SORT_KEY, v); }catch(e){}
+  renderContent();
+}
+const SPECIALTY_GROUPS = [
+  [/develop|autis/, 'Developmental', 'developmental'],
+  [/leuk|lymph|myelom|onc|cancer|tumou?r|radiation|hemat|blood|coagul|thromb/, 'Oncology & Hematology', 'oncology'],
+  [/cardi|heart|vascular|electrophys/, 'Cardiology', 'cardiology'],
+  [/radiol|imaging/, 'Radiology', 'medifind'],
+  [/psych|behavio|mental/, 'Mental Health', 'neurology'],
+  [/neuro|brain|stroke|epilep/, 'Neurology', 'neurology'],
+  [/obstet|gyn|matern|fetal|ob\/?gyn/, 'OB/GYN', 'pediatrics'],
+  [/pulm|lung|respir|sleep|thorac|critical care/, 'Pulmonology', 'pulmonology'],
+  [/gastro|hepat|liver|digest|colorect|\bgi\b/, 'Gastroenterology', 'medical-terminology'],
+  [/nephr|kidney|renal|dialys/, 'Nephrology', 'nephrology'],
+  [/urolog/, 'Urology', 'urology'],
+  [/endocr|diabet|thyroid/, 'Endocrinology', 'endocrinology'],
+  [/otolar|\bent\b|\bear\b|throat/, 'ENT', 'ent'],
+  [/ortho|bone|spine|sports|rehab|physiat|rheum/, 'Orthopedics & Rehab', 'orthopedics'],
+  [/ophthal|\beye|retina/, 'Ophthalmology', 'ophthalmology'],
+  [/dermat|\bskin/, 'Dermatology', 'dermatology'],
+  [/genet/, 'Genetics', 'genetics'],
+  [/infect|\bhiv\b/, 'Infectious Disease', 'infectious-disease'],
+  [/emergen|trauma|urgent/, 'Emergency', 'emergency'],
+  [/surg|anesth/, 'Surgery & Anesthesia', 'surgery-anesthesia'],
+  [/infusion/, 'Infusion', 'infusion'],
+  [/patholog|\blab(orator)/, 'Laboratory', 'laboratory'],
+  [/pharm/, 'Pharmacy', 'pharmacy'],
+  [/pediat|paediat|child|neonat/, 'Pediatrics', 'pediatrics'],
+  [/internal med|family|primary|hospitalist|general med/, 'Primary Care', 'medifind'],
+];
+const NO_SPECIALTY_LABEL = 'No specialty listed';
+const OTHER_SPECIALTY_LABEL = 'Other specialties';
+function doctorSpecialtyGroup(d){
+  const s = (d.specialty || '').toLowerCase();
+  if(!s.trim()) return { name: NO_SPECIALTY_LABEL, pin: 'medifind' };
+  const hit = SPECIALTY_GROUPS.find(([re]) => re.test(s));
+  return hit ? { name: hit[1], pin: hit[2] } : { name: OTHER_SPECIALTY_LABEL, pin: 'medifind' };
+}
+// "Dr. Lori A. Leslie, MD" sorts as Leslie: the last word once the title,
+// middle initials and letters after the name are gone (initialsOf's rules).
+function doctorLastName(name){
+  let words = String(name || '').trim().split(/\s+/).map(w => w.replace(/,$/, '')).filter(Boolean);
+  if(words.length > 1 && /^(dr\.?|doctor|prof\.?|professor|mr\.?|mrs\.?|ms\.?)$/i.test(words[0])) words = words.slice(1);
+  words = words.filter(w => !/^(md|do|phd|np|pa|rn|aprn|dnp|facs|facp|jr\.?|sr\.?)$/i.test(w));
+  return words.length ? words[words.length - 1] : '';
+}
+function doctorSortKey(d){ return foldText(doctorLastName(d.name)) + ' ' + foldText(d.name); }
+function doctorLetter(d){ const c = foldText(doctorLastName(d.name)).charAt(0).toUpperCase(); return /[A-Z]/.test(c) ? c : '#'; }
+
+function doctorSortChipsHtml(view, groups, searching){
+  const chips = DOCTOR_SORTS.map(([id, name]) =>
+    `<button type="button" class="dl-sort-btn${id === view ? ' is-on' : ''}" aria-pressed="${id === view}" onclick="setDoctorSort('${id}')">${name}</button>`).join('');
+  // Collapse all sits on this row now, only where groups fold.
+  let fold = '';
+  if(view !== 'az' && !searching && groups.length > 1){
+    const scope = view === 'specialty' ? 'doctors-spec' : 'doctors';
+    const anyOpen = groups.some(g => !isGroupCollapsed(scope, g.name));
+    fold = `<button type="button" class="dl-fold" onclick="setAllGroups('${scope}', '${groups.map(g => encGroup(g.name)).join(',')}', ${anyOpen})">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`;
+  }
+  return `<div class="dl-sort"><div class="dl-sort-chips" role="group" aria-label="Sort doctors by"><span class="dl-sort-lbl">Sort</span>${chips}</div>${fold}</div>`;
+}
+
+/* The doctors you opened last on this phone (ih_recentDoctors, newest
+   first), so the one you see every week is one tap away. */
+const RECENT_DOCTORS_KEY = 'ih_recentDoctors';
+function recentDoctorIds(){
+  try{ const a = JSON.parse(localStorage.getItem(RECENT_DOCTORS_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; }
+}
+function noteRecentDoctor(id){
+  const ids = [id, ...recentDoctorIds().filter(x => x !== id)].slice(0, 8);
+  try{ localStorage.setItem(RECENT_DOCTORS_KEY, JSON.stringify(ids)); }catch(e){}
+}
+function doctorRecentHtml(){
+  const list = recentDoctorIds().map(id => DOCTOR_DIRECTORY.find(d => d.id === id)).filter(Boolean).slice(0, 5);
+  if(!list.length) return '';
+  const lasts = list.map(d => doctorLastName(d.name) || d.name);
+  const items = list.map((d, i) => {
+    // Two recents with one last name get the first initial too.
+    const twin = lasts.filter(l => l === lasts[i]).length > 1;
+    const first = twin ? (initialsOf(d.name).charAt(0) + '. ') : '';
+    const label = (/^dr\.?\s/i.test(d.name || '') ? 'Dr. ' : '') + first + lasts[i];
+    const place = locationGroupName(d, d.hospitalLocation);
+    const art = d.photo
+      ? `<img class="is-photo" src="${escapeAttr(d.photo)}" alt="" loading="lazy">`
+      : pinImgHtml(specialtyPinKey(d.specialty, place));
+    return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail('${escapeAttr(d.id)}')"
+      aria-label="${escapeAttr(d.name)}"><span class="dl-recent-ph" aria-hidden="true">${art}</span><span>${escapeHtml(label)}</span></button>`;
+  }).join('');
+  return `<div class="dl-recent"><h3 class="dl-recent-h">Recent</h3><div class="dl-recent-row">${items}</div></div>`;
+}
+
+// One group's heading in the Specialty and A-Z views (Place keeps its own,
+// with the place icon you can change).
+function doctorSpecHeadHtml(group, searching){
+  const collapsed = !searching && isGroupCollapsed('doctors-spec', group.name);
+  const n = group.items.length;
+  return `<div class="group-head dl-spec-head${collapsed ? ' is-collapsed' : ''}">
+      <span class="group-mark" aria-hidden="true"><img class="group-pin" src="pins/${group.pin}.webp" alt="" loading="lazy" onerror="markLogoFallback(this)"></span>
+      <button class="group-toggle" onclick="toggleGroup('doctors-spec', '${encGroup(group.name)}')" aria-expanded="${collapsed ? 'false' : 'true'}">
+        <span class="group-head-text">
+          <span class="group-head-name">${escapeHtml(group.name)}</span>
+          <span class="group-head-count">${n} ${n === 1 ? 'doctor' : 'doctors'}</span>
+        </span>
+        <span class="group-chev">${ICON_CHEVRON_DOWN}</span>
+      </button>
+    </div>`;
+}
+
+// The letters down the side in A-Z: tap or slide a thumb along it to jump.
+function doctorLettersHtml(letters){
+  return `<nav class="dl-letters" aria-label="Jump to a letter" onpointerdown="doctorLetterTouch(event)" onpointermove="doctorLetterTouch(event)">`
+    + letters.map(l => `<button type="button" data-l="${l}" onclick="doctorJumpTo('${l}')">${l}</button>`).join('') + `</nav>`;
+}
+function doctorJumpTo(l){
+  const el = document.getElementById('dl-letter-' + (l === '#' ? 'num' : l));
+  if(!el) return;
+  el.scrollIntoView({ block: 'start', behavior: 'auto' });   // scroll-margin-top clears the top bar
+}
+function doctorLetterTouch(e){
+  if(e.type === 'pointermove' && !e.buttons && e.pointerType === 'mouse') return;
+  if(e.type === 'pointermove' && e.pointerType !== 'mouse' && !e.isPrimary) return;
+  const nav = e.currentTarget;
+  if(e.type === 'pointerdown'){ try{ nav.releasePointerCapture(e.pointerId); }catch(_){} }
+  const hit = document.elementFromPoint(e.clientX, e.clientY);
+  const b = hit && hit.closest && hit.closest('.dl-letters button');
+  if(!b || nav.dataset.on === b.dataset.l) return;
+  nav.dataset.on = b.dataset.l;
+  doctorJumpTo(b.dataset.l);
 }
 
 const DOCTOR_ADD_BTN = `<button type="button" class="dl-add" onclick="openAddDoctorDirModal()" aria-label="Add a doctor">+ Add</button>`;
@@ -12439,21 +12584,52 @@ function renderDoctorDirectory(q){
     return `<div class="empty"><div class="glyph">${ICON_GRID}</div>${msg}</div>`;
   }
 
-  const groups = groupByLocation(list, d => d.hospitalLocation);
   const searching = !!q;
+  const sort = doctorSortView();
+  let groups;
+  if(sort === 'specialty'){
+    const map = new Map();
+    list.forEach(d => {
+      const g = doctorSpecialtyGroup(d);
+      if(!map.has(g.name)) map.set(g.name, { name: g.name, pin: g.pin, items: [] });
+      map.get(g.name).items.push(d);
+    });
+    const last = n => n === NO_SPECIALTY_LABEL ? 2 : n === OTHER_SPECIALTY_LABEL ? 1 : 0;
+    groups = [...map.values()].sort((a, b) => last(a.name) - last(b.name) || a.name.localeCompare(b.name));
+  } else if(sort === 'az'){
+    list.sort((a, b) => doctorSortKey(a).localeCompare(doctorSortKey(b)));
+    const map = new Map();
+    list.forEach(d => { const l = doctorLetter(d); if(!map.has(l)) map.set(l, []); map.get(l).push(d); });
+    groups = [...map.entries()].map(([name, items]) => ({ name, items }))
+      .sort((a, b) => (a.name === '#') - (b.name === '#') || a.name.localeCompare(b.name));
+  } else {
+    groups = groupByLocation(list, d => d.hospitalLocation);
+  }
 
   let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${list.length} doctor${list.length===1?'':'s'}</span>${DOCTOR_ADD_BTN}</div>`;
   html += doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
   html += doctorTidyButtonHtml();
-  html += groupControlsHtml('doctors', groups, searching);
+  if(!searching) html += doctorRecentHtml();
+  html += doctorSortChipsHtml(sort, groups, searching);
   if(document.getElementById('doctorTidyOverlay')?.classList.contains('show')) setTimeout(renderDoctorTidy);
+  html += `<div class="dl-list is-${sort}">`;
   groups.forEach(group=>{
-    html += groupHeaderHtml('doctors', group, searching);
-    if(!searching && isGroupCollapsed('doctors', group.name)) return;
+    if(sort === 'az'){
+      html += `<h3 class="dl-letter-head" id="dl-letter-${group.name === '#' ? 'num' : group.name}">${group.name}</h3>`;
+    } else if(sort === 'specialty'){
+      html += doctorSpecHeadHtml(group, searching);
+      if(!searching && isGroupCollapsed('doctors-spec', group.name)) return;
+    } else {
+      html += groupHeaderHtml('doctors', group, searching);
+      if(!searching && isGroupCollapsed('doctors', group.name)) return;
+    }
     html += `<div class="dl-grid">${group.items.map(doctorListCard).join('')}</div>`;
   });
+  html += `</div>`;
+  // The letter strip only earns its place once the list runs long.
+  if(sort === 'az' && !searching && list.length > 20 && groups.length > 3) html += doctorLettersHtml(groups.map(g => g.name));
   return html;
 }
 
@@ -12493,7 +12669,7 @@ function doctorListCard(d){
       onclick="openDoctorDirDetail('${id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openDoctorDirDetail('${id}')}">
       ${ph}
       <div class="dl-name">${escapeHtml(d.name)}</div>
-      ${d.specialty ? `<div class="dl-spec">${escapeHtml(d.specialty)}</div>` : ''}
+      ${d.specialty ? `<div class="dl-spec"><span>${escapeHtml(d.specialty).replace(/\//g, '/<wbr>')}</span></div>` : ''}
       <div class="dl-floor${floor ? '' : ' is-none'}">${floor ? escapeHtml(floor) : 'No floor yet'}</div>
       ${tags || prep ? `<div class="dl-tags">${tags}${prep}</div>` : ''}
     </div>`;
@@ -12677,6 +12853,7 @@ function openDoctorDirDetail(id, tab){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;
   currentDoctorDetailId = id;
+  noteRecentDoctor(id);
   activeResearchTier.detail = tab || '';
   const page = document.getElementById('doctorDirDetailModal');
   page.innerHTML = renderDoctorDirDetail(d);
