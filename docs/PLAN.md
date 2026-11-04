@@ -1444,6 +1444,14 @@ come from this alone.
   1 day for canceled, errored and pre-production, 1 week for production;
   `vercel.json` no longer deploys `claude/` branches, so a PR has no
   preview link. If it nears 100% again, check Usage before anything else.
+  It hit 100% on 2026-11-04: each deployment ~54 MB (36 MB `atlas/`, 11 MB
+  `media/`), about 10 deployments a day, and 208 still listed back to
+  10-17, so the 1-week production setting above was not holding (not
+  explained: the setting isn't readable from the Vercel connector). Of
+  the last 100 only 44 were bumps; the rest repeated the same app or
+  changed only docs. Fixed: `ignoreCommand` in `vercel.json`, only "Bump
+  version" commits deploy. Not done: moving `atlas/` and `media/` out of
+  the deployment (would take each one from 54 MB to about 10 MB).
 - Dead CSS method (2026-10-14): a class counts as used if its name appears
   anywhere outside the stylesheet (`index.html` markup and scripts,
   `home-polish.js`, `pin-icons.js`). Names built in code (`em-${role}`,
