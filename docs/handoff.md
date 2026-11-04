@@ -19,7 +19,11 @@ Status 2026-11-04 (chat 1): Meshy blocked in that chat. The proxy refused api.me
 (403 on connect) and injected no Meshy key; only api.tripo3d.ai was set. The settings were likely saved after
 the chat started: a new chat picks them up. First call to try: `GET https://api.meshy.ai/openapi/v1/balance`.
 Later the same chat: Jose allowed the three hosts and they opened (docs read, api.meshy.ai answers), but the key
-was still not added ("Invalid API key", 401): a new chat should pick it up. Then Jose made an API key (meshy.ai/developers/keys, monthly cap 100) and saved it: balance call works in the same chat, balance 1490 credits (1070 monthly, 420 permanent). Jose's ChatGPT pictures: `docs/art/doctor-single.png`, `visitor-single.png`. Meshy image-to-3d tasks (latest = meshy-7.1, 2K texture, glb, multi-view thumbnails; 30 credits each, balance after 1430): doctor `01a1a894-183e-73f6-bc03-a5eebac01a40`, visitor `01a1a894-1e43-752d-bb5b-81754daf65f5`. Fetch with `GET /openapi/v1/image-to-3d/<id>`. Costs, read from
+was still not added ("Invalid API key", 401): a new chat should pick it up. Then Jose made an API key (meshy.ai/developers/keys, monthly cap 100) and saved it: balance call works in the same chat, balance 1490 credits (1070 monthly, 420 permanent). Jose's ChatGPT pictures: `docs/art/doctor-single.png`, `visitor-single.png`. Meshy image-to-3d tasks (latest = meshy-7.1, 2K texture, glb, multi-view thumbnails; 30 credits each, balance after 1430): doctor `01a1a894-183e-73f6-bc03-a5eebac01a40`, visitor `01a1a894-1e43-752d-bb5b-81754daf65f5`. Fetch with `GET /openapi/v1/image-to-3d/<id>`. Both SUCCEEDED (~560k triangles, one 2048 base colour each; raw 18 MB GLBs in Meshy, links expire). Phone files
+`meshy/doctor.glb` (1.8 MB) and `meshy/visitor.glb` (1.7 MB): `KEEPBASE=1 tools/toy/slim_tex.py -- raw out 0.085`,
+47.4k and 47.6k triangles, colours as Meshy made them (no warming, unlike the nurse). The three side by side, same
+light (`plain.py`, `EXPO=-0.9`): `meshy/trio-meshy.png` (front and 3/4), `trio-meshy-face.png`. Next, Jose to say:
+the trio into the app's practice scenes (replacing the cut-out drawings), or polish first. Costs, read from
 docs.meshy.ai/api/pricing.md: image to 3D with 2K textures is 30 credits on `meshy-7.1` (latest) or `meshy-6`
 (mesh only 20, 8K textures 35). So 30 a figure, 60 for both. The API uses prepaid API credits, bought in the
 subscription settings; not checked yet whether app credits count. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
