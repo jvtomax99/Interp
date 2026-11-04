@@ -520,13 +520,22 @@ class DrAnim{
     if(seq.fx && this.head && drFxOk()){
       run.timers.push(this.later(() => { if(this.run === run) this.effect(seq.fx); }, Math.max(0, seq.fxAt - skip) + lead));
     }
-    let i = 0;
+    // The frames keep the sequence's own clock (docs/feel-audit.md, phase 3):
+    // each is due at a fixed time from the start, so a late timer never
+    // pushes the frames after it. A stall swallows the frames whose time
+    // has passed (never the last one) instead of stretching the whole
+    // performance; nothing painted during the stall anyway.
+    let i = 0, due = performance.now();
     const step = () => {
       if(this.run !== run) return;
+      const now = performance.now();
+      while(i < frames.length - 1 && due + frames[i][1] <= now){ due += frames[i][1]; i++; }
       if(i >= frames.length){ this.finish(run, o.done); return; }
       const [f, ms] = frames[i++];
       this.set(f);
-      run.timers.push(this.later(step, ms));
+      if(window.__drProbe) (this.svg.__drLog = this.svg.__drLog || []).push({ run: run.name, f, due: Math.round(due), at: Math.round(now) });
+      due += ms;
+      run.timers.push(this.later(step, Math.max(0, due - performance.now())));
     };
     step();
     return true;
