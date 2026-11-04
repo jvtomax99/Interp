@@ -1,3 +1,9 @@
 .cache/
 osm.json
 *-check.png
+# the card pipeline's build outputs and render inputs (README, "The card's pictures")
+campus.html
+cap/
+renders/
+out/
+__pycache__/*.cpython-313.pyc
