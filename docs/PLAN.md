@@ -86,12 +86,14 @@ too: say both. Not when a phase finishes but the next phase continues here.
    Phase 0: #199 (the plan, two tools, the findings: after every deploy
    the app reloaded itself mid-hello; the opening's jam; his face timers
    late; the bold look cleared). Phase 1, no reload on a normal open:
-   #200, live b1104.1206. Phase 2, a quieter opening: #202. Phase 3, his
-   face frames on the sequence's own clock (a performance's end used to
-   land 61-434 ms late at 4x, now within one late frame):
-   `claude/feel-face-clock`. Next: phase 4 (scrolling and screens) and 5
-   (the finishing checklist and the guard suite); the hello's canvas is
-   Jose's call. Jose's phone numbers still owed.
+   #200, live b1104.1206. Phase 2, a quieter opening (pins re-applied
+   39 -> 3 in the opening, the pen's forced layouts gone, the update check
+   after the hello): #202. Phase 3, his face frames on the sequence's own
+   clock (a performance's end used to land 61-434 ms late at 4x, now
+   within one late frame): `claude/feel-face-clock`. The hello's canvas
+   draw is the opening's floor now: Jose's call (options in the audit
+   note). Next: phase 4 (scrolling and screens) and 5 (the finishing
+   checklist and the guard suite). Jose's phone numbers still owed.
 
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work

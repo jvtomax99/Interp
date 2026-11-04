@@ -974,9 +974,17 @@
 
   // The app re-renders sections in place. Re-apply only the small pieces whose
   // markup is recreated from legacy navigation constants (wave/tab/sidebar).
+  // Only when something a pin lives on was inserted (a screen drawn, the tab
+  // bar rebuilt). Not for the name pen's sparks (one new element every 30 ms
+  // while it writes: 27 re-applies in one opening), a greeting word or a
+  // petal (docs/feel-audit.md, phase 2).
+  const PIN_HOSTS = '.tabbar-btn, .side-row, .qa-card, .qa-tile, .domain-chip, .home-tile, .domain-family, .domain-banner, '
+    + '.tabbar-icon, .side-row-icon, .qa-icon, .qa-tile-icon, .domain-chip-icon, .home-tile-icon, .domain-banner-pin';
+  const hostsPins = n => n.nodeType === 1 && (n.matches(PIN_HOSTS) || !!n.querySelector(PIN_HOSTS));
   let queued = false;
-  const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(records => {
     if(queued) return;
+    if(!records.some(r => Array.prototype.some.call(r.addedNodes, hostsPins))) return;
     queued = true;
     requestAnimationFrame(() => {
       queued = false;
