@@ -2,9 +2,12 @@
    screen by screen, at iPhone size. Six checks, all measured, none a
    screenshot judgment:
 
-     press   every tappable thing gets a held touch; one whose computed look
-             (transform, colour, shadow, filter, class) has not changed
-             70 ms later has no press feedback
+     press   every tappable thing gets a held touch (its computed look 70 ms
+             later: transform, colour, shadow, filter, class) and, apart
+             from that, its :active state forced through the devtools
+             protocol (Chromium sets :active on a touch only after its
+             tap-down delay, so a held touch alone misses CSS press rules);
+             one that changes under neither has no press feedback
      load    the screen's text sampled at 0, 100, 400, 1000 and 2500 ms
              after it opens: a "No ... yet" / "Loading" line that is there
              early and gone at 2.5 s is a flash of empty before the data
@@ -12,9 +15,12 @@
              (PerformanceObserver 'layout-shift'), each shift's element named
      kb      a text field focused with the viewport shrunk to what the
              keyboard leaves: the field stays visible, the tab bar is gone
+             (lab only: the lab shrinks the layout viewport, an iPhone
+             shrinks the visual one; the phone is the judge)
      dark    the same screens in the app's dark theme (ih_theme): text
-             contrast against its background (WCAG 4.5:1, 3:1 for large),
-             and light surfaces left over; a screenshot per screen
+             contrast against its background (WCAG 4.5:1, 3:1 for large;
+             measured in the light theme too), and light surfaces left
+             over; a screenshot per screen
      safe    the stylesheets' fixed and sticky rules that never mention the
              phone's safe-area inset (static; the lab can't draw the notch)
 
@@ -161,10 +167,14 @@ async function screenPass(ctx, page, cdp, dark, findings) {
           samples[at] = await page.evaluate(TEXT);
         }
         const last = new Set(samples[2500]);
-        const flashes = [];
-        for (const at of [0, 100, 400, 1000]) for (const line of samples[at]) if (/^(No .{2,40} yet\b|Loading)/i.test(line) && !last.has(line) && !flashes.some(x => x.line === line)) flashes.push({ at, line: line.slice(0, 60) });
-        f.flashes = flashes;
-        f.empty = samples[2500].length === 0;
+        const flashes = [], loading = [];
+        for (const at of [0, 100, 400, 1000]) for (const line of samples[at]) {
+          if (last.has(line)) continue;
+          if (/^No .{2,40} yet\b/i.test(line) && !flashes.some(x => x.line === line)) flashes.push({ at, line: line.slice(0, 60) });
+          else if (/^Loading/i.test(line) && !loading.some(x => x.line === line)) loading.push({ at, line: line.slice(0, 60) });
+        }
+        f.flashes = flashes; f.loading = loading;   // a flash says "nothing" before the data; a loading line is a loading state, which is right
+        f.empty = samples[2500].length === 0 && !(await page.evaluate(() => !!document.querySelector('#content iframe')));
         const ls = await page.evaluate(() => window.__ls);
         f.shift = +ls.reduce((a, e) => a + e.v, 0).toFixed(3);
         f.shifts = ls.filter(e => e.v >= .005).slice(0, 6);
@@ -181,7 +191,23 @@ async function screenPass(ctx, page, cdp, dark, findings) {
           const b = await page.evaluate(SNAP2, { sig, lookSrc: LOOK.toString() });
           await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
           await page.waitForTimeout(120);
-          if (b && b.look === a.look && b.cls === a.cls) none.push(sig + (a.label ? ' "' + a.label + '"' : '') + (b.active ? ' (:active, no rule)' : ''));
+          let byTouch = !(b && b.look === a.look && b.cls === a.cls), byActive = false;
+          if (!byTouch) {
+            // The CSS side: :active forced on the element itself.
+            try {
+              const { result } = await cdp.send('Runtime.evaluate', { expression: `[...document.querySelectorAll('*')].find(e => e.__fc === ${JSON.stringify(sig)})`, objectGroup: 'fc' });
+              if (result && result.objectId) {
+                const { nodeId } = await cdp.send('DOM.requestNode', { objectId: result.objectId });
+                await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] });
+                await page.waitForTimeout(30);
+                const c = await page.evaluate(SNAP2, { sig, lookSrc: LOOK.toString() });
+                await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
+                byActive = !!c && c.look !== a.look;
+              }
+              await cdp.send('Runtime.releaseObjectGroup', { objectGroup: 'fc' });
+            } catch (e) { byActive = false; }
+          }
+          if (!byTouch && !byActive) none.push(sig + (a.label ? ' "' + a.label + '"' : ''));
         }
         f.tappables = sigs.length; f.noPress = none;
         // The touches may have moved things; put the screen back.
@@ -204,8 +230,8 @@ async function screenPass(ctx, page, cdp, dark, findings) {
           await page.waitForTimeout(400);
         }
       }
-      if (CHECKS.includes('dark') && dark) {
-        f.contrast = await page.evaluate(CONTRAST, SIG.toString());
+      if (CHECKS.includes('dark')) {
+        f[dark ? 'contrast' : 'contrastLight'] = await page.evaluate(CONTRAST, SIG.toString());
       }
       await page.screenshot({ path: path.join(SHOTS, key + '-' + name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png') });
     } catch (e) { f.error = (f.error ? f.error + '; ' : '') + key + ': ' + String(e.message).split('\n')[0].slice(0, 120); }
@@ -249,6 +275,7 @@ function safeAreas() {
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(12000);
     const cdp = await ctx.newCDPSession(page);
+    await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
     await screenPass(ctx, page, cdp, dark, findings);
     findings.__errors = (findings.__errors || []).concat(errors.map(e => (dark ? 'dark: ' : '') + e));
     await ctx.close();
@@ -259,21 +286,23 @@ function safeAreas() {
   // ---- report ----
   const names = Object.keys(findings).filter(k => !k.startsWith('__'));
   const pad = (s, n) => String(s).padEnd(n);
-  console.log(pad('screen', 26), 'taps', 'no press', 'flash', 'shift', 'kb', 'contrast', 'light');
+  console.log(pad('screen', 26), 'taps', 'no press', 'flash', 'shift', 'kb (lab)', 'low contrast light/dark', 'light surfaces');
   for (const n of names) {
     const f = findings[n];
     console.log(pad(n, 26), pad(f.tappables ?? '-', 4), pad(f.noPress ? f.noPress.length : '-', 8), pad(f.flashes ? f.flashes.length : '-', 5), pad(f.shift ?? '-', 5),
       pad(f.kb ? (f.kb.visible && f.kb.barAway ? 'ok' : (f.kb.visible ? '' : 'field hidden ') + (f.kb.barAway ? '' : 'bar stays')) : '-', 12),
-      pad(f.contrast ? f.contrast.low.length : '-', 8), f.contrast ? f.contrast.light.length : '-', f.error ? '  ERROR ' + f.error : '');
+      pad((f.contrastLight ? f.contrastLight.low.length : '-') + '/' + (f.contrast ? f.contrast.low.length : '-'), 23), f.contrast ? f.contrast.light.length : '-', f.error ? '  ERROR ' + f.error : '');
   }
   for (const n of names) {
     const f = findings[n]; const lines = [];
     if (f.noPress && f.noPress.length) lines.push('  no press feedback: ' + f.noPress.join(' | '));
     if (f.flashes && f.flashes.length) lines.push('  empty flash: ' + f.flashes.map(x => `"${x.line}" at ${x.at} ms`).join(' | '));
+    if (f.loading && f.loading.length) lines.push('  loading state (fine): ' + f.loading.map(x => `"${x.line}"`).join(' | '));
     if (f.empty) lines.push('  the screen is empty at 2.5 s');
     if (f.shifts && f.shifts.length) lines.push('  shifts: ' + f.shifts.map(s => `${s.v} at ${s.t} ms (${s.srcs.join(', ')})`).join(' | '));
     if (f.kb && !(f.kb.visible && f.kb.barAway)) lines.push('  keyboard: ' + JSON.stringify(f.kb));
-    if (f.contrast && f.contrast.low.length) lines.push('  low contrast: ' + f.contrast.low.map(([s, v]) => `${s} "${v.text}" ${v.ratio}:1 (needs ${v.need}, x${v.n})`).join(' | '));
+    if (f.contrastLight && f.contrastLight.low.length) lines.push('  low contrast, light: ' + f.contrastLight.low.map(([s, v]) => `${s} "${v.text}" ${v.ratio}:1 (needs ${v.need}, x${v.n})`).join(' | '));
+    if (f.contrast && f.contrast.low.length) lines.push('  low contrast, dark: ' + f.contrast.low.map(([s, v]) => `${s} "${v.text}" ${v.ratio}:1 (needs ${v.need}, x${v.n})`).join(' | '));
     if (f.contrast && f.contrast.light.length) lines.push('  light surfaces in dark mode: ' + f.contrast.light.join(' | '));
     if (lines.length) { console.log('\n' + n); lines.forEach(l => console.log(l)); }
   }
