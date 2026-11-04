@@ -12500,11 +12500,11 @@ function doctorSortMenuHtml(view){
   return `<label class="dl-sortmenu">Sort: <b>${name}</b><span class="dl-sortmenu-chev" aria-hidden="true">${ICON_CHEVRON_DOWN}</span>`
     + `<select onchange="setDoctorSort(this.value)" aria-label="Sort doctors by">${opts}</select></label>`;
 }
-// Collapse all, only where three or more groups fold (groups of 1-2 stay open).
+// Collapse all, wherever two or more groups fold.
 function doctorFoldHtml(view, groups, searching){
   if(view === 'az' || searching) return '';
-  const folding = groups.filter(g => g.items.length > 2);
-  if(folding.length < 3) return '';
+  const folding = groups.filter(doctorGroupFolds);
+  if(folding.length < 2) return '';
   const scope = view === 'specialty' ? 'doctors-spec' : 'doctors';
   const anyOpen = folding.some(g => !isGroupCollapsed(scope, g.name));
   return `<button type="button" class="dl-fold" onclick="setAllGroups('${scope}', '${folding.map(g => encGroup(g.name)).join(',')}', ${anyOpen})">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`;
@@ -12560,8 +12560,10 @@ function doctorRecentHtml(){
 
 // One group's heading in the Specialty view, and Place's "Other places"
 // (Place keeps its own for real places, with the icon you can change).
-// A group of one or two never folds: no chevron, nothing to tap.
-function doctorGroupFolds(group){ return group.items.length > 2; }
+// Every group folds, even a place with one doctor (Jose, 2026-11-04: "like
+// JTCC even if it's just 1 doctor"), so Collapse all leaves only headings.
+// Kept as a function so the static, unfoldable heading can come back.
+function doctorGroupFolds(group){ return true; }
 function doctorSpecHeadHtml(group, searching, scope = 'doctors-spec'){
   const folds = doctorGroupFolds(group);
   const collapsed = folds && !searching && isGroupCollapsed(scope, group.name);
