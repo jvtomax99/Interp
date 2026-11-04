@@ -83,7 +83,11 @@ too: say both. Not when a phase finishes but the next phase continues here.
 0. **Feel audit (Jose, 2026-11-04): the app glitches on open, Dr. Smiley
    stutters, moving the app feels off.** Plan and leads in
    `docs/feel-audit.md`; phase 0 (measure) first, then one PR per phase.
-   `claude/feel-audit`.
+   Phase 0: #199 (the plan, two tools, the findings: after every deploy
+   the app reloaded itself mid-hello; the opening's jam; his face timers
+   late; the bold look cleared). Phase 1, no reload on a normal open:
+   `claude/feel-no-reload`, stacked on #199. Next: phase 2 (the opening's
+   jam), then 3 (his face on a clock). Jose's phone numbers still owed.
 
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work

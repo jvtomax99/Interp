@@ -33,6 +33,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `sound-alikes.cjs` | Sound-Alikes: Home's rail and the tile, a speaker on every word and sentence (44px, its own tap), Spanish in es-US with a Latin American voice, filter and search, global search, the Drill heard with the words hidden, Show the words blanks the sound-alike, the other spelling counted as the lure, results |
 | `load-order.cjs` | The gap between the `features/*.js` files and `index.html`'s own script, held open 1.5 s: a resize, a key and a message in it raise no page error, and the app comes up afterwards |
 | `glossary-cv.cjs` | Glossary taps (S4), on 150-term domains: a fresh domain skips off-screen cards' layout; every box on screen sits where it would with all laid out; a redraw while scrolled, Back and a jump to one term land on the same card |
+| `deploy-open.cjs` | The first open after a deploy (`docs/feel-audit.md`, phase 1): the offline worker allowed, the checkout served by a small local server; a first visit, an open after a deploy and an open with nothing new never reload and play the hello once; a page older than the worker that just took control reloads once |
 | `chat-titles.cjs` | Team Chat titles: Admin follows the owner-code phone (a typed name can't borrow it), Supervisor of Language Services by name and spellings, new messages carry the phone |
 
 ## Run them
@@ -61,4 +62,6 @@ a change from any tool gets a green check or a red X on its commit.
 - `tools/idle.cjs`: Home left still (S7): the meter's numbers and longest stalls, and every main-thread task over 50 ms with what ran in it. `SCROLL=n` scrolls first, `START=s` waits after load, `UA=iphone`, `RUNS=n`, `INDEX=` another index.html.
 - `tools/first-paint.cjs`: a visit's first paint over a slowed network (`ROOTS=before,after`): each folder served by a local server the way Vercel does (brotli, ETag), Chromium's throttling for weak Wi-Fi and 4G, CPU 4x; first visit and return, medians. Made for phase 1 of the split (`docs/split-index.md`).
 - `tools/census.cjs`: the map of `index.html`'s script for the split (`docs/split-index.md`): every top-level name, its section, and which sections use which. `--names`, `--section <title>`, `--json`, `--write` (refreshes the table in the split plan). No browser; under a second.
+- `tools/deploy-open.cjs`: four opens in one browser profile with the offline worker allowed (the checkout from a small local server): a first visit, an open after a deploy, nothing deployed, a page older than the worker; each one's paints, hello starts, the worker taking control, reloads and files served. The suite of the same name checks it.
+- `tools/face-timing.cjs`: how late each of Dr. Smiley's face timers fires (`DrAnim.later`) in the opening, at rest and in each performance, with the long tasks around them. `UA=chromium`, `RUNS=n`.
 - `tools/doctor-replay.cjs`: replays a `doctors.json` export through the doctor page and reports anything lost.
