@@ -172,6 +172,54 @@ undo this.
 - "Stutter" may be two things: the face (lead 3) and the whole page
   (lead 2). The probe separates them; until it runs, both are open.
 
-## Findings (filled in by phase 0)
+## Findings (phase 0)
 
-(none yet)
+Lab: headless Chromium, iPhone size, CPU slowed 4x, the suites' stand-ins,
+this checkout at `ca37a5c` (main of 2026-11-04, b1104.0940). Chromium
+stands in for Safari: what runs is real, what it costs on the phone is
+Jose's meter's to say.
+
+### Lead 1, confirmed: the first open after a deploy reloads itself
+
+`tests/tools/deploy-open.cjs`, one browser profile, three opens:
+
+| Open | Documents | Home paints | What the person sees |
+|---|---|---|---|
+| After a deploy | 2 | 9 | Home at 0.6 s, the hello starts at 2.7 s, **the page reloads itself at 3.6 s**, Home again at 4.2 s, the hello starts again at 7.1 s |
+| Nothing deployed | 1 | 4 | Home at 0.5 s, the hello at 2.8 s |
+| The very first visit | 2 | 3 | Reloads at 1.8 s, the hello only after that |
+
+The server answered 310 requests for the open after a deploy against 85
+for a normal one: the second page load plus the new worker's precache,
+all during the hello. Cause, in `index.html` ("Install / offline
+support"): `controllerchange` always reloads, and every deploy makes a
+new worker that takes control at once. Phase 1 is this.
+
+### Lead 2, confirmed: the hello's seconds are a traffic jam
+
+`tests/tools/startup.cjs`, returning visit, iPhone paths, 3 runs:
+median worst task 353 ms, 115 tasks over 50 ms in the first 12 s. The
+run from 4.2 s to 7.0 s is 14 long tasks of 100-273 ms, back to back,
+each one holding the same four things: the name pen's `tick`
+(`home-polish.js`, two rect reads a frame: `getBoundingClientRect` is
+the single biggest line of the whole opening, 1,027 ms in 12 s), the
+hello's canvas `draw` (`drawImage` 543 ms), the pin re-apply
+(`pin-icons.js:982`, 301 ms) and a style recalc. The pin re-apply runs
+because the pen adds a spark element every 30 ms and the pin observer
+re-applies every pin after any insert on the page. The dock companion's
+`sync` (417 ms; `place`, `smileyInView` reading rects) wakes on every
+body class or child change too. Dr. Smiley's `greet` is timed about
+2.9 s after the hello starts, so it plays inside this run.
+
+A normal open also paints Home four times in 2.5 s (the cached glossary,
+then the categories, then the live terms, then the rank and the feed).
+Each is a full Home rebuild.
+
+`tests/tools/perf.cjs` on this checkout: idle Home 50% busy during the
+hello, 30% settled; taps wait 71-103 ms before their handler, 192-296 ms
+to paint; 19 animations that are not transform or opacity. The same on
+the copy from before the bold look is still running (lead 4).
+
+### Lead 3, measuring (face timing), lead 4, measuring (scroll and taps, before and after the bold look)
+
+(numbers to come)

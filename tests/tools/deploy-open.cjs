@@ -11,13 +11,17 @@
    the worker taking control (controllerchange), the page leaving
    (pagehide), navigations, and the worker's own requests (count, span).
    iPhone size, CPU slowed 4x (RATE=n), Firebase and the AI endpoints stood
-   in for, as in the suites. Chromium stands in for Safari.
+   in for, as in the suites. The checkout itself is served by a small local
+   server (the worker's own script and its fetches never pass through
+   Playwright's routes, so the suites' interp.test can't be used here).
+   Chromium stands in for Safari.
 
      cd tests
      node tools/deploy-open.cjs
      WAIT=30 node tools/deploy-open.cjs   seconds to watch each open (25) */
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const { chromium, route, SEED, ROOT } = require('../support/harness.cjs');
 const RATE = +(process.env.RATE || 4), WAIT = +(process.env.WAIT || 25) * 1000;
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1';
@@ -25,67 +29,69 @@ const SW_SRC = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const mime = f => ({ css: 'text/css', js: 'application/javascript', json: 'application/json', webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', svg: 'image/svg+xml', webmanifest: 'application/manifest+json', html: 'text/html; charset=utf-8', mp4: 'video/mp4' })[f.split('.').pop().toLowerCase()] || 'application/octet-stream';
 
 (async () => {
+  let version = 'A';
+  let served = [];
+  const server = http.createServer((req, res) => {
+    const u = new URL(req.url, 'http://x');
+    served.push({ at: Date.now(), f: u.pathname.slice(1) });
+    const f = u.pathname === '/' ? 'index.html' : decodeURIComponent(u.pathname.slice(1));
+    const p = path.join(ROOT, f);
+    if (!fs.existsSync(p) || !fs.statSync(p).isFile()) { res.writeHead(404); return res.end(); }
+    res.setHeader('cache-control', 'no-cache');
+    if (f === 'sw.js') { res.setHeader('content-type', 'application/javascript'); return res.end(SW_SRC.replace(/const CACHE_VERSION = '[^']*'/, `const CACHE_VERSION = 'interpreter-hub-test-${version}'`)); }
+    res.setHeader('content-type', mime(f)); res.end(fs.readFileSync(p));
+  });
+  await new Promise(r => server.listen(0, '127.0.0.1', r));
+  const ORIGIN = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 393, height: 759 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, userAgent: UA, serviceWorkers: 'allow' });
-  let version = 'A';
-  // The suites' stand-ins, registered on the context so the worker's own
-  // requests (Chromium routes them through the context) get the same answers.
+  // The suites' stand-ins for everything off this origin (Firebase, fonts, the AI endpoints).
   await route(ctx, {});
-  // Everything under interp.test the suites don't name (pins, the campus,
-  // memory/lines.json, ...): the worker precaches 96 such files.
-  await ctx.route(/^https:\/\/interp\.test\/.+/, r => {
-    const f = decodeURIComponent(new URL(r.request().url()).pathname.slice(1));
-    const p = path.join(ROOT, f);
-    if (f !== 'sw.js' && fs.existsSync(p) && fs.statSync(p).isFile()) return r.fulfill({ status: 200, contentType: mime(f), body: fs.readFileSync(p) });
-    return r.fallback();
-  });
-  await ctx.route('**/sw.js', r => r.fulfill({ status: 200, contentType: 'application/javascript', headers: { 'cache-control': 'no-cache' },
-    body: SW_SRC.replace(/const CACHE_VERSION = '[^']*'/, `const CACHE_VERSION = 'interpreter-hub-test-${version}'`) }));
+  // The suites answer every other origin with nothing; this one is the app itself.
+  await ctx.route(ORIGIN + '/**', r => r.continue());
+  // Events are kept in sessionStorage (it survives the reload this looks
+  // for; a message sent while the page reloads itself can be lost).
   await ctx.addInitScript(o => {
     window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
     try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
-    const log = (k, v) => console.log('[open] ' + JSON.stringify({ k, at: Date.now(), t: Math.round(performance.now()), v }));
-    log('start');
+    const log = (k, v) => { try { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); a.push({ k, at: Date.now(), v }); sessionStorage.setItem('__openEvents', JSON.stringify(a)); } catch (e) {} };
+    const nav = performance.getEntriesByType('navigation')[0];
+    log('document', (nav ? nav.type : '?') + (navigator.serviceWorker && navigator.serviceWorker.controller ? ', controlled by the worker' : ', no worker in control'));
     document.addEventListener('ih:home-paint', () => log('home-paint'));
-    new MutationObserver(ms => { for (const m of ms) { const el = m.target; if (el.classList && el.classList.contains('home-wave-entering') && !el.__helloSeen) { el.__helloSeen = 1; log('hello-start'); } } })
-      .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    const seen = {};
+    setInterval(() => { for (const [k, sel] of [['hello-start', '.home-wave-entering'], ['pen-start', '.home-name-pen']]) if (!seen[k] && document.querySelector(sel)) { seen[k] = 1; log(k); } }, 50);
     addEventListener('load', () => log('load'));
     addEventListener('pagehide', () => log('pagehide'));
-    try { new PerformanceObserver(l => l.getEntries().forEach(e => log('paint', e.name))).observe({ type: 'paint', buffered: true }); } catch (e) {}
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => log('controllerchange'));
-      navigator.serviceWorker.ready.then(() => log('sw-ready', !!navigator.serviceWorker.controller));
-    }
+    try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'first-contentful-paint') log('first paint'); })).observe({ type: 'paint', buffered: true }); } catch (e) {}
+    if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('controllerchange', () => log('controllerchange'));
   }, { seed: SEED });
 
+  let events = [], sw = [];
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: RATE });
-  let events = [], sw = [];
-  page.on('console', m => { const s = m.text(); if (s.startsWith('[open] ')) events.push(JSON.parse(s.slice(7))); });
   page.on('framenavigated', f => { if (f === page.mainFrame()) events.push({ k: 'navigated', at: Date.now() }); });
-  ctx.on('request', r => { if (r.serviceWorker()) sw.push({ at: Date.now(), url: r.url().replace('https://interp.test/', '') }); });
-  ctx.on('serviceworker', w => events.push({ k: 'worker-created', at: Date.now(), v: w.url().slice(-30) }));
+  ctx.on('serviceworker', w => events.push({ k: 'worker created', at: Date.now() }));
 
   const open = async (label) => {
-    events = []; sw = [];
+    events = []; sw = []; served = [];
     const t0 = Date.now();
-    await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
+    await page.goto(ORIGIN + '/', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(e => console.log('  goto: ' + e.message.split('\n')[0]));
     await page.waitForTimeout(WAIT);
+    events.push(...await page.evaluate(() => { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); sessionStorage.removeItem('__openEvents'); return a; }));
     const rel = e => ((e.at - t0) / 1000).toFixed(2) + ' s';
     const seq = events.filter(e => e.at >= t0).sort((a, b) => a.at - b.at);
     console.log(`\n== ${label} (worker version ${version}) ==`);
     const count = k => seq.filter(e => e.k === k).length;
-    console.log(`navigations ${count('navigated')}, loads ${count('load')}, Home paints ${count('home-paint')}, hello starts ${count('hello-start')}, controllerchange ${count('controllerchange')}, pagehide ${count('pagehide')}`);
-    for (const e of seq) if (['navigated', 'load', 'home-paint', 'hello-start', 'controllerchange', 'pagehide', 'worker-created', 'sw-ready'].includes(e.k) || (e.k === 'paint' && e.v === 'first-contentful-paint'))
-      console.log(`  ${rel(e).padStart(8)}  ${e.k}${e.v !== undefined ? ' ' + e.v : ''}`);
-    if (sw.length) console.log(`  worker requests: ${sw.length}, from ${rel(sw[0])} to ${rel(sw[sw.length - 1])}`);
-    else console.log('  worker requests: none seen');
+    console.log(`documents ${count('document')}, Home paints ${count('home-paint')}, hello starts ${count('hello-start')}, pen starts ${count('pen-start')}, controllerchange ${count('controllerchange')}, pagehide ${count('pagehide')}`);
+    for (const e of seq) if (e.k !== 'navigated') console.log(`  ${rel(e).padStart(8)}  ${e.k}${e.v !== undefined ? ' (' + e.v + ')' : ''}`);
+    const pre = served.filter(r => r.f.startsWith('city/'));
+    console.log(`  files served: ${served.length}; the worker's precache (campus pictures as the marker): ${pre.length}${pre.length ? ', from ' + rel(pre[0]) + ' to ' + rel(pre[pre.length - 1]) : ''}`);
   };
 
   await open('open 1, first visit');
   version = 'B';
   await open('open 2, after a deploy');
   await open('open 3, nothing deployed');
-  await ctx.close(); await browser.close();
+  await ctx.close(); await browser.close(); server.close();
 })().catch(e => { console.error(e); process.exit(1); });
