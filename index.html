@@ -17255,7 +17255,7 @@ const smileyRider = (() => {
      capsule takes the room, so on Home he hops in once the greeting scrolls
      away. On a computer he is the round button in the top bar (#tgSmiley). */
   const phone = window.matchMedia('(max-width:900px)');
-  let btn = null, face = null, bob = null, lastCat = null;
+  let btn = null, face = null, bob = null, lastCat = null, inViewLast = null;
   function build(){
     btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'dock-smiley';
@@ -17283,16 +17283,24 @@ const smileyRider = (() => {
     mo.observe(document.body, { childList: true });
     const lock = document.getElementById('accessLock');
     if(lock) mo.observe(lock, { attributes: true, attributeFilter: ['hidden'] });
-    // The Home greeting scrolling in or out of view hands him over. The
-    // check runs inside the scroll event, where the frame's layout is still
-    // clean (his lean's listener, before this one, has just paid for it),
-    // and place(), which writes, is queued only when the answer changed.
-    // It used to run place() in the frame callback on every scroll, after
-    // his lean had written its angle: a forced layout every frame, and the
-    // search for faces over the whole page with it (feel audit, phase 4:
-    // on a 150-term domain, 2.5 s of a 21 s scroll at 4x).
+    // The Home greeting scrolling in or out of view hands him over. Only
+    // that can change with a scroll, so only that is checked, inside the
+    // scroll event, where the frame's layout is still clean (his lean's
+    // listener, before this one, has just paid for it); place(), which
+    // writes, is queued only when the answer changed. It used to run
+    // place() in the frame callback on every scroll, after his lean had
+    // written its angle: a forced layout every frame, and the search for
+    // faces over the whole page with it (feel audit, phase 4: on a 150-term
+    // domain, 2.5 s of a 21 s scroll at 4x). Everything else place() weighs
+    // changes through a sync.
     let sq = 0;
-    window.addEventListener('scroll', () => { if(!sq && wantDock() !== wasShown) sq = requestAnimationFrame(() => { sq = 0; place(); }); }, { passive:true });
+    window.addEventListener('scroll', () => {
+      if(sq) return;
+      const inView = smileyInView();
+      if(inView === inViewLast) return;
+      inViewLast = inView;
+      sq = requestAnimationFrame(() => { sq = 0; place(); });
+    }, { passive:true });
   }
   // Only one Dr. Smiley at a time: any other one drawn and showing (the Home
   // greeting, Ask, the lock screen, a pop-up) sends this one away.
@@ -17352,6 +17360,7 @@ const smileyRider = (() => {
   function place(){
     if(!btn) return;
     const want = wantDock();
+    inViewLast = null;                  // the next scroll checks afresh
     document.body.classList.toggle('dock-has-smiley', want);
     btn.tabIndex = want ? 0 : -1;
     btn.setAttribute('aria-hidden', want ? 'false' : 'true');

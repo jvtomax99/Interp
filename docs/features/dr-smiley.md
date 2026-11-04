@@ -24,6 +24,26 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   cheer at 4x ended a third of a second late. `tests/tools/face-timing.cjs`
   measures it (the engine logs each frame's due and shown time under
   `window.__drProbe`). Don't go back to chaining timers by their own delay.
+- **A scroll frame reads before it writes, and searches nothing** (feel
+  audit, phase 4, 2026-11-04). The dock companion (`smileyRider` in
+  `index.html`) hands him between the Home greeting and the dock as the
+  greeting scrolls in and out of view. Its scroll listener runs inside the
+  scroll event, after his lean's listener (`drSwayScroll`, document, capture)
+  has read the scroll position, so the frame's layout is already clean and
+  the rect reads are free; `place()`, which writes (the `dock-has-smiley`
+  class, a glance), is queued for the frame callback only when the answer
+  changed. The other faces it weighs (`.ask-face`, `.home-face`,
+  `.access-face` outside the rider, the dock and the top bar) are found
+  once per `sync()` and at most twice a second otherwise (`faces()`), never
+  on every scroll. Before this, `place()` ran in the frame callback on every
+  scroll, after his lean had written its angle: a forced layout every
+  frame, and a search over the whole page with it (on a 150-term domain,
+  2.5 s of a 21 s scroll at 4x; script time in that scroll fell 60%). The
+  hero photo's drift (`applyHeroDrift`) follows the same rule: the position
+  is read in the scroll event and applied in the frame callback. Don't add
+  a layout read (`getBoundingClientRect`, `scrollY`, `offsetTop`) to a
+  frame callback that runs after his lean; read in the event, write in the
+  frame.
 - **Don't move him with a paused animation you seek by hand.** The Home
   greeting used to grow him in with a paused Web Animation whose
   `currentTime` was set every frame, while his breathing (a CSS animation on
