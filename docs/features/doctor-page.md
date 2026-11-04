@@ -150,12 +150,12 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   amber dot; on, accent-soft "Needs info · N ✕", never navy: navy is for
   + Add), things to tidy, then "Sort: Place" (`doctorSortMenuHtml`, a
   native select laid over the words; the sort chips are gone) and Collapse
-  all. The filter's note is one line, the pencil drawn. Groups of 1-2
-  doctors never fold (`doctorGroupFolds`: a static heading, no chevron);
-  in Specialty two or more of them merge (`mergeSmallDoctorGroups`) into
+  all. The filter's note is one line, the pencil drawn. Every group folds,
+  even a place with one doctor (`doctorGroupFolds`, Jose 2026-11-04; for a
+  day groups of 1-2 had a static heading); in Specialty two or more of them merge (`mergeSmallDoctorGroups`) into
   "Other specialties". Places did too ("Other places") until 2026-11-04:
   Jose found Don Imus and 360 Essex gone from the list, so every place has
-  its own heading again, small ones open. Left out:
+  its own heading again, and each folds like the rest. Left out:
   the topbar's three lines on phones, the search glyph, the panel behind
   search, data typos ("155 Polify Road", "Don IMUS").
 - **Bold look** (2026-11-03, Jose's pick after the glossary and Home): list

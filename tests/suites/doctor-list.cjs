@@ -180,7 +180,7 @@ async function load(page, sort, extra) {
         ok(await page.evaluate(() => document.querySelectorAll('#content .dl-card').length === DOCTOR_DIRECTORY.length && !doctorNeedsOnly), 'Show all doctors brings everyone back');
 
         // Every place keeps its own heading (no "Other places", 2026-11-04);
-        // a place with 1-2 doctors is open with nothing to fold. All on one row.
+        // every one folds, even a place with one doctor. All on one row.
         const SMALL = ['Hackensack University Medical Center', 'Hackensack University Medical Center', 'Hackensack University Medical Center',
           '155 Polifly Road', '20 Prospect Ave', '20 Prospect Ave', 'Teaneck office', ''].map((p, i) => ({ id: 'sm' + i, name: 'Dr. Small ' + 'ABCDEFGH'[i],
           specialty: 'Cardiology', hospitalLocation: p, locationDetails: '', region: 'north', customTerms: [] }));
@@ -193,13 +193,17 @@ async function load(page, sort, extra) {
           const noLoc = heads.find(h => h.textContent.includes('No location listed'));
           const row = document.querySelector('#content .dl-tools'), first = row && [...row.children];
           return { names: heads.map(h => h.querySelector('.group-head-name').textContent),
-            smallOpen: small.length === 3 && small.every(h => !h.querySelector('button.group-toggle') && h.nextElementSibling?.classList.contains('dl-grid')),
+            smallFold: small.length === 3 && small.every(h => !!h.querySelector('button.group-toggle')),
             noLocToggle: noLoc && !!noLoc.querySelector('button.group-toggle'), noLocCards: noLoc && noLoc.nextElementSibling?.classList.contains('dl-grid'),
             oneRow: first && new Set(first.map(c => Math.round(c.getBoundingClientRect().top + c.getBoundingClientRect().height / 2))).size === 1 };
         });
         ok(!s.names.includes('Other places') && s.names.includes('155 Polifly Road') && s.names.includes('Teaneck office') && s.names.at(-1) === 'No location listed', 'every place keeps its own heading, no Other places', s.names);
-        ok(s.smallOpen, 'places with 1-2 doctors are open, nothing to tap', s);
-        ok(s.noLocToggle === false && s.noLocCards, 'a group of one is open, with nothing to fold', s);
+        ok(s.smallFold && s.noLocToggle, 'every place folds, even one with a single doctor', s);
+        await page.evaluate(() => toggleGroup('doctors', encGroup('Teaneck office'))); await pause(page);
+        const folded = await page.evaluate(() => { const h = [...document.querySelectorAll('#content .dl-list .group-head')].find(x => x.textContent.includes('Teaneck'));
+          return h.classList.contains('is-collapsed') && !h.nextElementSibling?.classList.contains('dl-grid'); });
+        ok(folded, 'a one-doctor place folds away like the rest');
+        await page.evaluate(() => toggleGroup('doctors', encGroup('Teaneck office')));
         ok(s.oneRow, 'Needs info and Sort share one row', s);
 
         // Dark mode keeps the chips readable.
