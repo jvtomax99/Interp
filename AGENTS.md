@@ -310,7 +310,14 @@ no error on screen. So when you add something:
 
 ## Every deploy that touches `index.html`
 
-Vercel auto-deploys on push to `main`. No build step.
+Vercel deploys `main` only on a "Bump version" commit. No build step.
+Every other commit is skipped by `ignoreCommand` in `vercel.json` (Jose,
+2026-11-04): a merge used to deploy, then its bump deployed the same app
+again seconds later, and that filled the free 10 GB of Deployment Storage.
+**A push that changes the app goes live only through its bump.** If the
+bump fails, it is not live: re-run the workflow (Actions, Bump version, Run
+workflow). Pushes the bump skips (docs, tests, notes) do not deploy at all.
+Branches get no preview either.
 
 **Do not edit `const BUILD_ID`, `const BUILD_TIME` (`index.html`) or
 `const CACHE_VERSION` (`sw.js`) yourself, in a pull request or in a push
