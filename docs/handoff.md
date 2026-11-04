@@ -19,7 +19,7 @@ Status 2026-11-04 (chat 1): Meshy blocked in that chat. The proxy refused api.me
 (403 on connect) and injected no Meshy key; only api.tripo3d.ai was set. The settings were likely saved after
 the chat started: a new chat picks them up. First call to try: `GET https://api.meshy.ai/openapi/v1/balance`.
 Later the same chat: Jose allowed the three hosts and they opened (docs read, api.meshy.ai answers), but the key
-was still not added ("Invalid API key", 401): a new chat should pick it up. Costs, read from
+was still not added ("Invalid API key", 401): a new chat should pick it up. Then Jose made an API key (meshy.ai/developers/keys, monthly cap 100) and saved it: balance call works in the same chat, balance 1490 credits (1070 monthly, 420 permanent). Nothing spent yet; waiting on the doctor and visitor pictures. Costs, read from
 docs.meshy.ai/api/pricing.md: image to 3D with 2K textures is 30 credits on `meshy-7.1` (latest) or `meshy-6`
 (mesh only 20, 8K textures 35). So 30 a figure, 60 for both. The API uses prepaid API credits, bought in the
 subscription settings; not checked yet whether app credits count. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
