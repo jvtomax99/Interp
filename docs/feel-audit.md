@@ -266,7 +266,37 @@ never flash empty, nothing that jumps when data arrives, safe areas,
 dark mode, the keyboard. Then a suite, `tests/suites/feel.cjs`, that
 fails when any target above regresses (no reload on open, hitch time at
 rest, face lateness, layout shift), so the next bold look can't quietly
-undo this.
+undo this. Three pull requests: the measuring pass (no app change), the
+fixes by group (same look where the pixels can stay, Jose's eyes first
+where they can't), the guard.
+
+Sources: Apple's Human Interface Guidelines, Loading ("Show something as
+soon as possible... consider showing placeholder text, graphics, or
+animations as content loads, replacing these elements as content
+becomes available"; "Let people do other things in your app... while
+they wait"), read 2026-11-04; the CLS and INP limits above.
+
+#### Step 1, the measuring pass (done 2026-11-04, `claude/feel-finish`)
+
+`tests/tools/finish-check.cjs`: 26 screens and sheets at iPhone size,
+light and dark, six checks. What it measures and how is in its header;
+the lab's limits are named with each finding.
+
+| Check | Finding | Whose call |
+|---|---|---|
+| Press feedback | Of 16-21 tappable things per screen, about a third change nothing under a held touch or a forced `:active`: the top bar's five buttons (back, the brand, dark mode, the bell, the avatar) on every screen, the tab bar's buttons (the lens glides after the tap, the button itself never dips), the term cards' Hear and Look up pills, filter pills (False Friends' modes and chips, Ethics', Practice's tags, the `<summary>` notes), list actions (Alert me / Notify me, the ✕ delete, ✎, + Prep terms), the guide's tour, face and Show me buttons, Ask's "What I remember", Home's View all and feed rows, and in Team Chat the pinned bar, reactions, the quote, links and Add photos. About 30 classes in all. A doctor's page, the Add term sheet and `.btn` buttons everywhere pass (`.btn:active` dips 1px; cards and tiles lift through `LIFTS`). | Claude, step 2: one shared press rule for the lot (the `.btn` dip or the card lift), shown to Jose first |
+| A flash of empty before the data | None. Term Review and the memory trainer show "Loading…" lines first (a loading state, right by Apple). Home's rank outfit and feed swap-in after the first paint stay as found in phase 0 (Jose's call, `docs/PLAN.md` Facts). | Jose (Home's two swaps) |
+| Nothing jumps when data arrives | Layout shift 0 to 0.004 on every screen through its data arrival, except Team Chat: 0.059 (under the 0.1 limit), which is the chat screen replacing the app's top bar with its own, so `#app` moves 45 px, by design and after a tap (which the metric excludes on a phone). Training & Events reads the same 0.059 only when opened straight from chat (the bar coming back). | Nothing to do |
+| The keyboard (lab only: the lab shrinks the layout viewport, an iPhone shrinks the visual one) | With the viewport cut to 420 px and a field focused, the tab bar steps aside everywhere (`kb-open`). The field stays visible on Team Chat, the glossary, search, Translate, the guide; it is below the fold on Ask the Hub (its composer at the bottom) and Team access (its name field). Whether an iPhone scrolls them into view is the phone's to say. | Jose: two phone screenshots (Ask with the keyboard up, Team access with the keyboard up) |
+| Dark mode | Screenshots of all 26 in `tests/out/finish/`. Text contrast: the faint ink token (`--ink-faint`, #98A1B3 light, #707C93 dark) is used as a text colour 122 times (times, labels, eyebrows, counts, "yours", the build line) and reads 2.4-2.6:1 in the light theme and 3.78:1 in the dark one, against WCAG's 4.5:1 for text; the rest is single spots (Ethics' org tag 2.17:1, Doctor Directory's "+ Add" 2.92:1 dark, False Friends' "Changes care" badge 3.31:1 dark, Practice's "Dr. Smiley" label on his white bubble 2.6:1). Light surfaces left in dark mode: Practice's campus card and his speech bubble (daylight by design), one paragraph on Translate. | Jose: the token is his palette (`DESIGN.md`); #6B7489 would read 4.68:1 on paper and 4.33:1 on the page background. The spots are Claude's, step 2 |
+| Safe areas (static: the lab can't draw the notch) | 26 fixed or sticky rules never mention the safe-area inset. The ones that sit on an edge: `.toast`, `.ask-jump`, `.appt-pill`, `.smiley-rider`, `.dock-smiley` (bottom), `.dl-letters`, `.dp-top`, `.domain-dock`, `.gd-searchbar`, `.success-burst` (top); the rest are full-screen layers. Several sit above the tab bar, which carries the inset; whether any lands under the home indicator or the notch is the phone's to say. | Jose: three phone screenshots (a doctor's page, the doctor list's A-Z strip, a toast) |
+
+Not findings: the 3D Body reads empty because it is a frame; labels and
+an SVG trend point were listed as tappable because they carry a click
+handler, and need no press.
+
+What step 2 will not do without Jose: change the faint ink token, Home's
+two swaps, Practice's daylight card.
 
 ## Not in this version
 

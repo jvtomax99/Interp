@@ -96,6 +96,7 @@ const TAPPABLES = (sigSrc) => {
   const inter = [...root.querySelectorAll('button, a[href], [onclick], [role=button], [role=tab], [role=radio], summary, label[for], input[type=checkbox], input[type=radio]')]
     .filter(vis).filter(el => !el.closest('[aria-hidden="true"]')).filter(el => top ? true : !el.closest('.modal, .overlay, .gs-overlay'));
   const outer = inter.filter(el => !inter.some(o => o !== el && o.contains(el) && o.matches('button, a[href]')));
+  document.querySelectorAll('*').forEach(e => { if (e.__fc) delete e.__fc; });   // marks from the last screen (a closed sheet keeps its buttons)
   const seen = new Set(); const out = [];
   for (const el of outer) {
     const s = SIG(el); if (seen.has(s)) continue; seen.add(s);
