@@ -1,16 +1,35 @@
 # Handoff
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-03,
-the "free assets and figures" chat (parked Kenney cars, the toon look test, the three figures, Tripo).
+Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-04,
+the "figures" chat (Tripo figures, practice scenes, the 3D nurse made to match the drawing).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Work on branch `claude/hub-figures`. Tell me
-> what's being worked on now and what was worked on before, in a few short lines. Then make the nurse with Tripo's
-> image-to-3D API as `docs/handoff.md` says, show me front, side and back pictures beside the code nurse, and wait
-> for my go before the other two. Plain words, say "working on it" and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Work on branch `claude/hub-figures`. First
+> show me the current 3D nurse: send `docs/mockups/characters/nurse-current.png` and `nurse-current-face.png` as
+> files. Then tell me what's being worked on now and what was worked on before, in a few short lines, and ask me
+> (buttons) what's next for the 3D figures. Plain words, say "working on it" and "done". "Push" is always a button.
 
-## Now: the three figures from Jose's reference sheet, made by Tripo (nurse first)
+## Now: the 3D nurse matches the drawing; next step for the figures is Jose's call
+
+Picture of where she stands: `docs/mockups/characters/nurse-current.png` (drawing, then front and 3/4) and
+`nurse-current-face.png` (face close up). File: `docs/mockups/characters/tripo/nurse-best.glb` (7.6 MB, one GLB,
+the face and badge baked in). How she was made, step by step: "Making her match the drawing, round 2" below; the
+tools are in `docs/mockups/characters/tools/`. Renders come from Blender (`pip install bpy`, not kept between chats:
+ask Jose with a button before installing, and offer the setup-script line `pip install bpy`).
+
+Still different from the drawing: thin stray-hair marks at the temples, a faint line along the bang, the model's
+own proportions (bigger head, shorter legs), lumps in the hair. Jose had not said yet whether to polish more, do
+the doctor and visitor the same way (about 110 Tripo credits each; balance 635), or stop.
+
+Waiting on Jose, outside the figures: #204 (rules: paste boxes for environment settings, ask with a button before
+installing tools), tests passed, his "Not yet" on 2026-11-04.
+
+Live in the app (done): practice scenes in the memory trainer (#197, b1104.1059), with the figures cut straight
+from his drawing (#201, b1104.1206).
+
+## History of the figures work (oldest first)
+
 
 Jose's picture: `docs/art/figures-reference.png` (doctor left, nurse middle, visitor right; lavender background).
 Goal: 3D figures as close to that picture as possible, to compare with the code figures in
