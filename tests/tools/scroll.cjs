@@ -95,15 +95,24 @@ async function once(browser) {
     const { profile: p } = await cdp.send('Profiler.stop');
     // Self time per function (file:line), and per file, from the samples.
     const byId = new Map(p.nodes.map(n => [n.id, n]));
-    const self = new Map(), byFile = new Map();
+    const self = new Map(), byFile = new Map(), callers = new Map();
+    const parent = new Map(); p.nodes.forEach(n => (n.children || []).forEach(c => parent.set(c, n.id)));
     const dt = p.timeDeltas; let total = 0;
     p.samples.forEach((id, i) => {
       const n = byId.get(id), ms = (dt[i] || 0) / 1000; total += ms;
       const f = n.callFrame, file = short(f.url) || '(' + f.functionName + ')';
       const key = (f.functionName || '(anon)') + ' ' + file + ':' + (f.lineNumber + 1);
       self.set(key, (self.get(key) || 0) + ms); byFile.set(file, (byFile.get(file) || 0) + ms);
+      // A browser function (no file) is billed to the app line that called it.
+      if (!f.url && !/^\(/.test(f.functionName || '(')) {
+        let q = parent.get(id), c = null;
+        while (q) { const cf = byId.get(q).callFrame; if (cf.url) { c = (cf.functionName || '(anon)') + ' ' + short(cf.url) + ':' + (cf.lineNumber + 1); break; } q = parent.get(q); }
+        const ck = f.functionName + ' <- ' + (c || '(no app frame)');
+        callers.set(ck, (callers.get(ck) || 0) + ms);
+      }
     });
-    profile = { total: Math.round(total), top: [...self].sort((x, y) => y[1] - x[1]).slice(0, 28).map(([k, v]) => [k, Math.round(v)]), files: [...byFile].sort((x, y) => y[1] - x[1]).slice(0, 8).map(([k, v]) => [k, Math.round(v)]) };
+    profile = { total: Math.round(total), top: [...self].sort((x, y) => y[1] - x[1]).slice(0, 28).map(([k, v]) => [k, Math.round(v)]), files: [...byFile].sort((x, y) => y[1] - x[1]).slice(0, 8).map(([k, v]) => [k, Math.round(v)]),
+      callers: [...callers].sort((x, y) => y[1] - x[1]).slice(0, 16).map(([k, v]) => [k, Math.round(v)]) };
   }
   const run = await page.evaluate(() => { const r = frameMeterStop(); frameMeterClose(); return r; });
   const secs = z.Timestamp - a.Timestamp;
@@ -137,6 +146,8 @@ const short = u => (u || '').replace(/^https?:\/\/[^/]+\//, '');
     p.files.forEach(([k, v]) => console.log(`    ${String(v).padStart(6)} ms  ${k}`));
     console.log('  top functions by self time:');
     p.top.forEach(([k, v]) => console.log(`    ${String(v).padStart(6)} ms  ${k}`));
+    console.log('  browser functions by the app line that called them:');
+    p.callers.forEach(([k, v]) => console.log(`    ${String(v).padStart(6)} ms  ${k}`));
   }
   const errs = runs.flatMap(r => r.errors); if (errs.length) console.log('  page errors:', errs.slice(0, 3));
 })();
