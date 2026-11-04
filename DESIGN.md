@@ -29,7 +29,7 @@ same names.
 | `--paper` | `#FFFFFF` | `#1A2233` | Cards, sheets, inputs |
 | `--ink` | `#151C2C` | `#EBEFF7` | Headings and body text; never pure black |
 | `--ink-soft` | `#5A6478` | `#AEB7C9` | Secondary text, counts, meta |
-| `--ink-faint` | `#98A1B3` | `#707C93` | Hints, placeholders, the quietest labels |
+| `--ink-faint` | `#6B7489` | `#8C97AD` | Hints, placeholders, the quietest labels. 4.7:1 on paper, 5.4:1 on dark paper (was #98A1B3 / #707C93, 2.6:1 and 3.8:1: under WCAG's 4.5:1 for text; darkened 2026-11-04, the feel audit's phase 5, Jose's pick) |
 | `--line` | `#E2E7F0` | `#2B354A` | Borders and rules |
 | `--line-soft` | `#EEF1F7` | `#232C3E` | Inner dividers |
 | `--accent` | `#0F5FA6` | `#4C9FE0` | An SVG fill (icons, marks). Not a button or link color: as a background it appears on exactly one element |
