@@ -220,6 +220,50 @@ hello, 30% settled; taps wait 71-103 ms before their handler, 192-296 ms
 to paint; 19 animations that are not transform or opacity. The same on
 the copy from before the bold look is still running (lead 4).
 
-### Lead 3, measuring (face timing), lead 4, measuring (scroll and taps, before and after the bold look)
+### Lead 3, confirmed: his face frames are late whenever the page is busy
 
-(numbers to come)
+`tests/tools/face-timing.cjs`, 2 runs per path. How late each face
+timer fires against the 38 ms it asked for ("late" = more than one
+screen frame, 17 ms):
+
+| Window | iPhone paths (petals on the main thread in Chromium) | Chromium paths |
+|---|---|---|
+| The opening (0-14 s) | median 21 ms late, 54-57% late, 21-24% over 50 ms | 12-24% late, worst 48 ms |
+| Home at rest | 38-51% late, worst 66 ms | 4-15% late, worst 44 ms |
+| Performances at rest (greet, think, cheer, bounce, wince, ack, wink) | 10-54% late, worst 33-82 ms | 0-22% late, worst 38 ms |
+
+The lateness follows the main thread's load: worst in the opening (lead
+2), on the busy path, and in `think` and `wince`. The timer chain never
+catches up, so a late frame shortens every beat after it; the head's
+lean (a Web Animation) and the brows (CSS transitions) keep their clock
+through the same stall, which is what a stutter of the face alone looks
+like. Which of the two columns his phone is closer to, his meter says.
+
+### Lead 4: the bold look did not make scrolling or taps worse in the lab
+
+`tests/tools/scroll.cjs`, 3 runs each, this checkout against the copy
+from before the bold look (`1ba16ff`, b1103.2008): hitch ratio 173-203
+against 177-277, busy 74-76% against 78-80%, worst frame 133-150 ms
+both. `tap-hold.cjs`: lift to paint 240-368 ms against 256-352. One
+`perf.cjs` run each: idle settled 30% against 45%, taps 192-296 ms
+against 208-376. Same within the noise of single runs; nothing to undo.
+What scrolling does pay, on both copies: Dr. Smiley's lean on scroll
+(`drSwayScroll`, `index.html`) is 3.1-3.4 s of the run's main-thread
+time, seven times the next scroll listener. It reads the scroll position
+on every scroll event, so it is billed the frame's layout (Facts in
+`docs/PLAN.md`: the first read in a frame pays it); a lead for phase 4,
+measured on the phone first.
+
+### Still owed: Jose's phone
+
+The meter's Copy numbers for four runs (an open right after a deploy, an
+open with nothing new, Home left alone 30 s, one slow scroll of Home)
+and which iPhone and iOS. They say which lab column his phone is in.
+
+### What phase 0 decides
+
+The order stands: phase 1 (the reload) is deterministic, small and hits
+every first open after a deploy; phase 2 (the opening's jam: the pen's
+rect reads and sparks, the pin re-apply, the four Home paints) is where
+the stutter and the "off" feel of the opening come from; phase 3 (his
+face on a clock) makes his beat hold through whatever is left.
