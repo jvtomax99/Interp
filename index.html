@@ -17909,10 +17909,13 @@ document.addEventListener('focusout', (e)=>{
 if('serviceWorker' in navigator && window.isSecureContext){
   window.addEventListener('load', ()=>{
     navigator.serviceWorker.register('./sw.js').then(reg => {
-      // Check for a newer deploy on every launch and again periodically, so an
+      // Check for a newer deploy after the hello, and again every hour, so an
       // installed PWA that gets suspended and resumed for days still picks up
       // updates instead of sitting on whatever it had when first installed.
-      reg.update().catch(()=>{});
+      // Not at once: a new worker's precache (96 files) downloaded while Home
+      // was opening (docs/feel-audit.md, phase 2). The browser runs its own
+      // check on the way in; this one is for the app left open.
+      setTimeout(()=> reg.update().catch(()=>{}), 15000);
       setInterval(()=> reg.update().catch(()=>{}), 60 * 60 * 1000);
     }).catch(err=>{
       console.warn('Service worker registration failed:', err);

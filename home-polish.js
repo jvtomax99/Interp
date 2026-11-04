@@ -1100,8 +1100,15 @@
       };
       // Stop: the copy goes and the real name shows. Handing over (adopt): the
       // copy goes and the new greeting's name takes over the writing.
+      // Where the name sits is read again only when something could have
+      // moved it (a Home repaint, a resize) and every 250 ms as a fallback:
+      // reading it every frame forced the page's layout after the frame's own
+      // writes, the biggest single cost of the opening (feel audit, phase 2).
+      const follow={due:true,at:0}, moved=()=>{follow.due=true;};
+      document.addEventListener('ih:home-paint',moved);window.addEventListener('resize',moved,{passive:true});
       function stop(handover){
         if(done)return;done=true;cancelAnimationFrame(raf);clearTimeout(cap);
+        document.removeEventListener('ih:home-paint',moved);window.removeEventListener('resize',moved);
         svg.remove();if(!handover)show(name);if(run&&run.stop===stop)run=null;
       }
       // The pen keeps its own pace (64 ms a frame at most), so a page drawing
@@ -1115,8 +1122,10 @@
         if(!svg.isConnected||document.hidden||!name.isConnected)return stop();
         clock+=last?Math.min(64,Math.max(0,now-last)):0;last=now;const tm=clock;
         // the name moved inside its row (he stepped beside a longer name): follow it
-        const nr=name.getBoundingClientRect(), rr2=row.getBoundingClientRect(), mx=nr.left-rr2.left-at.x, my=nr.top-rr2.top-at.y;
-        if(Math.abs(mx-dx)>.5||Math.abs(my-dy)>.5){dx=mx;dy=my;svg.style.transform=`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;}
+        if(follow.due||now-follow.at>250){follow.due=false;follow.at=now;
+          const nr=name.getBoundingClientRect(), rr2=row.getBoundingClientRect(), mx=nr.left-rr2.left-at.x, my=nr.top-rr2.top-at.y;
+          if(Math.abs(mx-dx)>.5||Math.abs(my-dy)>.5){dx=mx;dy=my;svg.style.transform=`translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;}
+        }
         for(const ph of phases){const u=Math.min(1,Math.max(0,(tm-ph.start)/ph.dur));inkTo(ph.i,lens[ph.i]*ease(u));}
         const ph=phases.find(p=>tm>=p.start&&tm<p.start+p.dur);
         const lf=!ph&&lifts.find(l=>tm>=l.start&&tm<l.start+l.dur);
