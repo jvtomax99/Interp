@@ -1,15 +1,15 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-04,
-the feel audit chat (the app glitching on open, Dr. Smiley's stutter, moving the app feeling off).
+the second feel audit chat (phases 4 and 5: scrolling, the finishing checklist, the guard).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (item 0 under Next), `docs/feel-audit.md` and `docs/handoff.md`.
-> Tell me what's being worked on now and what was worked on before, in a few short lines. Then: if I have pasted my
-> phone's meter numbers, read them against the audit's two lab columns and say which my phone is in; otherwise ask
-> for them once. Then write the plan for phase 4 (scrolling and screens, same look) and wait for my go. Plain words,
-> say "working on it" and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next, items 0-2) and `docs/handoff.md`. Tell me what was worked
+> on before and what is next, in a few short lines. The feel audit (`docs/feel-audit.md`) is done; if I have pasted
+> my phone's meter numbers or the five phone screenshots it asks for, read them against it and say what they change;
+> otherwise ask for them once and move on to the next item in the plan: write its plan and wait for my go. Plain
+> words, say "working on it" and "done". "Push" is always a button.
 
 ## Now: the feel audit is done; what is left is Jose's
 
