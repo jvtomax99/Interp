@@ -133,14 +133,47 @@ app looks out of date" answer still holds (the first open after an update
 is a little slower: the new worker's precache) and needed no change. Jose
 confirms on his phone after a deploy: the hello plays once.
 
-### Phase 2: a quieter opening, same look
+### Phase 2: a quieter opening, same look (done 2026-11-04, `claude/feel-quiet-opening`)
 
-Only what phase 0 shows to matter, in this order of likely gain: the
-precache waits until the hello has ended; the pin observer ignores the
-greeting word's swap; the name pen's rect reads once per frame or cached;
-the glossary's first repaint waits for a quiet frame. The hello, the pen
-and the petals look pixel-identical (frame-by-frame comparison, the way
-the petals were compared). Measured again with the same tools.
+Three changes, no visible one:
+
+- `pin-icons.js`: the pin observer re-applies every pin only when something
+  a pin lives on was inserted (a screen drawn, the tab bar rebuilt), not
+  for the pen's sparks, a greeting word or a petal. Pins re-applied in the
+  first 12 s: **39 before, 3 after** (the opening probe).
+- `home-polish.js`: the pen reads where the name sits only when something
+  could have moved it (a Home repaint, a resize) and every 250 ms as a
+  fallback, not twice every frame. Its `tick` fell from 15-45 ms to
+  2-30 ms a frame at 4x and `getBoundingClientRect` left the top of the
+  profile.
+- `index.html`: the app's own check for a newer worker runs 15 s after
+  load, not at load. The browser still runs its own check on the way in,
+  so after a deploy the precache can still land during the hello; this
+  only removes the second, redundant check.
+
+What did not move: the opening's run of long frames. `startup.cjs`,
+returning, 3 runs: median worst task 353 ms before, 375 after; long tasks
+115 before, 117 after (noise). From 4.4 to 7.8 s the frames are still
+101-185 ms at 4x (about 25-45 ms on a phone, so dropped frames at 60 Hz),
+and what is left in every one of them is the hello's own canvas `draw`
+(8-37 ms, the sparkle-snap opening drawn every frame at 2x pixels), a
+style recalc (8-28 ms) and paint. His face timers in the opening stayed
+as late as before (67-81% a frame late in 2 runs, against 54-57%; the
+run-to-run spread is that wide). So the pins and the pen were real costs
+and are gone, but the hello's drawing is the frame's floor.
+
+**Next, Jose's call (it can change what he sees):** the hello's canvas.
+Options, cheapest look-safe first: (1) draw it from a worker on an
+OffscreenCanvas like the petals (same pixels; WebKit crashed on that
+once, so iPhones would keep today's path and only Chromium gains);
+(2) draw only the frames where something changes (the opening's rays,
+shards and sparkles are in motion every frame, so little gain);
+(3) draw the opening at 1x instead of 2x pixels on phones (a visible
+softening of the sparkles; he would see it first); (4) leave it: the hello
+is the look (Jose, 2026-10-15). Phase 3 (his face on a clock) is
+independent of this and comes next either way.
+
+The User Guide needed no change (nothing visible changed).
 
 ### Phase 3: his face on a clock, same look
 
