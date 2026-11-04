@@ -36,6 +36,7 @@ or "Bearer" doubled. Jose is checking or replacing the key on platform.tripo3d.a
 The proxy lists api.tripo3d.ai as "Allow + inject", so the header goes out; Tripo refuses the key. Stopped, nothing spent.
 Same chat, later: balance call 200 OK, key works. Balance 0 credits, so Jose tops up on platform.tripo3d.ai before the nurse.
 Nurse made (same chat): task `a46f35c3-09dd-4440-a750-d1e294fe800a`, 30 credits, 970 left, model v2.5. Download host `tripo-data.rg1.data.tripo3d.com` blocked by the network policy; Jose adds it. Download links expire in about 10 min: ask `GET /v2/openapi/task/<id>` again for fresh ones (no new generation needed).
+Nurse in the viewer (2026-11-04): `docs/mockups/characters/tripo/nurse.glb`, slimmed from 315,528 to 37,862 triangles and 10.9 MB to 1.1 MB (gltf-transform simplify 0.12, textures 1024 webp); raw stays on Tripo (task id above). Viewer button "Tripo" puts it beside the code nurse; it comes in facing +X, turned -90°. Tripo made it glossy (roughness ~0.2); `?matte` shows it matte (roughness 0.75), closer to the clay picture. Loader: three 0.160's GLTFLoader in `docs/mockups/characters/lib/`. Waiting on Jose's go for doctor and visitor.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
 Steps:
