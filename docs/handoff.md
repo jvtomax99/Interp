@@ -46,6 +46,10 @@ sent through the V2 API (works; V3's host openapi.tripo3d.ai is blocked here), t
 60 credits, 775 left: 1.97M triangles, three 4096 px textures, 61 MB. Sharper shapes than v2.5, still not the drawing's smooth
 finish. Docs: developers.tripo3d.com (reachable now): its V2-to-V3 migration guide lists the versions and options
 (`texture_quality` standard/detailed/extreme). Use v3.1 for any figure that must move in 3D.
+Repaint test (same day): `texture_model` v3.0 at `texture_quality` extreme, guided by the nurse drawing, on the v3.1 nurse:
+task `e7052567-8a93-4a0a-a054-8ed307a16fbb`, 30 credits, 745 left. Barely different from v3.1's own paint. A neutral,
+frontal light in `render.html` (`?light=studio&face=front`) brings it closest; what still differs: whites smeared round the
+eyes, grainy cloth, a lighter blue. Free next levers: smooth and colour-match the texture to the drawing.
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
