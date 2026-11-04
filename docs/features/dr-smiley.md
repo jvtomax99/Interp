@@ -15,6 +15,15 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   engine). Interruptions walk through in-between frames (`DR_FACE_BACK`);
   a sequence whose consecutive frames aren't neighbours gets them filled in.
   Reduced motion, a hidden page and a detached svg are handled there.
+- **His face frames keep the sequence's own clock** (feel audit, phase 3,
+  2026-11-04). In `DrAnim.play` each frame is due at a fixed time from the
+  start; the next timer is set for the next due time, never "38 ms from
+  whenever this one fired", so a late timer doesn't push the frames after
+  it, and a stall swallows the frames whose time has passed (never the
+  last one) instead of stretching the whole performance. Before this a
+  cheer at 4x ended a third of a second late. `tests/tools/face-timing.cjs`
+  measures it (the engine logs each frame's due and shown time under
+  `window.__drProbe`). Don't go back to chaining timers by their own delay.
 - **Don't move him with a paused animation you seek by hand.** The Home
   greeting used to grow him in with a paused Web Animation whose
   `currentTime` was set every frame, while his breathing (a CSS animation on
