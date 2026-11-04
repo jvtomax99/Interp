@@ -11016,8 +11016,8 @@ function memInto(L){ return L.dir === 'en-es' ? 'Spanish' : 'English'; }
 /* Practice scenes (docs/features/practice-scenes.md): the two speakers stand
    either side of the ring, the provider left, the patient or family right,
    you (the ring) between them. The one saying the line leans in while the
-   phone speaks. Pictures cut from Jose's drawing, docs/art/figures-reference.png (figures/). */
-const MEM_FIG = { doctor:[213, 480], nurse:[195, 480], visitor:[232, 480] };
+   phone speaks. Pictures rendered from the Meshy 3D figures (figures/; docs/features/practice-scenes.md). */
+const MEM_FIG = { doctor:[207, 480], nurse:[184, 480], visitor:[223, 480] };
 const MEM_PROVIDER = { discharge:'nurse', meds:'nurse', ob:'nurse', peds:'nurse', consent:'doctor', ed:'doctor', ff:'doctor' };
 function memFigHtml(who, side, state){
   const [w, h] = MEM_FIG[who];

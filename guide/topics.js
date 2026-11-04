@@ -509,7 +509,7 @@ const GUIDE_TOPICS = [
     <ol>
       <li>Open <b>CoreCHI Practice</b> and scroll to <b>Consecutive</b>. Tap <b>Start</b> on the Memory trainer.</li>
       <li>Pick <b>Both ways</b>, <b>To Spanish</b> or <b>To English</b>. Turn <b>Notes</b> on if you want to use your notepad, and <b>Record me</b> on to hear yourself afterwards.</li>
-      <li>Tap <b>Start</b> and listen. The ring fills while the line plays. Beside it stand the two people in the room: the doctor or a nurse on the left, the patient or a family member on the right. The one saying the line leans in; the other waits.</li>
+      <li>Tap <b>Start</b> and listen. The ring fills while the line plays. Beside it stand the two people in the room, little clay-toy figures: the doctor or a nurse on the left, the patient or a family member on the right. The one saying the line leans in; the other waits.</li>
       <li>When it says <b>Your turn</b>, say the whole line in the other language. Then tap <b>Show the rendering</b>.</li>
       <li>The model rendering comes in parts. Tap every part you dropped or changed, then tap <b>Next line</b>.</li>
     </ol>
@@ -518,7 +518,8 @@ const GUIDE_TOPICS = [
     <p>Under <b>Start</b>, <b>Your span, by week</b> draws your longest clean line each week for the last 8 weeks. Tap a point to read that week. With notes shows as a second, lighter line.</p>
     <p>With <b>Auto-mark</b> on, the phone listens to your turn and, when you tap Show the rendering, marks the parts it didn't hear ("not heard") and shows what it heard. It can be wrong, a synonym for example, so check the marks and tap to change any. Apple may process what you say, so practise away from patients. It's off unless you turn it on.</p>
     <p>If a line is wrong or sounds odd, tap <b>Flag this line</b> after the rendering and say why. Flags are read before the lines are changed.</p>
-    <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>` },
+    <p>Your progress stays on this phone. Record me is off unless you turn it on. Near patients, use earbuds.</p>
+    <p>The doctor, nurse and visitor were made as 3D models with Meshy (meshy.ai) from Jose's drawings.</p>` },
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
     <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It shows what the <b>Memory trainer</b> can use on your phone, and what it may add later.</p>
     <ol>

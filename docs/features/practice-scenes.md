@@ -7,12 +7,15 @@ trainer (branch `claude/practice-scenes`): `memSceneHtml`, `memFigHtml`, `MEM_FI
 
 ## As built
 
-- `figures/doctor.webp`, `nurse.webp`, `visitor.webp`: 480 px tall, about 23 KB each, transparent, facing forward.
-  Since 2026-11-04 (second version) they are **cut straight out of Jose's drawing** (`docs/art/figures-reference.png` on
-  branch `claude/hub-figures`; the same crops as for Tripo, doubled, background removed with rembg's
-  `isnet-general-use` model and alpha matting). The first version used pictures rendered from the Tripo models; Jose
-  found the visitor ugly (rough painted skin, lumpy hair), and a second Tripo try with its detailed texture (40
-  credits) was still rough. His drawing is smooth and exact, and the trainer only needs still pictures.
+- `figures/doctor.webp`, `nurse.webp`, `visitor.webp`: 480 px tall, about 20 KB each, transparent, facing forward.
+  Since 2026-11-04 (third version) they are **rendered from the Meshy 3D figures**: Jose's ChatGPT picture of each
+  (`docs/art/*-single.png`, prompts in `docs/mockups/characters/meshy/prompts.md`, all on branch
+  `claude/hub-figures`) made into a model by Meshy's image to 3D (`meshy-7.1`, 2K texture, 30 credits each; the nurse
+  in Jose's Meshy app, the doctor and visitor through the API), slimmed to phone GLBs (`meshy/*.glb`, ~1.7 MB, kept
+  on that branch, not deployed), then rendered front on in Blender (`tools/toy/plain.py`, `EXPO=-0.9`), cropped to
+  the figure and scaled to 480 px. The doctor's hair was lightened to his picture's brown. Before: cut out of Jose's
+  drawing (second version), and Tripo renders (first; Jose found the visitor ugly). The guide credits Meshy (its
+  free-plan models are CC BY 4.0; paid-plan models are the owner's, per Meshy's help pages).
 - Shown in the **Listen** and **Your turn** stages only, either side of the ring (`.mem-scene`, a 3-column grid; the
   figures 150 px tall, 126 px under 360 px wide). Listen: the speaker leans in 3 px and 2 degrees on `--spring0`,
   then bobs 3 px every 0.9 s, with a sound mark by the head; the other is at 60% and less saturated. Your turn: both
@@ -67,5 +70,7 @@ None of the three was opened and tried; this is from their own pages.
 
 ## Open
 
-Nothing. Tripo's terms on commercial use: Jose read them on 2026-11-04 and says the figures can be used in the app.
+Meshy's terms: from its help pages (searched, not opened): paid plans own their models outright, free plan is CC BY 4.0 (credit Meshy). Which plan made the nurse was not checked; the guide's credit covers both.
+
+Earlier, Tripo's terms on commercial use: Jose read them on 2026-11-04 and says the figures can be used in the app.
 (Claude could not open Tripo's pages from the cloud session, so this rests on his reading.)
