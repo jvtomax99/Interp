@@ -17907,10 +17907,12 @@ if('serviceWorker' in navigator && window.isSecureContext){
     // and its code are network-first) and is left alone. Reloading on every
     // take-over, as this used to, restarted the app in the middle of its
     // hello on the first open after every deploy (docs/feel-audit.md, phase 1).
-    navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-      const c = navigator.serviceWorker.controller;
-      if(c) c.postMessage({ type: 'version?' });
-    });
+    // Listened for from the start (below), not from load: a worker found by
+    // the browser's own check on the way in can take control before load.
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    const c = navigator.serviceWorker.controller;
+    if(c) c.postMessage({ type: 'version?' });
   });
   let swReloaded = false;
   navigator.serviceWorker.addEventListener('message', (event)=>{

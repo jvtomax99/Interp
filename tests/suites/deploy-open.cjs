@@ -8,7 +8,8 @@ const { measure } = require('../tools/deploy-open.cjs');
   const quiet = [];
   const r = await measure(s => quiet.push(s));
   const by = l => r.find(x => x.label.startsWith(l));
-  const check = (ok, what) => console.log(`${ok ? 'PASS' : 'FAIL'} ${what}`);
+  let failed = false;
+  const check = (ok, what) => { if (!ok) failed = true; console.log(`${ok ? 'PASS' : 'FAIL'} ${what}`); };
   const deploy = by('open 2'), same = by('open 3'), stale = by('open 4'), first = by('open 1');
   check(first && first.documents === 1, `first visit: one document, no reload (${first && first.documents})`);
   check(deploy && deploy.documents === 1 && deploy.reloads === 0, `after a deploy: no reload (${deploy && deploy.documents} documents)`);
@@ -18,5 +19,5 @@ const { measure } = require('../tools/deploy-open.cjs');
   // The stale page may have started its hello before the reload (the reload
   // comes when the worker takes control, 2-3 s in); that is the price of the
   // one reload that must still happen, so its hello count is not checked.
-  if (process.env.VERBOSE) console.log(quiet.join('\n'));
+  if (failed || process.env.VERBOSE) console.log(quiet.join('\n'));
 })().catch(e => { console.log('FAIL ' + e.message); process.exit(1); });
