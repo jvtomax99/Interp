@@ -184,7 +184,11 @@ under way, then what waits on Jose, then small leftovers.
       (`real-map/audit.cjs`; done: 269 spots fixed, `claude/campus-audit`), 2 traffic (lanes, one-way streets, stops
       at signs and crosswalks, turning, no overlaps; done in 3D 2026-10-29, `claude/campus-traffic`: `real-map/traffic.js`,
       checked by `traffic_check.cjs`; the card not re-rendered), 3 people (done in 3D 2026-10-29, `real-map/people.js`; sidewalks, crosswalks, doors, pairs, wheelchairs,
-      waiting), 4 the buildings checked against the real campus with sources. Live behaviour (giving way) is 3D only;
+      waiting), 4 the buildings checked against the real campus with sources (#176: four floor counts from HMH and
+      the builders' pages, garage gates where the map's driveways meet the walls; sources and the unproven list in
+      `real-map/README.md`, "The buildings, against sources". Opened 2026-10-30, redone on main 2026-11-04 after the
+      card's pictures were re-rendered at 1200 wide under it: the same scene changes, the pictures rendered again
+      with Blender 5.2 as `bpy` on Python 3.13, `campus3d/` rebuilt). Live behaviour (giving way) is 3D only;
       the card's movers follow fixed paths.
    b. Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
