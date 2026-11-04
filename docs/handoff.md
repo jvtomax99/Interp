@@ -39,6 +39,14 @@ triangles, three 2048 textures, kept in his Meshy account, not in the repo). Ren
 Base colour warmed a touch (`base-warm.png`: skin blue -15%, green -4%; scrubs red down). Phone file
 `meshy/nurse.glb`: 47.6k triangles, 1.7 MB, via `tools/toy/slim_tex.py ... 0.08 base.png` with `KEEPBASE=1`
 (shrinking the base colour to 1024 opened seam lines on the face). Pictures `nurse-meshy.png`, `nurse-meshy-face.png`.
+The ChatGPT prompt that made `nurse-single.png` (Jose attached `docs/art/figures-reference.png`):
+"Using the attached picture as the character reference, draw ONLY the nurse in the middle (...), alone, as a single
+full-body character for 3D modeling. Keep her exactly the same: same face, (...) same soft clay-toy 3D style and
+colours. Pose: standing straight, facing the camera directly, arms hanging slightly away from her body so there is a
+gap between arms and torso, hands relaxed, feet slightly apart. Camera: straight on at chest height, no perspective
+tilt, whole body in frame with a little space around her. Lighting: soft, even, flat front lighting, no strong
+shadows, no rim light. Background: plain solid light grey, nothing else in the picture. Square image, as large and
+sharp as possible." For the doctor (left) and visitor (right), swap the person and their clothes from the reference.
 Not read yet: Meshy's terms for commercial use (free plan rules may differ from paid). Shoes a bit soft.
 
 ## Second nurse (2026-11-04 night, Jose's ChatGPT picture)
