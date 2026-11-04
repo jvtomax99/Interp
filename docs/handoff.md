@@ -82,7 +82,10 @@ Making her match the drawing, round 2 (2026-11-04 afternoon, Jose: "perfect, lik
    `BADGE=badge-decal.png`: Blender render; the face plate is a copy of the head's front faces lifted a hair off the
    skin with camera-projected picture coordinates; the badge a flat card at the bump.
    `CLAY=1` renders the shape alone (how the carved mouth was found); `tools/uvmap.py` maps screen pixels to texels.
-Result `tripo/nurse-best.glb` (features and badge baked into the texture, no plates): front and 3/4 read as the drawing.
+6. For a single file: `tripo/features-screen.png` (the face plate and the badge card at their screen places) baked
+   with `tools/bake11.cjs` and laid over `color.png` (`color-final.png`), then `tools/tex.mjs set`.
+Result `tripo/nurse-best.glb` (7.6 MB, features and badge baked into the texture, no plates): front and 3/4 read as
+the drawing.
 Left: thin stray-hair marks at the temples, a faint line along the bang's edge, the figure's own proportions
 (bigger head, shorter legs than the drawing), the hair's lumps.
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
