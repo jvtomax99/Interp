@@ -6691,6 +6691,52 @@ html[data-theme="dark"] .dl-spec{ color:color-mix(in srgb, var(--dp-sp) 60%, #ff
 @media (prefers-reduced-motion: reduce){ .dl-card, .dl-add, .dl-tidy{ transition:none; } }
 /* Break a specialty at its slash, never inside a word ("Oncolo / gy"). */
 .dl-spec > span{ min-width:0; overflow-wrap:break-word; }
+
+/* ---- Doctors in the bold look (Jose's pick, 2026-11-03, after the glossary
+   and Home). --dp-vivid is the specialty colour made deeper and richer
+   (oklch, where the phone has it): the specialty colours were picked soft,
+   for small dots, and looked grey as a whole hero. */
+.dl-card, .dp-hero{ --dp-vivid:var(--dp-sp); }
+@supports (color: oklch(from red l c h)){
+  .dl-card, .dp-hero{ --dp-vivid:oklch(from var(--dp-sp) calc(l * .9) calc(c * 1.7) h); }
+}
+/* The list: each card washed in the specialty's colour, a tinted shadow, the
+   pin big and tilted out of the card's top edge (a photo stays straight). */
+.dl-grid{ row-gap:30px; padding-top:20px; }
+.dl-card{ border-radius:22px;
+  background:
+    radial-gradient(120% 100% at 100% 0%, color-mix(in srgb, var(--dp-vivid) 28%, var(--paper)) 0%, transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--dp-vivid) 12%, var(--paper)), color-mix(in srgb, var(--dp-vivid) 4%, var(--paper)));
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.9), 0 1px 2px rgba(20,43,67,0.06),
+    0 14px 24px -14px color-mix(in srgb, var(--dp-vivid) 70%, rgba(22,55,90,0.3)); }
+.dl-ph{ width:72px; height:72px; margin-top:-30px; background:none; }
+.dl-ph img{ width:72px; height:72px; transform:rotate(-6deg);
+  filter:drop-shadow(0 10px 12px color-mix(in srgb, var(--dp-vivid) 55%, rgba(8,12,40,0.4))); }
+.dl-ph.is-photo img{ border-radius:20px; transform:none; filter:none; box-shadow:0 10px 18px -8px rgba(8,12,40,0.45), 0 0 0 3px var(--paper); }
+.dl-ini{ background:var(--dp-vivid); }
+.dl-spec{ color:color-mix(in srgb, var(--dp-vivid) 72%, var(--ink)); }
+.dl-spec::before{ background:var(--dp-vivid); }
+
+/* The doctor's page: a colour hero in the specialty's colour, the name large
+   in white, the specialty as a glass chip, the pin big and tilted on the
+   right (a photo stays straight, framed in white). */
+.dp-hero{ min-height:150px; padding:22px 20px; border-radius:26px; color:#fff;
+  background:
+    radial-gradient(120% 90% at 85% 10%, color-mix(in srgb, var(--dp-vivid) 35%, #fff) 0%, transparent 55%),
+    radial-gradient(90% 80% at 0% 100%, color-mix(in srgb, var(--dp-vivid) 60%, #0B1030) 0%, transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--dp-vivid) 88%, #fff) 0%, var(--dp-vivid) 45%, color-mix(in srgb, var(--dp-vivid) 65%, #0B1030) 100%);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.35), 0 24px 40px -22px color-mix(in srgb, var(--dp-vivid) 80%, transparent); }
+.dp-hero::before{ left:auto; right:-40px; top:auto; bottom:-60px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,0.10); }
+.dp-hero .dp-ph{ order:2; flex:0 0 104px; width:104px; height:104px; margin-left:auto; background:none; }
+.dp-hero .dp-ph img{ width:104px; height:104px; transform:rotate(-8deg); filter:drop-shadow(0 14px 18px rgba(8,12,40,0.38)); }
+.dp-hero .dp-ph.is-photo{ overflow:visible; }
+.dp-hero .dp-ph.is-photo img{ border-radius:24px; transform:none; filter:none; box-shadow:0 14px 24px -10px rgba(8,12,40,0.5), 0 0 0 3px rgba(255,255,255,0.9); }
+.dp-hero .dp-ini{ background:color-mix(in srgb, var(--dp-vivid) 70%, #0B1030); box-shadow:0 0 0 3px rgba(255,255,255,0.9); }
+.dp-hero .dp-id{ order:1; flex:1; }
+.dp-hero .dp-name{ color:#fff; font-size:var(--fs-t1); letter-spacing:var(--tr-big); line-height:1.1; text-shadow:0 2px 12px rgba(8,12,40,0.25); }
+.dp-hero .dp-spec{ display:inline-flex; margin-top:9px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,0.18); color:#fff; }
+.dp-hero .dp-spec::before{ display:none; }
+html[data-theme="dark"] .dp-hero{ box-shadow:0 1px 0 0 inset rgba(255,255,255,0.2), 0 24px 40px -22px rgba(0,0,0,0.6); }
 .dl-name{ overflow-wrap:break-word; }
 
 /* Region not picked yet: one line, not the full card. */
