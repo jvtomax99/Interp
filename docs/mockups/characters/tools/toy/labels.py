@@ -7,18 +7,26 @@ P = np.load(f'{D}/pos.npy'); Nn = np.load(f'{D}/nrm.npy'); cov = np.linalg.norm(
 T = np.asarray(Image.open(f'{D}/img1.png').convert('RGB')).astype(np.float32)
 SEEDS = np.array([(215, 140, 90), (45, 62, 165), (35, 30, 32), (228, 226, 228), (110, 62, 35)], np.float32)  # skin blue hair white brown
 d = np.linalg.norm(T[:, :, None] - SEEDS[None, None], axis=-1); c = d.argmin(-1)
+import json, os
+Z = dict(head=0.05, eye_z=[0.06, 0.168], eye_x=0.105, white_top=-0.425, blue_bot=-0.44, vneck=True,
+         cheek_z=[0.03, 0.125], cheek_x=0.21, hair_top=0.195, hair_top_x=0.12)
+if os.path.exists(f'{D}/zones.json'): Z.update(json.load(open(f'{D}/zones.json')))
 x, y, z = P[..., 0], P[..., 1], P[..., 2]; nx, ny, nz = Nn[..., 0], Nn[..., 1], Nn[..., 2]
 # the face: front of the head (figure faces -Y). Head starts above the neck; find it from skin texels' heights
-head = (z > 0.05)
+head = (z > Z['head'])
 # eye whites, iris browns and highlights on the head are features painted on: they become skin
 c[head & ((c == 3) | (c == 4))] = 0
 c[~head & (c == 4)] = 0          # brown elsewhere: shading on skin
 # the eye zone: whatever Tripo painted there (pupils, lashes, highlights) becomes skin; the face pieces replace it
-fz = (ny < -0.2) & (z > 0.06) & (z < 0.168) & (np.abs(x) < 0.105)
+fz = (ny < -0.2) & (z > Z['eye_z'][0]) & (z < Z['eye_z'][1]) & (np.abs(x) < Z['eye_x'])
+if 'eyes' in Z:     # an ellipse round each eye (lashes and flicks included) instead of one box
+    a_, b_ = Z['eye_ab']; fz = np.zeros_like(fz)
+    for ex_, ez_ in Z['eyes']:
+        fz |= (ny < -0.2) & (((x - ex_) / a_) ** 2 + ((z - ez_) / b_) ** 2 < 1)
 c[fz & (c != 0)] = 0
 # white is only shoes (below the hems); the badge is its own piece
-c[(c == 3) & (z > -0.425)] = 1
-c[(c == 1) & (z < -0.44)] = 3
+c[(c == 3) & (z > Z['white_top'])] = 1
+c[(c == 1) & (z < Z['blue_bot'])] = 3
 K = 4
 # 3D vote: voxel histogram of classes, blurred by a box of radius R, read back at each texel
 vs = R / 2; lo = P[cov].min(0) - R * 2
@@ -43,9 +51,9 @@ for dx in (0, 1):
             acc += Hb[:, ii, jj, kk] * wgt
 # the V neck: skin inside the collar's V at the front
 vneck = (ny < 0) & (y < 0) & (np.abs(x) < 0.06) & (z < 0.045) & (z > -0.048 + np.abs(x) / 0.05 * 0.056)
-acc[0][vneck] += 1e6
-acc[0][(y < -0.03) & (z < 0.125) & (z > 0.03) & (np.abs(x) < 0.21) & (acc.argmax(0) == 2)] += 1e6   # no hair on the cheeks
-acc[2][(ny < 0) & (z > 0.195) & (np.abs(x) < 0.12)] += 1e6   # no skin on the hair above the forehead
+acc[0][vneck & Z['vneck']] += 1e6
+acc[0][(y < -0.03) & (z < Z['cheek_z'][1]) & (z > Z['cheek_z'][0]) & (np.abs(x) < Z['cheek_x']) & (acc.argmax(0) == 2)] += 1e6   # no hair on the cheeks
+acc[2][(ny < 0) & (z > Z['hair_top']) & (np.abs(x) < Z['hair_top_x'])] += 1e6   # no skin on the hair above the forehead
 L = acc.argmax(0); L[~cov] = 255
 np.save(f'{D}/label.npy', L.astype(np.uint8))
 pal = np.array([(0, 0, 0)] * 256, np.uint8); pal[:4] = [(220, 140, 95), (40, 60, 165), (35, 30, 32), (235, 230, 228)]

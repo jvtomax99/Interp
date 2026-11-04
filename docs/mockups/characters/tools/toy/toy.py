@@ -22,7 +22,7 @@ b.inputs['Specular IOR Level'].default_value = 0.35
 o.data.materials.clear(); o.data.materials.append(m)
 for p in o.data.polygons: p.use_smooth = True
 bpy.ops.mesh.customdata_custom_splitnormals_clear()
-bm0 = bmesh.new(); bm0.from_mesh(o.data); n0 = len(bm0.verts); bmesh.ops.remove_doubles(bm0, verts=bm0.verts, dist=1e-5); print('merged', n0 - len(bm0.verts)); bm0.to_mesh(o.data); bm0.free()
+bm0 = bmesh.new(); bm0.from_mesh(o.data); n0 = len(bm0.verts); bmesh.ops.remove_doubles(bm0, verts=bm0.verts, dist=float(os.environ.get('MERGE', '1e-5'))); print('merged', n0 - len(bm0.verts)); bm0.to_mesh(o.data); bm0.free()
 # --- whole-figure smoothing: Tripo's surface is grainy under its stored shading; smooth the real shape
 GS = int(os.environ.get('GSMOOTH', '0'))
 if GS:

@@ -3,7 +3,7 @@ import numpy as np, sys
 from PIL import Image, ImageFilter
 D = sys.argv[1]
 L = np.load(f'{D}/label.npy'); P = np.load(f'{D}/pos.npy')
-COL = np.array([(236, 134, 70), (24, 48, 140), (44, 36, 38), (240, 236, 234)], np.float32)
+COL = np.array([(236, 146, 88), (14, 34, 118), (44, 36, 38), (240, 236, 234)], np.float32)
 RGH = np.array([0.5, 0.78, 0.42, 0.55], np.float32)
 cov = L != 255; Li = np.where(cov, L, 0)
 col = COL[Li]; rg = RGH[Li]

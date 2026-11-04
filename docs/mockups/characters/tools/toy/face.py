@@ -1,25 +1,26 @@
 # Face pieces for the toy nurse, run inside toy.py (o, c, h, s, D in scope). Layout measured on the drawing's
 # nurse crop (px, 1 px = 1.016 mm at the figure's height), anchored on the model's own nose tip.
 from PIL import Image, ImageDraw
-MM = 0.978 / 963
+FEAT = json.load(open(os.environ.get('FEATURES', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'features.json'))))
+MM = FEAT.get('mm', 0.978 / 963); NOSE_D = tuple(FEAT.get('nose', (242, 385)))
+NZR = FEAT.get('nose_z', [0.08, 0.15])
 def mat(name, rgb, rough=0.5, coat=0.0):
     m_ = bpy.data.materials.new(name); m_.use_nodes = True; b_ = m_.node_tree.nodes['Principled BSDF']
     b_.inputs['Base Color'].default_value = (*[(q / 255) ** 2.2 for q in rgb], 1); b_.inputs['Roughness'].default_value = rough
     b_.inputs['Coat Weight'].default_value = coat; b_.inputs['Coat Roughness'].default_value = 0.08
     return m_
-NOSE_D = (242, 385)
 def nose_tip():
     best = None
     for v in o.data.vertices:
         p = v.co
-        if abs(p.x - c.x) < 0.02 and 0.08 < p.z < 0.15 and (best is None or p.y < best.y): best = p.copy()
+        if abs(p.x - c.x) < 0.02 and NZR[0] < p.z < NZR[1] and (best is None or p.y < best.y): best = p.copy()
     return best
 nt_ = nose_tip(); print('nose tip', tuple(round(q, 4) for q in nt_))
 def D2M(px, py):           # drawing px -> model (x, z)
     return nt_.x + (px - NOSE_D[0]) * MM, nt_.z - (py - NOSE_D[1]) * MM
 # --- smooth the face (Tripo's sockets, mouth crease, chin fold), the nose kept
 # a smooth height field fitted to the face (y as a polynomial of x and z), blended in: no sockets, creases or spikes
-x0, z0 = D2M(116, 296); x1, z1 = D2M(368, float(os.environ.get('FBOT', '458')))
+fb = FEAT.get('fit', [116, 296, 368, 458]); x0, z0 = D2M(fb[0], fb[1]); x1, z1 = D2M(fb[2], fb[3])
 sel = []
 for v in o.data.vertices:
     p = v.co
@@ -45,7 +46,7 @@ bpy.ops.mesh.primitive_uv_sphere_add(radius=1, segments=48, ring_count=24); nob 
 NR = float(os.environ.get('NOSER', '0.0085'))
 nob.scale = (NR, NR * 0.85, NR * 0.9); nob.location = (nt_.x, ny_fit - NR * 0.25, nt_.z + 0.002)
 for p_ in nob.data.polygons: p_.use_smooth = True
-nob.data.materials.append(mat('noseskin', (236, 134, 70), 0.5))
+nob.data.materials.append(mat('noseskin', (236, 146, 88), 0.5))
 print('face fit verts', len(sel), 'rms', float(np.sqrt(np.mean((yfit[fit] - X[fit, 2]) ** 2))))
 bpy.context.view_layer.update()
 def hit(mx, mz):
@@ -77,7 +78,6 @@ def smoothpath(ctrl, n=24):
             t_ = k / n; p0, p1, p2, p3 = P_[i - 1], P_[i], P_[i + 1], P_[i + 2]
             out_.append(tuple(0.5 * ((2 * p1[j]) + (-p0[j] + p2[j]) * t_ + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t_ ** 2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t_ ** 3) for j in (0, 1)))
     out_.append(ctrl[-1]); return out_
-FEAT = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'features.json')))
 dark = mat('lid', (28, 22, 24), 0.35, 0.3); browm = mat('brow', (34, 28, 30), 0.5); mouthm = mat('mouth', (125, 52, 45), 0.5)
 # --- eyes: a dome conformed to the face, textured with the iris
 def eye_tex(path, side):
@@ -126,7 +126,7 @@ for k, side in (('eye_l', 1), ('eye_r', -1)):
     tube(k + '_lid', smoothpath(lidpts, 3), rad, FEAT['eye']['dome'] * 0.55, dark)
 for k in ('brow_l', 'brow_r'):
     B = FEAT[k]; pts = smoothpath([tuple(q) for q in B['pts']], 8)
-    rr = [0.0036 * math.sin(math.pi * (0.12 + 0.76 * i / (len(pts) - 1))) for i in range(len(pts))]
+    rr = [FEAT.get('brow_size', 0.0036) * math.sin(math.pi * (0.12 + 0.76 * i / (len(pts) - 1))) for i in range(len(pts))]
     tube(k, pts, rr, 0.0006, browm)
 M_ = FEAT['mouth']; mp = smoothpath([tuple(q) for q in M_['pts']], 8)
 tube('mouth', mp, [0.0012 * math.sin(math.pi * (0.1 + 0.8 * i / (len(mp) - 1))) for i in range(len(mp))], 0.0007, mouthm)
