@@ -142,13 +142,26 @@ the glossary's first repaint waits for a quiet frame. The hello, the pen
 and the petals look pixel-identical (frame-by-frame comparison, the way
 the petals were compared). Measured again with the same tools.
 
-### Phase 3: his face on a clock, same look
+### Phase 3: his face on a clock, same look (done 2026-11-04, `claude/feel-face-clock`)
 
-Frames scheduled from timestamps (`requestAnimationFrame` with the
-sequence's own clock, late frames skipped so the beat holds; or the strip
-as a stepped Web Animation), so a stall never pushes the whole
-performance. `smiley-gestures`, `smiley-brows`, `smiley-squash` and the
-face-timing probe decide; frame by frame the sequences read the same.
+In `DrAnim.play` (`features/smiley-engine.js`) each face frame is now due
+at a fixed time from the performance's start: the next timer is set for
+the next due time, not for "38 ms from whenever this one fired", and a
+stall swallows the frames whose time has passed (never the last one)
+instead of stretching everything after it. The timers are as late as
+before (the main thread is what it is), but the beat holds:
+
+| Measure (iPhone paths, 4x, 2 runs each) | Before | After |
+|---|---|---|
+| How late a performance's last frame lands (`face-timing.cjs`) | 61-434 ms, the lateness of every timer added up (cheer 434 and 252, bounce 199 and 195, wink 200 and 88) | within one late frame: median 0-16 ms, worst 1-72 ms from its due time, per frame |
+| Frames shown a screen frame late, performances at rest | 20-60% | 0-56% (the same, by design: a late frame is late, the ones after it are not) |
+| Suites | | `smiley-gestures` 114, `smiley-brows` 23, `smiley-squash` 18, `smiley-gaze` 14, `smiley-quiz` 19, all passed: frame by frame the sequences read the same |
+
+In the lab the cheer used to end a third of a second late at 4x; now
+its end lands where its clock says. What a stall still does is drop
+the in-between frame it swallowed, which nothing painted anyway.
+`docs/features/dr-smiley.md` says the rule. The User Guide needed no
+change (nothing visible changed).
 
 ### Phase 4: scrolling and screens, same look
 
