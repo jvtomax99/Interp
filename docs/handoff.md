@@ -28,6 +28,16 @@ installing tools), tests passed, his "Not yet" on 2026-11-04.
 Live in the app (done): practice scenes in the memory trainer (#197, b1104.1059), with the figures cut straight
 from his drawing (#201, b1104.1206).
 
+## Meshy nurse (2026-11-04 night): the best so far
+
+Jose made her in Meshy from `docs/art/nurse-single.png` (screen recording in the chat; original GLB 21 MB, 595k
+triangles, three 2048 textures, kept in his Meshy account, not in the repo). Rendered as is with
+`tools/toy/plain.py` (`EXPO=-0.9`: the studio light was washing her out; her own skin is near the picture's).
+Base colour warmed a touch (`base-warm.png`: skin blue -15%, green -4%; scrubs red down). Phone file
+`meshy/nurse.glb`: 47.6k triangles, 1.7 MB, via `tools/toy/slim_tex.py ... 0.08 base.png` with `KEEPBASE=1`
+(shrinking the base colour to 1024 opened seam lines on the face). Pictures `nurse-meshy.png`, `nurse-meshy-face.png`.
+Not read yet: Meshy's terms for commercial use (free plan rules may differ from paid). Shoes a bit soft.
+
 ## Second nurse (2026-11-04 night, Jose's ChatGPT picture)
 
 `docs/art/nurse-single.png` (Jose made it in ChatGPT from the prompt in this chat: the nurse alone, straight on,
