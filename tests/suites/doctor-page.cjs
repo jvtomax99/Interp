@@ -173,7 +173,7 @@ async function targets(page) {
             full: { w: ov.width, h: ov.height, x: ov.left, vw: innerWidth, vh: innerHeight },
             hScroll: document.getElementById('doctorDirDetailModal').scrollWidth - document.getElementById('doctorDirDetailModal').clientWidth };
         });
-        ok(head.name === 'Dr. Lori A. Leslie' && head.nameSize === '22px' && head.nameWeight === '650', 'name 22/650', head);
+        ok(head.name === 'Dr. Lori A. Leslie' && head.nameSize === '28px' && head.nameWeight === '650', 'name 28/650, large in the colour hero', head);
         ok(head.ini === 'LL' && /pins\/leukemia\.webp$/.test(head.pin), 'specialty pin in its tile, with the initials', head);
         const hex = h => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
         ok(head.dot === hex(head.want), 'specialty dot in specialtyColor()', head);
