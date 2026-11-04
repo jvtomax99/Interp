@@ -179,8 +179,8 @@ async function load(page, sort, extra) {
         await page.click('#content .dl-need'); await pause(page);
         ok(await page.evaluate(() => document.querySelectorAll('#content .dl-card').length === DOCTOR_DIRECTORY.length && !doctorNeedsOnly), 'Show all doctors brings everyone back');
 
-        // Small places: one "Other places" group, each card naming its place;
-        // a lone small group stays open with nothing to fold. All on one row.
+        // Every place keeps its own heading (no "Other places", 2026-11-04);
+        // a place with 1-2 doctors is open with nothing to fold. All on one row.
         const SMALL = ['Hackensack University Medical Center', 'Hackensack University Medical Center', 'Hackensack University Medical Center',
           '155 Polifly Road', '20 Prospect Ave', '20 Prospect Ave', 'Teaneck office', ''].map((p, i) => ({ id: 'sm' + i, name: 'Dr. Small ' + 'ABCDEFGH'[i],
           specialty: 'Cardiology', hospitalLocation: p, locationDetails: '', region: 'north', customTerms: [] }));
@@ -189,17 +189,16 @@ async function load(page, sort, extra) {
         await pause(page);
         s = await page.evaluate(() => {
           const heads = [...document.querySelectorAll('#content .dl-list .group-head')];
-          const other = heads.find(h => h.textContent.includes('Other places'));
-          const grid = other && other.nextElementSibling;
+          const small = heads.filter(h => /155 Polifly|20 Prospect|Teaneck/.test(h.textContent));
           const noLoc = heads.find(h => h.textContent.includes('No location listed'));
           const row = document.querySelector('#content .dl-tools'), first = row && [...row.children];
           return { names: heads.map(h => h.querySelector('.group-head-name').textContent),
-            places: grid ? [...grid.querySelectorAll('.dl-place')].map(e => e.textContent) : [],
+            smallOpen: small.length === 3 && small.every(h => !h.querySelector('button.group-toggle') && h.nextElementSibling?.classList.contains('dl-grid')),
             noLocToggle: noLoc && !!noLoc.querySelector('button.group-toggle'), noLocCards: noLoc && noLoc.nextElementSibling?.classList.contains('dl-grid'),
             oneRow: first && new Set(first.map(c => Math.round(c.getBoundingClientRect().top + c.getBoundingClientRect().height / 2))).size === 1 };
         });
-        ok(s.names.join('|') === 'Hackensack University Medical Center|Other places|No location listed', 'places with 1-2 doctors share Other places, before No location listed', s.names);
-        ok(s.places.join('|') === '155 Polifly Road|20 Prospect Ave|20 Prospect Ave|Teaneck office', 'each card in Other places names its place', s.places);
+        ok(!s.names.includes('Other places') && s.names.includes('155 Polifly Road') && s.names.includes('Teaneck office') && s.names.at(-1) === 'No location listed', 'every place keeps its own heading, no Other places', s.names);
+        ok(s.smallOpen, 'places with 1-2 doctors are open, nothing to tap', s);
         ok(s.noLocToggle === false && s.noLocCards, 'a group of one is open, with nothing to fold', s);
         ok(s.oneRow, 'Needs info and Sort share one row', s);
 
