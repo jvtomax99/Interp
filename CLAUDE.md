@@ -527,6 +527,17 @@ design and anything touching data or rules stay with the main model.
   tripo-data.rg1.data.tripo3d.com
   developers.tripo3d.com
   ```
+- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): when
+  another program, package, plug-in or tool would make the work better,
+  ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
+  what it buys) then "Not now"; on Install, install it and use it. Never
+  install unasked, never quietly work around a missing tool. Installs last
+  only for this chat's machine; to keep one, give the setup-script line to
+  paste (rule above). Example: Blender's site is blocked here, but it
+  installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):
+  ```
+  pip install bpy
+  ```
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

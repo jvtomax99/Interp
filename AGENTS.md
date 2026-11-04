@@ -393,6 +393,15 @@ with one per line. Never only describe the value. The one exception is a
 secret's value (an API key): say where to get it and which field it goes
 in, and never ask him to paste a key into the chat.
 
+**Ask, then install what helps** (Jose, 2026-11-04). When another program,
+package, plug-in or tool would let the agent do the work better (Blender for
+3D, a converter, a test tool), ask him with a clickable choice: "Install"
+first, with what it is, its size and what it buys, then "Not now". On
+"Install", install it and use it. Never install without asking, and never
+work around a missing tool in silence when one would do the job better.
+Installs last only for this chat's machine: to keep one for every chat,
+give him the setup-script line to paste (the rule above).
+
 ### How Jose works with AI tools (Jose, 2026-10-29)
 
 Treat the AI as a junior developer he manages, not a genie. These hold for
