@@ -24,7 +24,7 @@ const depthRT = new THREE.WebGLRenderTarget(1200, 2400); depthRT.depthTexture = 
 renderer.setRenderTarget(depthRT); renderer.render(scene, cam);
 // 2. bake: every texel of the model's texture looks up the drawing where the camera sees it
 const drawing = await new THREE.TextureLoader().loadAsync(Q.get('img')); drawing.colorSpace = THREE.NoColorSpace;
-const mat = new THREE.ShaderMaterial({ defines: { BIAS: Q.get('bias') || '0.0015', F0: Q.get('f0') || '0.30', F1: Q.get('f1') || '0.65' }, side: THREE.DoubleSide, depthTest: false, depthWrite: false, transparent: false,
+const mat = new THREE.ShaderMaterial({ defines: Object.assign({ BIAS: Q.get('bias') || '0.0015', F0: Q.get('f0') || '0.30', F1: Q.get('f1') || '0.65' }, Q.has('debug') ? { DEBUG: 1 } : {}), side: THREE.DoubleSide, depthTest: false, depthWrite: false, transparent: false,
   uniforms: { camVP: { value: new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse) }, camPos: { value: cam.position },
               img: { value: drawing }, depthMap: { value: depthRT.depthTexture } },
   vertexShader: `uniform mat4 camVP; varying vec4 vClip; varying vec3 vN; varying vec3 vW;
@@ -35,8 +35,11 @@ const mat = new THREE.ShaderMaterial({ defines: { BIAS: Q.get('bias') || '0.0015
       if (st.x < 0.0 || st.x > 1.0 || st.y < 0.0 || st.y > 1.0) { gl_FragColor = vec4(0.0); return; }
       float seen = texture2D(depthMap, st).r; float z = ndc.z * 0.5 + 0.5;
       float vis = z <= seen + BIAS ? 1.0 : 0.0;
-      float facing = smoothstep(F0, F1, dot(normalize(vN), normalize(camPos - vW)));
+      float facing = smoothstep(F0, F1, abs(dot(normalize(vN), normalize(camPos - vW))));
       vec4 col = texture2D(img, st);
+      #ifdef DEBUG
+      gl_FragColor = vec4(facing, vis, dot(normalize(vN), normalize(camPos - vW)) * 0.5 + 0.5, 1.0); return;
+      #endif
       gl_FragColor = vec4(col.rgb, col.a * facing * vis); }` });
 m.traverse(o => { if (o.isMesh) o.material = mat; });
 const bakeRT = new THREE.WebGLRenderTarget(SIZE, SIZE);

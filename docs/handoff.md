@@ -67,6 +67,24 @@ Making the 3D nurse match the drawing (Jose: "perfect, like the drawing, use cre
    Blender (installed with `pip install bpy`, 5.2.3; add it to the setup script to keep it): `tools/studio.py in.glb out.png
    front|three standard|agx` renders a figure in Cycles with soft key, fill and rim area lights and a matte, slightly
    subsurface skin. With it the same nurse looks close to the drawing: most of the gap was the browser render's light.
+Making her match the drawing, round 2 (2026-11-04 afternoon, Jose: "perfect, like the drawing"): the chain is now in
+`docs/mockups/characters/tools/` (run from the scratchpad copies; paths inside are the chat's):
+1. `tools/smooth.mjs in.glb out.glb 40` with `LAP=60`: Taubin smoothing then a flattening pass over the face (nose
+   kept, the badge bump too), seam copies moved together, consistent normals. Tripo's carved eyes and mouth go.
+2. `tools/vecface.py drawing-screen.png vec.png`: the face redrawn as crisp shapes (eyes, brows, nose, mouth, blush)
+   over cleaned skin, plus `vec-decal.png` (features only) and `vec-hair.png` (the drawing's hair).
+3. `bake.html` through `tools/bake4.cjs` (features), `bake9.cjs` (wide mask: face zone, badge, shirt zone, hair,
+   below-eye flag) and `bake10.cjs` (straight-on mask): screen pictures projected into the texture's layout.
+4. `tools/clean.py`, `tools/eyes.py`, then `tools/project.py base projF projM out projMF`: per-kind flattening and
+   colour match (skin, blue, hair, white), every mark off the face (straight-on: all; sideways: keep the hair mass
+   above eye level), the shirt flat round the badge; writes `color.png`, `rough.png`, `coat.png`, `spec.png`.
+5. `tools/studio.py in.glb out.png front|three standard` with `TEXDIR`, `SMOOTH=0.2`, `DECAL=vec-decal.png`,
+   `BADGE=badge-decal.png`: Blender render; the face plate is a copy of the head's front faces lifted a hair off the
+   skin with camera-projected picture coordinates; the badge a flat card at the bump.
+   `CLAY=1` renders the shape alone (how the carved mouth was found); `tools/uvmap.py` maps screen pixels to texels.
+Result `tripo/nurse-best.glb` (features and badge baked into the texture, no plates): front and 3/4 read as the drawing.
+Left: thin stray-hair marks at the temples, a faint line along the bang's edge, the figure's own proportions
+(bigger head, shorter legs than the drawing), the hair's lumps.
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
