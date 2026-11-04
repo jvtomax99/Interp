@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figure Render</title>
+<!-- Renders one Tripo figure on a transparent background for the practice scenes (docs/features/practice-scenes.md).
+     ?who=doctor|nurse|visitor&face=right|left  ->  window.__ready, then a screenshot of the canvas. -->
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{ "imports": { "three": "../../../campus3d/three/three.module.min.js", "three/addons/": "../../../campus3d/three/addons/" } }</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from './lib/GLTFLoader.js';
+const Q = new URLSearchParams(location.search), who = Q.get('who') || 'nurse', face = Q.get('face') || 'right';
+const W = innerWidth, H = innerHeight;
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(devicePixelRatio); renderer.setSize(W, H); renderer.setClearColor(0, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
+document.body.append(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.45;
+// the viewer's soft studio light (index.html), without the floor
+scene.add(new THREE.HemisphereLight(0xfaf6ff, 0xd9cfe8, 0.75));
+const key = new THREE.DirectionalLight(0xfff4ea, 1.55); key.position.set(1.6, 4.2, 5.5); scene.add(key);
+const fill = new THREE.DirectionalLight(0xe6e0ff, 0.7); fill.position.set(-5, 2.2, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(0, 3.5, -5); scene.add(rim);
+const g = await new GLTFLoader().loadAsync(`./tripo/${who}.glb`);
+const m = g.scene; m.rotation.y = -Math.PI/2 + (face === 'right' ? 0.42 : -0.42);   // Tripo faces +X; turned about 24° toward the other speaker
+m.traverse(o => { if (o.isMesh) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; } });
+scene.add(m); m.updateMatrixWorld(true);
+const b = new THREE.Box3().setFromObject(m), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+const cam = new THREE.PerspectiveCamera(12, W/H, 0.1, 100);                      // a long lens: little perspective
+const d = Math.max(s.y*1.04/2/Math.tan(THREE.MathUtils.degToRad(6)), s.x*1.04/2/Math.tan(Math.atan(Math.tan(THREE.MathUtils.degToRad(6))*W/H)));
+cam.position.set(c.x, c.y + d*0.06, c.z + d); cam.lookAt(c);
+renderer.render(scene, cam); window.__ready = true;
+</script>
+</body></html>
