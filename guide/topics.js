@@ -504,12 +504,12 @@ const GUIDE_TOPICS = [
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>Last come your <b>Taps</b>: every tap in the run, timed from when your finger lifts. "Wait" is how long until the app starts on it, "drawn" how long until the next screen is on view. The six slowest are listed with where you were and what you tapped.</p>
     <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
-  { id:'memory', section:'study', k:'memory trainer consecutive span notes note-taking listen render retention short-term memory long lines chunks flag line voice paulina samantha', q:'How does the Memory trainer work?', a:`
+  { id:'memory', section:'study', k:'memory trainer consecutive span notes speaker doctor nurse patient family who is talking note-taking listen render retention short-term memory long lines chunks flag line voice paulina samantha', q:'How does the Memory trainer work?', a:`
     <p>Practice for consecutive interpreting. The phone reads a line out loud, a provider in English or a patient in Spanish, with the words hidden. You say it in the other language, out loud, then check yourself.</p>
     <ol>
       <li>Open <b>CoreCHI Practice</b> and scroll to <b>Consecutive</b>. Tap <b>Start</b> on the Memory trainer.</li>
       <li>Pick <b>Both ways</b>, <b>To Spanish</b> or <b>To English</b>. Turn <b>Notes</b> on if you want to use your notepad, and <b>Record me</b> on to hear yourself afterwards.</li>
-      <li>Tap <b>Start</b> and listen. The ring fills while the line plays.</li>
+      <li>Tap <b>Start</b> and listen. The ring fills while the line plays. Beside it stand the two people in the room: the doctor or a nurse on the left, the patient or a family member on the right. The one saying the line leans in; the other waits.</li>
       <li>When it says <b>Your turn</b>, say the whole line in the other language. Then tap <b>Show the rendering</b>.</li>
       <li>The model rendering comes in parts. Tap every part you dropped or changed, then tap <b>Next line</b>.</li>
     </ol>

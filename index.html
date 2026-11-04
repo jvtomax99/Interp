@@ -5790,9 +5790,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'memory',      tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Memory trainer',        title:'See who is talking: the doctor, a nurse or the patient leans in while the line plays' },
   { id:'doctorgaps',  tone:'gd-n1', pin:'pins/find-doctor.webp',       eyebrow:'Doctor Directory',      title:'Find the doctors still missing a place, a floor or prep terms, and see exactly what each one needs' },
   { id:'directory',   tone:'gd-n2', pin:'pins/doctor-directory.webp',  eyebrow:'Doctor Directory',      title:'Doctor Directory: your recent doctors at the top, and sort by place, specialty or A to Z by last name' },
-  { id:'pins',        tone:'gd-n3', pin:'pins/cardiology.webp',         eyebrow:'New look',              title:'New pictures across the app: every Home pin redrawn in soft 3D, from the heart to Team Chat' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -11005,6 +11005,23 @@ function memSrc(L){ return L.u.map(c => c[0]).join(' '); }
 function memModel(L){ return L.u.map(c => c[1]).join(' '); }
 function memWho(L){ return L.dir === 'en-es' ? 'Provider · English' : (L.set === 'peds' || L.set === 'ob' ? 'Family · Spanish' : 'Patient · Spanish'); }
 function memInto(L){ return L.dir === 'en-es' ? 'Spanish' : 'English'; }
+/* Practice scenes (docs/features/practice-scenes.md): the two speakers stand
+   either side of the ring, the provider left, the patient or family right,
+   you (the ring) between them. The one saying the line leans in while the
+   phone speaks. Pictures rendered once from the Tripo figures (figures/). */
+const MEM_FIG = { doctor:[214, 480], nurse:[189, 480], visitor:[254, 480] };
+const MEM_PROVIDER = { discharge:'nurse', meds:'nurse', ob:'nurse', peds:'nurse', consent:'doctor', ed:'doctor', ff:'doctor' };
+function memFigHtml(who, side, state){
+  const [w, h] = MEM_FIG[who];
+  return `<span class="mem-fig is-${side}${state ? ' is-' + state : ''}"><span class="mem-fig-lean"><img src="figures/${who}.webp" alt="" width="${w}" height="${h}" decoding="async" draggable="false"></span>${
+    state === 'speaking' ? '<svg class="mem-say" viewBox="0 0 20 24" aria-hidden="true"><path d="M4 8a5 5 0 0 1 0 8"/><path d="M8.5 5a9 9 0 0 1 0 14"/><path d="M13 2a13 13 0 0 1 0 20"/></svg>' : ''}</span>`;
+}
+function memSceneHtml(kind){
+  const L = MEM.line, fromProvider = L.dir === 'en-es', listen = kind === 'listen';
+  const st = mine => listen ? (mine ? 'speaking' : 'waiting') : '';
+  return `<div class="mem-scene${reducedMotion() || (typeof drStill === 'function' && drStill()) ? ' is-still' : ''}">${memFigHtml(MEM_PROVIDER[L.set] || 'doctor', 'left', st(fromProvider))}${
+    memRingHtml(kind)}${memFigHtml('visitor', 'right', st(!fromProvider))}</div>`;
+}
 function memToday(){
   const d = new Date(); d.setHours(0, 0, 0, 0);
   return memProg().log.filter(x => x.at >= +d).length;
@@ -11398,14 +11415,14 @@ function renderMemTrainer(){
   const msg = MEM.msg ? `<p class="mem-msg" role="status">${escapeHtml(MEM.msg)}</p>` : '';
   html += `<div class="dash-tile mem-card mem-stage is-${MEM.stage}" style="--dom:${MEM_COLOR}">${head}${msg}`;
   if(MEM.stage === 'listen'){
-    html += memRingHtml('listen') + `<p class="mem-hint">${p.notes ? 'Take your notes.' : 'Hold it in your head.'}</p>
+    html += memSceneHtml('listen') + `<p class="mem-hint">${p.notes ? 'Take your notes.' : 'Hold it in your head.'}</p>
       <div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memStop()">Stop</button></div>`;
   } else if(MEM.stage === 'read'){
     html += `<p class="mem-read" lang="${L.dir === 'en-es' ? 'en' : 'es'}">${escapeHtml(memSrc(L))}</p>
       <p class="mem-hint">This phone can’t read aloud. Read it once, then tap Hide.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memTurn()">Hide, my turn</button></div>`;
   } else if(MEM.stage === 'turn'){
-    html += memRingHtml('turn') + memRecLine() + (p.auto && MEMSR.state === 'on' ? `<p class="mem-rec" role="status">Auto-mark: <span id="memHeardN">listening</span></p>`
+    html += memSceneHtml('turn') + memRecLine() + (p.auto && MEMSR.state === 'on' ? `<p class="mem-rec" role="status">Auto-mark: <span id="memHeardN">listening</span></p>`
       : p.auto && MEMSR.state === 'error' && !MEMSR.text ? `<div class="mem-btns"><button type="button" class="btn btn-ghost" onclick="memSRTap()">Start listening</button></div>` : '') + `<p class="mem-hint">Out loud, the whole line, as you would for the ${L.dir === 'en-es' ? 'patient' : 'provider'}.</p>
       <div class="mem-btns"><button type="button" class="mastery-go mem-go" onclick="memReveal()">Show the rendering</button></div>`;
   } else {
