@@ -1,39 +1,47 @@
 # Handoff
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-03,
-the campus upgrade chat (sharper card, Kenney cars in 3D, free people and trees tested).
+Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-04,
+the feel audit chat (the app glitching on open, Dr. Smiley's stutter, moving the app feeling off).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md`, `docs/handoff.md` and `docs/mockups/cchi-city/real-map/README.md`
-> ("Cars: Kenney's Car Kit", "Free people and trees, tested and dropped", "People"). Work on branch
-> `claude/smoother-walk`. Tell me what's being worked on now and what was worked on before, in a few short lines,
-> then write the plan for a smoother walk for the campus people and wait for my go. Plain words, say "working on it"
-> and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (item 0 under Next), `docs/feel-audit.md` and `docs/handoff.md`.
+> Tell me what's being worked on now and what was worked on before, in a few short lines. Then: if I have pasted my
+> phone's meter numbers, read them against the audit's two lab columns and say which my phone is in; otherwise ask
+> for them once. Then write the plan for phase 4 (scrolling and screens, same look) and wait for my go. Plain words,
+> say "working on it" and "done". "Push" is always a button.
 
-## Now: a smoother walk for our campus people (3D view)
+## Now: the feel audit, phases 4 and 5
 
-Jose's pick (2026-11-03), after free people packs lost to ours. Goal: keep our people's look (round, soft, hospital
-roles), make the walk read as walking instead of a two-pose flicker.
+Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets in numbers and every measurement are in
+`docs/feel-audit.md`. Phases 0-3 are live. What is left:
 
-Where it is:
-- `stride(g, f)` in `docs/mockups/cchi-city/diorama.html` (~line 569): two poses only, legs at +-0.45 rad or straight.
-- `people.js` line ~138 picks the pose: `f = p.v > 0.05 ? Math.floor(p.step/0.22) % 2 : 0`; pairs get `1 - f`.
-- `person()` (~line 546): body, head, two legs as meshes, coloured per vertex; the arms are merged into the body, so
-  an arm swing needs the arms as their own meshes (more draws: measure).
-- The card's walkers are 2-frame sprites (`card_build.py`); leave the card alone in this change.
-
-Ideas to plan from (not decided): a continuous phase (sine) for the legs instead of 0/1, speed-matched so feet don't
-slide; a small bob and sway of the body; arms as two meshes swinging opposite the legs; reduced motion keeps today's.
-Spec first with "not in this version" (`AGENTS.md`), measure draws and triangles before and after (`count.cjs` way in
-README), `traffic_check.cjs` must stay all zero, campus-3d suite, before/after screenshots at phone size.
+- **Phase 4, scrolling and screens, same look.** The lab cleared the bold look (no regression); the costliest scroll
+  listener is Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`: it reads the scroll position on every scroll
+  event, so it is billed the frame's layout). Measure on the phone first (his meter while scrolling Home and a
+  150-term domain), then `tests/tools/scroll.cjs` before/after, interleaved. The Facts in `docs/PLAN.md` warn that
+  moving one read only moves the bill to the next reader.
+- **Phase 5, the finishing checklist and the guard.** Every screen for press feedback, loading states that never
+  flash empty, nothing jumping when data arrives, safe areas, dark mode, the keyboard; then a suite that fails when a
+  target regresses (no reload on open is already guarded by `deploy-open.cjs`; add hitch time at rest, face slip,
+  layout shift).
+- **Jose's call, open:** the hello's own canvas drawing is now the floor of the opening's frames (101-185 ms at 4x
+  from 4.4 to 7.8 s). Options under Phase 2 in the audit note; "leave it, the hello is the look" is a fair answer.
+- **Still owed by Jose:** the meter's Copy numbers (More, bottom) for an open right after a deploy, an open with
+  nothing new, Home left alone 30 s, one slow scroll of Home; and which iPhone and iOS. They say which lab column
+  (the iPhone paths or the Chromium paths) his phone is in.
 
 ## Where things stand
 
-- Live: sharper CoreCHI card (#177, b1103.1246); Kenney cars in 3D (#184, b1103.1529); notes "push is a button" (#181).
+- Live: #200 no reload on a normal open (b1104.1206); #202 a quieter opening, pins re-applied 39 -> 3, the pen's
+  forced layouts gone, the update check after the hello (b1104.1314); #203 his face frames on the sequence's own
+  clock, a performance's end lands where its clock says (b1104.1348). #199 the plan, tools and findings (docs).
 - Open changes: none. Check-ins: none.
-- New rules this chat (in `AGENTS.md`/`CLAUDE.md`): "push" is always a clickable button, and Claude merges on Push;
-  a phone notification when something goes live (from main, #180).
-- Learned: the card capture pins the clock to noon NY (`card_page.cjs`), else windows render lit. Blender here: `pip
-  install bpy==5.0.1` in a Python 3.11 venv. The tests' pinned Playwright needs `executablePath:
-  '/opt/pw-browsers/chromium'` in cloud sessions (a `-r` preload that patches `chromium.launch`).
+- New tools: `tests/tools/deploy-open.cjs` (four opens with the offline worker on, from a small local server; its
+  suite `deploy-open.cjs` is in `run.cjs`), `tests/tools/face-timing.cjs` (timer lateness and frame slip; the engine
+  logs under `window.__drProbe`). In a cloud session the tests' pinned Playwright needs a `-r` preload that patches
+  `chromium.launch` with `executablePath: '/opt/pw-browsers/chromium'`; for `run.cjs` pass it through `NODE_OPTIONS`.
+- Learned: the browser checks for a new worker on its own on the way in, so a new worker can take control before
+  `load`; the page's listener must be at script level. Playwright's routes never see the worker's own script or
+  fetches (hence the local server in `deploy-open.cjs`). A page served from a worker's cache is never older than that
+  worker (the precache is the worker's own build), so "page older than the worker" only happens on `controllerchange`.
