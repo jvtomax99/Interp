@@ -157,6 +157,13 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   place (`.dl-place`), or into "Other specialties" in Specialty. Left out:
   the topbar's three lines on phones, the search glyph, the panel behind
   search, data typos ("155 Polify Road", "Don IMUS").
+- **Bold look** (2026-11-03, Jose's pick after the glossary and Home): list
+  cards washed in the specialty's colour with a tinted shadow, the pin 72px
+  tilted out of the card's top edge (a photo stays straight); the doctor's
+  page opens on a colour hero (`.dp-hero`) in the specialty's colour, the
+  name 28px in white, the specialty as a glass chip, the pin 104px tilted on
+  the right. `--dp-vivid` is the specialty colour made deeper (oklch, where
+  supported): the soft dot colours looked grey as a whole hero.
 - Navy "+ Add" (`DOCTOR_ADD_BTN`) at the end of the section head; the
   topbar has no add button on this screen.
 - Duplicates and old terminology: one "N things to tidy" button
