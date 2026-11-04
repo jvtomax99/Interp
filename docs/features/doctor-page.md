@@ -152,9 +152,10 @@ columns on a phone, `auto-fill` 200px on a computer), the standard finish.
   native select laid over the words; the sort chips are gone) and Collapse
   all. The filter's note is one line, the pencil drawn. Groups of 1-2
   doctors never fold (`doctorGroupFolds`: a static heading, no chevron);
-  two or more of them merge (`mergeSmallDoctorGroups`) into "Other places"
-  after the big places, before "No location listed", each card naming its
-  place (`.dl-place`), or into "Other specialties" in Specialty. Left out:
+  in Specialty two or more of them merge (`mergeSmallDoctorGroups`) into
+  "Other specialties". Places did too ("Other places") until 2026-11-04:
+  Jose found Don Imus and 360 Essex gone from the list, so every place has
+  its own heading again, small ones open. Left out:
   the topbar's three lines on phones, the search glyph, the panel behind
   search, data typos ("155 Polify Road", "Don IMUS").
 - **Bold look** (2026-11-03, Jose's pick after the glossary and Home): list

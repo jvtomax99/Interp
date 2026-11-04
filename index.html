@@ -12510,11 +12510,12 @@ function doctorFoldHtml(view, groups, searching){
   return `<button type="button" class="dl-fold" onclick="setAllGroups('${scope}', '${folding.map(g => encGroup(g.name)).join(',')}', ${anyOpen})">${anyOpen ? 'Collapse all' : 'Expand all'}</button>`;
 }
 
-/* Places (or specialties) with one or two doctors share one group at the
-   end, "Other places", each card naming its place: a heading per doctor
-   cost a tap to see one name and left half the row empty. A lone small
-   group stays as it is, open. "No location listed" always keeps its own. */
-const OTHER_PLACES_LABEL = 'Other places';
+/* Specialties with one or two doctors share one group at the end, "Other
+   specialties" (each card already says its specialty). Places no longer do
+   (Jose, 2026-11-04): a building's name is how you look for a doctor, and
+   "Don Imus" vanishing into "Other places" read as lost. Small places keep
+   their own heading and are open, nothing to tap (doctorGroupFolds). The
+   function still takes any group name. */
 function mergeSmallDoctorGroups(groups, otherName, keepLast){
   const small = groups.filter(g => g.items.length < 3 && !keepLast.includes(g.name) && g.name !== otherName);
   if(small.length < 2) return groups;
@@ -12659,7 +12660,7 @@ function renderDoctorDirectory(q){
     groups = [...map.entries()].map(([name, items]) => ({ name, items }))
       .sort((a, b) => (a.name === '#') - (b.name === '#') || a.name.localeCompare(b.name));
   } else {
-    groups = mergeSmallDoctorGroups(groupByLocation(list, d => d.hospitalLocation), OTHER_PLACES_LABEL, [NO_LOCATION_LABEL]);
+    groups = groupByLocation(list, d => d.hospitalLocation);
   }
 
   // One number on screen, and it's what the list shows.
