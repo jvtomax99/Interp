@@ -167,7 +167,9 @@ const TEXT = () => (document.querySelector('.modal.show, .overlay.show, .gs-over
   await page.evaluate(() => { FM.on = false; frameMeterStart(); });
   await page.waitForTimeout(6000);
   const rest = await page.evaluate(() => { const r = frameMeterStop(); frameMeterClose(); return r; });
-  ok(rest && rest.ratio < 60, `Home at rest: hitch ${rest && rest.ratio} ms/s at 1x (under 60; the phone's bar is 10)`);
+  // This machine reads 0-56 at 1x from run to run; GitHub's runners are
+  // slower and noisier. 120 catches a runaway loop (hundreds), not noise.
+  ok(rest && rest.ratio < 120, `Home at rest: hitch ${rest && rest.ratio} ms/s at 1x (under 120; the phone's bar is 10)`);
 
   ok(!errors.length, 'no page errors', errors);
   await browser.close();

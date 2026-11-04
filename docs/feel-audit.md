@@ -360,8 +360,8 @@ card's pill, a term card, a filter pill, a doctor card; no text under
 4.5:1 on the faint ink's screens; a 150-term domain's scroll searches
 the page far less than once a frame and reads only a few rects; a
 cheer at rest keeps its clock (every frame within 100 ms of its due
-time at 1x; measured 0-2 ms); Home at rest under 60 ms/s of hitches at
-1x (measured 0-11; the phone's bar is 10, at 4x the lab reads 86-156).
+time at 1x; measured 0-2 ms); Home at rest under 120 ms/s of hitches at
+1x (measured 0-56 here, so the limit is for a runaway loop, not noise; the phone's bar is 10, at 4x the lab reads 86-156).
 The first open after a deploy keeps its own guard, `deploy-open.cjs`.
 Run against `main` before step 2 it failed the press and contrast
 checks, as it should; against step 2 it found the cards' dead glow
