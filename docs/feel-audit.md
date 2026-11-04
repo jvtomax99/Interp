@@ -298,7 +298,7 @@ handler, and need no press.
 What step 2 will not do without Jose: change the faint ink token, Home's
 two swaps, Practice's daylight card.
 
-#### Step 2, the fixes by group (done 2026-11-04, `claude/feel-finish-2`)
+#### Step 2, the fixes by group (done 2026-11-04, #208, live b1104.2144)
 
 Jose's call on the token (2026-11-04): darken it. Three groups, measured
 with the same tool after:
@@ -346,7 +346,7 @@ False Friends' mode button at 4.49:1 on a tint the tool reads
 approximately. No runtime errors across the 26 screens, light and dark.
 The User Guide needed no change (no new feature).
 
-#### Step 3, the guard (done 2026-11-04, `claude/feel-guard`)
+#### Step 3, the guard (done 2026-11-04, #209, live b1104.2150)
 
 `tests/suites/feel.cjs`, in `run.cjs`, so GitHub runs it on every push.
 One browser at iPhone size, no CPU throttling (the runners vary too

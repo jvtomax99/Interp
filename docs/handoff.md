@@ -11,27 +11,24 @@ the feel audit chat (the app glitching on open, Dr. Smiley's stutter, moving the
 > for them once. Then write the plan for phase 4 (scrolling and screens, same look) and wait for my go. Plain words,
 > say "working on it" and "done". "Push" is always a button.
 
-## Now: the feel audit, phases 4 and 5
+## Now: the feel audit is done; what is left is Jose's
 
 Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets in numbers and every measurement are in
-`docs/feel-audit.md`. Phases 0-4 are live (phase 4: #205, b1104.1832). What is left:
+`docs/feel-audit.md`. Phases 0-5 are live (phase 4: #205, b1104.1832; phase 5: #207, #208 b1104.2144, #209
+b1104.2150). What is left:
 
 - **Phase 4's lean, open:** Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`) reads the scroll position
   in every scroll event and is billed the frame's style work; in the lab that is Chromium's CSS petals, which the
   phone composites, so only Jose's meter on a domain scroll says what it really costs. Left as it is until then.
-- **Phase 5, step 1 (#207) and step 2 (`claude/feel-finish-2`):** the measuring pass (`tests/tools/finish-check.cjs`,
+- **Phase 5, step 1 (#207), step 2 (#208, live b1104.2144), step 3 (#209, live b1104.2150):** the measuring pass (`tests/tools/finish-check.cjs`,
   26 screens, six checks) with its findings table in the audit note, then the fixes: press feedback for about 30
   kinds of control (one rule beside `.tg-sync:active`, the classes in `LIFTS`), the faint ink token darkened
-  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Step 3 (`claude/feel-guard`): the guard
+  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Step 3: the guard
   suite `tests/suites/feel.cjs` in `run.cjs` (no empty flash or jump on data, press feedback on ten controls,
   contrast, a scroll that searches nothing, his face on its clock, Home at rest), and the bug it found: the term and
   doctor cards' press glow was dead under their entrance animation's forwards fill (`cardIn`, now `backwards`).
   Still owed by Jose: five phone screenshots (Ask and Team access with the keyboard up; a doctor's page, the doctor
   list's A-Z strip and a toast, for the safe areas).
-- **Phase 5, the finishing checklist and the guard.** Every screen for press feedback, loading states that never
-  flash empty, nothing jumping when data arrives, safe areas, dark mode, the keyboard; then a suite that fails when a
-  target regresses (no reload on open is already guarded by `deploy-open.cjs`; add hitch time at rest, face slip,
-  layout shift).
 - **Jose's call, open:** the hello's own canvas drawing is now the floor of the opening's frames (101-185 ms at 4x
   from 4.4 to 7.8 s). Options under Phase 2 in the audit note; "leave it, the hello is the look" is a fair answer.
 - **Still owed by Jose:** the meter's Copy numbers (More, bottom) for an open right after a deploy, an open with
