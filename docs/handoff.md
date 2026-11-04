@@ -19,10 +19,12 @@ Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets i
 - **Phase 4's lean, open:** Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`) reads the scroll position
   in every scroll event and is billed the frame's style work; in the lab that is Chromium's CSS petals, which the
   phone composites, so only Jose's meter on a domain scroll says what it really costs. Left as it is until then.
-- **Phase 5, step 1 is on `claude/feel-finish`:** the measuring pass (`tests/tools/finish-check.cjs`, 26 screens, six
-  checks) and its findings table in the audit note. Step 2, the fixes by group, waits on Jose: his call on the faint
-  ink token (`--ink-faint`, 2.4-2.6:1 as text, 122 uses), and five phone screenshots (Ask and Team access with the
-  keyboard up; a doctor's page, the doctor list's A-Z strip and a toast, for the safe areas). Then the guard suite.
+- **Phase 5, step 1 (#207) and step 2 (`claude/feel-finish-2`):** the measuring pass (`tests/tools/finish-check.cjs`,
+  26 screens, six checks) with its findings table in the audit note, then the fixes: press feedback for about 30
+  kinds of control (one rule beside `.tg-sync:active`, the classes in `LIFTS`), the faint ink token darkened
+  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Still owed by Jose: five phone screenshots
+  (Ask and Team access with the keyboard up; a doctor's page, the doctor list's A-Z strip and a toast, for the safe
+  areas). Then the guard suite (`tests/suites/feel.cjs`).
 - **Phase 5, the finishing checklist and the guard.** Every screen for press feedback, loading states that never
   flash empty, nothing jumping when data arrives, safe areas, dark mode, the keyboard; then a suite that fails when a
   target regresses (no reload on open is already guarded by `deploy-open.cjs`; add hitch time at rest, face slip,

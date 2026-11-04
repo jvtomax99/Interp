@@ -8,7 +8,7 @@
     --paper:#FFFFFF;
     --ink:#151C2C;
     --ink-soft:#5A6478;
-    --ink-faint:#98A1B3;
+    --ink-faint:#6B7489;   /* was #98A1B3 (2.6:1 on paper); 4.7:1 since 2026-11-04, the feel audit's phase 5 (Jose's pick) */
     --line:#E2E7F0;
     --line-soft:#EEF1F7;
     --accent:#0F5FA6;
@@ -18,7 +18,7 @@
     --cyan:#01B8E6;
     --danger:#C2485C;
     --danger-soft:#FBECEF;
-    --good:#2F7D5B;
+    --good:#2B7354;   /* was #2F7D5B: 4.4:1 on its soft tint; 5.0 since 2026-11-04 (feel audit, phase 5) */
     --good-soft:#E7F5EE;
     --mono:'IBM Plex Mono', ui-monospace, monospace;
     --sans:'Inter', system-ui, -apple-system, sans-serif;
@@ -54,7 +54,7 @@
     --paper:#1A2233;
     --ink:#EBEFF7;
     --ink-soft:#AEB7C9;
-    --ink-faint:#707C93;
+    --ink-faint:#8C97AD;   /* was #707C93 (3.8:1 on dark paper); 5.4:1 */
     --line:#2B354A;
     --line-soft:#232C3E;
     --accent:#4C9FE0;
@@ -212,6 +212,34 @@
   .tg-sync:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
   .tg-sync{ transition:transform .16s var(--ease), filter .16s var(--ease); }
   .tg-sync:active, .tg-sync.is-pressed{ transform:scale(.95); filter:brightness(.96); }
+  /* Press feedback for the small controls that had none (feel audit, phase
+     5, 2026-11-04, tests/tools/finish-check.cjs): the top bar's buttons, the
+     cards' Hear and Look up pills, filter pills, list actions, the guide's
+     buttons, Team Chat's reactions and Add photos. The same dip as .tg-sync.
+     Touch adds .is-pressed (LIFTS in index.html): :hover never fires there
+     and :active comes after the tap delay. Wide rows (a feed row, the pinned
+     bar, a quote) only darken; an inline link only fades. The tab bar's
+     buttons (the lens answers them) and the Home badge (his face, pettable)
+     are left as they are. */
+  .tg-back:active, .tg-brand:active, .tg-icon-btn:active, .tg-avatar:active, .link-pill:active, .ff-mode:active, .ff-chip:active, .sa-all:active,
+  .ethics-filter-pill:active, .activity-delete:active, .icon-btn:active, .dl-prep:active, .dd-detail-close:active, .home-sec-more:active,
+  .home-sec-add:active, .gd-tour:active, .gd-face-btn:active, .gd-week-hide:active, .gd-show:active, .ask-mem-link:active, .ask-chip:active,
+  .chat-reaction:active, .tc-attach:active, .sa-pair-say:active, .group-mark:active, .domain-banner-more:active, .domain-add:active, .tr-swap:active,
+  .tg-back.is-pressed, .tg-brand.is-pressed, .tg-icon-btn.is-pressed, .tg-avatar.is-pressed, .link-pill.is-pressed, .ff-mode.is-pressed, .ff-chip.is-pressed, .sa-all.is-pressed,
+  .ethics-filter-pill.is-pressed, .activity-delete.is-pressed, .icon-btn.is-pressed, .dl-prep.is-pressed, .dd-detail-close.is-pressed, .home-sec-more.is-pressed,
+  .home-sec-add.is-pressed, .gd-tour.is-pressed, .gd-face-btn.is-pressed, .gd-week-hide.is-pressed, .gd-show.is-pressed, .ask-mem-link.is-pressed, .ask-chip.is-pressed,
+  .chat-reaction.is-pressed, .tc-attach.is-pressed, .sa-pair-say.is-pressed, .group-mark.is-pressed, .domain-banner-more.is-pressed, .domain-add.is-pressed, .tr-swap.is-pressed{
+    transform:scale(.95); filter:brightness(.96);
+  }
+  .home-feed-row:active, .tc-pinned-bar:active, .chat-quote:active, .head-action:active, .group-toggle:active, summary:active,
+  .home-feed-row.is-pressed, .tc-pinned-bar.is-pressed, .chat-quote.is-pressed, .head-action.is-pressed, .group-toggle.is-pressed, summary.is-pressed{ filter:brightness(.94); }
+  .chat-link:active, .chat-link.is-pressed{ opacity:.72; }
+  /* A campus badge is placed by its own transform (translate(-50%,-100%)),
+     so its press keeps that and adds the dip; a plain scale moved the badge
+     and the tap missed it (campus-pick). The card's ••• already dips its
+     inner span on :active; a touch gets the same through .is-pressed. */
+  .cp-tag:active, .cp-tag.is-pressed{ transform:translate(-50%,-100%) scale(.95); filter:brightness(.96); }
+  .card-more.is-pressed > span{ transform:scale(.92); }
   @media (prefers-reduced-motion:reduce){ .tg-sync{ transition:none; } }
   .tg-sync-short, .tg-sync-mark{ display:none; }
   .tg-sync-dot{ width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
@@ -1280,6 +1308,8 @@
   .ethics-filter-pill.is-active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
   .ethics-org-tag.is-ncihc{ color:#2F5D62; background:#2F5D621F; }
   .ethics-org-tag.is-cchi{ color:#8C6E4F; background:#8C6E4F1F; }
+  html[data-theme="dark"] .ethics-org-tag.is-ncihc{ color:#7FC4C9; }   /* the light-theme inks read 2.2:1 and 3.4:1 on dark paper */
+  html[data-theme="dark"] .ethics-org-tag.is-cchi{ color:#D9B48F; }
   .ethics-practice-box{
     display:flex; gap:9px; align-items:flex-start; font-size:var(--fs-foot);
     color:color-mix(in srgb, var(--good) 62%, var(--ink));
@@ -4011,7 +4041,7 @@
     box-shadow:0 6px 14px rgba(10,6,30,.45); pointer-events:none; animation:cpDrBob 1.8s ease-in-out infinite; }
   .cp-dr .ds-art{ width:100%; height:100%; display:block; }
   @keyframes cpDrBob{ 50%{ transform:translateY(-4px); } }
-  .cp-say p small{ display:block; font-size:var(--fs-cap2); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:#98A1B3; margin-bottom:2px; }
+  .cp-say p small{ display:block; font-size:var(--fs-cap2); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:#6B7489; margin-bottom:2px; }   /* the bubble stays white in dark mode, so a literal: 4.7:1 */
   .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-ambd img{ animation-play-state:paused; }
   .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:var(--fs-cap); font-weight:550;
@@ -4845,6 +4875,8 @@
     color:var(--ff-color, var(--accent));
     background:color-mix(in srgb, var(--ff-color, var(--accent)) 13%, transparent);
   }
+  /* The risk colours are picked for paper; on dark paper they read down to 3.3:1, so dark mode lightens them. */
+  html[data-theme="dark"] .ff-badge{ color:color-mix(in srgb, var(--ff-color, var(--accent)) 72%, #fff); }
   /* --ink-faint reads 2.6:1 here, under AA for 12px. --ink-soft keeps the
      tag secondary to the headword while staying legible in both themes. */
   .ff-tag{ font-size:var(--fs-cap); color:var(--ink-soft); }
@@ -6676,6 +6708,7 @@ html[data-theme="dark"] .dt-act.is-del{ color:#F08A9B; }
 /* Doctor list (D3; mockup docs/mockups/doctors/list.png). Two columns on a
    phone, the standard finish, the page's pin tile and initials. */
 .dl-head{ align-items:center; }
+html[data-theme="dark"] .dl-add{ color:var(--bg); }   /* 6.3:1 on the dark theme's lighter navy; white read 2.9:1 */
 .dl-add{ order:2; flex:0 0 auto; min-height:44px; padding:0 17px; border:0; border-radius:999px; background:var(--navy); color:#fff;
   font:650 var(--fs-sub) var(--sans); cursor:pointer; white-space:nowrap; box-shadow:0 8px 20px -12px rgba(22,55,90,.5);
   transition:transform .18s var(--ease); }
@@ -6969,7 +7002,7 @@ html[data-theme="dark"] .rg-ask{ background:rgba(46,139,208,.14); }
 .tc-chan{ flex:0 0 auto; display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:0 14px; border:0; border-radius:999px;
   background:var(--line-soft); color:var(--ink-soft); font:650 var(--fs-sub) var(--sans); cursor:pointer; -webkit-tap-highlight-color:transparent;
   transition:background .2s var(--ease), color .2s var(--ease), transform .15s var(--ease); }
-.tc-chan small{ font-size:var(--fs-cap); font-weight:550; color:var(--ink-faint); }
+.tc-chan small{ font-size:var(--fs-cap); font-weight:550; color:var(--ink-soft); }   /* "yours" read 4.1:1 in the faint ink on the channel's tint (feel audit, phase 5) */
 .tc-chan.is-on{ background:var(--paper); color:var(--ink);
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
 .tc-chan-n{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--danger); color:#fff;

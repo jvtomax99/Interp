@@ -99,10 +99,12 @@ too: say both. Not when a phase finishes but the next phase continues here.
    note). Phase 5, step 1, the measuring pass over 26 screens
    (`tests/tools/finish-check.cjs`: press feedback, empty flashes, layout
    shift, the keyboard, dark mode, safe areas; findings table in the audit
-   note): `claude/feel-finish`. Next: step 2, the fixes by group (about
-   30 classes with no press feedback, four contrast spots), after Jose's
-   calls on the faint ink token and five phone screenshots; then the
-   guard suite. Jose's phone numbers still owed.
+   note): #207. Step 2, the fixes by group (press feedback for about 30
+   kinds of control, the faint ink token darkened on Jose's call, five
+   contrast spots): `claude/feel-finish-2`. Next: the guard suite
+   (`tests/suites/feel.cjs`). Still owed by Jose: five phone screenshots
+   (Ask and Team access with the keyboard up; a doctor's page, the
+   doctor list's A-Z strip, a toast) and his meter numbers.
 
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work

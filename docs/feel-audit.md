@@ -298,6 +298,44 @@ handler, and need no press.
 What step 2 will not do without Jose: change the faint ink token, Home's
 two swaps, Practice's daylight card.
 
+#### Step 2, the fixes by group (done 2026-11-04, `claude/feel-finish-2`)
+
+Jose's call on the token (2026-11-04): darken it. Three groups, measured
+with the same tool after:
+
+- **Press feedback.** One shared rule beside `.tg-sync:active` in
+  `app.css`: the top bar's five buttons, the cards' Hear and Look up
+  pills, filter pills, list actions, the guide's buttons, Ask's chips,
+  Team Chat's reactions and Add photos get the sync button's dip
+  (`scale(.95)` and `brightness(.96)`); wide rows (a feed row, the pinned
+  bar, a quote, a group heading, a `<summary>`) only darken; an inline
+  link fades. Touch adds `.is-pressed` through `LIFTS` in `index.html`
+  (`:hover` never fires there and `:active` comes after the tap delay).
+  Left as they are, on purpose: the tab bar's buttons (the lens answers
+  them, and their transforms are animated by `dockMorph`) and the Home
+  badge (his face, pettable). After: of 16-21 tappable things per
+  screen, 0-4 without feedback, all of them those two, labels, an SVG
+  trend point and the guide's unclassed Show me button (was 7-12).
+- **The faint ink.** `--ink-faint` #98A1B3 → #6B7489 (4.7:1 on paper,
+  4.3 on the page background) and, dark, #707C93 → #8C97AD (5.4:1).
+  `DESIGN.md` carries the values and the reason. Every small caption is
+  one shade darker; the Updates list's times, measured in the
+  screenshot, went from #98A1B3 to #6B7489 and nothing else on the
+  screen moved.
+- **The spots.** Practice's "Dr. Smiley" label on his white bubble
+  (a literal, 4.7:1), Ethics' org tags and the False Friends risk badges
+  lightened in dark mode, the doctor list's + Add in the dark theme's
+  ink on its lighter navy (6.3:1), `--good` #2F7D5B → #2B7354 (5.0:1 on
+  its soft tint; Events' source pills and the ethics "In practice" line
+  read 4.45), the channel picker's "yours" in the soft ink.
+
+After, light theme: no text under 4.5:1 on any of the 26 screens but
+the generic `.tag` ("Principle", 2.5:1: the tag colour mixed 56% into
+ink on its own tint; a look decision, left for Jose). Dark: one hair,
+False Friends' mode button at 4.49:1 on a tint the tool reads
+approximately. No runtime errors across the 26 screens, light and dark.
+The User Guide needed no change (no new feature).
+
 ## Not in this version
 
 - No visual change without Jose seeing it first. Same look, cheaper.
