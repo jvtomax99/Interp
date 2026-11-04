@@ -63,6 +63,7 @@ Making the 3D nurse match the drawing (Jose: "perfect, like the drawing, use cre
    eyes are soft because the nurse's face is only ~220 px wide in the reference sheet; the sides show a little smear
    where the projection reaches past the front (`f0=0.02`; try 0.15).
    Balance 635. Next lever: a big, single-figure picture of each person (ideally front, side, back in the same style).
+   Refined: the drawing sharpened (unsharp mask) before projecting, and `f0=0.15&f1=0.40`: the side smear is gone, eyes crisper.
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
