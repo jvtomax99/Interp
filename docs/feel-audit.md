@@ -111,13 +111,27 @@ the meter's **Copy numbers** pasted into the chat for four runs: open
 right after a deploy, open with nothing deployed, Home left alone 30 s,
 one slow scroll down Home and back. Plus which iPhone and iOS version.
 
-### Phase 1: no reload on open
+### Phase 1: no reload on open (done 2026-11-04, `claude/feel-no-reload`)
 
-Reload only when the page itself came from the cache or carries another
-build than the worker's (compare `BUILD_ID` with the worker's version), never after a
-network-first open. Check: `deploy-open.cjs` shows one navigation; the
-hello plays once; the `load-order` and `startup-work` suites stay green;
-Jose confirms on his phone after a deploy.
+The page reloads only when it is older than the worker that just took
+control: on `controllerchange` it asks the worker its build (`sw.js`
+answers `version?` with `CACHE_VERSION`, which ends in the `BUILD_ID` it
+was deployed with) and reloads once if its own `BUILD_ID` is another one,
+which is only a page served from the saved copy (offline, or the network
+taking over 3 s). A page fetched fresh is left alone. Measured with
+`deploy-open.cjs`, before and after:
+
+| Open | Before | After |
+|---|---|---|
+| After a deploy | 2 documents, 9 Home paints, the hello twice (2.7 s and 7.1 s) | 1 document, 4 Home paints, the hello once (2.4 s) |
+| Nothing deployed | 1 document | 1 document |
+| The very first visit | 2 documents, the hello only after the reload | 1 document, the hello at 2.2 s |
+| A page older than the worker (new case) | | 2 documents, one reload, the hello once after it |
+
+Guarded by the `deploy-open` suite (in `run.cjs`). The User Guide's "The
+app looks out of date" answer still holds (the first open after an update
+is a little slower: the new worker's precache) and needed no change. Jose
+confirms on his phone after a deploy: the hello plays once.
 
 ### Phase 2: a quieter opening, same look
 

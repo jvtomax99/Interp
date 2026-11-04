@@ -183,6 +183,16 @@ self.addEventListener('push', event => {
   );
 });
 
+/* The page asks the worker that just took control which build it belongs
+ * to (index.html, "Install / offline support"): it reloads only when its own
+ * build is another one, so a page served from the cache catches up and a
+ * page fetched fresh is left alone. */
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'version?' && event.source) {
+    event.source.postMessage({ type: 'sw-version', version: CACHE_VERSION });
+  }
+});
+
 /* Tapping a notification should bring the already-open app forward rather
  * than opening a second copy of it; with the app closed it opens on the
  * notification's screen (?open=, read at startup in index.html). */

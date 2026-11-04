@@ -3,9 +3,11 @@
    this script controls. Three opens in one browser profile, like a phone:
 
      1. a first open (worker version A installs and takes control)
-     2. an open after a "deploy" (version B): does the page reload itself,
-        when, and what does the new worker fetch meanwhile?
+     2. an open after a "deploy" (version B, the page's own build): does the
+        page reload itself, when, and what does the new worker fetch?
      3. an open with nothing deployed (B again): the control.
+     4. a page served from the saved copy: the worker's build (C) is not the
+        page's, so this one open must reload once and only once.
 
    For each open: load, first paint, Home's paints, the hello's starts,
    the worker taking control (controllerchange), the page leaving
@@ -26,10 +28,12 @@ const { chromium, route, SEED, ROOT } = require('../support/harness.cjs');
 const RATE = +(process.env.RATE || 4), WAIT = +(process.env.WAIT || 25) * 1000;
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1';
 const SW_SRC = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+const BUILD = (/const BUILD_ID = '([^']*)'/.exec(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')) || [])[1] || 'b0000.0000';
 const mime = f => ({ css: 'text/css', js: 'application/javascript', json: 'application/json', webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', svg: 'image/svg+xml', webmanifest: 'application/manifest+json', html: 'text/html; charset=utf-8', mp4: 'video/mp4' })[f.split('.').pop().toLowerCase()] || 'application/octet-stream';
 
-(async () => {
-  let version = 'A';
+async function measure(say = console.log) {
+  let version = 'interpreter-hub-vA-' + BUILD;
+  const results = [];
   let served = [];
   const server = http.createServer((req, res) => {
     const u = new URL(req.url, 'http://x');
@@ -38,7 +42,7 @@ const mime = f => ({ css: 'text/css', js: 'application/javascript', json: 'appli
     const p = path.join(ROOT, f);
     if (!fs.existsSync(p) || !fs.statSync(p).isFile()) { res.writeHead(404); return res.end(); }
     res.setHeader('cache-control', 'no-cache');
-    if (f === 'sw.js') { res.setHeader('content-type', 'application/javascript'); return res.end(SW_SRC.replace(/const CACHE_VERSION = '[^']*'/, `const CACHE_VERSION = 'interpreter-hub-test-${version}'`)); }
+    if (f === 'sw.js') { res.setHeader('content-type', 'application/javascript'); return res.end(SW_SRC.replace(/const CACHE_VERSION = '[^']*'/, `const CACHE_VERSION = '${version}'`)); }
     res.setHeader('content-type', mime(f)); res.end(fs.readFileSync(p));
   });
   await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -81,17 +85,23 @@ const mime = f => ({ css: 'text/css', js: 'application/javascript', json: 'appli
     events.push(...await page.evaluate(() => { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); sessionStorage.removeItem('__openEvents'); return a; }));
     const rel = e => ((e.at - t0) / 1000).toFixed(2) + ' s';
     const seq = events.filter(e => e.at >= t0).sort((a, b) => a.at - b.at);
-    console.log(`\n== ${label} (worker version ${version}) ==`);
+    say(`\n== ${label} (worker version ${version}) ==`);
     const count = k => seq.filter(e => e.k === k).length;
-    console.log(`documents ${count('document')}, Home paints ${count('home-paint')}, hello starts ${count('hello-start')}, pen starts ${count('pen-start')}, controllerchange ${count('controllerchange')}, pagehide ${count('pagehide')}`);
-    for (const e of seq) if (e.k !== 'navigated') console.log(`  ${rel(e).padStart(8)}  ${e.k}${e.v !== undefined ? ' (' + e.v + ')' : ''}`);
+    results.push({ label, documents: count('document'), helloStarts: count('hello-start'), reloads: seq.filter(e => e.k === 'document' && /reload/.test(e.v)).length });
+    say(`documents ${count('document')}, Home paints ${count('home-paint')}, hello starts ${count('hello-start')}, pen starts ${count('pen-start')}, controllerchange ${count('controllerchange')}, pagehide ${count('pagehide')}`);
+    for (const e of seq) if (e.k !== 'navigated') say(`  ${rel(e).padStart(8)}  ${e.k}${e.v !== undefined ? ' (' + e.v + ')' : ''}`);
     const pre = served.filter(r => r.f.startsWith('city/'));
-    console.log(`  files served: ${served.length}; the worker's precache (campus pictures as the marker): ${pre.length}${pre.length ? ', from ' + rel(pre[0]) + ' to ' + rel(pre[pre.length - 1]) : ''}`);
+    say(`  files served: ${served.length}; the worker's precache (campus pictures as the marker): ${pre.length}${pre.length ? ', from ' + rel(pre[0]) + ' to ' + rel(pre[pre.length - 1]) : ''}`);
   };
 
   await open('open 1, first visit');
-  version = 'B';
+  version = 'interpreter-hub-vB-' + BUILD;
   await open('open 2, after a deploy');
   await open('open 3, nothing deployed');
+  version = 'interpreter-hub-vC-b0000.0001';
+  await open('open 4, a page from the saved copy (older than the worker)');
   await ctx.close(); await browser.close(); server.close();
-})().catch(e => { console.error(e); process.exit(1); });
+  return results;
+}
+module.exports = { measure };
+if (require.main === module) measure().catch(e => { console.error(e); process.exit(1); });

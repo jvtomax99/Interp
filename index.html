@@ -17899,20 +17899,28 @@ if('serviceWorker' in navigator && window.isSecureContext){
       console.warn('Service worker registration failed:', err);
     });
 
-    // When a new service worker takes control, the page is running old code
-    // against a new cache. Reload once (guarded, so it can't loop) so the
-    // person actually sees the version that was just deployed.
-    let swReloaded = false;
+    // When a new service worker takes control, ask it which build it belongs
+    // to (sw.js answers with its CACHE_VERSION, which ends in the BUILD_ID it
+    // was deployed with). The page reloads only when its own build is another
+    // one: a page served from the saved copy (offline, or the network taking
+    // over 3 s). A page fetched fresh already runs the deployed code (the page
+    // and its code are network-first) and is left alone. Reloading on every
+    // take-over, as this used to, restarted the app in the middle of its
+    // hello on the first open after every deploy (docs/feel-audit.md, phase 1).
     navigator.serviceWorker.addEventListener('controllerchange', ()=>{
-      if(swReloaded) return;
-      swReloaded = true;
-      window.location.reload();
+      const c = navigator.serviceWorker.controller;
+      if(c) c.postMessage({ type: 'version?' });
     });
   });
-  // Tapping a chat notification asks the app to jump straight to Team Chat.
+  let swReloaded = false;
   navigator.serviceWorker.addEventListener('message', (event)=>{
-    if(event.data && event.data.type === 'open-section' && event.data.section){
-      setCategory(event.data.section);
+    const d = event.data;
+    if(!d) return;
+    // Tapping a chat notification asks the app to jump straight to Team Chat.
+    if(d.type === 'open-section' && d.section) setCategory(d.section);
+    // The worker's build, asked for above: reload once if this page is older.
+    if(d.type === 'sw-version' && typeof d.version === 'string' && !swReloaded){
+      if(d.version.split('-').pop() !== BUILD_ID){ swReloaded = true; window.location.reload(); }
     }
   });
 }
