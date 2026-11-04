@@ -389,6 +389,26 @@ plainly.
 with the `BUILD_ID` to find), notify his phone with which change went
 live and its `BUILD_ID`, even if he seems to be watching the chat.
 
+**Environment settings come ready to paste** (Jose, 2026-11-04). Whenever
+the cloud environment needs something saved (a domain under Network access,
+a network secret, an environment variable, a line in the setup script),
+give him the exact text in its own copy box (a code block), one box per
+field, each under the field's name and where it goes (menu, then field).
+Exactly what he should paste: no `https://`, no `www` unless the address
+has it, no quotes, no explanation inside the box. Several domains: one box
+with one per line. Never only describe the value. The one exception is a
+secret's value (an API key): say where to get it and which field it goes
+in, and never ask him to paste a key into the chat.
+
+**Ask, then install what helps** (Jose, 2026-11-04). When another program,
+package, plug-in or tool would let the agent do the work better (Blender for
+3D, a converter, a test tool), ask him with a clickable choice: "Install"
+first, with what it is, its size and what it buys, then "Not now". On
+"Install", install it and use it. Never install without asking, and never
+work around a missing tool in silence when one would do the job better.
+Installs last only for this chat's machine: to keep one for every chat,
+give him the setup-script line to paste (the rule above).
+
 ### How Jose works with AI tools (Jose, 2026-10-29)
 
 Treat the AI as a junior developer he manages, not a genie. These hold for

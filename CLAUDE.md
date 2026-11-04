@@ -520,6 +520,31 @@ design and anything touching data or rules stay with the main model.
   2026-11-03; `AGENTS.md`): once Vercel reports the deploy of the bump
   commit completed (see Deploying), send `PushNotification` naming the
   change and its `BUILD_ID`, even if he seems to be in the chat.
+- **Environment settings come ready to paste** (Jose, 2026-11-04;
+  `AGENTS.md`): whenever the cloud environment needs something saved
+  (a Network access domain, a network secret, an environment variable, a
+  setup-script line), give the exact text in its own code block, one per
+  field, under the field's name and where it goes. Exactly what to paste
+  (no `https://`, no `www` unless the address has it, no quotes); several
+  domains one per line in one box. Never only describe it. A secret's
+  value (an API key) is the exception: say where to get it and which
+  field, never ask for it in the chat. Example, for Network access then
+  Allowed domains:
+  ```
+  tripo-data.rg1.data.tripo3d.com
+  developers.tripo3d.com
+  ```
+- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): when
+  another program, package, plug-in or tool would make the work better,
+  ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
+  what it buys) then "Not now"; on Install, install it and use it. Never
+  install unasked, never quietly work around a missing tool. Installs last
+  only for this chat's machine; to keep one, give the setup-script line to
+  paste (rule above). Example: Blender's site is blocked here, but it
+  installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):
+  ```
+  pip install bpy
+  ```
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the
