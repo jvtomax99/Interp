@@ -196,7 +196,7 @@ the in-between frame it swallowed, which nothing painted anyway.
 `docs/features/dr-smiley.md` says the rule. The User Guide needed no
 change (nothing visible changed).
 
-### Phase 4: scrolling and screens, same look (done 2026-11-04, `claude/feel-scroll`)
+### Phase 4: scrolling and screens, same look (done 2026-11-04, #205, live b1104.1832)
 
 Measured first (two new tools: `tests/tools/glass-count.cjs`, what each
 screen carries, and `scroll.cjs` with `SCREEN=domain` for a 150-term

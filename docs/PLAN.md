@@ -94,7 +94,7 @@ too: say both. Not when a phase finishes but the next phase continues here.
    and screens (the dock companion searched the whole page for faces and
    forced a layout on every scroll frame; a 150-term domain's scroll
    script fell 60%, dropped frames 42% -> 31%; glass is never stacked, so
-   nothing cut): `claude/feel-scroll`. The hello's canvas
+   nothing cut): #205, live b1104.1832. The hello's canvas
    draw is the opening's floor now: Jose's call (options in the audit
    note). Next: phase 5 (the finishing checklist and the guard suite).
    Jose's phone numbers still owed.
