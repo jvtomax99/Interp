@@ -13,6 +13,8 @@
      PRE='js' node tools/scroll.cjs        run js in the page first (an experiment)
      SCREEN=domain node tools/scroll.cjs   scroll the biggest domain grown to
                                            150 terms (feel audit, phase 4) instead of Home
+     PROFILE=1 node tools/scroll.cjs       a CPU profile of the scrolling: the top
+                                           functions by self time (file:line), run 1
 
    With the iPhone user agent, Chromium runs the iPhone's CSS petals on its
    main thread every frame (Home at rest ~96% busy at 4x), which an iPhone
@@ -72,6 +74,7 @@ async function once(browser) {
   if (process.env.PRE) await page.evaluate(process.env.PRE); // an experiment, e.g. drop some CSS first
   await page.evaluate(() => { for (const k in window.__scrollT) delete window.__scrollT[k]; FM.on = false; frameMeterStart(); });
   await page.waitForTimeout(300);
+  if (process.env.PROFILE) { await cdp.send('Profiler.enable'); await cdp.send('Profiler.setSamplingInterval', { interval: 500 }); await cdp.send('Profiler.start'); }
   const a = await m();
   // Finger drags (synthesizeScrollGesture doesn't move Home in headless
   // Chromium): 3 flicks down, 3 back up, each then left to coast 700 ms.
@@ -87,6 +90,21 @@ async function once(browser) {
     for (let k = 0; k < 3; k++) await drag(170, 620);
   }
   const z = await m();
+  let profile = null;
+  if (process.env.PROFILE) {
+    const { profile: p } = await cdp.send('Profiler.stop');
+    // Self time per function (file:line), and per file, from the samples.
+    const byId = new Map(p.nodes.map(n => [n.id, n]));
+    const self = new Map(), byFile = new Map();
+    const dt = p.timeDeltas; let total = 0;
+    p.samples.forEach((id, i) => {
+      const n = byId.get(id), ms = (dt[i] || 0) / 1000; total += ms;
+      const f = n.callFrame, file = short(f.url) || '(' + f.functionName + ')';
+      const key = (f.functionName || '(anon)') + ' ' + file + ':' + (f.lineNumber + 1);
+      self.set(key, (self.get(key) || 0) + ms); byFile.set(file, (byFile.get(file) || 0) + ms);
+    });
+    profile = { total: Math.round(total), top: [...self].sort((x, y) => y[1] - x[1]).slice(0, 28).map(([k, v]) => [k, Math.round(v)]), files: [...byFile].sort((x, y) => y[1] - x[1]).slice(0, 8).map(([k, v]) => [k, Math.round(v)]) };
+  }
   const run = await page.evaluate(() => { const r = frameMeterStop(); frameMeterClose(); return r; });
   const secs = z.Timestamp - a.Timestamp;
   const handlers = await page.evaluate(() => window.__scrollT);
@@ -97,8 +115,9 @@ async function once(browser) {
   return { dropped: run ? run.scroll.pct : null, ratio: run ? run.scroll.ratio : null, worst: run ? run.scroll.worst : null, secs: run ? Math.round(run.scroll.ms / 100) / 10 : null,
     layouts: d('LayoutCount'), layoutMs: Math.round(d('LayoutDuration') * 1000), styles: d('RecalcStyleCount'), styleMs: Math.round(d('RecalcStyleDuration') * 1000),
     scriptMs: Math.round(d('ScriptDuration') * 1000), taskMs: Math.round(d('TaskDuration') * 1000),
-    stylePerS: Math.round(d('RecalcStyleCount') / secs), busy: Math.round(d('TaskDuration') / secs * 100), allDropped: run ? run.pct : null, handlers, extra, errors };
+    stylePerS: Math.round(d('RecalcStyleCount') / secs), busy: Math.round(d('TaskDuration') / secs * 100), allDropped: run ? run.pct : null, handlers, extra, errors, profile };
 }
+const short = u => (u || '').replace(/^https?:\/\/[^/]+\//, '');
 
 (async () => {
   const browser = await chromium.launch();
@@ -112,5 +131,12 @@ async function once(browser) {
   console.log('  scroll listeners (calls, ms, run 1):');
   Object.entries(h).sort((x, y) => y[1][0].ms - x[1][0].ms).forEach(([k, v]) => console.log(`    ${String(v[0].n).padStart(5)} ${v[0].ms.toFixed(1).padStart(8)} ms  ${k}`));
   runs.forEach((r, i) => { if (r.extra) console.log('  extra run ' + (i + 1) + ':', JSON.stringify(r.extra)); });
+  if (runs[0].profile) {
+    const p = runs[0].profile;
+    console.log(`  CPU profile, run 1: ${p.total} ms sampled; self time by file:`);
+    p.files.forEach(([k, v]) => console.log(`    ${String(v).padStart(6)} ms  ${k}`));
+    console.log('  top functions by self time:');
+    p.top.forEach(([k, v]) => console.log(`    ${String(v).padStart(6)} ms  ${k}`));
+  }
   const errs = runs.flatMap(r => r.errors); if (errs.length) console.log('  page errors:', errs.slice(0, 3));
 })();
