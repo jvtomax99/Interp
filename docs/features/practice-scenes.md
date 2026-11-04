@@ -7,10 +7,12 @@ trainer (branch `claude/practice-scenes`): `memSceneHtml`, `memFigHtml`, `MEM_FI
 
 ## As built
 
-- `figures/doctor.webp`, `nurse.webp`, `visitor.webp`: 480 px tall, about 20 KB each, transparent, matte, turned
-  about 24 degrees toward the other speaker. Made by `docs/mockups/characters/render.html` on branch
-  `claude/hub-figures`, with the Tripo models there (`docs/mockups/characters/tripo/`; Tripo task ids in that branch's
-  `docs/handoff.md`). The visitor's hair had a green speck from Tripo's texture, painted over in the picture.
+- `figures/doctor.webp`, `nurse.webp`, `visitor.webp`: 480 px tall, about 23 KB each, transparent, facing forward.
+  Since 2026-11-04 (second version) they are **cut straight out of Jose's drawing** (`docs/art/figures-reference.png` on
+  branch `claude/hub-figures`; the same crops as for Tripo, doubled, background removed with rembg's
+  `isnet-general-use` model and alpha matting). The first version used pictures rendered from the Tripo models; Jose
+  found the visitor ugly (rough painted skin, lumpy hair), and a second Tripo try with its detailed texture (40
+  credits) was still rough. His drawing is smooth and exact, and the trainer only needs still pictures.
 - Shown in the **Listen** and **Your turn** stages only, either side of the ring (`.mem-scene`, a 3-column grid; the
   figures 150 px tall, 126 px under 360 px wide). Listen: the speaker leans in 3 px and 2 degrees on `--spring0`,
   then bobs 3 px every 0.9 s, with a sound mark by the head; the other is at 60% and less saturated. Your turn: both
