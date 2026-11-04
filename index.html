@@ -8053,16 +8053,22 @@ function heroMotionDisabled(){
   return heroMotionOff;
 }
 
+/* The scroll position is read in the scroll event, while the frame's layout
+   is still clean (Dr. Smiley's lean, a listener before this one, has just
+   paid for it), and only applied in the frame callback. Reading it there,
+   after his lean had written its angle, forced a second layout every scroll
+   frame of Home (feel audit, phase 4: 0.5 s of a 33 s scroll at 4x). */
+let heroScrollY = 0;
 function applyHeroDrift(){
   heroDriftFrame = null;
   if(!heroPhotoEl || !heroPhotoEl.isConnected || heroMotionDisabled()) return;
-  const y = window.scrollY || window.pageYOffset || 0;
-  const drift = Math.min(y * HERO_DRIFT_RATE, HERO_DRIFT_MAX);
+  const drift = Math.min(heroScrollY * HERO_DRIFT_RATE, HERO_DRIFT_MAX);
   heroPhotoEl.style.transform = 'translate3d(0,' + drift.toFixed(1) + 'px,0)';
 }
 
 window.addEventListener('scroll', ()=>{
   if(!heroPhotoEl) return;                    // not on Home: costs one check
+  heroScrollY = window.scrollY || window.pageYOffset || 0;
   if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
 }, { passive: true });
 
@@ -8131,6 +8137,7 @@ function renderContent(){
     // next frame, before it paints: reading the scroll position here forced
     // the whole new screen's layout inside this task (S3).
     heroPhotoEl = content.querySelector('.home-greeting-photo-inner');
+    heroScrollY = window.scrollY || window.pageYOffset || 0;
     if(heroDriftFrame === null) heroDriftFrame = requestAnimationFrame(applyHeroDrift);
     return;
   }
@@ -17276,23 +17283,43 @@ const smileyRider = (() => {
     mo.observe(document.body, { childList: true });
     const lock = document.getElementById('accessLock');
     if(lock) mo.observe(lock, { attributes: true, attributeFilter: ['hidden'] });
-    // The Home greeting scrolling in or out of view hands him over.
+    // The Home greeting scrolling in or out of view hands him over. The
+    // check runs inside the scroll event, where the frame's layout is still
+    // clean (his lean's listener, before this one, has just paid for it),
+    // and place(), which writes, is queued only when the answer changed.
+    // It used to run place() in the frame callback on every scroll, after
+    // his lean had written its angle: a forced layout every frame, and the
+    // search for faces over the whole page with it (feel audit, phase 4:
+    // on a 150-term domain, 2.5 s of a 21 s scroll at 4x).
     let sq = 0;
-    window.addEventListener('scroll', () => { if(!sq) sq = requestAnimationFrame(() => { sq = 0; place(); }); }, { passive:true });
+    window.addEventListener('scroll', () => { if(!sq && wantDock() !== wasShown) sq = requestAnimationFrame(() => { sq = 0; place(); }); }, { passive:true });
   }
   // Only one Dr. Smiley at a time: any other one drawn and showing (the Home
   // greeting, Ask, the lock screen, a pop-up) sends this one away.
+  // The other faces are found when something could have changed them (a
+  // sync: a screen drawn, a body class, a resize) and at most twice a second
+  // otherwise, never on every scroll frame: on a 150-term domain that search
+  // over the whole page was the costliest thing in a scroll frame.
+  let faceList = [], faceAt = -1e9;
+  function faces(force){
+    const now = performance.now();
+    if(force || now - faceAt > 500){
+      faceAt = now;
+      faceList = [...document.querySelectorAll('.ask-face, .home-face, .access-face')].filter(f => !f.closest('.smiley-rider, .dock-smiley, #tgSmiley'));
+    }
+    return faceList;
+  }
   function smileyElsewhere(){
-    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
-      if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
+    for(const f of faces()){
+      if(!f.isConnected) continue;
       if(f.getClientRects().length && getComputedStyle(f).visibility !== 'hidden') return true;
     }
     return false;
   }
   // The same, but only counting one you can actually see right now.
   function smileyInView(){
-    for(const f of document.querySelectorAll('.ask-face, .home-face, .access-face')){
-      if(f.closest('.smiley-rider, .dock-smiley, #tgSmiley')) continue;
+    for(const f of faces()){
+      if(!f.isConnected) continue;
       const r = f.getBoundingClientRect();
       if(!r.width || r.bottom <= 0 || r.top >= window.innerHeight) continue;
       if(getComputedStyle(f).visibility === 'hidden') continue;
@@ -17317,10 +17344,14 @@ const smileyRider = (() => {
     return !!btn && document.body.classList.contains('dock-has-smiley') && getComputedStyle(btn).visibility !== 'hidden';
   }
   let wasShown = false;
+  // Whether he belongs in the dock right now (reads only).
+  function wantDock(){
+    return phone.matches && !!document.querySelector('.tabbar') && smileyFollows()
+      && activeCategory !== 'ask' && !apptActive() && !smileyInView();
+  }
   function place(){
     if(!btn) return;
-    const want = phone.matches && !!document.querySelector('.tabbar') && smileyFollows()
-      && activeCategory !== 'ask' && !apptActive() && !smileyInView();
+    const want = wantDock();
     document.body.classList.toggle('dock-has-smiley', want);
     btn.tabIndex = want ? 0 : -1;
     btn.setAttribute('aria-hidden', want ? 'false' : 'true');
@@ -17372,6 +17403,7 @@ const smileyRider = (() => {
   function sync(){
     try{
       if(!btn){ if(!document.body) return; build(); }
+      faces(true);
       topBar();
       smileyDressAll();
       place();
