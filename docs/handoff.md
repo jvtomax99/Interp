@@ -64,6 +64,9 @@ Making the 3D nurse match the drawing (Jose: "perfect, like the drawing, use cre
    where the projection reaches past the front (`f0=0.02`; try 0.15).
    Balance 635. Next lever: a big, single-figure picture of each person (ideally front, side, back in the same style).
    Refined: the drawing sharpened (unsharp mask) before projecting, and `f0=0.15&f1=0.40`: the side smear is gone, eyes crisper.
+   Blender (installed with `pip install bpy`, 5.2.3; add it to the setup script to keep it): `tools/studio.py in.glb out.png
+   front|three standard|agx` renders a figure in Cycles with soft key, fill and rim area lights and a matte, slightly
+   subsurface skin. With it the same nurse looks close to the drawing: most of the gap was the browser render's light.
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 
