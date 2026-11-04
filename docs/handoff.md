@@ -23,7 +23,11 @@ was still not added ("Invalid API key", 401): a new chat should pick it up. Then
 `meshy/doctor.glb` (1.8 MB) and `meshy/visitor.glb` (1.7 MB): `KEEPBASE=1 tools/toy/slim_tex.py -- raw out 0.085`,
 47.4k and 47.6k triangles, colours as Meshy made them (no warming, unlike the nurse). The three side by side, same
 light (`plain.py`, `EXPO=-0.9`): `meshy/trio-meshy.png` (front and 3/4), `trio-meshy-face.png`. Next, Jose to say:
-the trio into the app's practice scenes (replacing the cut-out drawings), or polish first. Costs, read from
+the trio into the app's practice scenes (replacing the cut-out drawings), or polish first. Jose picked "Polish first", then "Hair only": the doctor's paint hair was (52,11,9), darker and redder
+than his picture's brown (lit median 87,47,39), so hair texels (near that colour and red over blue) got +28,+32,+24,
+soft edge (`meshy/doctor-hair.png`: before, after, picture). Looked at and not done: smoothing the clay bumps
+(Laplacian after joining seams) cleans the skin but bends the eyes and leaves specks; it would have to go on all
+three. Colours otherwise match the pictures in the paint; renders look paler only from the studio light. Costs, read from
 docs.meshy.ai/api/pricing.md: image to 3D with 2K textures is 30 credits on `meshy-7.1` (latest) or `meshy-6`
 (mesh only 20, 8K textures 35). So 30 a figure, 60 for both. The API uses prepaid API credits, bought in the
 subscription settings; not checked yet whether app credits count. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
