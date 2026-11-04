@@ -196,13 +196,67 @@ the in-between frame it swallowed, which nothing painted anyway.
 `docs/features/dr-smiley.md` says the rule. The User Guide needed no
 change (nothing visible changed).
 
-### Phase 4: scrolling and screens, same look
+### Phase 4: scrolling and screens, same look (done 2026-11-04, `claude/feel-scroll`)
 
-Where phase 0 finds a cost: fewer glass layers on screen at once (a
-blur that is never seen through costs the same as one that is), `filter`
-replaced by a baked shadow where the pixels match, animations off screen
-paused. Each change shown to Jose before and after; pixel comparisons
-where the look must not move.
+Measured first (two new tools: `tests/tools/glass-count.cjs`, what each
+screen carries, and `scroll.cjs` with `SCREEN=domain` for a 150-term
+domain and `PROFILE=1` for who runs during a scroll), then one change,
+no visible one.
+
+**What the screens carry** (`glass-count.cjs`, iPhone paths, 4x, 6 s at
+rest each): glass is never stacked. Home has 4 backdrop blurs on screen
+(top bar, search, tab bar, the promo label), a domain 3, the doctor list
+2, a doctor's page 5, More over Home 5; filters on screen 2-22 (Home's
+are the 13 CSS petals, which the phone hands to Core Animation). Running
+animations: Home 62 on the iPhone paths (the petals) against 8 on
+Chromium's, and only 2 of them restyle on the main thread (the
+heartline's 4.2 s draw, every few seconds); a domain, the doctor list and
+page 2-5, none on the main thread. Compositor layers: Home 186, a domain
+153, the doctor list 19, a doctor's page 16, More over Home 226. More's
+sheet is glass over Home, so Home's decor is seen through it and keeps
+running by design. Nothing here to cut without changing the look, so the
+glass and the off-screen pauses planned for this phase were not done:
+the numbers didn't ask for them.
+
+**Scrolling a 150-term domain was the real cost**, not Home: hitch
+416 ms/s against Home's 109 at 4x, 42% of frames dropped against 16%,
+and 6.0 s of script in a 42 s scroll against 2.6 s, on both paths alike
+(so not the petals). The profile named it: the dock companion
+(`smileyRider`, `index.html`) ran `place()` in the frame callback on every
+scroll, which searched the whole page for other Dr. Smiley faces
+(`querySelectorAll` over 7,700 elements: 2.0 s of a 21 s scroll) and then
+read their rects after his lean had written its angle in the same frame
+(a forced layout every frame, 0.5 s). Home paid the same forced layout
+through the hero photo's drift, which read `scrollY` in its frame
+callback after that write (0.5 s of 33 s).
+
+**The change** (same look): the faces are found once per `sync()` (a
+screen drawn, a body class, a resize) and at most twice a second
+otherwise; the scroll listener checks only what a scroll can change
+(a face in or out of view) inside the scroll event, where the frame's
+layout is still clean because his lean's listener has just paid for it,
+and queues `place()` only when the answer changed. The hero's drift takes
+the position read in the scroll event. Rule in
+`docs/features/dr-smiley.md`: read in the event, write in the frame.
+
+| `scroll.cjs`, iPhone paths, 4x, 3 runs, medians | Before | After (two rounds) |
+|---|---|---|
+| Domain (150 terms): script in the scroll | 5,970 ms | 2,401 / 2,685 ms |
+| Domain: frames dropped | 41.6% | 31.0 / 32.2% |
+| Domain: hitch (ms/s) | 416 | 310 / 322 |
+| Domain: main-thread time, worst frame | 31.5 s, 133 ms | 26.0 / 27.6 s, 100 / 117 ms |
+| Home: hitch, script | 109, 2,571 ms | 116, 2,064 ms (the same within noise) |
+
+The runtime smoke (Home scrolled down and up, a domain, back to Home):
+he hands over between the greeting and the dock as before, the drift
+applies, no errors. What is left in the domain scroll is the browser's
+own work drawing cards as they arrive (`content-visibility`) and his
+lean's read, which in the lab pays the frame's style work for Chromium's
+petals; on the phone those are composited, so that read's real cost is
+Jose's meter's to say (his domain scroll numbers, still owed). Home's
+scroll did not move: its lab cost is the petals' style, not script.
+
+The User Guide needed no change (nothing visible changed).
 
 ### Phase 5: the finishing checklist and the guard
 

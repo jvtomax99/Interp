@@ -90,10 +90,14 @@ too: say both. Not when a phase finishes but the next phase continues here.
    39 -> 3 in the opening, the pen's forced layouts gone, the update check
    after the hello): #202. Phase 3, his face frames on the sequence's own
    clock (a performance's end used to land 61-434 ms late at 4x, now
-   within one late frame): `claude/feel-face-clock`. The hello's canvas
+   within one late frame): #203, live b1104.1348. Phase 4, scrolling
+   and screens (the dock companion searched the whole page for faces and
+   forced a layout on every scroll frame; a 150-term domain's scroll
+   script fell 60%, dropped frames 42% -> 31%; glass is never stacked, so
+   nothing cut): `claude/feel-scroll`. The hello's canvas
    draw is the opening's floor now: Jose's call (options in the audit
-   note). Next: phase 4 (scrolling and screens) and 5 (the finishing
-   checklist and the guard suite). Jose's phone numbers still owed.
+   note). Next: phase 5 (the finishing checklist and the guard suite).
+   Jose's phone numbers still owed.
 
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
