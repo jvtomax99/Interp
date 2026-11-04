@@ -275,7 +275,7 @@ function safeAreas() {
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(12000);
     const cdp = await ctx.newCDPSession(page);
-    await cdp.send('DOM.enable'); await cdp.send('CSS.enable');
+    await cdp.send('DOM.enable'); await cdp.send('CSS.enable'); await cdp.send('DOM.getDocument', { depth: 0 }); // requestNode needs the document pushed first
     await screenPass(ctx, page, cdp, dark, findings);
     findings.__errors = (findings.__errors || []).concat(errors.map(e => (dark ? 'dark: ' : '') + e));
     await ctx.close();
