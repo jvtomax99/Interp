@@ -39,7 +39,7 @@ same names.
 | `--cyan` | `#01B8E6` | `#4FD8F5` | The logo's cyan: small live marks |
 | `--danger` | `#C2485C` | `#E17B8C` | Errors, risk, delete |
 | `--danger-soft` | `#FBECEF` | `#3A2029` | Behind danger text |
-| `--good` | `#2F7D5B` | `#6FC79C` | Correct, done, saved |
+| `--good` | `#2B7354` | `#6FC79C` | Correct, done, saved | (was #2F7D5B, 4.4:1 on its soft tint; 5.0 since 2026-11-04)
 | `--good-soft` | `#E7F5EE` | `#16302A` | Behind good text |
 
 Domain colors (one per glossary domain) feed the icons through `--ic-fill`
