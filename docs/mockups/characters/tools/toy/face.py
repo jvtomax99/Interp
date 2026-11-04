@@ -114,15 +114,15 @@ def eye(name, cx_, cy_, w_, h_, side):
         for li in poly.loop_indices: uvl.data[li].uv = uvs[me.loops[li].vertex_index]
     mm_ = bpy.data.materials.new(name); mm_.use_nodes = True; bb = mm_.node_tree.nodes['Principled BSDF']
     tt = mm_.node_tree.nodes.new('ShaderNodeTexImage'); tt.image = bpy.data.images.load(path); tt.extension = 'EXTEND'
-    mm_.node_tree.links.new(tt.outputs[0], bb.inputs['Base Color']); bb.inputs['Roughness'].default_value = 0.25
-    bb.inputs['Coat Weight'].default_value = 0.35; bb.inputs['Coat Roughness'].default_value = 0.05
+    mm_.node_tree.links.new(tt.outputs[0], bb.inputs['Base Color']); bb.inputs['Roughness'].default_value = 0.35
+    bb.inputs['Coat Weight'].default_value = FEAT['eye'].get('coat', 0.35); bb.inputs['Coat Roughness'].default_value = 0.05
     me.materials.append(mm_); ob = bpy.data.objects.new(name, me); s.collection.objects.link(ob)
 for k, side in (('eye_l', 1), ('eye_r', -1)):
     E = FEAT[k]; eye(k, E['cx'], E['cy'], E['w'], E['h'], side)
-    lid = [(E['cx'] + E['w'] / 2 * 1.03 * math.cos(math.radians(a)), E['cy'] - E['h'] / 2 * 1.03 * math.sin(math.radians(a))) for a in (range(180, -1, -10) if side == 1 else range(0, 181, 10))]
+    LO = FEAT['eye'].get('lid_over', 1.03); lid = [(E['cx'] + E['w'] / 2 * 1.03 * math.cos(math.radians(a)), E['cy'] - E['h'] / 2 * LO * math.sin(math.radians(a))) for a in (range(180, -1, -10) if side == 1 else range(0, 181, 10))]
     outer = lid[0]; fl = (outer[0] - side * E['w'] * 0.16, outer[1] - E['h'] * 0.18)
     lidpts = [fl] + lid if True else lid
-    rad = [0.0008] + [0.0029 - 0.0016 * (i / len(lid)) ** 1.4 for i in range(len(lid))]
+    LR = FEAT['eye'].get('lid_r', 0.0029); rad = [0.0008] + [LR - 0.45 * LR * (i / len(lid)) ** 1.4 for i in range(len(lid))]
     tube(k + '_lid', smoothpath(lidpts, 3), rad, FEAT['eye']['dome'] * 0.55, dark)
 for k in ('brow_l', 'brow_r'):
     B = FEAT[k]; pts = smoothpath([tuple(q) for q in B['pts']], 8)
@@ -137,7 +137,7 @@ ys_ = [q.y for q in ys_ if q is not None]
 if loc is not None: loc = Vector((loc.x, min(ys_) + 0.0004, loc.z))
 if loc is not None:
     bpy.ops.mesh.primitive_cube_add(size=1); bo = bpy.context.active_object; bo.name = 'badge'
-    bo.scale = (Bd['w'] * MM, 0.003, Bd['h'] * MM); bo.location = loc + Vector((0, -0.0012, 0)); bo.rotation_euler = (math.radians(-8), 0, 0)
+    bo.scale = (Bd['w'] * MM, FEAT['badge'].get('thick', 0.003), Bd['h'] * MM); bo.location = loc + Vector((0, -FEAT['badge'].get('lift', 0.0012), 0)); bo.rotation_euler = (math.radians(-8), 0, 0)
     bv = bo.modifiers.new('bv', 'BEVEL'); bv.width = 0.0012; bv.segments = 4
     bo.data.materials.append(mat('badge', (246, 244, 240), 0.45))
     for p in bo.data.polygons: p.use_smooth = True

@@ -37,7 +37,9 @@ geometry, standard paint, task `6718c65f-0a73-45f3-ab5f-79e63653e5ee` (50); bala
 `tools/toy/nurse2/` (`run.sh tag front|three|face`, needs `MERGE=3e-4` for the slimmed seams).
 Pictures: `nurse-toy2.png`, `nurse-toy2-face.png`. Much better proportions and a round face. Left: eyes rounder
 and more goggly than the picture, a blue line on the badge, black specks on the pant cuffs, a rough hairline on the
-forehead, arms touching the sides. V2 API still works on api.tripo3d.ai (upload gives `image_token`; multiview task
+forehead, arms touching the sides. Polish round (same night): lids lower and thicker, matte eyes, badge clean, V neck
+back (`vneck` as apex, slope, half width, top), vote radius 0.018, `PASSES=1` (two passes ate the right brow).
+Pictures `nurse-toy3.png`, `nurse-toy3-face.png`. Still: ragged hairline, a few dark specks at the pant cuffs. V2 API still works on api.tripo3d.ai (upload gives `image_token`; multiview task
 takes `files` front, left, back, right).
 
 ## Clean rebuild (2026-11-04 evening, Jose picked it)

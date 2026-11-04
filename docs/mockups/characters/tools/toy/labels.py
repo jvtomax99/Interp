@@ -32,29 +32,40 @@ K = 4
 vs = R / 2; lo = P[cov].min(0) - R * 2
 ijk = np.floor((P - lo) / vs).astype(int); ijk[~cov] = 0
 dims = ijk[cov].max(0) + 4
-H = np.zeros((K, *dims), np.float32)
-for k in range(K):
-    m = cov & (c == k); np.add.at(H[k], (ijk[m, 0], ijk[m, 1], ijk[m, 2]), 1)
 def box(a, r):
     for ax in (1, 2, 3):
         cs = np.cumsum(np.pad(a, [(0, 0)] + [(r + 1, r) if i == ax else (0, 0) for i in (1, 2, 3)]), axis=ax)
         a = np.take(cs, np.arange(2 * r + 1, cs.shape[ax]), axis=ax) - np.take(cs, np.arange(0, cs.shape[ax] - 2 * r - 1), axis=ax)
     return a
-Hb = box(H, 2)
 f = (P - lo) / vs - 0.5; f0 = np.floor(f).astype(int); fr = f - f0; f0[~cov] = 0; fr[~cov] = 0
-acc = np.zeros((K,) + P.shape[:2], np.float32)
-for dx in (0, 1):
-    for dy in (0, 1):
-        for dz in (0, 1):
-            wgt = (fr[..., 0] if dx else 1 - fr[..., 0]) * (fr[..., 1] if dy else 1 - fr[..., 1]) * (fr[..., 2] if dz else 1 - fr[..., 2])
-            ii = np.clip(f0[..., 0] + dx, 0, dims[0] - 1); jj = np.clip(f0[..., 1] + dy, 0, dims[1] - 1); kk = np.clip(f0[..., 2] + dz, 0, dims[2] - 1)
-            acc += Hb[:, ii, jj, kk] * wgt
+def vote(lab):
+    H = np.zeros((K, *dims), np.float32)
+    for k in range(K):
+        m = cov & (lab == k); np.add.at(H[k], (ijk[m, 0], ijk[m, 1], ijk[m, 2]), 1)
+    Hb = box(H, 2)
+    acc = np.zeros((K,) + P.shape[:2], np.float32)
+    for dx in (0, 1):
+        for dy in (0, 1):
+            for dz in (0, 1):
+                wgt = (fr[..., 0] if dx else 1 - fr[..., 0]) * (fr[..., 1] if dy else 1 - fr[..., 1]) * (fr[..., 2] if dz else 1 - fr[..., 2])
+                ii = np.clip(f0[..., 0] + dx, 0, dims[0] - 1); jj = np.clip(f0[..., 1] + dy, 0, dims[1] - 1); kk = np.clip(f0[..., 2] + dz, 0, dims[2] - 1)
+                acc += Hb[:, ii, jj, kk] * wgt
+    return acc
+acc = vote(c)
+FZ = np.zeros_like(acc)
 # the V neck: skin inside the collar's V at the front
 vneck = (ny < 0) & (y < 0) & (np.abs(x) < 0.06) & (z < 0.045) & (z > -0.048 + np.abs(x) / 0.05 * 0.056)
-acc[0][vneck & Z['vneck']] += 1e6
-acc[0][(y < -0.03) & (z < Z['cheek_z'][1]) & (z > Z['cheek_z'][0]) & (np.abs(x) < Z['cheek_x']) & (acc.argmax(0) == 2)] += 1e6   # no hair on the cheeks
-acc[2][(ny < 0) & (z > Z['hair_top']) & (np.abs(x) < Z['hair_top_x'])] += 1e6   # no skin on the hair above the forehead
-L = acc.argmax(0); L[~cov] = 255
+if isinstance(Z['vneck'], list):   # [apex z, slope, half width, top z]
+    az, sl, hw, tz = Z['vneck']; vneck = (ny < 0) & (y < 0) & (np.abs(x) < hw) & (z < tz) & (z > az + sl * np.abs(x))
+    FZ[0][vneck] += 1e6
+elif Z['vneck']: FZ[0][vneck] += 1e6
+FZ[0][(y < -0.03) & (z < Z['cheek_z'][1]) & (z > Z['cheek_z'][0]) & (np.abs(x) < Z['cheek_x']) & (acc.argmax(0) == 2)] += 1e6   # no hair on the cheeks
+FZ[2][z < Z.get('hair_low', -9)] -= 1e7   # nothing below the neck is hair (dark shading on cuffs)
+FZ[2][(ny < 0) & (z > Z['hair_top']) & (np.abs(x) < Z['hair_top_x'])] += 1e6   # no skin on the hair above the forehead
+L = (acc + FZ).argmax(0)
+for _ in range(int(__import__('os').environ.get('PASSES', '2')) - 1):   # vote again on the clean labels: smoother edges
+    L = (vote(L) + FZ).argmax(0)
+L[~cov] = 255
 np.save(f'{D}/label.npy', L.astype(np.uint8))
 pal = np.array([(0, 0, 0)] * 256, np.uint8); pal[:4] = [(220, 140, 95), (40, 60, 165), (35, 30, 32), (235, 230, 228)]
 Image.fromarray(pal[c.astype(np.uint8) if True else c]).resize((768, 768), Image.NEAREST).save(f'{D}/raw_lab.png')
