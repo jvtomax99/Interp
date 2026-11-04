@@ -15,6 +15,8 @@ the "figures" chat (Tripo figures, practice scenes, the 3D nurse made to match t
 
 ## Now: Meshy by API for the doctor and visitor (older notes below)
 
+DONE and live (2026-11-04): #211 put the three Meshy figures in the memory trainer's practice scenes (`figures/*.webp`, renders of `meshy/*.glb`), live as b1104.2317. Still to tidy: CLAUDE.md's file map row for `figures/` says "cut out of Jose's drawing"; it is now Meshy renders.
+
 Status 2026-11-04 (chat 1): Meshy blocked in that chat. The proxy refused api.meshy.ai, docs.meshy.ai
 (403 on connect) and injected no Meshy key; only api.tripo3d.ai was set. The settings were likely saved after
 the chat started: a new chat picks them up. First call to try: `GET https://api.meshy.ai/openapi/v1/balance`.
