@@ -203,3 +203,8 @@ gets marked; you untap it. If listening can't start without a tap
 it. Unproven too: Record me and Auto-mark both on at once (two users of the
 mic). Apple may process the speech on its servers: the switch says to
 practise away from patients.
+
+## Practice scenes (2026-11-04)
+
+While a line plays, the provider (doctor or nurse) and the patient or family stand either side of the ring, and
+the one saying it leans in. Details: `docs/features/practice-scenes.md`.

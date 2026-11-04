@@ -3792,6 +3792,35 @@
   .mem-ring-in b{ font-size:var(--fs-head); font-weight:650; color:var(--ink); }
   .mem-ring-in small{ font-size:var(--fs-foot); color:var(--ink-soft); padding:0 9px; }
   .mem-hint{ margin:0; font-size:var(--fs-sub); color:var(--ink-soft); text-align:center; }
+  /* Practice scenes: the provider left, the patient or family right, the ring (you) between them.
+     The speaker leans in and bobs while the phone says the line; the other waits, a little faded. */
+  .mem-scene{ display:grid; grid-template-columns:1fr auto 1fr; align-items:end; justify-items:center; margin:6px 0; }
+  .mem-scene .mem-ring{ margin:0; align-self:center; }
+  .mem-fig{ position:relative; z-index:1; display:block; height:150px; pointer-events:none; user-select:none; -webkit-user-select:none; }
+  .mem-fig.is-left{ justify-self:end; margin-right:-6px; }
+  .mem-fig.is-right{ justify-self:start; margin-left:-6px; }
+  .mem-fig::before{ content:""; position:absolute; left:12%; right:12%; bottom:-4px; height:12px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(37,46,109,.18), transparent); }
+  .mem-fig-lean{ position:relative; display:block; height:100%; transform-origin:50% 100%; transition:opacity .588s var(--spring0), filter .588s var(--spring0); }
+  .mem-fig img{ display:block; height:100%; width:auto; }
+  .mem-fig.is-waiting .mem-fig-lean{ opacity:.6; filter:saturate(.75); }
+  .mem-fig.is-speaking .mem-fig-lean{ animation:memLeanL .588s var(--spring0) both, memTalk .9s ease-in-out .588s infinite; }
+  .mem-fig.is-right.is-speaking .mem-fig-lean{ animation-name:memLeanR, memTalk; }
+  @keyframes memLeanL{ from{ transform:none; } to{ transform:translateX(3px) rotate(2deg); } }
+  @keyframes memLeanR{ from{ transform:none; } to{ transform:translateX(-3px) rotate(-2deg); } }
+  .mem-fig.is-left.is-speaking{ --lean:translateX(3px) rotate(2deg); }
+  .mem-fig.is-right.is-speaking{ --lean:translateX(-3px) rotate(-2deg); }
+  @keyframes memTalk{ 0%,100%{ transform:var(--lean) translateY(0); } 50%{ transform:var(--lean) translateY(-3px); } }
+  .mem-say{ position:absolute; top:4%; width:15px; height:18px; fill:none; stroke:var(--dom); stroke-width:2; stroke-linecap:round; }
+  .mem-fig.is-left .mem-say{ right:-13px; }
+  .mem-fig.is-right .mem-say{ left:-13px; transform:scaleX(-1); }
+  .mem-say path{ animation:memSay 1.2s ease-in-out infinite; }
+  .mem-say path:nth-child(2){ animation-delay:.2s; } .mem-say path:nth-child(3){ animation-delay:.4s; }
+  @keyframes memSay{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+  .mem-scene.is-still .mem-fig-lean, .mem-scene.is-still .mem-say path{ animation:none !important; }
+  .mem-scene.is-still .mem-fig.is-speaking .mem-fig-lean{ transform:var(--lean); }
+  .mem-scene.is-still .mem-say path{ opacity:.8; }
+  @media (max-width:360px){ .mem-fig{ height:126px; } .mem-scene .mem-ring{ width:156px; height:156px; } }
   .mem-read{ margin:0; font-family:'IBM Plex Serif', Georgia, serif; font-size:var(--fs-head); line-height:1.5; color:var(--ink); }
   .mem-btns{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
   .mem-btns .btn{ min-height:44px; }
@@ -3822,6 +3851,9 @@
     .mem-ring-arc, .mem-chunk, .mem-switch, .mem-switch::after, .mem-seg button{ transition:none !important; }
     .mem-chunk:active, .mem-chunk.is-pressed{ transform:none; }
     .mem-rec i{ animation:none; }
+    .mem-fig-lean, .mem-say path{ animation:none !important; transition:none !important; }
+    .mem-fig.is-speaking .mem-fig-lean{ transform:var(--lean); }
+    .mem-say path{ opacity:.8; }
   }
 
   /* ---------- Your HUMC campus (renderCampus) ----------

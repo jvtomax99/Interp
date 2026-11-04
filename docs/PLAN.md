@@ -225,6 +225,12 @@ Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
    the scroll event (index.html ~20912); cheap while layout is clean,
    measure in Team Chat before touching.
 
+4. **Practice scenes: the doctor, nurse and visitor as the speakers in the
+   memory trainer** (Jose, 2026-11-04, after the Tripo figures on
+   `claude/hub-figures`). Built on `claude/practice-scenes`; before it goes
+   live Jose reads Tripo's commercial-use terms.
+   `docs/features/practice-scenes.md`.
+
 **Waiting on Jose** (nothing to build until he does):
 - **K2, Term Review privacy (#117):** publish `firestore.rules` in the
   Firebase console. Until then the "only your own record" rule does

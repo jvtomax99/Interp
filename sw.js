@@ -42,6 +42,9 @@ const PRECACHE = [
   './hmh-mark-square.png',
   // The memory trainer's lines, so it works offline from the start.
   './memory/lines.json',
+  './figures/doctor.webp',
+  './figures/nurse.webp',
+  './figures/visitor.webp',
   // Dr. Smiley (drSmileyArt in index.html): his picture and the strip of
   // frames his face moves through. On Home, the dock, Ask the Hub and the
   // lock screen, so they must work offline from the start.
