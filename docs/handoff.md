@@ -28,6 +28,21 @@ installing tools), tests passed, his "Not yet" on 2026-11-04.
 Live in the app (done): practice scenes in the memory trainer (#197, b1104.1059), with the figures cut straight
 from his drawing (#201, b1104.1206).
 
+## Clean rebuild (2026-11-04 evening, Jose picked it)
+
+Why the earlier rounds kept missing: we painted over Tripo's paint. Now shape and colour are apart, like a toy:
+`docs/mockups/characters/tools/toy/` (run from a scratchpad copy; Blender via `pip install bpy`).
+1. `bake_pos.py` bakes where each texel sits in 3D; `glbimg.py` pulls the GLB's colour map.
+2. `labels.py` sorts every texel into skin, scrubs, hair or white by a 3D vote (thin painted marks vanish), with
+   rules by place (eye zone all skin, V neck skin, no hair on cheeks, white only on shoes). `paint.py`: flat colours.
+3. `toy.py` (with `face.py`, `features.json`): whole figure smoothed (`GSMOOTH=16 GTYPE=SMOOTH`), face fitted to a
+   smooth surface, clay-ball nose, eyes as glossy domes with drawn irises, lids, brows and mouth as tubes, badge as a
+   card, blush in the shader. Feature places are measured on the drawing and anchored on the nose.
+   Render: `FACE=1 SAMPLES=128 GSMOOTH=16 GTYPE=SMOOTH JAWIT=60 KEY=55 KEYS=3 FRONT=40 UNDER=12 WORLD=0.35 ./view.sh z front|three|face`.
+Pictures: `nurse-toy.png` (drawing, before, now front, now turned), `nurse-toy-face.png`. No Tripo credits spent.
+Left: head boxier than the drawing (shadowed cheek sides), lower face longer, skin a touch orange, no GLB export yet
+(curves and the blush need baking first).
+
 ## History of the figures work (oldest first)
 
 
