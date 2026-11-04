@@ -5,12 +5,15 @@ the "figures" chat (Tripo figures, practice scenes, the 3D nurse made to match t
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Work on branch `claude/hub-figures`. First
-> show me the current 3D nurse: send `docs/mockups/characters/nurse-current.png` and `nurse-current-face.png` as
-> files. Then tell me what's being worked on now and what was worked on before, in a few short lines, and ask me
-> (buttons) what's next for the 3D figures. Plain words, say "working on it" and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` and `docs/handoff.md`. Work on branch `claude/hub-figures`. Goal: the
+> doctor and visitor made in Meshy through its API, to match the Meshy nurse. First check the Meshy API works (Jose
+> saved the key as a network secret for api.meshy.ai, header Authorization, prefix Bearer, and allowed api.meshy.ai,
+> assets.meshy.ai, docs.meshy.ai): read docs.meshy.ai for the image-to-3D call and credit costs, then one balance or
+> list call. Tell me the cost per figure before spending, and write the ChatGPT prompts for the doctor and visitor
+> pictures (like the nurse prompt in "Meshy nurse" below). Plain words, say "working on it" and "done". "Push" is
+> always a button.
 
-## Now: the 3D nurse matches the drawing; next step for the figures is Jose's call
+## Now: Meshy by API for the doctor and visitor (older notes below)
 
 Picture of where she stands: `docs/mockups/characters/nurse-current.png` (drawing, then front and 3/4) and
 `nurse-current-face.png` (face close up). File: `docs/mockups/characters/tripo/nurse-best.glb` (7.6 MB, one GLB,
