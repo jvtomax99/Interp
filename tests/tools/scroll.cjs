@@ -11,6 +11,8 @@
      IDLE=20 N=0 node tools/scroll.cjs     Home untouched for 20 s instead
      UA=chromium node tools/scroll.cjs     Chromium's own paths (worker petals)
      PRE='js' node tools/scroll.cjs        run js in the page first (an experiment)
+     SCREEN=domain node tools/scroll.cjs   scroll the biggest domain grown to
+                                           150 terms (feel audit, phase 4) instead of Home
 
    With the iPhone user agent, Chromium runs the iPhone's CSS petals on its
    main thread every frame (Home at rest ~96% busy at 4x), which an iPhone
@@ -24,6 +26,17 @@
    line of its source). Chromium stands in for Safari: compare runs. */
 const { chromium, route, SEED } = require('../support/harness.cjs');
 const RATE = +(process.env.RATE || 4), N = +(process.env.N || 4), RUNS = +(process.env.RUNS || 1);
+const SCREEN = process.env.SCREEN || 'home';
+// SCREEN=domain: the biggest seeded domain grown to 150 terms (copies).
+function bigSeed() {
+  const seed = JSON.parse(JSON.stringify(SEED));
+  const cat = seed.slice().sort((a, b) => (b.terms || []).length - (a.terms || []).length)[0];
+  const base = cat.terms.slice();
+  let i = 0;
+  while (cat.terms.length < 150) { const t = Object.assign({}, base[i % base.length]); delete t.id; t.en = t.en + ' ' + (i + 2); cat.terms.push(t); i++; }
+  return { seed, id: cat.id };
+}
+const BIG = SCREEN === 'domain' ? bigSeed() : { seed: SEED, id: null };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1';
 
 const WRAP = () => {
@@ -47,10 +60,11 @@ async function once(browser) {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: SEED });
+    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: BIG.seed });
   await page.addInitScript(WRAP);
   await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(14000); // the hello and its thought cloud are over
+  if (BIG.id) { await page.evaluate(id => setCategory(id), BIG.id); await page.waitForTimeout(2500); await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(500); }
   const cdp = await ctx.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: RATE });
   await cdp.send('Performance.enable');
@@ -92,7 +106,7 @@ async function once(browser) {
   for (let i = 0; i < RUNS; i++) runs.push(await once(browser));
   await browser.close();
   const med = k => { const v = runs.map(r => r[k]).filter(x => x !== null).sort((x, y) => x - y); return v[Math.floor(v.length / 2)]; };
-  console.log(`rate ${RATE}x, ${N} down+up gestures, ${RUNS} run(s), medians:`);
+  console.log(`rate ${RATE}x, ${N} down+up gestures, ${RUNS} run(s), ${BIG.id ? 'domain ' + BIG.id + ' (150 terms)' : 'Home'}, medians:`);
   for (const k of ['busy', 'stylePerS', 'allDropped', 'dropped', 'ratio', 'worst', 'secs', 'layouts', 'layoutMs', 'styles', 'styleMs', 'scriptMs', 'taskMs']) console.log('  ' + k.padEnd(9), med(k), RUNS > 1 ? '  [' + runs.map(r => r[k]).join(', ') + ']' : '');
   const h = {}; runs.forEach(r => Object.entries(r.handlers).forEach(([k, v]) => { (h[k] = h[k] || []).push(v); }));
   console.log('  scroll listeners (calls, ms, run 1):');
