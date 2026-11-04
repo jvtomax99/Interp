@@ -15,7 +15,7 @@
 </style>
 <script type="importmap">{ "imports": { "three": "../../../campus3d/three/three.module.min.js", "three/addons/": "../../../campus3d/three/addons/" } }</script>
 </head><body>
-<div class="bar top" role="group" aria-label="Who"><button data-focus="all" aria-pressed="true">All</button><button data-focus="doctor">Doctor</button><button data-focus="nurse">Nurse</button><button data-focus="visitor">Visitor</button><button data-focus="pair">Tripo</button></div>
+<div class="bar top" role="group" aria-label="Who"><button data-focus="all" aria-pressed="true">All</button><button data-focus="doctor">Doctor</button><button data-focus="nurse">Nurse</button><button data-focus="visitor">Visitor</button><button data-tripo aria-pressed="false">Tripo</button></div>
 <div class="bar bot" role="group" aria-label="View"><button data-view="front" aria-pressed="true">Front</button><button data-view="three">¾</button><button data-view="side">Side</button><button data-view="back">Back</button></div>
 <script type="module">
 import * as THREE from 'three';
@@ -47,32 +47,40 @@ floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
 const figs = {}, X = { doctor: -1.2, nurse: 0, visitor: 1.2 };
 for (const k of ['doctor', 'nurse', 'visitor']){ const f = makeCharacter(CAST[k]); f.position.x = X[k]; scene.add(f); figs[k] = f; }
 
-// Tripo's nurse (image-to-3D from docs/art/figures-reference.png), shown beside the code nurse under "Tripo"
-const tripo = new THREE.Group(); tripo.visible = false; scene.add(tripo); figs.tripo = tripo;
-const tripoReady = new GLTFLoader().loadAsync('./tripo/nurse.glb').then(g => {
-  const m = g.scene; m.rotation.y = -Math.PI/2; m.updateMatrixWorld(true); m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true;
-    if (Q.has('matte')) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; o.material.needsUpdate = true; } } });
-  const hb = new THREE.Box3().setFromObject(figs.nurse), mb = new THREE.Box3().setFromObject(m);
-  const k = (hb.max.y - hb.min.y) / (mb.max.y - mb.min.y); m.scale.setScalar(k);
-  const c = mb.getCenter(new THREE.Vector3()); m.position.set(-c.x*k, -mb.min.y*k, -c.z*k); tripo.add(m); frame(); });
-function lineup(){ const pair = focus === 'pair';
-  figs.doctor.visible = figs.visitor.visible = !pair; tripo.visible = pair;
-  figs.nurse.position.x = pair ? -0.6 : X.nurse; tripo.position.x = 0.6; }
+// Tripo's figures (image-to-3D from docs/art/figures-reference.png), each beside its code version when "Tripo" is on.
+// Matte by default, like the clay picture; ?gloss shows Tripo's own shine.
+const twins = {}, PAIR = 0.58, SPREAD = 2.3;
+const tripoReady = Promise.all(['doctor', 'nurse', 'visitor'].map(k => new GLTFLoader().loadAsync(`./tripo/${k}.glb`).then(g => {
+  const m = g.scene; m.rotation.y = -Math.PI/2; m.updateMatrixWorld(true);   // Tripo's models face +X
+  m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true;
+    if (!Q.has('gloss')) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; o.material.needsUpdate = true; } } });
+  const hb = new THREE.Box3().setFromObject(figs[k]), mb = new THREE.Box3().setFromObject(m);
+  const s = (hb.max.y - hb.min.y) / (mb.max.y - mb.min.y); m.scale.setScalar(s);
+  const c = mb.getCenter(new THREE.Vector3()); m.position.set(-c.x*s, -mb.min.y*s, -c.z*s);
+  const t = new THREE.Group(); t.add(m); t.visible = false; scene.add(t); twins[k] = t; })));
+let withTripo = Q.has('tripo');
+const shown = () => focus === 'all' ? ['doctor', 'nurse', 'visitor'] : [focus];
+function lineup(){ for (const k of ['doctor', 'nurse', 'visitor']) {
+  const on = shown().includes(k), base = withTripo && focus === 'all' ? X[k]/1.2*SPREAD : focus === 'all' ? X[k] : 0;
+  figs[k].visible = on; figs[k].position.x = withTripo ? base - PAIR : base;
+  if (twins[k]) { twins[k].visible = on && withTripo; twins[k].position.x = base + PAIR; } } }
 const cam = new THREE.PerspectiveCamera(28, innerWidth/innerHeight, 0.1, 60);
-const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 16; controls.maxPolarAngle = Math.PI*0.56;
+const controls = new OrbitControls(cam, renderer.domElement); controls.enableDamping = true; controls.minDistance = 1.5; controls.maxDistance = 40; controls.maxPolarAngle = Math.PI*0.56;
 let focus = Q.get('focus') || 'all', view = Q.get('view') || 'front';
 const ANG = { front: 0, three: 0.68, side: Math.PI/2, back: Math.PI };
 function frame(){   // fit who is in focus to the screen, from the chosen side
-  const box = new THREE.Box3(); lineup(); (focus === 'all' ? [figs.doctor, figs.nurse, figs.visitor] : focus === 'pair' ? [figs.nurse, tripo] : [figs[focus]]).forEach(f => box.expandByObject(f));
+  const box = new THREE.Box3(); lineup(); shown().forEach(k => { box.expandByObject(figs[k]); if (withTripo && twins[k]) box.expandByObject(twins[k]); });
   const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
   const vf = THREE.MathUtils.degToRad(cam.fov), hf = 2*Math.atan(Math.tan(vf/2)*cam.aspect);
-  const wide = (focus === 'all' || focus === 'pair') ? size.x : Math.max(size.x, size.z), d = Math.max((size.y*1.12)/2/Math.tan(vf/2), (wide*1.14)/2/Math.tan(hf/2)) + size.z/2;
+  const wide = (focus === 'all' || withTripo) ? size.x : Math.max(size.x, size.z), d = Math.max((size.y*1.12)/2/Math.tan(vf/2), (wide*1.14)/2/Math.tan(hf/2)) + size.z/2;
   const a = ANG[view] ?? 0; controls.target.set(c.x, c.y*0.98, c.z);
   cam.position.set(c.x + Math.sin(a)*d, c.y + d*0.12, c.z + Math.cos(a)*d); controls.update();
   document.querySelectorAll('[data-focus]').forEach(b => b.setAttribute('aria-pressed', b.dataset.focus === focus));
-  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view)); }
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
+  document.querySelector('[data-tripo]').setAttribute('aria-pressed', withTripo); }
 document.querySelectorAll('[data-focus]').forEach(b => b.onclick = () => { focus = b.dataset.focus; frame(); });
 document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { view = b.dataset.view; frame(); });
+document.querySelector('[data-tripo]').onclick = () => { withTripo = !withTripo; frame(); };
 addEventListener('resize', () => { renderer.setPixelRatio(capDpr()); renderer.setSize(innerWidth, innerHeight); cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); frame(); });
 cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); frame();
 
@@ -81,6 +89,6 @@ if (STILL) [figs.doctor, figs.nurse, figs.visitor].forEach(f => f.userData.still
 renderer.setAnimationLoop(() => { const dt = clock.getDelta(), t = clock.elapsedTime;
   if (!STILL) [figs.doctor, figs.nurse, figs.visitor].forEach(f => f.userData.tick(t, dt));
   controls.update(); renderer.render(scene, cam); });
-window.__figs = figs; window.__cam = cam; window.__controls = controls; tripoReady.then(() => { window.__ready = true; }, e => { console.error(e); window.__ready = true; });
+window.__figs = figs; window.__cam = cam; window.__controls = controls; window.__twins = twins; tripoReady.then(() => { frame(); window.__ready = true; }, e => { console.error(e); window.__ready = true; });
 </script>
 </body></html>
