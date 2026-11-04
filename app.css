@@ -1468,7 +1468,7 @@
       inset 0 1px 0 rgba(255,255,255,0.9),
       var(--sh-1);
     transition:box-shadow .22s var(--ease), transform .22s var(--ease);
-    animation:cardIn .3s var(--ease) both;
+    animation:cardIn .3s var(--ease) backwards;   /* not both: a forwards fill would hold the last frame's transform over the press rules (see .card) */
   }
   /* The spine. Full-bleed to the card's edges, so it reads as part of the
      card's construction rather than a stripe drawn on top of it. */
@@ -2218,7 +2218,12 @@
       0 1px 2px rgba(21,28,44,0.05),
       0 8px 22px -10px rgba(21,28,44,0.20);
     transition:box-shadow .22s var(--ease), transform .22s var(--ease);
-    animation:cardIn .3s var(--ease) both;
+    animation:cardIn .3s var(--ease) backwards;
+    /* backwards, not both: a forwards fill keeps the last frame's transform
+       for ever, and an animation's held value beats every normal rule, so
+       the press glow (.card:active, .is-pressed) and the hover lift never
+       showed on a term card. The last frame is the card's own rest state,
+       so releasing it changes nothing at rest (feel audit, phase 5). */
   }
   /* ---------- Slang & Profanity ----------
      A heat meter instead of a word badge (five bars, cool to hot), a panel

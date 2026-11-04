@@ -339,6 +339,13 @@ lost concurrent edits. Do not reintroduce that.
   (a scroll restore, `scrollIntoView` on a card) adds `cv-all` to
   `#content` first, or it lands on a guess; iPhone Safari has no scroll
   anchoring to fix it. `renderContent` does this itself for redraws.
+- **An entrance animation never fills forwards on anything with a press
+  or hover rule.** `.card` and `.doc-card` ran `cardIn ... both`, so the
+  animation's last frame held their `transform` for ever, and an
+  animation's held value beats every normal rule: their press glow and
+  hover lift were dead for weeks with no error (found by the feel guard,
+  `tests/suites/feel.cjs`, 2026-11-04). Use `backwards`; the last frame
+  is the rest state anyway.
 - **No `body:has(...)` for state** (`AGENTS.md`): it made scrolling Home
   restyle. Overlays open set `body.ov-open` / `.gs-open` / `.dm-open`
   (`overlayFlags` in `index.html`, a watcher, so new overlays need nothing).

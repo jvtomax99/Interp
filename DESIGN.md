@@ -147,6 +147,7 @@ box-shadow:
 - **Overshoot only where it is the point:** the Practice buttons' `--spring-settle`, Dr. Smiley's acting. No new overshooting `cubic-bezier`; `tests/suites/springs.cjs` holds the kept list.
 - **Touch press feedback:** `:hover` never fires on a phone. Presses use `:active` plus a JS `.is-pressed` class held about 260ms (the `LIFTS` list in `index.html`).
 - **Every animation has a `prefers-reduced-motion` guard;** every control keeps `:focus-visible`.
+- **An entrance never fills forwards** (`animation-fill-mode: both` or `forwards`) on anything with a press or hover rule: the held last frame beats every normal rule, so the press glow dies with no error (the term and doctor cards, 2026-11-04). Use `backwards`; the last frame is the rest state anyway. The feel guard (`tests/suites/feel.cjs`) checks the cards.
 - **Speed never costs the look:** make a visual cheaper, never smaller, shorter or stopped.
 
 ## Do's and Don'ts
