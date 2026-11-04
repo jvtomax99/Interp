@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Front Projection Bake</title>
+<!-- Projects Jose's drawing onto the model's front and bakes it into the texture's layout (UV space).
+     ?glb=tripo/x.glb&img=tripo/drawing-screen.png&size=4096 -> window.__png (data URL, RGBA: colour + weight). -->
+<script type="importmap">{ "imports": { "three": "../../../campus3d/three/three.module.min.js", "three/addons/": "../../../campus3d/three/addons/" } }</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './lib/GLTFLoader.js';
+const Q = new URLSearchParams(location.search), SIZE = +(Q.get('size') || 4096);
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
+renderer.setSize(300, 600);
+const g = await new GLTFLoader().loadAsync(Q.get('glb'));
+const m = g.scene; m.rotation.y = -Math.PI/2; m.updateMatrixWorld(true);
+const scene = new THREE.Scene(); scene.add(m);
+// the same front camera as render.html (viewport 300 x 600, fov 12)
+const W = 300, H = 600;
+const b = new THREE.Box3().setFromObject(m), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+const cam = new THREE.PerspectiveCamera(12, W/H, 0.1, 100);
+const d = Math.max(s.y*1.04/2/Math.tan(THREE.MathUtils.degToRad(6)), s.x*1.04/2/Math.tan(Math.atan(Math.tan(THREE.MathUtils.degToRad(6))*W/H)));
+cam.position.set(c.x, c.y + d*0.06, c.z + d); cam.lookAt(c); cam.updateMatrixWorld(true); cam.updateProjectionMatrix();
+// 1. depth from the camera, to know what the front actually sees
+const depthRT = new THREE.WebGLRenderTarget(1200, 2400); depthRT.depthTexture = new THREE.DepthTexture(1200, 2400); depthRT.depthTexture.type = THREE.FloatType;
+renderer.setRenderTarget(depthRT); renderer.render(scene, cam);
+// 2. bake: every texel of the model's texture looks up the drawing where the camera sees it
+const drawing = await new THREE.TextureLoader().loadAsync(Q.get('img')); drawing.colorSpace = THREE.NoColorSpace;
+const mat = new THREE.ShaderMaterial({ defines: { BIAS: Q.get('bias') || '0.0015', F0: Q.get('f0') || '0.30', F1: Q.get('f1') || '0.65' }, side: THREE.DoubleSide, depthTest: false, depthWrite: false, transparent: false,
+  uniforms: { camVP: { value: new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse) }, camPos: { value: cam.position },
+              img: { value: drawing }, depthMap: { value: depthRT.depthTexture } },
+  vertexShader: `uniform mat4 camVP; varying vec4 vClip; varying vec3 vN; varying vec3 vW;
+    void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vW = w.xyz; vN = normalize(mat3(modelMatrix) * normal); vClip = camVP * w;
+      gl_Position = vec4(uv.x * 2.0 - 1.0, uv.y * 2.0 - 1.0, 0.0, 1.0); }`,
+  fragmentShader: `uniform sampler2D img; uniform sampler2D depthMap; uniform vec3 camPos; varying vec4 vClip; varying vec3 vN; varying vec3 vW;
+    void main(){ vec3 ndc = vClip.xyz / vClip.w; vec2 st = ndc.xy * 0.5 + 0.5;
+      if (st.x < 0.0 || st.x > 1.0 || st.y < 0.0 || st.y > 1.0) { gl_FragColor = vec4(0.0); return; }
+      float seen = texture2D(depthMap, st).r; float z = ndc.z * 0.5 + 0.5;
+      float vis = z <= seen + BIAS ? 1.0 : 0.0;
+      float facing = smoothstep(F0, F1, dot(normalize(vN), normalize(camPos - vW)));
+      vec4 col = texture2D(img, st);
+      gl_FragColor = vec4(col.rgb, col.a * facing * vis); }` });
+m.traverse(o => { if (o.isMesh) o.material = mat; });
+const bakeRT = new THREE.WebGLRenderTarget(SIZE, SIZE);
+renderer.setRenderTarget(bakeRT); renderer.setClearColor(0, 0); renderer.clear(); renderer.render(scene, new THREE.OrthographicCamera());
+const px = new Uint8Array(SIZE * SIZE * 4); renderer.readRenderTargetPixels(bakeRT, 0, 0, SIZE, SIZE, px);
+const cv = document.createElement('canvas'); cv.width = cv.height = SIZE; const ctx = cv.getContext('2d');
+const id = ctx.createImageData(SIZE, SIZE); id.data.set(px); ctx.putImageData(id, 0, 0);   // row r = texture row r (glTF uv, flipY false)
+window.__png = cv.toDataURL('image/png'); window.__ready = true;
+</script></body></html>

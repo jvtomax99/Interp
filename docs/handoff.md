@@ -50,6 +50,19 @@ Repaint test (same day): `texture_model` v3.0 at `texture_quality` extreme, guid
 task `e7052567-8a93-4a0a-a054-8ed307a16fbb`, 30 credits, 745 left. Barely different from v3.1's own paint. A neutral,
 frontal light in `render.html` (`?light=studio&face=front`) brings it closest; what still differs: whites smeared round the
 eyes, grainy cloth, a lighter blue. Free next levers: smooth and colour-match the texture to the drawing.
+Making the 3D nurse match the drawing (Jose: "perfect, like the drawing, use credits"), 2026-11-04:
+1. Tripo drew four views from the nurse crop (`generate_multiview_image`, task `c44b2cbe-2ef3-4690-8786-929293783a99`, 10 credits).
+2. `multiview_to_model` from those, v3.1, geometry detailed, texture extreme (task `06a52900-10e4-4e6b-84b9-2b31ab1319d5`, 70):
+   shape right from every side. Paint still rough.
+3. `texture_model` v3.0 extreme guided by the four views (task `43a20cbc-c438-4063-ba5b-22b4e5a884db`, 30): skin a bit better.
+4. Free, in `docs/mockups/characters/`: `tools/clean.py` (smooth each colour class and match it to the drawing's colours),
+   `tools/eyes.py`, `tools/smooth.mjs` (flatten Tripo's carved eyes and mouth on the face, seam copies moved together),
+   `bake.html` (projects the drawing onto the front and bakes it into the texture; `?bias&f0&f1`), `tools/tex.mjs`
+   (swap a GLB's base colour). The drawing is fitted to the front render by bounding box, then the face shifted 40 px
+   down (eyes) at 1200 x 2400. Result: `tripo/nurse-best.glb` (1.8 MB). Front now reads as the drawing; up close the
+   eyes are soft because the nurse's face is only ~220 px wide in the reference sheet; the sides show a little smear
+   where the projection reaches past the front (`f0=0.02`; try 0.15).
+   Balance 635. Next lever: a big, single-figure picture of each person (ideally front, side, back in the same style).
 Place picked (Jose, 2026-11-04): practice scenes. Plan in `docs/features/practice-scenes.md` (pictures rendered from the Tripo figures, no live 3D, no rigging for doctor and visitor); PLAN.md item 4. Waiting on his OK and on Tripo's terms.
 Nurse crop used: `docs/art/figures-reference.png`, box (532, 0, 996, 1024), which keeps the visitor's arm out.
 

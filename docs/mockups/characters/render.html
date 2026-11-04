@@ -32,8 +32,8 @@ const fill = new THREE.DirectionalLight(0xe6e0ff, 0.7); fill.position.set(-5, 2.
 const rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(0, 3.5, -5); scene.add(rim);
 }
 const g = await new GLTFLoader().loadAsync(`./tripo/${who}.glb`);
-const m = g.scene; m.rotation.y = -Math.PI/2 + (face === 'right' ? 0.42 : face === 'front' ? 0 : -0.42);   // Tripo faces +X; turned about 24° toward the other speaker
-m.traverse(o => { if (o.isMesh) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; } });
+const m = g.scene; m.rotation.y = (Q.has('base') ? +Q.get('base') : -Math.PI/2) + ({ right:0.42, front:0, left:-0.42, side:Math.PI/2, back:Math.PI })[face];   // Tripo faces +X; turned about 24° toward the other speaker
+m.traverse(o => { if (o.isMesh) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; if (Q.has('flat')) { o.material.normalMap = null; o.material.needsUpdate = true; } } });
 scene.add(m); m.updateMatrixWorld(true);
 const b = new THREE.Box3().setFromObject(m), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
 const cam = new THREE.PerspectiveCamera(12, W/H, 0.1, 100);                      // a long lens: little perspective
