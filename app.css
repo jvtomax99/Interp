@@ -222,18 +222,24 @@
      buttons (the lens answers them) and the Home badge (his face, pettable)
      are left as they are. */
   .tg-back:active, .tg-brand:active, .tg-icon-btn:active, .tg-avatar:active, .link-pill:active, .ff-mode:active, .ff-chip:active, .sa-all:active,
-  .ethics-filter-pill:active, .cp-tag:active, .activity-delete:active, .icon-btn:active, .dl-prep:active, .dd-detail-close:active, .home-sec-more:active,
+  .ethics-filter-pill:active, .activity-delete:active, .icon-btn:active, .dl-prep:active, .dd-detail-close:active, .home-sec-more:active,
   .home-sec-add:active, .gd-tour:active, .gd-face-btn:active, .gd-week-hide:active, .gd-show:active, .ask-mem-link:active, .ask-chip:active,
-  .chat-reaction:active, .tc-attach:active, .sa-pair-say:active, .group-mark:active, .card-more:active, .domain-banner-more:active, .domain-add:active, .tr-swap:active,
+  .chat-reaction:active, .tc-attach:active, .sa-pair-say:active, .group-mark:active, .domain-banner-more:active, .domain-add:active, .tr-swap:active,
   .tg-back.is-pressed, .tg-brand.is-pressed, .tg-icon-btn.is-pressed, .tg-avatar.is-pressed, .link-pill.is-pressed, .ff-mode.is-pressed, .ff-chip.is-pressed, .sa-all.is-pressed,
-  .ethics-filter-pill.is-pressed, .cp-tag.is-pressed, .activity-delete.is-pressed, .icon-btn.is-pressed, .dl-prep.is-pressed, .dd-detail-close.is-pressed, .home-sec-more.is-pressed,
+  .ethics-filter-pill.is-pressed, .activity-delete.is-pressed, .icon-btn.is-pressed, .dl-prep.is-pressed, .dd-detail-close.is-pressed, .home-sec-more.is-pressed,
   .home-sec-add.is-pressed, .gd-tour.is-pressed, .gd-face-btn.is-pressed, .gd-week-hide.is-pressed, .gd-show.is-pressed, .ask-mem-link.is-pressed, .ask-chip.is-pressed,
-  .chat-reaction.is-pressed, .tc-attach.is-pressed, .sa-pair-say.is-pressed, .group-mark.is-pressed, .card-more.is-pressed, .domain-banner-more.is-pressed, .domain-add.is-pressed, .tr-swap.is-pressed{
+  .chat-reaction.is-pressed, .tc-attach.is-pressed, .sa-pair-say.is-pressed, .group-mark.is-pressed, .domain-banner-more.is-pressed, .domain-add.is-pressed, .tr-swap.is-pressed{
     transform:scale(.95); filter:brightness(.96);
   }
   .home-feed-row:active, .tc-pinned-bar:active, .chat-quote:active, .head-action:active, .group-toggle:active, summary:active,
   .home-feed-row.is-pressed, .tc-pinned-bar.is-pressed, .chat-quote.is-pressed, .head-action.is-pressed, .group-toggle.is-pressed, summary.is-pressed{ filter:brightness(.94); }
   .chat-link:active, .chat-link.is-pressed{ opacity:.72; }
+  /* A campus badge is placed by its own transform (translate(-50%,-100%)),
+     so its press keeps that and adds the dip; a plain scale moved the badge
+     and the tap missed it (campus-pick). The card's ••• already dips its
+     inner span on :active; a touch gets the same through .is-pressed. */
+  .cp-tag:active, .cp-tag.is-pressed{ transform:translate(-50%,-100%) scale(.95); filter:brightness(.96); }
+  .card-more.is-pressed > span{ transform:scale(.92); }
   @media (prefers-reduced-motion:reduce){ .tg-sync{ transition:none; } }
   .tg-sync-short, .tg-sync-mark{ display:none; }
   .tg-sync-dot{ width:7px; height:7px; border-radius:50%; background:currentColor; flex-shrink:0; }
