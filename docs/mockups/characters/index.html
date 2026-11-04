@@ -49,14 +49,18 @@ for (const k of ['doctor', 'nurse', 'visitor']){ const f = makeCharacter(CAST[k]
 
 // Tripo's figures (image-to-3D from docs/art/figures-reference.png), each beside its code version when "Tripo" is on.
 // Matte by default, like the clay picture; ?gloss shows Tripo's own shine.
-const twins = {}, PAIR = 0.58, SPREAD = 2.3;
-const tripoReady = Promise.all(['doctor', 'nurse', 'visitor'].map(k => new GLTFLoader().loadAsync(`./tripo/${k}.glb`).then(g => {
-  const m = g.scene; m.rotation.y = -Math.PI/2; m.updateMatrixWorld(true);   // Tripo's models face +X
+const twins = {}, mixers = [], PAIR = 0.58, SPREAD = 2.3, FILE = { nurse: 'nurse-walk' };   // the nurse is rigged by Tripo and walks in place
+const tripoReady = Promise.all(['doctor', 'nurse', 'visitor'].map(k => new GLTFLoader().loadAsync(`./tripo/${FILE[k] || k}.glb`).then(g => {
+  const m = g.scene; m.rotation.y = Q.has('turn') ? +Q.get('turn') : -Math.PI/2; m.updateMatrixWorld(true);   // Tripo's models face +X
   m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true;
     if (!Q.has('gloss')) { o.material.roughnessMap = null; o.material.roughness = 0.75; o.material.metalness = 0; o.material.needsUpdate = true; } } });
   const hb = new THREE.Box3().setFromObject(figs[k]), mb = new THREE.Box3().setFromObject(m);
   const s = (hb.max.y - hb.min.y) / (mb.max.y - mb.min.y); m.scale.setScalar(s);
   const c = mb.getCenter(new THREE.Vector3()); m.position.set(-c.x*s, -mb.min.y*s, -c.z*s);
+  for (const clip of g.animations) for (const tr of clip.tracks) if (/^(Root|Hip)\.position$/.test(tr.name)) {   // walk in place: take out the forward drift
+    const v = tr.values, n = tr.times.length, T = tr.times[n-1] - tr.times[0] || 1;
+    for (let i = 0; i < n; i++) for (let c = 0; c < 3; c++) v[i*3+c] -= (v[(n-1)*3+c] - v[c]) * (tr.times[i] - tr.times[0]) / T; }
+  if (g.animations.length) { const mx = new THREE.AnimationMixer(m); mx.clipAction(g.animations[0]).play(); mixers.push(mx); }
   const t = new THREE.Group(); t.add(m); t.visible = false; scene.add(t); twins[k] = t; })));
 let withTripo = Q.has('tripo');
 const shown = () => focus === 'all' ? ['doctor', 'nurse', 'visitor'] : [focus];
@@ -87,8 +91,8 @@ cam.aspect = innerWidth/innerHeight; cam.updateProjectionMatrix(); frame();
 const clock = new THREE.Clock();
 if (STILL) [figs.doctor, figs.nurse, figs.visitor].forEach(f => f.userData.still());
 renderer.setAnimationLoop(() => { const dt = clock.getDelta(), t = clock.elapsedTime;
-  if (!STILL) [figs.doctor, figs.nurse, figs.visitor].forEach(f => f.userData.tick(t, dt));
+  if (!STILL) { [figs.doctor, figs.nurse, figs.visitor].forEach(f => f.userData.tick(t, dt)); mixers.forEach(m => m.update(dt)); }
   controls.update(); renderer.render(scene, cam); });
-window.__figs = figs; window.__cam = cam; window.__controls = controls; window.__twins = twins; tripoReady.then(() => { frame(); window.__ready = true; }, e => { console.error(e); window.__ready = true; });
+window.__figs = figs; window.__cam = cam; window.__controls = controls; window.__twins = twins; window.__mixers = mixers; tripoReady.then(() => { frame(); window.__ready = true; }, e => { console.error(e); window.__ready = true; });
 </script>
 </body></html>
