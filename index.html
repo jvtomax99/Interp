@@ -17915,6 +17915,7 @@ if('serviceWorker' in navigator && window.isSecureContext){
       // Not at once: a new worker's precache (96 files) downloaded while Home
       // was opening (docs/feel-audit.md, phase 2). The browser runs its own
       // check on the way in; this one is for the app left open.
+      if(!reg) return;   // a browser that registers nothing (the suites' stand-in)
       setTimeout(()=> reg.update().catch(()=>{}), 15000);
       setInterval(()=> reg.update().catch(()=>{}), 60 * 60 * 1000);
     }).catch(err=>{
