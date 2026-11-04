@@ -15,6 +15,14 @@ the "figures" chat (Tripo figures, practice scenes, the 3D nurse made to match t
 
 ## Now: Meshy by API for the doctor and visitor (older notes below)
 
+Status 2026-11-04 (chat 1): Meshy blocked in that chat. The proxy refused api.meshy.ai, docs.meshy.ai
+(403 on connect) and injected no Meshy key; only api.tripo3d.ai was set. The settings were likely saved after
+the chat started: a new chat picks them up. First call to try: `GET https://api.meshy.ai/openapi/v1/balance`.
+Costs (Meshy's pricing page, read through search, not yet opened directly): image to 3D on Meshy-6 is 20 credits
+without texture, 30 with texture, 35 with 8K texture; the general page lists Meshy 7 at 25. So about 30 credits a
+figure, 60 for both. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
+
+
 Picture of where she stands: `docs/mockups/characters/nurse-current.png` (drawing, then front and 3/4) and
 `nurse-current-face.png` (face close up). File: `docs/mockups/characters/tripo/nurse-best.glb` (7.6 MB, one GLB,
 the face and badge baked in). How she was made, step by step: "Making her match the drawing, round 2" below; the
