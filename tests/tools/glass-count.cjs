@@ -81,9 +81,11 @@ const COUNT = () => {
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: RATE });
   let layers = null; cdp.on('LayerTree.layerTreeDidChange', e => { if (e.layers) layers = e.layers.length; });
   await cdp.send('LayerTree.enable');
+  // Each opener runs in the page (its source is sent over), so the domain's
+  // id goes in as its argument.
   const SCREENS = [
     ['Home', () => { setCategory('home'); }],
-    ['domain ' + big + ' (150 terms)', () => { setCategory(big); }],
+    ['domain ' + big + ' (150 terms)', id => { setCategory(id); }],
     ['doctor list', () => { setCategory('doctor-directory'); }],
     ['doctor page', () => { openDoctorDirDetail('d3'); }],
     ['More (sheet over Home)', () => { closeDoctorDirDetail(); setCategory('home'); openMoreSheet(); }]
@@ -91,7 +93,7 @@ const COUNT = () => {
   console.log(`rate ${RATE}x, ${REST} s at rest per screen, ${process.env.UA === 'chromium' ? 'Chromium' : 'iPhone'} paths`);
   console.log('screen'.padEnd(28), 'elems', 'backdrop on/off', 'filter on/off', 'will-change', 'blend', 'anims (off, main)', 'layers', 'hitch ms/s', 'dropped %', 'worst');
   for (const [name, open] of SCREENS) {
-    await page.evaluate(open);
+    await page.evaluate(open, big);
     await page.waitForTimeout(2500);
     await page.evaluate(() => scrollTo(0, 0));
     await page.waitForTimeout(600);
