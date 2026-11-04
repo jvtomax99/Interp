@@ -18,9 +18,11 @@ the "figures" chat (Tripo figures, practice scenes, the 3D nurse made to match t
 Status 2026-11-04 (chat 1): Meshy blocked in that chat. The proxy refused api.meshy.ai, docs.meshy.ai
 (403 on connect) and injected no Meshy key; only api.tripo3d.ai was set. The settings were likely saved after
 the chat started: a new chat picks them up. First call to try: `GET https://api.meshy.ai/openapi/v1/balance`.
-Costs (Meshy's pricing page, read through search, not yet opened directly): image to 3D on Meshy-6 is 20 credits
-without texture, 30 with texture, 35 with 8K texture; the general page lists Meshy 7 at 25. So about 30 credits a
-figure, 60 for both. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
+Later the same chat: Jose allowed the three hosts and they opened (docs read, api.meshy.ai answers), but the key
+was still not added ("Invalid API key", 401): a new chat should pick it up. Costs, read from
+docs.meshy.ai/api/pricing.md: image to 3D with 2K textures is 30 credits on `meshy-7.1` (latest) or `meshy-6`
+(mesh only 20, 8K textures 35). So 30 a figure, 60 for both. The API uses prepaid API credits, bought in the
+subscription settings; not checked yet whether app credits count. The ChatGPT prompts for the doctor and visitor pictures: `meshy/prompts.md`.
 
 
 Picture of where she stands: `docs/mockups/characters/nurse-current.png` (drawing, then front and 3/4) and
