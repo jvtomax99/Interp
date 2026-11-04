@@ -96,8 +96,13 @@ too: say both. Not when a phase finishes but the next phase continues here.
    script fell 60%, dropped frames 42% -> 31%; glass is never stacked, so
    nothing cut): #205, live b1104.1832. The hello's canvas
    draw is the opening's floor now: Jose's call (options in the audit
-   note). Next: phase 5 (the finishing checklist and the guard suite).
-   Jose's phone numbers still owed.
+   note). Phase 5, step 1, the measuring pass over 26 screens
+   (`tests/tools/finish-check.cjs`: press feedback, empty flashes, layout
+   shift, the keyboard, dark mode, safe areas; findings table in the audit
+   note): `claude/feel-finish`. Next: step 2, the fixes by group (about
+   30 classes with no press feedback, four contrast spots), after Jose's
+   calls on the faint ink token and five phone screenshots; then the
+   guard suite. Jose's phone numbers still owed.
 
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
