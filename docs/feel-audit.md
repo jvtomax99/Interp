@@ -329,12 +329,43 @@ with the same tool after:
   its soft tint; Events' source pills and the ethics "In practice" line
   read 4.45), the channel picker's "yours" in the soft ink.
 
+**A dead press glow, found by the guard (step 3).** The term cards'
+and doctor cards' press glow (`.card:active`, `.card.is-pressed`, in
+`LIFTS` since the first press work) never showed: their entrance
+animation (`cardIn`) was set to fill `both`, so its last frame's
+`transform` was held for ever, and an animation's held value beats
+every normal rule, the hover lift included. The fill is `backwards`
+now (the last frame is the card's own rest state, so nothing moves at
+rest). Rule in `DESIGN.md` and `CLAUDE.md`: an entrance never fills
+forwards on an element with a press or hover rule.
+
 After, light theme: no text under 4.5:1 on any of the 26 screens but
 the generic `.tag` ("Principle", 2.5:1: the tag colour mixed 56% into
 ink on its own tint; a look decision, left for Jose). Dark: one hair,
 False Friends' mode button at 4.49:1 on a tint the tool reads
 approximately. No runtime errors across the 26 screens, light and dark.
 The User Guide needed no change (no new feature).
+
+#### Step 3, the guard (done 2026-11-04, `claude/feel-guard`)
+
+`tests/suites/feel.cjs`, in `run.cjs`, so GitHub runs it on every push.
+One browser at iPhone size, no CPU throttling (the runners vary too
+much for timed limits at 4x): no "nothing yet" line before the data and
+layout shift under 0.1 on Home, a 150-term domain, the doctor list, a
+doctor's page, Team Chat and Updates; ten controls answer a press
+(`:active` forced through the protocol, then the `.is-pressed` class a
+touch adds): the top bar's two buttons, a domain card on Home (the
+family carries the glow), a quick tile, a primary button, a list ✕, a
+card's pill, a term card, a filter pill, a doctor card; no text under
+4.5:1 on the faint ink's screens; a 150-term domain's scroll searches
+the page far less than once a frame and reads only a few rects; a
+cheer at rest keeps its clock (every frame within 100 ms of its due
+time at 1x; measured 0-2 ms); Home at rest under 60 ms/s of hitches at
+1x (measured 0-11; the phone's bar is 10, at 4x the lab reads 86-156).
+The first open after a deploy keeps its own guard, `deploy-open.cjs`.
+Run against `main` before step 2 it failed the press and contrast
+checks, as it should; against step 2 it found the cards' dead glow
+above.
 
 ## Not in this version
 

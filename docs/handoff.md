@@ -22,9 +22,12 @@ Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets i
 - **Phase 5, step 1 (#207) and step 2 (`claude/feel-finish-2`):** the measuring pass (`tests/tools/finish-check.cjs`,
   26 screens, six checks) with its findings table in the audit note, then the fixes: press feedback for about 30
   kinds of control (one rule beside `.tg-sync:active`, the classes in `LIFTS`), the faint ink token darkened
-  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Still owed by Jose: five phone screenshots
-  (Ask and Team access with the keyboard up; a doctor's page, the doctor list's A-Z strip and a toast, for the safe
-  areas). Then the guard suite (`tests/suites/feel.cjs`).
+  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Step 3 (`claude/feel-guard`): the guard
+  suite `tests/suites/feel.cjs` in `run.cjs` (no empty flash or jump on data, press feedback on ten controls,
+  contrast, a scroll that searches nothing, his face on its clock, Home at rest), and the bug it found: the term and
+  doctor cards' press glow was dead under their entrance animation's forwards fill (`cardIn`, now `backwards`).
+  Still owed by Jose: five phone screenshots (Ask and Team access with the keyboard up; a doctor's page, the doctor
+  list's A-Z strip and a toast, for the safe areas).
 - **Phase 5, the finishing checklist and the guard.** Every screen for press feedback, loading states that never
   flash empty, nothing jumping when data arrives, safe areas, dark mode, the keyboard; then a suite that fails when a
   target regresses (no reload on open is already guarded by `deploy-open.cjs`; add hitch time at rest, face slip,

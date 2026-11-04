@@ -101,8 +101,10 @@ too: say both. Not when a phase finishes but the next phase continues here.
    shift, the keyboard, dark mode, safe areas; findings table in the audit
    note): #207. Step 2, the fixes by group (press feedback for about 30
    kinds of control, the faint ink token darkened on Jose's call, five
-   contrast spots): `claude/feel-finish-2`. Next: the guard suite
-   (`tests/suites/feel.cjs`). Still owed by Jose: five phone screenshots
+   contrast spots): #208. Step 3, the guard suite (`tests/suites/feel.cjs`
+   in `run.cjs`; it found the term and doctor cards' press glow dead
+   under their entrance animation's forwards fill, fixed): `claude/feel-guard`.
+   Phase 5 ends there. Still owed by Jose: five phone screenshots
    (Ask and Team access with the keyboard up; a doctor's page, the
    doctor list's A-Z strip, a toast) and his meter numbers.
 
