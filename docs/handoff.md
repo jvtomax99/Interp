@@ -17,8 +17,6 @@ and Home rails. Pick one of these next (mockup first, his OK, then code, own PR)
 
 - **Stronger term cards.** The colour wash on term cards (`.card[data-term-id]`, `app.css`) is faint for pale domains
   (Genetics). Raise it; keep definitions whole (a card has no tap to open it).
-- **Doctor pages.** The doctor list and the doctor's page in the same hero style (big pin or photo, colour hero).
-  `docs/features/doctor-page.md` first.
 - **Home banner.** Busy (cloud bubble, Watch, the sign). Jose's banner rules are strict: CLAUDE.md "The Home banner
   photo is set per mode" and "Hello banner lettering". Mock carefully, ask before touching.
 - Small things still open from the doctor list review: the search box's icon is a text glyph; a lighter panel with a
@@ -35,6 +33,8 @@ and Home rails. Pick one of these next (mockup first, his OK, then code, own PR)
 - **All domains tiles, #193, live b1103.2225.** One colour tile per top-level domain, tap opens, Back returns; a
   search still lists terms.
 - **Home rails, #194, live b1103.2342.** Rail cards with big tilted pins and colour wash; press glow kept.
+- **Doctor pages, #195, live b1104.0829.** List cards washed in the specialty colour with big pins; the doctor's page
+  opens on a colour hero; `--dp-vivid` deepens the soft specialty colours.
 
 ## Learned, not elsewhere yet
 
