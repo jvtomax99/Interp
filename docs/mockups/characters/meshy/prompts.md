@@ -25,8 +25,8 @@ nothing else in the picture. Square image, as large and sharp as possible.
 ## Visitor (right in the reference)
 
 Using the attached picture as the character reference, draw ONLY the visitor on
-the right (the young woman with big curly orange hair, green eyes, light
-pale skin, mustard-yellow ribbed turtleneck sweater, dark navy trousers with
+the right (the young woman with big curly orange hair, green eyes, pale
+skin, mustard-yellow ribbed turtleneck sweater, dark navy trousers with
 turned-up cuffs, brown shoes), alone, as a single full-body character for 3D
 modeling. Keep her exactly the same: same face, same hair shape and curls, same
 sweater with its ribbed collar, cuffs and hem, same navy trousers, same brown
