@@ -84,7 +84,7 @@ between assignments.
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
 | `manifest.webmanifest` | — | PWA manifest |
 | `DESIGN.md` | — | The design reference: colors with roles, type scale, letter spacing by size (`--tr-*`), weights, shadows, motion, do's and don'ts. Any tool reads it before a visual change |
-| `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; no deployments for `claude/` branches (storage) |
+| `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; only "Bump version" commits deploy (`ignoreCommand`, storage); no deployments for `claude/` branches (storage) |
 | `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
 | `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `features/knowledge-brain.js` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
 | `api/translate.js` | 145 | Translate tool — Claude API |
@@ -179,7 +179,14 @@ Resolve conflicts hunk by hunk, then confirm all four files are still loaded
 
 ## Deploying
 
-Vercel auto-deploys on push to the default branch. There is no build step.
+Vercel deploys the default branch only on a "Bump version" commit. There is
+no build step. Every other commit is skipped by `ignoreCommand` in
+`vercel.json` (2026-11-04): each merge used to deploy, then its bump deployed
+the same app again seconds later, and that filled the free 10 GB of
+Deployment Storage. A skipped commit shows as canceled on Vercel; that is
+normal. If the bump fails, the change is not live: re-run the workflow
+(Actions, Bump version, Run workflow). `tests/suites/deploy-rule.mjs` holds
+the rule and the bump's commit title together.
 
 **Never edit the version lines by hand; a GitHub Action moves them**
 (2026-10-20). After every push to `main` that changes the app,
@@ -513,6 +520,31 @@ design and anything touching data or rules stay with the main model.
   2026-11-03; `AGENTS.md`): once Vercel reports the deploy of the bump
   commit completed (see Deploying), send `PushNotification` naming the
   change and its `BUILD_ID`, even if he seems to be in the chat.
+- **Environment settings come ready to paste** (Jose, 2026-11-04;
+  `AGENTS.md`): whenever the cloud environment needs something saved
+  (a Network access domain, a network secret, an environment variable, a
+  setup-script line), give the exact text in its own code block, one per
+  field, under the field's name and where it goes. Exactly what to paste
+  (no `https://`, no `www` unless the address has it, no quotes); several
+  domains one per line in one box. Never only describe it. A secret's
+  value (an API key) is the exception: say where to get it and which
+  field, never ask for it in the chat. Example, for Network access then
+  Allowed domains:
+  ```
+  tripo-data.rg1.data.tripo3d.com
+  developers.tripo3d.com
+  ```
+- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): when
+  another program, package, plug-in or tool would make the work better,
+  ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
+  what it buys) then "Not now"; on Install, install it and use it. Never
+  install unasked, never quietly work around a missing tool. Installs last
+  only for this chat's machine; to keep one, give the setup-script line to
+  paste (rule above). Example: Blender's site is blocked here, but it
+  installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):
+  ```
+  pip install bpy
+  ```
 - Jose works from a phone much of the time. Keep instructions concrete and
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the

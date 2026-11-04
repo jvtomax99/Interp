@@ -1,6 +1,10 @@
 # After each push to main that changes the app, moves BUILD_ID (index.html)
 # and CACHE_VERSION (sw.js) and pushes that as its own small commit, which
-# Vercel then deploys. Pull requests leave those lines alone: they used to
+# Vercel then deploys. It is the only kind of commit Vercel deploys
+# (ignoreCommand in vercel.json looks for the title "Bump version to ", so
+# keep the two in step; tests/suites/deploy-rule.mjs checks it). If this
+# fails, the change is not live until it is re-run. Pull requests leave those
+# lines alone: they used to
 # bump them by hand, so every open PR conflicted with every other one.
 # The bump commit is pushed with the workflow's own token, so it does not
 # start this workflow (or the checks) again.
