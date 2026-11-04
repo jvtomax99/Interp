@@ -227,8 +227,8 @@ Later, not Home (from S7): Team Chat's thread tuck reads `scrollTop` in
 
 4. **Practice scenes: the doctor, nurse and visitor as the speakers in the
    memory trainer** (Jose, 2026-11-04, after the Tripo figures on
-   `claude/hub-figures`). Built on `claude/practice-scenes`; before it goes
-   live Jose reads Tripo's commercial-use terms.
+   `claude/hub-figures`). Built on `claude/practice-scenes` (#197); Tripo's terms
+   read by Jose 2026-11-04: OK to use.
    `docs/features/practice-scenes.md`.
 
 **Waiting on Jose** (nothing to build until he does):

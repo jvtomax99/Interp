@@ -65,5 +65,5 @@ None of the three was opened and tried; this is from their own pages.
 
 ## Open
 
-1. **Tripo's terms on commercial use**: Jose reads them before this goes live (not read by anyone yet). If they don't
-   allow it, the code figures are the fallback: render them the same way.
+Nothing. Tripo's terms on commercial use: Jose read them on 2026-11-04 and says the figures can be used in the app.
+(Claude could not open Tripo's pages from the cloud session, so this rests on his reading.)
