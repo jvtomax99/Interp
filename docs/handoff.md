@@ -28,6 +28,18 @@ installing tools), tests passed, his "Not yet" on 2026-11-04.
 Live in the app (done): practice scenes in the memory trainer (#197, b1104.1059), with the figures cut straight
 from his drawing (#201, b1104.1206).
 
+## Second nurse (2026-11-04 night, Jose's ChatGPT picture)
+
+`docs/art/nurse-single.png` (Jose made it in ChatGPT from the prompt in this chat: the nurse alone, straight on,
+even light). Tripo views task `13a857b8-fa64-4f6a-b5a4-54b9d5c291cc` (10), `multiview_to_model` v3.1 detailed
+geometry, standard paint, task `6718c65f-0a73-45f3-ab5f-79e63653e5ee` (50); balance 575. Slimmed with
+`tools/toy/slim.py` (0.1) to `tripo/nurse2.glb`. Same clean rebuild, per-figure zones and face layout in
+`tools/toy/nurse2/` (`run.sh tag front|three|face`, needs `MERGE=3e-4` for the slimmed seams).
+Pictures: `nurse-toy2.png`, `nurse-toy2-face.png`. Much better proportions and a round face. Left: eyes rounder
+and more goggly than the picture, a blue line on the badge, black specks on the pant cuffs, a rough hairline on the
+forehead, arms touching the sides. V2 API still works on api.tripo3d.ai (upload gives `image_token`; multiview task
+takes `files` front, left, back, right).
+
 ## Clean rebuild (2026-11-04 evening, Jose picked it)
 
 Why the earlier rounds kept missing: we painted over Tripo's paint. Now shape and colour are apart, like a toy:
