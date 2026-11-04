@@ -14,13 +14,11 @@ the feel audit chat (the app glitching on open, Dr. Smiley's stutter, moving the
 ## Now: the feel audit, phases 4 and 5
 
 Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets in numbers and every measurement are in
-`docs/feel-audit.md`. Phases 0-3 are live. What is left:
+`docs/feel-audit.md`. Phases 0-3 are live; phase 4 is on `claude/feel-scroll` (see below). What is left:
 
-- **Phase 4, scrolling and screens, same look.** The lab cleared the bold look (no regression); the costliest scroll
-  listener is Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`: it reads the scroll position on every scroll
-  event, so it is billed the frame's layout). Measure on the phone first (his meter while scrolling Home and a
-  150-term domain), then `tests/tools/scroll.cjs` before/after, interleaved. The Facts in `docs/PLAN.md` warn that
-  moving one read only moves the bill to the next reader.
+- **Phase 4's lean, open:** Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`) reads the scroll position
+  in every scroll event and is billed the frame's style work; in the lab that is Chromium's CSS petals, which the
+  phone composites, so only Jose's meter on a domain scroll says what it really costs. Left as it is until then.
 - **Phase 5, the finishing checklist and the guard.** Every screen for press feedback, loading states that never
   flash empty, nothing jumping when data arrives, safe areas, dark mode, the keyboard; then a suite that fails when a
   target regresses (no reload on open is already guarded by `deploy-open.cjs`; add hitch time at rest, face slip,
@@ -36,7 +34,16 @@ Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets i
 - Live: #200 no reload on a normal open (b1104.1206); #202 a quieter opening, pins re-applied 39 -> 3, the pen's
   forced layouts gone, the update check after the hello (b1104.1314); #203 his face frames on the sequence's own
   clock, a performance's end lands where its clock says (b1104.1348). #199 the plan, tools and findings (docs).
-- Open changes: none. Check-ins: none.
+- Phase 4 (`claude/feel-scroll`): the dock companion searched the whole page for other faces and forced a layout
+  on every scroll frame (it read rects after his lean's write); now the faces are found once per sync and the
+  scroll check reads inside the event, writing only on a change; the hero photo's drift reads in the event too.
+  A 150-term domain's scroll: script 6.0 s -> 2.4 s, dropped frames 42% -> 31%, hitch 416 -> 310 at 4x. Glass is
+  never stacked on any screen (`tests/tools/glass-count.cjs`), so nothing was cut. Rule in
+  `docs/features/dr-smiley.md`.
+- Open changes: phase 4's pull request. Check-ins: none.
+- New tools (phase 4): `tests/tools/glass-count.cjs` (what each screen carries: glass, filters, animations,
+  layers, the meter at rest), `scroll.cjs` with `SCREEN=domain` (a 150-term domain) and `PROFILE=1` (who runs
+  during the scroll, browser functions billed to the app line that called them).
 - New tools: `tests/tools/deploy-open.cjs` (four opens with the offline worker on, from a small local server; its
   suite `deploy-open.cjs` is in `run.cjs`), `tests/tools/face-timing.cjs` (timer lateness and frame slip; the engine
   logs under `window.__drProbe`). In a cloud session the tests' pinned Playwright needs a `-r` preload that patches
