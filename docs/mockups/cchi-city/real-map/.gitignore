@@ -1,6 +1,9 @@
-# build outputs and render inputs of the card pipeline (README, "The card's pictures"); never committed
+.cache/
+osm.json
+*-check.png
+# the card pipeline's build outputs and render inputs (README, "The card's pictures")
 campus.html
 cap/
 renders/
 out/
-__pycache__/
+__pycache__/*.cpython-313.pyc
