@@ -80,6 +80,11 @@ too: say both. Not when a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
+0. **Feel audit (Jose, 2026-11-04): the app glitches on open, Dr. Smiley
+   stutters, moving the app feels off.** Plan and leads in
+   `docs/feel-audit.md`; phase 0 (measure) first, then one PR per phase.
+   `claude/feel-audit`.
+
 Tidied 2026-10-23: finished items left this list for **Done** (a line
 each; the long notes live in `docs/features/`). What's left is the work
 under way, then what waits on Jose, then small leftovers.
