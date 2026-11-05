@@ -4,6 +4,23 @@ Jose picked this on 2026-11-05 as the next campus piece (item 2c in `docs/PLAN.m
 when a building is finished"). This is the spec, written before any code (his rule, `AGENTS.md`, "How Jose works with
 AI tools"). Waiting for his go.
 
+## As built (2026-11-05, branch `claude/campus-celebration`)
+
+- `renderCampus` (`features/campus.js`): `fin` is `cover >= 0.9999` (every question known, none shaky); `cheer` is `fin`
+  with levels already drawn on this phone (`ih_campusLv` present) and the building not yet in `ih_campusDone`. A cheer
+  writes three `.cp-fire` spans at the badge point (offsets -44/-70, 52/-104, 4/-146 render px, each with eight `<i>`
+  sparks, `--dom` the domain colour, `--f` the start: 1 s + tenths climbed x 0.32 s + 0.5 s, or 0.4 s when nothing
+  climbed, `--n` the burst 0-2) and one `.cp-ribbon` 6 px under the badge; the badge gets `is-done`, a star instead of
+  the percentage and "finished" in its label. `ih_campusDone` is rewritten on every drawing with the finished keys only,
+  so a drop under 100% clears it. `data-sig` carries an F per finished building.
+- `app.css` beside `.cp-spark`: `.cp-fire` is an 11%-wide square container (`container-type:size`) so the sparks fly
+  `cqw` units, the same share of the card at every size; each spark rotates by its `--a` and runs out on `--spring0`,
+  bursts 0.6 s apart, 1.3 s each (about 2.5 s in all); a soft glow (`::before`) at each burst's heart. Reduced motion:
+  `.cp-fire` hidden, the ribbon's fade off; Still: the page's `.is-still` rule stops their animations, which leaves the
+  sparks at opacity 0 and the ribbon simply there. `.is-away` pauses the bursts with the rest of the card.
+- Checks in `tests/suites/campus-alive.cjs` (the cases under Checks below). Guide: one sentence in the practice answer
+  and the first New lately card (`GUIDE_NEWS`, `index.html`).
+
 ## What it does
 
 On the CoreCHI Practice card, each exam area is a building on your HUMC campus, painted a tenth at a time as you learn
