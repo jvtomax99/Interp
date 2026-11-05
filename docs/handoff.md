@@ -1,60 +1,71 @@
 # Handoff
 
-Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-04,
-the second feel audit chat (phases 4 and 5: scrolling, the finishing checklist, the guard).
+Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-05,
+the campus chat after the feel audit (the building check redone, the celebration).
 
 ## Paste this into the new chat
 
 > Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next, items 0-2) and `docs/handoff.md`. Tell me what was worked
-> on before and what is next, in a few short lines. The feel audit (`docs/feel-audit.md`) is done; if I have pasted
-> my phone's meter numbers or the five phone screenshots it asks for, read them against it and say what they change;
-> otherwise ask for them once and move on to the next item in the plan: write its plan and wait for my go. Plain
-> words, say "working on it" and "done". "Push" is always a button.
+> on before and what is next, in a few short lines. If I have pasted my phone's meter numbers or the five phone
+> screenshots the feel audit asks for (`docs/feel-audit.md`), read them against it and say what they change;
+> otherwise ask for them once and move on to the next campus piece: ask me which (tap a person for a term, or
+> friendly weather for a streak), write its spec note and wait for my go. Plain words, say "working on it" and
+> "done". "Push" is always a button.
 
-## Now: the feel audit is done; what is left is Jose's
+## Now: nothing in flight; the next campus piece is Jose's pick
 
-Goal: the Hub feels like a premium app on Jose's iPhone. The plan, the targets in numbers and every measurement are in
-`docs/feel-audit.md`. Phases 0-5 are live (phase 4: #205, b1104.1832; phase 5: #207, #208 b1104.2144, #209
-b1104.2150). What is left:
+Goal of the campus work (`docs/PLAN.md`, item 2): your HUMC campus on the CoreCHI Practice card, alive and
+interactive. Done so far in 2c: the celebration (#213). Left in 2c, one PR each, Jose picks the order:
 
-- **Phase 4's lean, open:** Dr. Smiley's lean on scroll (`drSwayScroll`, `index.html`) reads the scroll position
-  in every scroll event and is billed the frame's style work; in the lab that is Chromium's CSS petals, which the
-  phone composites, so only Jose's meter on a domain scroll says what it really costs. Left as it is until then.
-- **Phase 5, step 1 (#207), step 2 (#208, live b1104.2144), step 3 (#209, live b1104.2150):** the measuring pass (`tests/tools/finish-check.cjs`,
-  26 screens, six checks) with its findings table in the audit note, then the fixes: press feedback for about 30
-  kinds of control (one rule beside `.tg-sync:active`, the classes in `LIFTS`), the faint ink token darkened
-  (Jose's pick, #6B7489 / #8C97AD dark, `DESIGN.md`), five contrast spots. Step 3: the guard
-  suite `tests/suites/feel.cjs` in `run.cjs` (no empty flash or jump on data, press feedback on ten controls,
-  contrast, a scroll that searches nothing, his face on its clock, Home at rest), and the bug it found: the term and
-  doctor cards' press glow was dead under their entrance animation's forwards fill (`cardIn`, now `backwards`).
-  Still owed by Jose: five phone screenshots (Ask and Team access with the keyboard up; a doctor's page, the doctor
-  list's A-Z strip and a toast, for the safe areas).
-- **Jose's call, open:** the hello's own canvas drawing is now the floor of the opening's frames (101-185 ms at 4x
-  from 4.4 to 7.8 s). Options under Phase 2 in the audit note; "leave it, the hello is the look" is a fair answer.
-- **Still owed by Jose:** the meter's Copy numbers (More, bottom) for an open right after a deploy, an open with
-  nothing new, Home left alone 30 s, one slow scroll of Home; and which iPhone and iOS. They say which lab column
-  (the iPhone paths or the Chromium paths) his phone is in.
+- **4, tap a person:** a passer-by tapped gives a glossary term to render, counted as practice; the tap area bigger
+  than the figure. Spec note first (his rule), with "not in this version".
+- **6, friendly weather:** sun and a rainbow for a study streak; never snow for a missed day. Spec note first.
+- Not next: 2b (the card drawn live in three.js) is argued against in this chat: the 3D button already does it.
+
+Still owed by Jose (asked once per chat, then move on): the five phone screenshots (Ask the Hub and Team access
+with the keyboard up; a doctor's page; the doctor list's A-Z strip; a toast), the meter's Copy numbers (More,
+bottom) for four runs (open right after a deploy, open with nothing new, Home left alone 30 s, one slow scroll of
+Home), and which iPhone and iOS. Also his call on the hello's canvas drawing (options under Phase 2 in
+`docs/feel-audit.md`; leaving it is a fair answer).
 
 ## Where things stand
 
-- Live: #200 no reload on a normal open (b1104.1206); #202 a quieter opening, pins re-applied 39 -> 3, the pen's
-  forced layouts gone, the update check after the hello (b1104.1314); #203 his face frames on the sequence's own
-  clock, a performance's end lands where its clock says (b1104.1348). #199 the plan, tools and findings (docs).
-- Phase 4 (#205, live b1104.1832): the dock companion searched the whole page for other faces and forced a layout
-  on every scroll frame (it read rects after his lean's write); now the faces are found once per sync and the
-  scroll check reads inside the event, writing only on a change; the hero photo's drift reads in the event too.
-  A 150-term domain's scroll: script 6.0 s -> 2.4 s, dropped frames 42% -> 31%, hitch 416 -> 310 at 4x. Glass is
-  never stacked on any screen (`tests/tools/glass-count.cjs`), so nothing was cut. Rule in
-  `docs/features/dr-smiley.md`.
-- Open changes: none. Check-ins: none.
-- New tools (phase 4): `tests/tools/glass-count.cjs` (what each screen carries: glass, filters, animations,
-  layers, the meter at rest), `scroll.cjs` with `SCREEN=domain` (a 150-term domain) and `PROFILE=1` (who runs
-  during the scroll, browser functions billed to the app line that called them).
-- New tools: `tests/tools/deploy-open.cjs` (four opens with the offline worker on, from a small local server; its
-  suite `deploy-open.cjs` is in `run.cjs`), `tests/tools/face-timing.cjs` (timer lateness and frame slip; the engine
-  logs under `window.__drProbe`). In a cloud session the tests' pinned Playwright needs a `-r` preload that patches
-  `chromium.launch` with `executablePath: '/opt/pw-browsers/chromium'`; for `run.cjs` pass it through `NODE_OPTIONS`.
-- Learned: the browser checks for a new worker on its own on the way in, so a new worker can take control before
-  `load`; the page's listener must be at script level. Playwright's routes never see the worker's own script or
-  fetches (hence the local server in `deploy-open.cjs`). A page served from a worker's cache is never older than that
-  worker (the precache is the worker's own build), so "page older than the worker" only happens on `controllerchange`.
+- **#210, live b1104.2338:** the campus buildings checked against sources (#176 redone on today's main: Medical
+  Plaza 12 floors to 9, Jurist 6 to 5, Child Care 2 to 4, the utility plant 5 to 4; garage gates where the map's
+  driveways meet the walls), the card's pictures rendered again with today's pipeline, `campus3d/` rebuilt. #176
+  closed as replaced. Sources and the unproven list: `docs/mockups/cchi-city/real-map/README.md`, "The buildings,
+  against sources".
+- **#213, live b1105.0959:** the campus celebration. A building at 100% (every question known) gets three fireworks
+  around its badge after the paint's last climb, a gold Finished ribbon for that visit, its badge gold with a star for
+  good; once per phone (`ih_campusDone`), the gold off and forgotten under 100%, a first visit only draws the gold.
+  Spec and as-built: `docs/features/campus-celebration.md`. Checks in `campus-alive.cjs`. The guide's practice answer
+  has the sentence; New lately: the celebration, Places (#212, another tool), the memory trainer.
+- Open changes: none. Check-ins: none. Nothing waits on Jose except the items above.
+
+## Learned this chat (not in the docs elsewhere)
+
+- **Blender in a cloud session:** `pip install bpy` on Python 3.13 gives Blender 5.2 and the card pipeline runs on
+  it unchanged (the README still says 3.11 and bpy 5.0.1; both work). The capture takes about 6 min in software GL
+  (`--use-angle=swiftshader`), the render 12.5 min on 4 CPUs at 96 samples, the build 1.5 min. The pipeline's
+  outputs (`campus.html`, `cap/`, `renders/`, `out/`) are ignored by `real-map/.gitignore` now; `three@0.160.0`
+  goes in `docs/mockups/cchi-city/` with `npm install --no-save`.
+- **A stale picture PR can't be rebased:** `city/` is rewritten whole by every render, so a PR that re-rendered it
+  clashes with any later render on main (all 130 files). Redo the scene change on main and render again, as #210
+  did; don't try to merge pictures.
+- **The force push is refused here** (the auto mode's rule), so a redone branch gets a new name and a new PR; the
+  old PR is closed on Jose's push.
+- **`frame-meter.cjs` can go red on a busy runner:** it injects a 400 ms busy loop and expects a frame of 300 ms or
+  more; GitHub's shared machine once split it (283 ms). The same commit passed in its parallel run; one re-run of
+  the failed job was green. Not the change's; if it recurs, make the check read the busy loop's own length.
+- **The tests' Playwright in a cloud session:** `tests/npm install` once, then every run with
+  `NODE_OPTIONS="-r <preload>"` where the preload patches `chromium.launch` with
+  `executablePath: '/opt/pw-browsers/chromium'` (the preload used here: a `Module.prototype.require` wrapper on
+  `playwright`). A background `cd tests && node run.cjs` sometimes starts in the repo root instead; use
+  `(cd tests && node run.cjs ...)`.
+- **A suite that boots with seeds and reads after `L.go`** can see a second drawing of the Practice screen (it
+  settles in more than one render): seed again and call `renderContent()` once before reading, as the campus-alive
+  cases do.
+- **Container query units for sprite throws:** `.cp-fire` is `container-type:size` so its sparks fly `cqw` units,
+  the same share of the card at every size. iOS 16+.
+- Blocked hosts met this chat: `blog.duolingo.com`, `support.apple.com` (for the celebration's research). To let
+  a chat read them: Network access, Allowed domains, one per line.
