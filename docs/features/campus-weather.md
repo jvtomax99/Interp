@@ -2,7 +2,27 @@
 
 Jose picked this on 2026-11-05 as the last campus piece (item 2c in `docs/PLAN.md`: "weather, the friendly half only:
 sun and a rainbow for a streak, never snow for a missed day"). This is the spec, written before any code (his rule,
-`AGENTS.md`, "How Jose works with AI tools"). Waiting for his go.
+`AGENTS.md`, "How Jose works with AI tools"). His go the same day: "Go, as written".
+
+## As built (2026-11-05, branch `claude/campus-weather`)
+
+- `features/campus.js`: `CAMPUS_SKY = { sun: 3, bow: 7, at: [125, 100] }` (the streak days, and the sun's place in render
+  px: left of the sky, under the ring, above the US Systems badge). `renderCampus` reads `st.days` (already in the
+  card's `data-sig`, so a new day redraws), writes `.cp-sky-fx.cp-sun` (with an `<i>` for the rays) and
+  `.cp-sky-fx.cp-bow` between the sky picture (`.cp-d-sky`) and the town (`.cp-d-far`), so the board and every badge
+  draw over them; `is-new` on each the first time this phone qualifies (`ih_campusSky`, `{ sun, bow }`, rewritten on
+  every drawing and removed when neither holds, so a streak that ends forgets them).
+- `app.css` beside `.cp-d-far`: `.cp-sky-fx` slides with the sky (`translate` from `--dpx`/`--dpy`, the sky's own
+  share). The sun is a 9.4 cqw disc (radial gradient, a soft glow) with a wide halo (`::before`) and twelve soft rays
+  (`i`: a repeating conic gradient under a radial mask, `cpRays`, one turn in 60 s). The rainbow is a 93 cqw circle
+  centred at 50% / 62% of the picture, its upper half kept (`clip-path`), six bands as radial-gradient stops at 34%
+  opacity. First time: `cpSkyIn` 1.5 s (sun), `cpBowIn` 2.5 s (rainbow). Reduced motion: no animation on either;
+  `is-away` pauses the rays; Still stops them through the page's rule.
+- Checks: `tests/suites/campus-alive.cjs`, "weather" (the list under Checks below, all in; contrast within 0.5 not
+  measured separately: the badges draw over the rainbow, its opacity is 34% and the suite's existing badge checks
+  pass). Guide: a paragraph in the practice answer and its keywords (`guide/topics.js`); the first New lately card
+  names the sky and the people together (`GUIDE_NEWS`, `index.html`; the three cards must be three answers).
+- Not done from the spec: nothing. Beyond it: nothing.
 
 ## What it does
 

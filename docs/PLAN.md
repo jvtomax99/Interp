@@ -211,7 +211,11 @@ under way, then what waits on Jose, then small leftovers.
       people under the buildings' tap boxes, three dots over the group holding
       the word, the card asks the English, Show, Got it / Missed it saved as a
       Term Review answer; the CoreCHI streak untouched. #214, live
-      b1105.1156. Left of 2c: 6 (weather).
+      b1105.1156. **2026-11-05 (his pick, the last): 6, friendly weather.** Spec first
+      (`docs/features/campus-weather.md`, his go the same day, "as written"), then
+      `claude/campus-weather`: the sun from 3 days at the left of the sky, a rainbow
+      from 7 over the board, CSS only, sliding with the sky; nothing for a missed day.
+      **2c is done with this.**
 3. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
    distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The
