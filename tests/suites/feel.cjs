@@ -41,7 +41,7 @@ const TEXT = () => (document.querySelector('.modal.show, .overlay.show, .gs-over
   await route(page, {});
   await page.addInitScript(o => {
     window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' }; window.__drProbe = true;
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__ls = [];
     try { new PerformanceObserver(l => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__ls.push(+e.value.toFixed(4)); }).observe({ type: 'layout-shift', buffered: true }); } catch (e) {}
     // Counts of the two reads a scroll frame must not make (phase 4).

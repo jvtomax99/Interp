@@ -37,7 +37,7 @@ async function once(browser) {
   await route(page, {});
   await page.addInitScript(o => {
     window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__drProbe = true;
     const L = window.__face = { timers: [], long: [], tag: 'opening', phases: [['opening', 0]] };
     try { new PerformanceObserver(l => l.getEntries().forEach(e => L.long.push({ t: Math.round(e.startTime), ms: Math.round(e.duration), tag: L.tag }))).observe({ type: 'longtask', buffered: true }); } catch (e) {}

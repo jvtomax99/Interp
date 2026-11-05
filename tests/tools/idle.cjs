@@ -54,7 +54,7 @@ async function once(browser, i) {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: SEED });
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: SEED });
   // Body class changes with their time (the tab bar's tuck is dock-mini).
   await page.addInitScript(() => { window.__bodyLog = []; document.addEventListener('DOMContentLoaded', () => {
     let was = new Set(document.body.classList);

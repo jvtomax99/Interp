@@ -57,7 +57,7 @@ async function measure(say = console.log) {
   // for; a message sent while the page reloads itself can be lost).
   await ctx.addInitScript(o => {
     window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     const log = (k, v) => { try { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); a.push({ k, at: Date.now(), v }); sessionStorage.setItem('__openEvents', JSON.stringify(a)); } catch (e) {} };
     const nav = performance.getEntriesByType('navigation')[0];
     log('document', (nav ? nav.type : '?') + (navigator.serviceWorker && navigator.serviceWorker.controller ? ', controlled by the worker' : ', no worker in control'));

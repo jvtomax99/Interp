@@ -62,7 +62,7 @@ async function once(browser) {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: BIG.seed });
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: BIG.seed });
   await page.addInitScript(WRAP);
   await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(14000); // the hello and its thought cloud are over

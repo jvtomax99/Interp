@@ -24,7 +24,7 @@ async function once(browser, sel) {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__T = { lift: 0, ev: null };
     window.addEventListener('touchend', e => { window.__T.lift = e.timeStamp; }, { capture: true, passive: true });
     try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'click') window.__T.ev = { start: e.startTime, ps: e.processingStart, pe: e.processingEnd, end: e.startTime + e.duration }; })).observe({ type: 'event', buffered: true, durationThreshold: 16 }); } catch (e) {} }, { seed: SEED });

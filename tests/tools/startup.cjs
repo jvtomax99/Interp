@@ -26,7 +26,7 @@ async function once(browser) {
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: RATE });
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__fcp = 0; try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'first-contentful-paint') window.__fcp = Math.round(e.startTime); })).observe({ type: 'paint', buffered: true }); } catch (e) {} }, { seed: SEED });
   if (process.env.RETURNING) { await page.goto('https://interp.test/', { waitUntil: 'load' }); await page.waitForTimeout(8000); }
 

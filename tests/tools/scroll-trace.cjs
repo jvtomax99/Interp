@@ -18,7 +18,7 @@ const N = +(process.env.N || 2), RATE = +(process.env.RATE || 1);
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: SEED });
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {} }, { seed: SEED });
   await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(14000);
   const total = await page.evaluate(() => document.querySelectorAll('*').length);
