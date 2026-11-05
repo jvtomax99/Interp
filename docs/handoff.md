@@ -1,68 +1,67 @@
 # Handoff
 
 Overwritten by each chat that hands over (rule: `docs/PLAN.md`, "A heavy chat hands over"). This one: 2026-11-05,
-the second campus chat (tap a person, friendly weather; the campus list 2c is done).
+the opening chat (about fifteen mockups, Badge in picked, the plan merged as #220).
 
 ## Paste this into the new chat
 
-> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next, items 0-4 and "Doctor list, next ideas") and
-> `docs/handoff.md`. Tell me what was worked on before and what is next, in a few short lines. If I have pasted my
-> phone's meter numbers or the five phone screenshots the feel audit asks for (`docs/feel-audit.md`), read them
-> against it and say what they change; otherwise ask for them once and move on: ask me which doctor-list idea
-> (search that also finds a doctor's terms and short forms, or compact rows with a mock-up first), write its spec
-> note and wait for my go. Plain words, say "working on it" and "done". "Push" is always a button.
+> Read `AGENTS.md`, `CLAUDE.md`, `docs/PLAN.md` (Next, item 5), `docs/handoff.md` and
+> `docs/features/opening.md`, and look at `docs/mockups/opening/` (`hub-opening-final.mp4` is the picked opening).
+> Tell me in a few short lines what is being worked on now and what was worked on before. Then build the opening
+> as one change for my OK: `features/opening.js`, an "Opening" block in `app.css`, the background as a pre-rendered
+> loop in `opening/`, More's Opening card (on/off, Sound, Replay, Badge title), `tests/suites/opening.cjs`, the
+> User Guide answer and a New lately card. Show me phone screenshots and a video before asking to push. Plain
+> words, say "working on it" and "done". "Push" is always a button.
 
-## Now: nothing in flight; the campus list is done
+## Now: build the opening (Badge in)
 
-The campus work (`docs/PLAN.md`, item 2) is finished: the real map, the 3D view, the celebration (#213), tap a
-person (#214) and the friendly weather (#217). Nothing is open. Next is Jose's pick from the plan:
+The plan is merged (#220, docs only): `docs/features/opening.md`. In short:
 
-- **Doctor list search that also finds a doctor's terms and short forms** (GI, cardio, peds): small, no mock-up.
-  Spec note first (his rule), with "not in this version".
-- **Compact doctor rows** instead of the two-column cards: a mock-up first (it reverses D3's cards).
-- Also waiting on him only: publish `firestore.rules` in the Firebase console (K2, Term Review privacy); one
-  memory-trainer round with Auto-mark on (M5).
+- **Every time the app really starts** (Jose: "always triggers every time the app is opened"), except when a
+  notification started it (`?open=`), on the reload after an update, or during an exam or practice timer. A tap
+  before the badge arrives skips to Home. iPhone resuming the app is not a start.
+- **The scene:** Jose's own photo of the Helena Theurer Pavilion (`docs/mockups/opening/src/pavilion.jpg`), softly
+  blurred and drifting, soft light shafts made from the photo's own sky (not drawn beams: Jose found drawn ones
+  fake), faint dust, no random sparkles. At the bottom the plain HMH mark (`hmh-mark.png`, no tile) and
+  "*Interpreter* Hub" in Cormorant Garamond (italic Interpreter, upright Hub), HUMC LANGUAGE SERVICES under it.
+- **The badge,** after Jose's real one: landscape white card in a clear holder, the purple INTERPRETER card
+  behind, a clear strap with a metal snap, a blue connector, the woven navy lanyard saying INTERPRETER only (the
+  team covers more than Spanish). The card: "Jose V." (first name, last initial, from `ih_myName`), the badge
+  title (each person picks once, default Staff Interpreter, `ih_badgeTitle`), the HMH / HUMC lettering with the
+  mark, "Language Services". **Dr. Smiley where the photo goes** (`drSmileyArt`); no photo, barcode or number.
+- **The tap:** "Tap your badge to begin"; it lowers onto a frosted glass reader, a cyan scan line (beep), green
+  (chime), a green pulse up the lanyard and a green glow on badge and lanyard (Jose asked to keep this), Dr. Smiley
+  winks (face frame `wink`), "Welcome in, Jose". Then **the green ring grows from the reader and Home shows inside
+  it** (picked from four exits).
+- **Sound on by default, quiet,** only after the tap; More's switch turns it off.
+- **Build it light:** the mockup used three.js and read the screen back every frame for the light shafts; the app
+  must not. Render the background (drift and light) once into a seamless ~6 s loop (WebM and MP4, under ~1.5 MB)
+  and precache it in `sw.js`; everything on top is HTML/CSS. Home draws underneath as now, so the ring opens on
+  the live Home. Still mode / reduced motion: no drift or swing, a 260 ms fade.
+- **Home's hello and name pen must wait** for the opening to end (`hub-opening-done`; `home-polish.js`).
+- **Tests:** the other suites must not see it (set the switch off in `tests/support`); a new suite checks a fresh
+  start plays it, `?open=` skips it, a tap before the badge skips it, nothing is left over Home after
+  (`elementFromPoint`), Still takes the short path.
 
-Still owed by Jose (asked once per chat, then move on): the five phone screenshots (Ask the Hub and Team access with
-the keyboard up; a doctor's page; the doctor list's A-Z strip; a toast), the meter's Copy numbers (More, bottom) for
-four runs (open right after a deploy, open with nothing new, Home left alone 30 s, one slow scroll of Home), and
-which iPhone and iOS. He picked "Later, move on" this chat. Also his call on the hello's canvas drawing (options
-under Phase 2 in `docs/feel-audit.md`; leaving it is a fair answer).
+## How the mockup was made (to render the loop)
 
-## Where things stand
+`docs/mockups/opening/README.md`: `src/src7.html` plus `build7.py` (change `d` to that folder). Its query string
+draws any still (`?t=<ms>&light=1&exit=3&font=cg`, add `&tap=4400` for after the tap). The depth map came from
+Depth Anything V2 Small as ONNX (github.com/fabio-sim/Depth-Anything-ONNX releases, v2.0.0, `vits`), run with
+`pip install onnxruntime`; Hugging Face and download.pytorch.org are blocked from cloud sessions, GitHub release
+downloads work. Rendering in headless Chromium needs `--use-gl=angle --use-angle=swiftshader
+--enable-unsafe-swiftshader`; about 1 s a frame at 2x.
 
-- **#214, live b1105.1156: tap a person for a word.** The people on the campus card in groups (five: the bench, the
-  plaza, the path, the east door, Ethics' door), one 44 px spot each under the buildings' tap boxes (a wall still
-  picks the building); three dots over the group holding the word; the card under the picture asks the English,
-  Show gives the Spanish, Got it / Missed it saved as a Term Review answer (`saveTermReview`, confirm); the next word
-  waits with another group; the CoreCHI streak untouched (Jose: "Term Review only"). Spec and as-built:
-  `docs/features/campus-tap-person.md`. Checks: `campus-alive.cjs`, "tap a person" (16 cases).
-- **#217, live b1105.1421: friendly weather.** The sun from a 3-day streak at the left of the sky (the side the
-  scene's light comes from), a rainbow from 7 over the board behind the town; CSS only, sliding with the sky; the
-  first drawing fades them in (`ih_campusSky`); a streak that ends takes them off and forgets them; nothing ever for
-  a missed day. Spec and as-built: `docs/features/campus-weather.md`. Checks: `campus-alive.cjs`, "weather" (9).
-  Main moved under it (#215 idea credits, #216 the chat keyboard, from another tool); merged in by hand, the New
-  lately cards kept to three answers (credits, practice, places).
-- Open changes: none. Check-ins: none. Nothing waits on Jose except the items above.
+## What was worked on before (this chat)
 
-## Learned this chat (not in the docs elsewhere)
+About fifteen opening mockups, each dropped on Jose's word: four light ideas, a Genshin-style title screen, a
+block-3D walk up the drive (rejected: "no blocky graphics"), the walk made from his photos in 3D, a CoreCHI campus
+dive, a cherry-blossom badge scene. He picked **Badge in** and refined it (his real badge's layout, the plain logo,
+the stylish name at the bottom, natural light, the green lanyard glow, the ring opening into Home). #220 merged the
+plan (docs only, no deploy). Nothing else open from this chat.
 
-- **Two New lately cards must never share an answer:** a card's New badge is its answer's (`ih_guideSeen`), so two
-  cards on the practice answer cleared together and `guide.cjs` ("opening one removes its badge") went red. Three
-  cards, three answers; a second feature on the same screen shares the card's title.
-- **The campus people are 2-5 css px tall on a phone** (0.37 css px per render px): a figure is never a tap target;
-  the group is, and every group stands within 22 css px of a building's tap box, so the buildings must win where
-  they overlap (spots before `.cp-bld` in the markup). Measured in `campus-alive.cjs` with `elementFromPoint`.
-- **The scene's light is from the top left** (`.cp-card::before`'s warm glow, the Blender sun off frame there); a sun
-  drawn on the card has to sit on that side, not where the sky is empty.
-- **The worker can restart between a `PushNotification` and the `AskUserQuestion` that follows it;** after a restart
-  nothing resends the button, so a check-in (`send_later`) that re-asks is worth keeping until Jose answers.
-- **A merge of main into a branch:** resolve hunk by hunk, then grep `./app.css`, `./home-polish.css`,
-  `./home-polish.js`, `./pin-icons.js` (with the `./`) to confirm the four files are still loaded, then run the
-  suites the merge touched before pushing.
-- Blocked hosts met this chat: `ac-pocketcamp.com`, `niantic.helpshift.com`, `nimblebit.com`, `developer.apple.com`
-  (answers an empty page to a plain fetch), `blog.duolingo.com`, `forestapp.cc`, `www.nintendo.com`. To let a chat
-  read them: Network access, Allowed domains, one per line.
-- The tests' Playwright in a cloud session, Blender as `bpy`, the force push being refused, `frame-meter.cjs` on a
-  busy runner, and a suite that reads right after `L.go`: see the previous handoff's notes, now in `docs/PLAN.md`'s
-  Facts if they were moved there; otherwise the git history of this file (commit 9c45ff8).
+## Still owed by Jose (from earlier chats; ask once, then move on)
+
+The five phone screenshots and the meter numbers for the feel audit (`docs/feel-audit.md`); publishing
+`firestore.rules` in the Firebase console (K2, and the credits rule from #218); one memory-trainer round with
+Auto-mark on (M5).
