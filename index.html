@@ -5794,7 +5794,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Finish an exam area and its building celebrates: fireworks over the roof, a Finished ribbon, and a gold badge for good' },
+  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Tap the people on your campus: someone asks you a glossary term, and your answer counts as a Term Review' },
   { id:'places',      tone:'gd-n2', pin:'pins/doctor-directory.webp',  eyebrow:'Places',                title:'Put a place in the North or the South: tap the pencil beside it in the Where list' },
   { id:'memory',      tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Memory trainer',        title:'See who is talking: the doctor, a nurse or the patient leans in while the line plays' },
 ];
@@ -10555,7 +10555,7 @@ const MOTIVATIONAL_QUOTES = [
 // and stylus; mouse still uses :hover.
 (function(){
   const LIFTS = '.tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
-    '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+    '.cp-play, .cp-3d, .cp-exam, .cp-key, .cp-folk, .cp-folk-no, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
