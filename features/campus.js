@@ -35,7 +35,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   // Labels: name + % in a chip ~ (letters x 6.6 + 24) css px at the phone's ~0.37 css px per render px;
   // nudge any that would overlap upward, keep all inside the picture.
   const K = 0.37, tagsAt = {}, placed = [];
-  if (!document.querySelector('#content .cp-card')) CAMPUS_PICK.key = null;   // a fresh arrival starts with nothing picked
+  if (!document.querySelector('#content .cp-card')) CAMPUS_PICK.key = CAMPUS_PICK.folk = null;   // a fresh arrival starts with nothing picked
   CAMPUS.map(b => b.key).sort((a, b) => M.b[b].label[1] - M.b[a].label[1]).forEach(key => {
     const w = ((CAMPUS.find(b => b.key === key).short.length + 5) * 6.6 + 24) / K, h = 30 / K;
     let x = Math.max(w/2 + 4, Math.min(W - w/2 - 4, M.b[key].label[0])), y = M.b[key].label[1];
@@ -118,6 +118,13 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   let say;
   if (!worst) say = 'Every building is painted. Sit an exam simulation to prove it!';
   else { const b = CAMPUS.find(x => x.id === worst); say = `Paint <b>${escapeHtml(b ? b.place : '')}</b>: ${escapeHtml(b ? b.short : ready.worst.d.name)} is ${ready.worst.d.weight}% of the exam.`; }
+  // Tap a person for a word (docs/features/campus-tap-person.md): one round spot per group of people, the group holding the word marked;
+  // until the first word is answered on this phone, Dr. Smiley says so instead of his paint line (ih_campusTalked).
+  const folk = campusFolkGroups(), wordG = campusWordGroup(folk), fsel = CAMPUS_PICK.folk ? CAMPUS_PICK.folk.g : -1;
+  const spots = folk.map((g, i) => `<button class="cp-folk${i === wordG ? ' is-word' : ''}${i === fsel ? ' is-sel' : ''}" type="button" data-g="${i}" style="${at(g.x, g.y)}" onclick="campusFolkTap(${i})"
+        aria-label="${g.n > 1 ? 'The people' : 'Someone'} ${escapeAttr(g.where)}${i === wordG ? ', with a word for you' : ''}" aria-pressed="${i === fsel}"><span class="cp-folk-say" aria-hidden="true"><i></i><i></i><i></i></span></button>`).join('');
+  if (folk.length && !campusTalked() && reviewPool(null).length) say = `The people <b>${escapeHtml(folk[wordG].where)}</b> have a word for you. Tap them.`;
+  if (typeof termReviewsLoaded !== 'undefined' && !termReviewsLoaded && typeof db !== 'undefined' && db && whoAmI()) ensureLoaded('termReviews', loadTermReviews);   // so the word drawn at a tap knows your record
   const next = due ? ['review', `Play: ${due} due`] : shaky ? ['weak', `Play: ${shaky} mistake${shaky===1?'':'s'}`] : unseen ? ['new', 'Play: learn new'] : ['exam', 'Play: exam sim'];
   return `<div class="cp-card dash-in" data-motion="ready" data-sig="${ready.pct}|${st.days||0}|${todayCount}|${due}|${sig.join('')}">
     <div class="cp-hud">
@@ -132,10 +139,10 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
       ${M.layers ? `<img class="cp-depth cp-d-sky" src="./city/sky.webp" alt="" decoding="async" style="${pos(...M.layers.sky)}"><img class="cp-depth cp-d-far" src="./city/far.webp" alt="" decoding="async" style="${pos(...M.layers.far)}">
       <img class="cp-ground" src="./city/near.webp" alt="" decoding="async" style="${pos(...M.layers.near)}">` : `<img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">`}
       <button class="cp-3d" type="button" onclick="event.stopPropagation();openCampus3d()" aria-label="Explore your campus in 3D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7.2v9.6L12 21.2 4 16.8V7.2z"/><path d="M4 7.2 12 11.6l8-4.4M12 11.6v9.6"/></svg>3D</button>
-      ${paint}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelPaint(CAMPUS_PICK.key, top) : ''}${hits.sort((a, b) => a[0] - b[0]).map(h => h[1]).join('')}${tags}${dr}
+      ${paint}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelPaint(CAMPUS_PICK.key, top) : ''}${spots}${hits.sort((a, b) => a[0] - b[0]).map(h => h[1]).join('')}${tags}${dr}
     </div>
-    <div class="cp-foot${CAMPUS_PICK.key ? ' has-sel' : ''}">
-    <div class="cp-pick" role="region" aria-live="polite" aria-label="Picked building">${CAMPUS_PICK.key ? campusPickCard(CAMPUS_PICK.key) : ''}</div>
+    <div class="cp-foot${CAMPUS_PICK.key || CAMPUS_PICK.folk ? ' has-sel' : ''}">
+    <div class="cp-pick" role="region" aria-live="polite" aria-label="Picked building">${CAMPUS_PICK.key ? campusPickCard(CAMPUS_PICK.key) : CAMPUS_PICK.folk ? campusFolkCard() : ''}</div>
     <div class="cp-chips">
       <span class="cp-chip study-streak"><i>${ICON_FLAME}</i><b class="study-flame js-count" data-to="${st.days||0}">${st.days||0}</b> day${(st.days||0)===1?'':'s'}</span>
       <span class="cp-chip${todayCount >= DAILY_GOAL ? ' is-met' : ''}"><i>${ICON_TARGET}</i><b class="js-count" data-to="${todayCount}">${todayCount}</b>&#8202;/&#8202;${DAILY_GOAL} today</span>
@@ -153,7 +160,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
    rest of the scene dims, a card names the exam area with Practise); a second tap, or Practise,
    starts. A tap on the empty scene, the card's close or Escape puts it back. Kept across the
    screen's re-renders, dropped on a fresh arrival (renderCampus). */
-const CAMPUS_PICK = { key: null };
+const CAMPUS_PICK = { key: null, folk: null };
 function campusPos(top){ const M = CAMPUS_MAP, H = M.g[1] + M.g[3] - top;
   return { box: (x, y, w, h) => `left:${(x/M.w*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/M.w*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`,
     pt: (x, y) => [(x/M.w*100).toFixed(2) + '%', ((y-top)/H*100).toFixed(2) + '%'], H }; }
@@ -174,6 +181,7 @@ function campusPickCard(key){
 }
 function campusPick(key){
   if (key && CAMPUS_PICK.key === key) return campusGo(key);
+  if (key && CAMPUS_PICK.folk) campusFolkClose(true);
   CAMPUS_PICK.key = key;
   const world = document.querySelector('#content .cp-world'), pick = document.querySelector('#content .cp-pick');
   if (!world || !pick) return;
@@ -189,8 +197,113 @@ function campusGo(key){
   const b = CAMPUS.find(x => x.key === key); CAMPUS_PICK.key = null;
   if (b) requireName(() => startStudy('domain', b.id));
 }
-function campusTapOut(e){ if (CAMPUS_PICK.key && !e.target.closest('.cp-bld, .cp-tag')) campusPick(null); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && CAMPUS_PICK.key && document.querySelector('#content .cp-world.has-sel')) campusPick(null); });
+function campusTapOut(e){ if (e.target.closest('.cp-bld, .cp-tag, .cp-folk')) return; if (CAMPUS_PICK.key) campusPick(null); if (CAMPUS_PICK.folk) campusFolkClose(); }
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (CAMPUS_PICK.key && document.querySelector('#content .cp-world.has-sel')) campusPick(null); else if (CAMPUS_PICK.folk && document.querySelector('#content .cp-folk.is-sel')) campusFolkClose(); });
+
+/* ---------- Tap a person for a word (docs/features/campus-tap-person.md, 2026-11-05) ----------
+   The people standing and sitting about (CAMPUS_MAP.live: idlers and sitters) in groups: one round 44 css px tap spot per
+   group, placed before the buildings' tap boxes in the markup, so a wall still picks the building and the people take
+   only the ground around them. One group holds the word (three dots over it); tapping any group asks it: the English
+   on the card under the picture, Show gives the Spanish, Got it / Missed it saves a Term Review answer (saveTermReview,
+   confirm; the knowledge log follows). Nothing here touches the CoreCHI streak or today's count.
+   ih_campusWord: { g: the group with the dots, id: the word held until answered, last: the one before }; ih_campusTalked:
+   a word was answered on this phone, so Dr. Smiley stops pointing the people out. */
+const CAMPUS_FOLK_SPOTS = [[525, 650, 'at the bench'], [765, 590, 'on the plaza'], [639, 624, 'on the path'], [875, 565, 'by the east door'], [660, 455, "at Ethics' door"]];
+let campusFolkCache = null;
+// Groups: each person joins the first group whose middle is within 22 css px (at the phone's 0.37 css px per render px),
+// else starts one. Named by the nearest known spot above (or "on the campus"), top of the picture first.
+function campusFolkGroups(){
+  if (campusFolkCache) return campusFolkCache;
+  const L = CAMPUS_MAP.live || {}, R = 22 / 0.37;
+  const ppl = [...(L.idlers && L.idlers.items || []).map(o => o.box), ...(L.sitters || []).map(o => o.img[0])].map(b => [b[0] + b[2]/2, b[1] + b[3]/2]);
+  const groups = [];
+  ppl.forEach(p => { const g = groups.find(g => Math.hypot(g.x - p[0], g.y - p[1]) < R);
+    if (g){ g.pts.push(p); g.x = g.pts.reduce((s, q) => s + q[0], 0) / g.pts.length; g.y = g.pts.reduce((s, q) => s + q[1], 0) / g.pts.length; }
+    else groups.push({ x: p[0], y: p[1], pts: [p] }); });
+  campusFolkCache = groups.map(g => { const near = CAMPUS_FOLK_SPOTS.map(s => [Math.hypot(s[0] - g.x, s[1] - g.y), s[2]]).sort((a, b) => a[0] - b[0])[0];
+    return { x: g.x, y: g.y, n: g.pts.length, where: near && near[0] < 120 ? near[1] : 'on the campus' }; }).sort((a, b) => a.y - b.y || a.x - b.x);
+  return campusFolkCache;
+}
+function campusWord(){ try { return JSON.parse(localStorage.getItem('ih_campusWord') || 'null') || {}; } catch (e) { return {}; } }
+function campusWordSet(w){ try { localStorage.setItem('ih_campusWord', JSON.stringify(w)); } catch (e) {} }
+function campusTalked(){ try { return !!localStorage.getItem('ih_campusTalked'); } catch (e) { return false; } }
+// The group with the dots; picked once and kept until a word is answered.
+function campusWordGroup(folk){
+  const w = campusWord();
+  if (!(w.g >= 0 && w.g < folk.length)){ w.g = folk.length ? Math.floor(Math.random() * folk.length) : 0; campusWordSet(w); }
+  return w.g;
+}
+// Term Review's own order over the whole glossary (missed, due, new, a check), never the word before.
+function campusWordDraw(lastId){
+  const built = reviewBuild(null, 2).terms;
+  return built.find(t => t.id !== lastId) || built[0] || null;
+}
+function campusFolkTap(i){
+  if (CAMPUS_PICK.folk && CAMPUS_PICK.folk.g === i && CAMPUS_PICK.folk.stage === 'ask') return campusFolkShow();
+  requireName(() => {
+    if (CAMPUS_PICK.key) campusPick(null);
+    const w = campusWord();
+    let term = w.id ? allTermsFlat().find(t => t.id === w.id && t.en && t.es) : null;
+    if (!term){ term = campusWordDraw(w.last); if (term){ w.id = term.id; campusWordSet(w); } }
+    CAMPUS_PICK.folk = { g: i, id: term ? term.id : null, stage: term ? 'ask' : 'none' };
+    campusFolkPaint();
+  });
+}
+function campusFolkShow(){ const F = CAMPUS_PICK.folk; if (!F || F.stage !== 'ask') return; F.stage = 'show'; campusFolkPaint(); }
+function campusFolkClose(quiet){
+  CAMPUS_PICK.folk = null;
+  const world = document.querySelector('#content .cp-world'), pick = document.querySelector('#content .cp-pick'), foot = document.querySelector('#content .cp-foot');
+  if (world) world.querySelectorAll('.cp-folk').forEach(b => { b.classList.remove('is-sel'); b.setAttribute('aria-pressed', 'false'); });
+  if (quiet) return;   // a building pick takes over the card and the foot
+  if (foot) foot.classList.remove('has-sel');
+  if (pick) pick.innerHTML = '';
+}
+// Draws the pick: the spot's ring, the foot cleared under the card, the card itself.
+function campusFolkPaint(){
+  const F = CAMPUS_PICK.folk, world = document.querySelector('#content .cp-world'), pick = document.querySelector('#content .cp-pick'), foot = document.querySelector('#content .cp-foot');
+  if (!F || !world || !pick) return;
+  world.querySelectorAll('.cp-folk').forEach(b => { const on = +b.dataset.g === F.g; b.classList.toggle('is-sel', on); b.setAttribute('aria-pressed', on); });
+  if (foot) foot.classList.add('has-sel');
+  pick.innerHTML = campusFolkCard();
+}
+// The dots move to the group now holding the word.
+function campusFolkMark(){
+  const world = document.querySelector('#content .cp-world'); if (!world) return;
+  const g = campusWordGroup(campusFolkGroups());
+  world.querySelectorAll('.cp-folk').forEach(b => { const on = +b.dataset.g === g; b.classList.toggle('is-word', on);
+    b.setAttribute('aria-label', b.getAttribute('aria-label').replace(/, with a word for you$/, '') + (on ? ', with a word for you' : '')); });
+}
+function campusFolkCard(){
+  const F = CAMPUS_PICK.folk, G = campusFolkGroups()[F.g], who = G ? (G.n > 1 ? 'The people ' : 'Someone ') + G.where : 'Someone on the campus', ask = G && G.n > 1 ? ' ask:' : ' asks:';
+  const t = F.id ? allTermsFlat().find(x => x.id === F.id) : null;
+  const x = `<button class="cp-pick-x" onclick="campusFolkClose()" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>`;
+  const open = `<div class="cp-pick-in cp-folk-in" style="--dom:#B5577A"><p><b><span class="cp-dot"></span>${escapeHtml(who)}`;
+  if (!t) return `${open}</b><small>No word to ask yet: the glossary is still loading, or has no term in both languages.</small></p><div class="cp-pick-go">${x}</div></div>`;
+  const en = `<span class="cp-word${F.stage === 'ask' || F.stage === 'error' ? '' : ' is-asked'}">${escapeHtml(t.en)}</span>`, es = `<span class="cp-word cp-word-es" lang="es">${escapeHtml(t.es)}</span>`;
+  let body, go;
+  if (F.stage === 'ask'){ body = `${en}<small>${escapeHtml(reviewWhy(t).text)} · say it in Spanish, then</small>`; go = `<button class="cp-play" onclick="campusFolkShow()">Show</button>${x}`; }
+  else if (F.stage === 'saving'){ body = `${en}${es}`; go = `<small class="cp-folk-wait">Saving…</small>`; }
+  else if (F.stage === 'error'){ body = `${en}<small class="is-error">Not saved: ${escapeHtml(F.why || 'it didn’t go through.')}</small>`;
+    go = `<button class="cp-folk-no" onclick="campusFolkClose()">Skip</button><button class="cp-play" onclick="campusFolkAnswer(${!!F.ok})">Try again</button>`; }
+  else if (F.stage === 'saved'){ body = `${en}${es}<small>${F.ok ? 'Got it.' : 'Missed it, noted.'} Saved to your Term Review record.</small>`; go = ''; }
+  else { body = `${en}${es}`; go = `<button class="cp-folk-no" onclick="campusFolkAnswer(false)">Missed it</button><button class="cp-play" onclick="campusFolkAnswer(true)">Got it</button>${x}`; }
+  return `${open}${ask}</b>${body}</p><div class="cp-pick-go">${go}</div></div>`;
+}
+// Saves the answer as Term Review does (confirm: the record changes only once stored), then the next word waits with another group.
+async function campusFolkAnswer(ok){
+  const F = CAMPUS_PICK.folk; if (!F || !F.id || F.stage === 'saving') return;
+  const prior = TERM_REVIEWS[F.id], box = ok ? Math.min((prior ? prior.box : 0) + 1, REVIEW_INTERVALS.length - 1) : 0;
+  F.stage = 'saving'; F.ok = ok; campusFolkPaint();
+  const res = await saveTermReview(F.id, box, (prior ? prior.reviewCount : 0) + 1, { result: ok ? 'ok' : 'miss', confirm: true });
+  if (!res.ok){ if (CAMPUS_PICK.folk === F){ F.stage = 'error'; F.why = res.why; campusFolkPaint(); } return; }
+  const w = campusWord(), n = campusFolkGroups().length, others = [...Array(n).keys()].filter(i => i !== w.g);
+  campusWordSet({ g: others.length ? others[Math.floor(Math.random() * others.length)] : (w.g || 0), last: F.id });
+  try { localStorage.setItem('ih_campusTalked', '1'); } catch (e) {}
+  campusFolkMark();
+  if (CAMPUS_PICK.folk !== F) return;   // closed while it saved; the answer is in all the same
+  F.stage = 'saved'; campusFolkPaint();
+  setTimeout(() => { if (CAMPUS_PICK.folk === F) campusFolkClose(); }, 1600);
+}
 
 /* The campus in 3D, full screen (Jose, 2026-10-26: "rotate, pinch to zoom, and a button to preview how the
    buildings would look once they are completed"). campus3d/index.html (built by docs/mockups/cchi-city/live/gen.py

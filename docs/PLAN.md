@@ -205,7 +205,13 @@ under way, then what waits on Jose, then small leftovers.
       `claude/campus-celebration`, live b1105.0959: three fireworks around the badge after the last
       climb, a Finished ribbon for the visit, the badge gold with a star for good,
       once per phone (`ih_campusDone`); no sound, no cheer, no finale in this
-      version. Next of the three: 4 (tap a person) or 6 (weather), his pick.
+      version. **2026-11-05 (his pick): 4, tap a person.** Spec first
+      (`docs/features/campus-tap-person.md`, his go the same day, "Term Review
+      only"), then `claude/campus-tap-person`: one 44 px spot per group of
+      people under the buildings' tap boxes, three dots over the group holding
+      the word, the card asks the English, Show, Got it / Missed it saved as a
+      Term Review answer; the CoreCHI streak untouched. #214, live
+      b1105.1156. Left of 2c: 6 (weather).
 3. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
    distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The

@@ -4027,6 +4027,35 @@
   .cp-idle i{ position:absolute; inset:0; background-image:url(./city/idlers.webp); background-repeat:no-repeat; }
   .cp-idle i:last-child{ animation:cpTurn var(--d, 7s) steps(1) infinite; animation-delay:calc(var(--i, 0) * -1.7s); }
   .cp-clouds{ pointer-events:none; }
+  /* Tap a person for a word (docs/features/campus-tap-person.md): one round 44 px spot per group of people, before the buildings' tap
+     boxes in the markup so a wall still picks the building; the group holding the word has three small dots over it; a picked
+     group shows a ring at its middle (there is no figure big enough to light) */
+  .cp-folk{ position:absolute; width:44px; height:44px; margin:-22px 0 0 -22px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .cp-folk::after{ content:''; position:absolute; left:50%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%;
+    box-shadow:0 0 0 2px rgba(255,255,255,.92), 0 0 0 4px rgba(10,6,30,.28); opacity:0; transition:opacity .25s var(--ease); }
+  .cp-folk.is-sel::after, .cp-folk:active::after, .cp-folk.is-pressed::after, .cp-folk:focus-visible::after{ opacity:1; }
+  .cp-folk:focus-visible{ outline:none; }
+  .cp-folk-say{ position:absolute; left:50%; bottom:calc(50% + 5px); translate:-50% 0; display:none; align-items:center; gap:2px; padding:3px 5px;
+    border-radius:7px 7px 7px 2px; background:#241b33; box-shadow:0 2px 6px rgba(10,6,30,.35); }
+  .cp-folk.is-word .cp-folk-say{ display:flex; }
+  .cp-folk-say i{ width:3px; height:3px; border-radius:50%; background:#fff; animation:cpDots 1.4s ease-in-out infinite; }
+  .cp-folk-say i:nth-child(2){ animation-delay:.2s; } .cp-folk-say i:nth-child(3){ animation-delay:.4s; }
+  @keyframes cpDots{ 0%,60%,100%{ opacity:.45; transform:translateY(0); } 30%{ opacity:1; transform:translateY(-1px); } }
+  .cp-world.has-sel .cp-folk-say{ opacity:.55; }
+  /* the word card, in the building pick's place under the picture */
+  .cp-pick:has(.cp-folk-in){ align-items:flex-end; }   /* it stacks (the word, then the buttons) and may stand taller than the foot: it grows up over the picture, never past the card's bottom */
+  .cp-folk-in{ flex-direction:column; align-items:stretch; gap:6px; }
+  .cp-folk-in .cp-pick-go{ justify-content:flex-end; }
+  .cp-folk-in p .cp-word{ display:block; margin-top:2px; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); line-height:1.2; }
+  .cp-folk-in p .cp-word.is-asked{ font-size:var(--fs-sub); font-weight:550; letter-spacing:var(--tr-sub); color:#5A6478; }   /* once the Spanish shows, the English steps back */
+  .cp-folk-in p .cp-word-es{ margin-top:1px; }
+  .cp-folk-in p .cp-word-es + small{ margin-top:3px; }
+  .cp-folk-in small.is-error{ color:#C2485C; }
+  .cp-folk-no{ border:0; cursor:pointer; min-height:44px; padding:0 11px; border-radius:14px; background:rgba(21,28,44,.08); color:#151C2C;
+    font-family:var(--sans); font-size:var(--fs-sub); font-weight:650; letter-spacing:var(--tr-sub); transition:transform .368s var(--spring0), background .2s; }
+  .cp-folk-no:active, .cp-folk-no.is-pressed{ transform:translateY(2px) scale(1.02,.96); background:rgba(21,28,44,.14); transition-duration:.08s; }
+  .cp-folk-no:focus-visible{ outline:2px solid #0F5FA6; outline-offset:2px; }
+  .cp-folk-wait{ font-size:var(--fs-cap); color:#5A6478; padding:0 6px; }
   /* Depth (F3, campusDepth): the backdrop and the clouds behind the board (once the sky and the far town) sit behind the campus as their own pictures and slide
      by --dpx/--dpy (css px) as the card scrolls and while a finger drags across it; the campus never moves,
      so badges, tap areas and movers stay put. Each layer is scaled up just enough to cover its widest slide. */
@@ -4069,7 +4098,7 @@
   .cp-dr .ds-art{ width:100%; height:100%; display:block; }
   @keyframes cpDrBob{ 50%{ transform:translateY(-4px); } }
   .cp-say p small{ display:block; font-size:var(--fs-cap2); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:#6B7489; margin-bottom:2px; }   /* the bubble stays white in dark mode, so a literal: 4.7:1 */
-  .cp-card.is-away .cp-fire i, .cp-card.is-away .cp-fire::before, .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-ambd img{ animation-play-state:paused; }
+  .cp-card.is-away .cp-fire i, .cp-card.is-away .cp-fire::before, .cp-card.is-away .cp-glow, .cp-card.is-away .cp-idle i, .cp-card.is-away .cp-flag, .cp-card.is-away .cp-spray, .cp-card.is-away .cp-veh img, .cp-card.is-away .cp-dr, .cp-card.is-away .cp-tag.is-focus, .cp-card.is-away .cp-ambd img, .cp-card.is-away .cp-folk-say i{ animation-play-state:paused; }
   .cp-chips{ position:relative; display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
   .cp-chip{ display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:999px; font-size:var(--fs-cap); font-weight:550;
     color:rgba(255,255,255,.9); background:rgba(255,255,255,.14); }
@@ -4088,7 +4117,7 @@
   @media (min-width:600px){ .cp-hud{ max-width:none; } .cp-say{ left:auto; width:300px; } }
   @media (prefers-reduced-motion: reduce){
     .cp-paint, .cp-glow, .cp-paintw, .cp-idle i, .cp-flag, .cp-spray, .cp-veh, .cp-veh img, .cp-dr, .cp-tag.is-focus, .cp-pick-in, .cp-ambd img{ animation:none !important; } .cp-tag, .cp-shade{ transition:none; } .cp-veh:not(.cp-sit){ display:none; } .cp-flag:not([style*='--f:0']), .cp-spray:not([style*='--f:0']){ display:none; }
-    .cp-spark, .cp-fire{ display:none; } .cp-ribbon{ animation:none !important; } .cp-idle i:last-child{ opacity:0; }
+    .cp-spark, .cp-fire{ display:none; } .cp-ribbon{ animation:none !important; } .cp-idle i:last-child{ opacity:0; } .cp-folk-say i{ animation:none !important; opacity:1; } .cp-folk::after{ transition:none; }
     .cp-sit img:first-child{ opacity:1; } .cp-sit img:last-child{ opacity:0; } .cp-ambd img{ opacity:0 !important; }
     .cp-go button{ transition:none; }
   }

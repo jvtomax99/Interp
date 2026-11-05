@@ -129,5 +129,70 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
     tDone: document.querySelector('#content .cp-tag[data-k="t"]').classList.contains('is-done'), done: localStorage.getItem('ih_campusDone') }));
   ok(first.fires === 0 && first.ribbon === 0 && first.tDone && first.done === '{"t":true}', 'a first visit draws a finished building gold, with no fireworks, and remembers it', first);
   if (p2.__errors.length) ok(false, 'no page errors', p2.__errors);
+
+  // Tap a person for a word (docs/features/campus-tap-person.md): one 44 px spot per group of people, under the buildings' tap
+  // boxes; one group holds the word (three dots); the card asks the English, Show gives the Spanish, Got it writes a Term
+  // Review record and the next word waits with another group. The streak is never touched.
+  console.log('== tap a person');
+  const p3 = (await L.boot(b, { device: 'iphone' })).page;
+  await L.go(p3, 'practice', 1800);
+  await p3.evaluate(() => { localStorage.removeItem('ih_campusWord'); localStorage.removeItem('ih_campusTalked'); renderContent(); document.querySelector('#content .cp-card').scrollIntoView({ block: 'start' }); }); await wait(500);
+  const spots = await p3.evaluate(() => {
+    const w = document.querySelector('#content .cp-world'), R = w.getBoundingClientRect(), P = campusPos(+w.dataset.top || 0), G = campusFolkGroups();
+    const list = [...w.querySelectorAll('.cp-folk')].map(b => { const r = b.getBoundingClientRect(), g = G[+b.dataset.g], [px, py] = P.pt(g.x, g.y);
+      const cx = R.left + parseFloat(px)/100*R.width, cy = R.top + parseFloat(py)/100*R.height, hit = (dx, dy) => { const h = document.elementFromPoint(cx + dx, cy + dy); return h ? h.className.split(' ')[0] + (h.dataset.k ? ':' + h.dataset.k : '') : null; };
+      return { g: +b.dataset.g, where: g.where, w: r.width, h: r.height, off: Math.hypot(r.left + r.width/2 - cx, r.top + r.height/2 - cy), centre: hit(0, 0), below: hit(0, 14), above: hit(0, -18), word: b.classList.contains('is-word') }; });
+    return { list, dots: w.querySelectorAll('.cp-folk.is-word').length, anim: getComputedStyle(w.querySelector('.cp-folk.is-word .cp-folk-say i')).animationName, say: document.querySelector('#content .cp-say p').textContent, groups: G.length };
+  });
+  ok(spots.groups === 5 && spots.list.length === 5 && spots.list.every(s => s.w >= 44 && s.h >= 44 && s.off < 1), 'five groups of people, a spot of at least 44 px centred on each', spots);
+  const bench = spots.list.find(s => s.where === 'at the bench'), plaza = spots.list.find(s => s.where === 'on the plaza');
+  ok(bench && bench.centre === 'cp-folk' && bench.below === 'cp-folk' && bench.above === 'cp-bld:s', 'the bench: the ground around the people is theirs, the wall above is still Oncology', bench);
+  ok(plaza && plaza.centre === 'cp-folk' && plaza.above === 'cp-bld:c', 'the plaza: the same with Encounter', plaza);
+  ok(spots.dots === 1 && spots.anim === 'cpDots' && /have a word for you\. Tap them\./.test(spots.say), 'one group holds the word, three moving dots over it, and Dr. Smiley points it out', spots);
+  const wordG = spots.list.find(s => s.word).g;
+  await p3.evaluate(i => campusFolkTap(i), wordG); await wait(400);
+  const ask = await p3.evaluate(() => ({ card: document.querySelector('#content .cp-pick').innerText, sel: document.querySelectorAll('#content .cp-folk.is-sel').length, foot: document.querySelector('#content .cp-foot').classList.contains('has-sel'),
+    es: !!document.querySelector('#content .cp-word-es'), word: JSON.parse(localStorage.getItem('ih_campusWord')), en: document.querySelector('#content .cp-word').textContent }));
+  ok(/asks?:/.test(ask.card) && /Show/.test(ask.card) && /New to you|Due|Missed|Quick check/.test(ask.card) && !ask.es && ask.sel === 1 && ask.foot && ask.word.id, 'the tap asks the English with its reason, the Spanish hidden, the group ringed', ask);
+  const en = await p3.evaluate(id => { const t = allTermsFlat().find(t => t.id === id); return t && t.en; }, ask.word.id);
+  ok(en === ask.en, 'the word asked is the one held in ih_campusWord', { en, asked: ask.en });
+  await p3.evaluate(() => campusFolkShow()); await wait(200);
+  const shown = await p3.evaluate(() => ({ es: document.querySelector('#content .cp-word-es') && document.querySelector('#content .cp-word-es').textContent, card: document.querySelector('#content .cp-pick').innerText }));
+  ok(shown.es && /Got it/.test(shown.card) && /Missed it/.test(shown.card), 'Show gives the Spanish and the two answers', shown);
+  const before = await p3.evaluate(() => localStorage.getItem('ih_practice_streak_v1'));
+  await p3.evaluate(() => campusFolkAnswer(true)); await wait(600);
+  const saved = await p3.evaluate(id => { const d = window.__DB['term-reviews']['jose__' + id]; const w = JSON.parse(localStorage.getItem('ih_campusWord'));
+    return { rec: d, card: document.querySelector('#content .cp-pick').innerText, talked: localStorage.getItem('ih_campusTalked'), w, dots: [...document.querySelectorAll('#content .cp-folk.is-word')].map(b => +b.dataset.g), streak: localStorage.getItem('ih_practice_streak_v1'), mem: TERM_REVIEWS[id] && TERM_REVIEWS[id].lastResult }; }, ask.word.id);
+  ok(saved.rec && saved.rec.lastResult === 'ok' && saved.rec.box === 1 && saved.mem === 'ok' && /Saved to your Term Review record/.test(saved.card), 'Got it writes the Term Review record (box 1, ok) and says so', saved);
+  ok(saved.w.last === ask.word.id && !saved.w.id && saved.dots.length === 1 && saved.dots[0] !== wordG && saved.w.g === saved.dots[0] && saved.talked === '1', 'the next word waits with another group, the dots moved there, Dr. Smiley need not point again', saved);
+  ok(saved.streak === before, 'the CoreCHI streak and today\'s count are untouched', { before, after: saved.streak });
+  await wait(1500);
+  const closed = await p3.evaluate(() => ({ card: document.querySelector('#content .cp-pick').innerText, foot: document.querySelector('#content .cp-foot').classList.contains('has-sel'), sel: document.querySelectorAll('#content .cp-folk.is-sel').length }));
+  ok(!closed.card && !closed.foot && !closed.sel, 'the card closes itself after a saved answer', closed);
+  // Missed it: box 0, a miss; a tap on a building while the card is open hands the card to the building
+  await p3.evaluate(() => campusFolkTap(0)); await wait(300); await p3.evaluate(() => campusFolkShow()); await wait(100);
+  const id2 = await p3.evaluate(() => JSON.parse(localStorage.getItem('ih_campusWord')).id);
+  await p3.evaluate(() => campusFolkAnswer(false)); await wait(600);
+  const missed = await p3.evaluate(id => ({ rec: window.__DB['term-reviews']['jose__' + id], card: document.querySelector('#content .cp-pick').innerText }), id2);
+  ok(missed.rec && missed.rec.lastResult === 'miss' && missed.rec.box === 0 && /Missed it, noted/.test(missed.card), 'Missed it writes a miss (box 0)', missed);
+  ok(id2 !== ask.word.id, 'never the same word twice in a row', { id2, first: ask.word.id });
+  await wait(1500);
+  await p3.evaluate(() => campusFolkTap(1)); await wait(300);
+  await p3.evaluate(() => campusPick('t')); await wait(300);
+  const handed = await p3.evaluate(() => ({ folk: CAMPUS_PICK.folk, key: CAMPUS_PICK.key, card: document.querySelector('#content .cp-pick').innerText, sel: document.querySelectorAll('#content .cp-folk.is-sel').length }));
+  ok(!handed.folk && handed.key === 't' && /Terminology/.test(handed.card) && !handed.sel, 'a building tapped while a word is open takes the card over', handed);
+  await p3.evaluate(() => campusPick(null));
+  if (p3.__errors.length) ok(false, 'no page errors', p3.__errors);
+
+  // No name set: the tap asks for the name first and saves nothing. Reduced motion: the dots stand still.
+  const p4 = (await L.boot(b, { device: 'iphone', fresh: true, reducedMotion: true })).page;
+  await p4.evaluate(() => { localStorage.setItem('ih_onboarded', '1'); });
+  await L.go(p4, 'practice', 1800);
+  const noName = await p4.evaluate(() => { const n = document.querySelectorAll('#content .cp-folk').length; campusFolkTap(0);
+    return { n, name: whoAmI(), modal: !!document.querySelector('.modal.show, .modal-backdrop.show, [class*=modal].show, #nameModal.show, .name-modal.show') || document.body.innerText.includes('name'), folk: CAMPUS_PICK.folk, card: document.querySelector('#content .cp-pick').innerText,
+      anim: getComputedStyle(document.querySelector('#content .cp-folk.is-word .cp-folk-say i')).animationName }; });
+  ok(noName.n === 5 && !noName.name && !noName.folk && !noName.card, 'no name yet: the tap opens nothing until a name is set', noName);
+  ok(noName.anim === 'none', 'reduced motion: the dots stand still', noName);
+  if (p4.__errors.length) ok(false, 'no page errors', p4.__errors);
   await b.close();
 })();

@@ -84,7 +84,7 @@ const tap = async (page, sel) => { const r = await page.evaluate(sel => { const 
 
     // empty scene, close, Escape
     const empty = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), r = w.getBoundingClientRect();
-      for (let y = r.top + r.height * .9; y > r.top + 10; y -= 6) for (let x = r.left + 10; x < r.right - 10; x += 12) { const h = document.elementFromPoint(x, y); if (h && w.contains(h) && !h.closest('.cp-bld, .cp-tag')) return { x, y }; }
+      for (let y = r.top + r.height * .9; y > r.top + 10; y -= 6) for (let x = r.left + 10; x < r.right - 10; x += 12) { const h = document.elementFromPoint(x, y); if (h && w.contains(h) && !h.closest('.cp-bld, .cp-tag, .cp-folk')) return { x, y }; }
       return null; });
     if (empty) await page.mouse.click(empty.x, empty.y); await wait(400);
     s = await state(page);
