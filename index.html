@@ -3009,6 +3009,16 @@ function syncChatNotifyButton(){
 function fitChatPanel(){
   const panel = document.getElementById('tcPanel');
   if(!panel) return;
+  if(chatTypingOn()){
+    // Typing on a phone: the screen is pinned to what the keyboard leaves
+    // (syncChatTyping) and the thread fills it, so no height is set here.
+    const box = document.getElementById('chatMessages');
+    const stick = box ? chatAtBottom(box) : true;
+    syncChatTyping();
+    if(panel.style.height) panel.style.height = '';
+    if(box && stick) box.scrollTop = box.scrollHeight;
+    return;
+  }
   const bar = document.querySelector('.tabbar');
   const kb = document.body.classList.contains('kb-open');
   const barRect = !kb && bar && getComputedStyle(bar).display !== 'none' ? bar.getBoundingClientRect() : null;
@@ -3038,6 +3048,48 @@ window.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatP
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', () => { if(activeCategory === 'chat') fitChatPanel(); }, { passive:true });
   window.visualViewport.addEventListener('scroll', () => { if(activeCategory === 'chat' && document.body.classList.contains('kb-open')) fitChatPanel(); }, { passive:true });
+}
+
+/* Typing in Team Chat on a phone (Jose's report, 2026-11-05: on his iPhone
+   the box you type in ended up behind the keyboard, the thread showing where
+   it should be). The keyboard does not shrink the page, it covers it, and
+   the phone scrolls the page on its own to show the box; the thread was
+   sized against the page's position, so the two fought and the box could
+   land under the keyboard. While the box has focus the whole chat screen
+   (header, thread, box) is pinned instead to the part of the screen the
+   keyboard leaves (visualViewport: its top and height), so the box always
+   sits right on the keyboard and the page's scroll no longer matters. Off
+   again the moment the box lets go. Phones only: a computer has no
+   on-screen keyboard. */
+const TC_PHONE = window.matchMedia('(max-width:900px)');
+function chatTypingOn(){ return document.body.classList.contains('tc-typing'); }
+function syncChatTyping(){
+  const root = document.documentElement, vv = window.visualViewport;
+  const top = vv ? Math.max(0, vv.offsetTop) : 0;
+  // A phone that reports the keyboard late still shows only what is left
+  // under its pan, so the screen is never taller than that.
+  const h = Math.max(120, Math.min(vv ? vv.height : innerHeight, innerHeight - top));
+  const t = Math.round(top) + 'px', hh = Math.round(h) + 'px';
+  if(root.style.getPropertyValue('--tc-vv-top') !== t) root.style.setProperty('--tc-vv-top', t);
+  if(root.style.getPropertyValue('--tc-vv-h') !== hh) root.style.setProperty('--tc-vv-h', hh);
+}
+function setChatTyping(on){
+  const b = document.body;
+  on = !!on && TC_PHONE.matches && activeCategory === 'chat' && !!document.getElementById('tcPanel');
+  if(on === chatTypingOn()) return;
+  const box = document.getElementById('chatMessages');
+  const stick = box ? chatAtBottom(box) : true;
+  if(on) syncChatTyping();
+  b.classList.toggle('tc-typing', on);
+  if(on){
+    // The keyboard's arrival and the phone's own scroll come in over the
+    // next half second, not always with an event each; look again then.
+    clearTimeout(setChatTyping.t1); clearTimeout(setChatTyping.t2);
+    setChatTyping.t1 = setTimeout(() => { if(chatTypingOn()) fitChatPanel(); }, 300);
+    setChatTyping.t2 = setTimeout(() => { if(chatTypingOn()) fitChatPanel(); }, 750);
+  }else if(window.scrollY) window.scrollTo(0, 0);   // back in the page, from its top as before
+  fitChatPanel();
+  if(box && stick) box.scrollTop = box.scrollHeight;
 }
 
 /* The message box grows with what you write, up to about five lines. */
@@ -8077,6 +8129,11 @@ window.addEventListener('scroll', ()=>{
 }, { passive: true });
 
 function renderContent(){
+  // A redraw replaces the box you were typing in; the pinned chat goes with it.
+  if(document.body.classList.contains('tc-typing')){
+    document.body.classList.remove('tc-typing');
+    if(window.scrollY) window.scrollTo(0, 0);
+  }
   // A screen redrawn in place (a quiz starting over the campus, whose own
   // Dr. Smiley then goes) can change which Dr. Smiley shows: the dock checks
   // again once the new screen is in (its observer misses these redraws).
@@ -17827,13 +17884,17 @@ if(shouldShowOnboarding()){
 document.addEventListener('focusin', (e)=>{
   if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
     document.body.classList.add('kb-open');
-    if(activeCategory === 'chat') requestAnimationFrame(fitChatPanel);
+    if(activeCategory === 'chat'){
+      setChatTyping(e.target.id === 'chatInput');
+      requestAnimationFrame(fitChatPanel);
+    }
   }
 });
 document.addEventListener('focusout', (e)=>{
   if(e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')){
     setTimeout(()=>{
       const active = document.activeElement;
+      if(!active || active.id !== 'chatInput') setChatTyping(false);
       if(!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')){
         document.body.classList.remove('kb-open');
         // Ask sizes its panel to the tab bar, which is hidden while this flag

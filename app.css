@@ -7750,6 +7750,30 @@ body.pv-open{ overflow:hidden; }
     border-bottom:1px solid var(--line-soft);
   }
   body:has(#content > .tc):not(:has(#tgSync.is-problem, #tgSync.is-offline)) .tc-back{ display:flex; }
+
+  /* Typing (body.tc-typing, setChatTyping in index.html): the chat screen
+     is pinned to the part of the screen the keyboard leaves, its top and
+     height from visualViewport (--tc-vv-top, --tc-vv-h), so the box you
+     type in sits right on the keyboard however the page has scrolled. The
+     header keeps the top, under the clock; the thread takes what is left. */
+  body.tc-typing .tc{
+    position:fixed; z-index:40; left:0; right:0;
+    top:var(--tc-vv-top, 0px); height:var(--tc-vv-h, 100%);
+    max-width:none; margin:0; overflow:hidden;
+    padding:0 max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
+    background:var(--bg);
+    --tc-content-top:0px;
+  }
+  body.tc-typing .tc-head{
+    position:relative; z-index:9; margin:0 -18px; flex-shrink:0;
+    padding:calc(env(safe-area-inset-top, 0px) + 5px) 8px 5px 4px;
+    background:var(--glass-bg); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
+    border-bottom:1px solid var(--line-soft);
+  }
+  body.tc-typing .tc-back{ display:flex; }
+  body.tc-typing .tc-channels{ flex-shrink:0; }
+  body.tc-typing .tc-channels .rg-ask{ display:none; }   /* back when you stop typing; the thread needs the room */
+  body.tc-typing .tc .chat-panel.tc-panel{ flex:1 1 auto; min-height:0; }
 }
 .tc-back{ display:none; width:40px; height:44px; flex-shrink:0; align-items:center; justify-content:center; margin-right:-4px;
   border:none; background:none; color:var(--accent); cursor:pointer; border-radius:12px; -webkit-tap-highlight-color:transparent; }
