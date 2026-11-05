@@ -305,8 +305,8 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    replay (he sends `doctors.json`, steps in the review); the 5-minute
    interpreter test on iPhones (Spanish voice on ES included).
 5. **The opening, Badge in (Jose, 2026-11-05).** Plan and mockup picked:
-   `docs/features/opening.md`, `docs/mockups/opening/`. First open of the
-   day: the badge drops in over the Helena Theurer Pavilion, a tap scans it
+   `docs/features/opening.md`, `docs/mockups/opening/`. Every start of the
+   app (Jose, 2026-11-05): the badge drops in over the Helena Theurer Pavilion, a tap scans it
    green, the green ring opens into Home. Jose answered the three questions
    (his own photo; each person picks the badge title once; sound on,
    quiet). Next, one PR: `features/opening.js`, an "Opening" block in

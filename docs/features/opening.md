@@ -1,6 +1,6 @@
 # The opening (Badge in)
 
-The first thing the Hub shows on the first open of the day: your staff
+The first thing the Hub shows every time it starts: your staff
 badge drops in on its lanyard in front of the Helena Theurer Pavilion, you
 tap it, it scans green, and the green ring opens into Home. Jose,
 2026-11-05, after about fifteen mockups ("I want an opening similar to the
@@ -35,13 +35,16 @@ The picked mockup is in `docs/mockups/opening/` (video and stills).
    itself). Then the hello on Home runs as it does today, the name pen
    included.
 
-**When it plays.** The first real start of the day only (`ih_openingDay`
-holds the date it last played). Never when a notification opened the app
-(`?open=`), never on the reload after an update, never during an exam or
-practice timer. A tap before the badge arrives skips straight to Home. More
-gets **Replay the opening** and an **Opening** switch (on / off).
+**When it plays: every time the app really starts** (Jose, 2026-11-05:
+"always triggers every time the app is opened"; this replaces "first open
+of the day"). On iPhone, coming back to the Hub from another app resumes
+it without a restart, so the opening plays when the app starts fresh, not
+on every switch back (the same as the CPA app). Never when a notification started the app (`?open=`; Jose, 2026-11-05:
+it goes straight to its message), never on the reload after an update, never during an exam or practice timer. A tap before the badge
+arrives skips straight to Home. More gets **Replay the opening** and an
+**Opening** switch (on / off).
 
-**Who it is for.** Everyone on the team, on their phone, once a morning.
+**Who it is for.** Everyone on the team, on their phone.
 The name comes from the name set in the app (`ih_myName`); with no name
 set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 
@@ -84,9 +87,10 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 
 - **Jose's CPA app** (`jvtomax99/cpa-study-app`, `src/intro.js`): a 15 s
   night train ride into its town on every launch, Tap to Start, side
-  buttons, a white flash. Its loading line shows real progress. Ours is
-  shorter (about 4 s before the tap) and once a day, because the Hub is
-  opened between patients to find a word fast.
+  buttons, a white flash. Its loading line shows real progress. Ours plays on
+  every start too, but is shorter (about 4 s before the tap) and skips
+  on a tap, because the Hub is opened between patients to find a word
+  fast.
 - **Genshin Impact and Honkai: Star Rail** (start screens, from memory; not
   re-checked in this session): a scene that is never still, the title
   appearing out of light, one tap to start, music, then a big exit (a flash
@@ -95,8 +99,9 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   wait: a game is opened to play, the Hub to work.
 - **Apple's guidance on launch screens** (Human Interface Guidelines,
   "Launching"; from memory, not re-checked): a launch screen is not a
-  branding moment and should get out of the way. The reason ours plays once
-  a morning, skips on a tap, and never waits for the network.
+  branding moment and should get out of the way. Ours goes against that on
+  purpose (Jose's call), so it keeps the rest: it skips on a tap and never
+  waits for the network.
 
 ## Decided (Jose, 2026-11-05)
 
@@ -111,9 +116,8 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 
 ## Checks (when built)
 
-A new suite, `tests/suites/opening.cjs`: it plays on the first open of the
-day and not the second; not with `?open=`; a tap before the badge skips
+A new suite, `tests/suites/opening.cjs`: it plays on a fresh start and not on a resume; not with `?open=`; a tap before the badge skips
 it; after it, nothing is left over Home (`elementFromPoint` reaches Home's
 search); Still takes the short path; it never adds a wait to Home's first
-draw. The other suites start with today's `ih_openingDay` set, so they
-never see it.
+draw. The other suites start with the opening switched off
+(`ih_opening` = off), so they never see it.

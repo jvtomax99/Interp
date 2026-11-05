@@ -71,7 +71,7 @@
 <script type="text/plain" id="three-src">{{three}}</script>
 <script type="module">
 const THREE = await import(URL.createObjectURL(new Blob([document.getElementById('three-src').textContent], { type: 'text/javascript' })));
-const q = new URLSearchParams(location.search), SOLO = q.has('t'), FIXT = +q.get('t') || 0, TSTYLE = q.get('font') || 'cg', LIGHT = +(q.get('light') || 1), EXIT = +(q.get('exit') || 1);
+const q = new URLSearchParams(location.search), SOLO = q.has('t'), FIXT = +q.get('t') || 0, TSTYLE = q.get('font') || 'cg', LIGHT = +(q.get('light') || 1), EXIT = +(q.get('exit') || 3);
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const sine = x => .5 - .5*Math.cos(Math.PI*clamp(x));
 const outc = x => 1 - Math.pow(1 - clamp(x), 3);
