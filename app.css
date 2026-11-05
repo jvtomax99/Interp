@@ -4000,17 +4000,18 @@
   /* A building finished (every question known; docs/features/campus-celebration.md): three fireworks over its roof
      after the climb and its flash (--f the start, --n the burst), eight sparks each thrown out on a spring, transform
      and opacity only; a gold ribbon under its badge for this visit; the badge gold with a star for good */
-  .cp-fire{ position:absolute; width:11%; aspect-ratio:1; translate:-50% -50%; pointer-events:none; container-type:size; }
-  .cp-fire::before{ content:''; position:absolute; inset:30%; border-radius:50%; opacity:0; mix-blend-mode:screen;
+  .cp-fire{ position:absolute; width:22%; aspect-ratio:1; translate:-50% -50%; pointer-events:none; container-type:size; }   /* behind the badges */
+  .cp-fire::before{ content:''; position:absolute; inset:28%; border-radius:50%; opacity:0; mix-blend-mode:screen;
     background:radial-gradient(circle, rgba(255,240,200,.95), rgba(255,210,120,.5) 40%, rgba(255,190,90,0) 70%);
     animation:cpFireGlow .5s ease-out forwards; animation-delay:calc(var(--f, .4s) + var(--n, 0) * .6s); }
-  .cp-fire i{ position:absolute; left:50%; top:50%; width:9%; height:9%; margin:-4.5% 0 0 -4.5%; border-radius:50%; background:var(--dom, #FFD58A); opacity:0;
-    animation:cpFire 1.3s var(--spring0, cubic-bezier(.2,.8,.2,1)) forwards; animation-delay:calc(var(--f, .4s) + var(--n, 0) * .6s); }
+  .cp-fire i{ position:absolute; left:50%; top:50%; width:5%; height:14%; margin:-7% 0 0 -2.5%; border-radius:999px; background:var(--dom, #FFD58A); opacity:0;
+    box-shadow:0 0 5px rgba(255,235,180,.85); animation:cpFire 1.3s var(--spring0, cubic-bezier(.2,.8,.2,1)) forwards; animation-delay:calc(var(--f, .4s) + var(--n, 0) * .6s); }
   .cp-fire i:nth-child(odd){ background:#FFE09A; }
-  .cp-fire i:nth-child(1){ --a:0deg; } .cp-fire i:nth-child(2){ --a:45deg; } .cp-fire i:nth-child(3){ --a:90deg; } .cp-fire i:nth-child(4){ --a:135deg; }
-  .cp-fire i:nth-child(5){ --a:180deg; } .cp-fire i:nth-child(6){ --a:225deg; } .cp-fire i:nth-child(7){ --a:270deg; } .cp-fire i:nth-child(8){ --a:315deg; }
-  @keyframes cpFire{ 0%{ opacity:0; transform:rotate(var(--a)) translateY(0) scale(.4); } 12%{ opacity:1; transform:rotate(var(--a)) translateY(-10cqw) scale(1.1); }
-    100%{ opacity:0; transform:rotate(var(--a)) translateY(-46cqw) scale(.25); } }
+  .cp-fire i:nth-child(1){ --a:0deg; } .cp-fire i:nth-child(2){ --a:30deg; } .cp-fire i:nth-child(3){ --a:60deg; } .cp-fire i:nth-child(4){ --a:90deg; }
+  .cp-fire i:nth-child(5){ --a:120deg; } .cp-fire i:nth-child(6){ --a:150deg; } .cp-fire i:nth-child(7){ --a:180deg; } .cp-fire i:nth-child(8){ --a:210deg; }
+  .cp-fire i:nth-child(9){ --a:240deg; } .cp-fire i:nth-child(10){ --a:270deg; } .cp-fire i:nth-child(11){ --a:300deg; } .cp-fire i:nth-child(12){ --a:330deg; }
+  @keyframes cpFire{ 0%{ opacity:0; transform:rotate(var(--a)) translateY(0) scaleY(.3); } 10%{ opacity:1; transform:rotate(var(--a)) translateY(-12cqw) scale(1); }
+    55%{ opacity:.95; transform:rotate(var(--a)) translateY(-36cqw) scale(1); } 100%{ opacity:0; transform:rotate(var(--a)) translateY(-48cqw) scaleY(.4); } }
   @keyframes cpFireGlow{ 0%{ opacity:0; scale:.4; } 35%{ opacity:1; scale:1; } 100%{ opacity:0; scale:1.6; } }
   .cp-ribbon{ position:absolute; translate:-50% 0; z-index:2; pointer-events:none; padding:2px 8px; border-radius:999px; white-space:nowrap;
     font-family:var(--sans); font-size:var(--fs-cap2); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:#3B2A06;

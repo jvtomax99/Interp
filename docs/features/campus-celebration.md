@@ -8,7 +8,7 @@ AI tools"). Waiting for his go.
 
 - `renderCampus` (`features/campus.js`): `fin` is `cover >= 0.9999` (every question known, none shaky); `cheer` is `fin`
   with levels already drawn on this phone (`ih_campusLv` present) and the building not yet in `ih_campusDone`. A cheer
-  writes three `.cp-fire` spans at the badge point (offsets -44/-70, 52/-104, 4/-146 render px, each with eight `<i>`
+  writes three `.cp-fire` spans at the badge point (offsets -130/-10, 140/-40, 0/-72 render px from its badge, which sits nudged inside the picture, each with twelve `<i>`
   sparks, `--dom` the domain colour, `--f` the start: 1 s + tenths climbed x 0.32 s + 0.5 s, or 0.4 s when nothing
   climbed, `--n` the burst 0-2) and one `.cp-ribbon` 6 px under the badge; the badge gets `is-done`, a star instead of
   the percentage and "finished" in its label. `ih_campusDone` is rewritten on every drawing with the finished keys only,
@@ -28,7 +28,7 @@ its questions. The moment an area is **finished** (every one of its questions kn
 celebrates it, once, on the building itself:
 
 1. **Fireworks** over its roof: three small bursts, one after the other, rising from the building's badge point and
-   opening in the domain's colour and gold, about 2.5 s in all. They start right after the paint's last tenth has
+   opening in the domain's colour and gold as twelve short streaks, about 2.5 s in all. They start right after the paint's last tenth has
    climbed and its warm flash has played (the existing `.cp-rise` and `.cp-spark` sequence), so the climb, the flash and
    the fireworks read as one event.
 2. **A ribbon** across the building for the rest of that visit: a short gold band with "Finished" in small capitals,
@@ -57,7 +57,7 @@ weeks of work; the Hub should make the moment feel like something, in the place 
 
 ## How it is drawn (cheap, like everything on the card)
 
-- The fireworks are CSS only: one `<span class="cp-fire">` per burst at the badge point, each with 8 spark children
+- The fireworks are CSS only: one `<span class="cp-fire">` per burst around the badge, each with 12 spark children
   thrown out by a `transform` animation (translate and scale, opacity), staggered 0.6 s apart, on the page's spring
   (`--spring0` for the throw, ease-out for the fade). No canvas, no JavaScript timers: the drawing writes them, CSS
   plays them, they are gone at the next drawing. Transform and opacity only, so the compositor plays them (the feel

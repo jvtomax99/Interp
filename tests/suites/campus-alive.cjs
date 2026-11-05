@@ -62,14 +62,14 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
     ok(rise.cranes === 0 && rise.saved.e === 7 && rise.saved.t === 10, 'no cranes after the climb either; the new levels are kept', rise);
     const fin = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), q = s => [...w.querySelectorAll(s)];
       const d = el => parseFloat(getComputedStyle(el).animationDelay), tag = k => w.querySelector(`.cp-tag[data-k="${k}"]`);
-      const fires = q('.cp-fire'), spark = q('.cp-spark').map(d);
+      const fires = q('.cp-fire'), spark = q('.cp-spark').filter(x => x.style.getPropertyValue('--s') === '1').map(d);   // Terminology's own flash (it climbed one tenth)
       return { fires: fires.length, sparksEach: fires.map(f => f.children.length), bursts: fires.map(f => d(f.firstElementChild)), lastSpark: Math.max(...spark),
-        inside: fires.every(f => { const r = f.getBoundingClientRect(), R = w.getBoundingClientRect(); return r.left >= R.left && r.right <= R.right && r.top >= R.top; }),
+        inside: fires.every(f => { const r = f.getBoundingClientRect(), R = w.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2; return cx >= R.left && cx <= R.right && cy >= R.top && cy <= R.bottom; }),
         ribbon: q('.cp-ribbon').map(r => [r.textContent, d(r)]), tDone: tag('t').classList.contains('is-done'), tStar: tag('t').querySelector('i').textContent, tLabel: tag('t').getAttribute('aria-label'),
         eDone: tag('e').classList.contains('is-done'), eText: tag('e').querySelector('i').textContent, tFocus: tag('t').classList.contains('is-focus'),
         done: JSON.parse(localStorage.getItem('ih_campusDone')) }; });
-    ok(fin.fires === 3 && fin.sparksEach.every(n => n === 8) && fin.inside, 'Terminology finished: three fireworks over its roof, eight sparks each, inside the picture', fin);
-    ok(fin.bursts.every((v, i) => v > fin.lastSpark && (i === 0 || v > fin.bursts[i - 1])), 'the bursts start after the climb and its flash, one after another', fin);
+    ok(fin.fires === 3 && fin.sparksEach.every(n => n === 12) && fin.inside, 'Terminology finished: three fireworks over its roof, twelve sparks each, their hearts inside the picture', fin);
+    ok(fin.bursts.every((v, i) => v > fin.lastSpark && (i === 0 || v > fin.bursts[i - 1])), 'the bursts start after its own climb and flash, one after another', fin);
     ok(fin.ribbon.length === 1 && fin.ribbon[0][0] === 'Finished' && fin.ribbon[0][1] > fin.bursts[0], 'a Finished ribbon under its badge, after the first burst', fin.ribbon);
     ok(fin.tDone && fin.tStar === '\u2605' && /finished$/.test(fin.tLabel) && !fin.tFocus && !fin.eDone && fin.eText === '70%', 'its badge is gold with a star (and never the focus badge); Ethics keeps its number', fin);
     ok(JSON.stringify(fin.done) === '{"t":true}', 'the celebration is remembered on this phone', fin.done);
@@ -103,8 +103,11 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
   // Reduced motion: the people hold their first frame, no flash; the paint is simply there.
   console.log('== reduced motion');
   const { page } = await L.boot(b, { device: 'iphone', reducedMotion: true });
-  await page.evaluate(m => { new Function(m)(); localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); }, `(${MASTERY})()`);
-  await L.go(page, 'practice', 1800); await page.evaluate(() => document.querySelector('#content .cp-card').scrollIntoView({ block: 'start' })); await wait(400);
+  await page.evaluate(m => { new Function(m)(); localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); localStorage.removeItem('ih_campusDone'); }, `(${MASTERY})()`);
+  await L.go(page, 'practice', 1800);
+  // the screen may draw more than once while it settles: seed again and draw once, as above
+  await page.evaluate(() => { localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); localStorage.removeItem('ih_campusDone'); });
+  await redraw(page); await wait(400);
   const r = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), q = s => [...w.querySelectorAll(s)];
     return { idleLast: getComputedStyle(q('.cp-idle i:last-child')[0]).opacity, idleAnim: getComputedStyle(q('.cp-idle i:last-child')[0]).animationName,
       anims: campusAnims.length,

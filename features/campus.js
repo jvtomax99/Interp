@@ -74,8 +74,8 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     for (let n = was + 1; n <= lv; n++) paint += layer(n, `;--s:${n - was - 1}`);
     if (lv > was) paint += `<span class="cp-spark" style="${at(...B.label)};--s:${lv - was}"></span>`;
     if (cheer){   // after the climb and its flash (or at once when nothing climbed): three bursts over the roof, then the ribbon under the badge
-      const f = (lv > was ? 1 + (lv - was) * 0.32 + 0.5 : 0.4).toFixed(2), [lx, ly] = B.label, [tx, ty] = tagsAt[b.key];
-      paint += [[-44, -70], [52, -104], [4, -146]].map(([dx, dy], n) => `<span class="cp-fire" style="${at(lx + dx, ly + dy)};--dom:${d.color||'#FFD58A'};--f:${f}s;--n:${n}">${'<i></i>'.repeat(8)}</span>`).join('')
+      const f = (lv > was ? 1 + (lv - was) * 0.32 + 0.5 : 0.4).toFixed(2), [tx, ty] = tagsAt[b.key];   // around its badge (nudged inside the picture), over the roof
+      paint += [[-130, -10], [140, -40], [0, -72]].map(([dx, dy], n) => `<span class="cp-fire" style="${at(tx + dx, ty + dy)};--dom:${d.color||'#FFD58A'};--f:${f}s;--n:${n}">${'<i></i>'.repeat(12)}</span>`).join('')
         + `<span class="cp-ribbon" style="${at(tx, ty + 6/K)};--f:${f}s">Finished</span>`;
     }
     // warm windows on the painted floors, flickering; after a rise they come on at its end
