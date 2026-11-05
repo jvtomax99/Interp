@@ -359,6 +359,15 @@ come from this alone.
 
 ## Done
 
+- 2026-11-05 Idea credits (Jose: "Sylvia came up with the idea of
+  Sound-Alikes"). Four mockups; Jose picked "line + card". A credited
+  screen shows a small purple tag under its title; a tap on it or a
+  double-tap on the title opens the card; an owner's double-tap on any
+  title gives a credit (Edit, Remove). `features/credits.js`,
+  `hub-credits` (new rules: Jose pastes `firestore.rules` into the
+  console), `tests/suites/credits.cjs`, guide answer `credits` and a New
+  lately card. `docs/features/credits.md`.
+
 - 2026-11-03 Type sizes onto the scale (Jose's picks: 14px to 15, tiny
   text up to 11). Every stylesheet font size is now one of ten `--fs-*`
   steps, Apple's iPhone scale: the old seven plus `--fs-cap2` 11,

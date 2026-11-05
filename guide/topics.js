@@ -306,6 +306,12 @@ const GUIDE_TOPICS = [
     <p>In a drill the phone says a sentence and you pick the right rendering for the sound-alike in it. <b>Hear again</b> and <b>Slower</b> replay it; <b>Show the words</b> shows the sentence with the word blanked out, for a noisy hallway or a phone with no voice. <b>Exit</b> leaves the drill.</p>
     <p>It uses your phone's own voice, and nothing is saved. The renderings are marked until a staff interpreter has checked them.</p>` },
 
+  { id:'credits', section:'team', k:'credit credits idea ideas whose idea thanks thank who came up with suggested suggestion double tap double-tap title tag lightbulb purple owner give credit edit remove', q:'Whose idea was this screen?', a:`
+    <p>Some screens carry a small purple tag under their title, like <b>Sylvia's idea</b> on Sound-Alikes. It names the teammate who came up with that screen, wrote what is in it, checked its Spanish or tested it.</p>
+    <p>Tap the tag, or double-tap the screen's title, to see the card: their name, what they said when they suggested it, and who gave the credit. <b>Close</b>, or a tap outside it, puts it away.</p>
+    <p><b>Owners:</b> double-tap any screen's title to give it a credit. Type the name, add their words if they want them shown, pick what the credit is for, and tap <b>Save</b>. Ask the person first. To change one, open its card and tap <b>Edit</b>; <b>Remove</b> is in there too.</p>
+    <p>A credit belongs to the screen with that title. A group's drill or list has a title of its own, so it shows no tag.</p>` },
+
   { id:'lookup', section:'prep', k:'look up source medlineplus reference link definition web check card button', q:'What does “Look up” on a card do?', a:`
     <p>It searches trusted medical sites for that term right now, in English and Spanish, and shows the pages it found with a short preview. Use it to check a definition or find a patient-friendly page.</p>
     <p>If a teammate saved a link on the term, <b>Source</b> opens that exact page.</p>` },
