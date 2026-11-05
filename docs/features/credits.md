@@ -67,7 +67,9 @@ the only way in: a credit nobody finds isn't much of a credit.
   `touch-action:manipulation` and no text selection, so the browser
   neither zooms nor selects a word. The click that follows the second
   touch lands on the card's backdrop the instant it appears; backdrop
-  clicks in the first 450 ms are ignored, or the card closed itself.
+  clicks in the first 450 ms after a touch double-tap are ignored, or the
+  card closed itself. A mouse has no such click (its second click comes
+  before the dblclick), so it gets no guard.
 - **Data.** `hub-credits/{key}` = `{ section, name, role, words, by, at }`
   (`role` one of `idea`, `suggested` (domains), `content`, `spanish`, `testing`; `words` up to
   300 characters; `by` is `whoAmI()`; `at` is ms). One document per

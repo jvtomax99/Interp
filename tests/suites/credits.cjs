@@ -201,6 +201,10 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
     await page.screenshot({ path: O + 'desktop-card.png' });
     await page.mouse.click(5, 450); await wait(250);
     ok(!(await open(page)), 'a click outside closes it');
+    // A mouse has no stray click after its double-click, so a quick click outside closes it too.
+    await page.dblclick('#content .credit-title'); await wait(80);
+    await page.mouse.click(5, 450); await wait(200);
+    ok(!(await open(page)), 'a click outside right after opening closes it (no touch guard for a mouse)');
     ok((page.__errors || []).length === 0, 'no page errors', page.__errors);
     await page.context().close();
   }

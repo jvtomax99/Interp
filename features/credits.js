@@ -136,7 +136,6 @@ function creditShow(html, label, focusSel) {
   ov.setAttribute('aria-label', label);
   ov.innerHTML = html;
   ov.classList.add('show');
-  CREDITS.shownAt = performance.now();
   const f = ov.querySelector(focusSel);
   if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
 }
@@ -261,6 +260,9 @@ document.addEventListener('pointerup', e => {
   if (T.t && e.timeStamp - T.t < 350 && Math.hypot(e.clientX - T.x, e.clientY - T.y) < 30) {
     T.t = 0;
     creditOpen(el.dataset.creditKey, el.dataset.creditSection);
+    // Only a touch double-tap is followed by a stray click (a mouse's comes
+    // before its dblclick), so only this one opens the backdrop's guard.
+    CREDITS.shownAt = performance.now();
   } else { T.t = e.timeStamp; T.x = e.clientX; T.y = e.clientY; }
 });
 document.addEventListener('dblclick', e => {
