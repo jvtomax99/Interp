@@ -7807,3 +7807,68 @@ body.pv-open{ overflow:hidden; }
 .kb-mini:active, .kb-mini.is-pressed{ transform:scale(.985); }
 .kb-mini:focus-visible{ outline:2px solid var(--cyan); outline-offset:3px; }
 @media (prefers-reduced-motion:reduce){ .kb-mini{ transition:none; } .kb-mini:active, .kb-mini.is-pressed{ transform:none; } }
+
+/* Idea credits (features/credits.js; docs/features/credits.md): the small tag
+   under a credited screen's title, the card it opens, and the owner's Give
+   credit sheet. Its own purple, the same in every screen, so a credit always
+   reads as a credit. */
+:root{ --credit:#7A5BA8; --credit-ink:#5B3F8A; --credit-soft:color-mix(in srgb, #7A5BA8 10%, var(--paper)); }
+html[data-theme="dark"]{ --credit:#9B7BD0; --credit-ink:#CDB8F0; --credit-soft:color-mix(in srgb, #9B7BD0 18%, var(--paper)); }
+.credit-title{ -webkit-user-select:none; user-select:none; touch-action:manipulation; -webkit-touch-callout:none; }
+.credit-tag{ position:relative; display:inline-flex; align-items:center; gap:6px; min-height:32px; margin:-4px 0 13px 2px; padding:0 13px 0 9px;
+  border:0; border-radius:999px; background:var(--credit-soft); color:var(--credit-ink); cursor:pointer;
+  font:550 var(--fs-foot)/1 var(--sans); letter-spacing:var(--tr-sm);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .368s var(--spring0, var(--ease)); }
+.credit-tag::before{ content:""; position:absolute; inset:-6px -2px; }   /* a 44px tap */
+.credit-tag svg{ width:17px; height:17px; flex:none; }
+.credit-tag:active, .credit-tag.is-pressed{ transform:scale(.96); }
+.credit-tag:focus-visible{ outline:2px solid var(--accent-2); outline-offset:3px; }
+.hub-head + .credit-tag{ margin-top:6px; }
+
+.credit-ov{ align-items:center; padding:26px 17px; }
+.credit-ov .modal{ position:relative; overflow:hidden; max-width:380px; border-radius:24px; }
+.credit-card{ text-align:center; padding:26px 22px 20px; }
+.credit-card::before{ content:""; position:absolute; inset:0 0 auto 0; height:120px; pointer-events:none;
+  background:radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--credit) 26%, transparent), transparent 70%); }
+.credit-av{ position:relative; width:76px; height:76px; margin:0 auto 13px; border-radius:50%; display:grid; place-items:center;
+  background:linear-gradient(145deg, #9B7BD0, #6A4A9C); color:#fff; font:650 var(--fs-t1)/1 var(--sans);
+  box-shadow:0 0 0 5px var(--paper), 0 0 0 7px color-mix(in srgb, var(--credit) 30%, transparent), 0 12px 24px -10px rgba(74,43,120,.5); }
+.credit-av i{ position:absolute; right:-6px; bottom:-4px; width:30px; height:30px; border-radius:50%; background:#F7C948; color:#5B3F00;
+  display:grid; place-items:center; box-shadow:0 0 0 3px var(--paper); }
+.credit-av i svg{ width:17px; height:17px; }
+.credit-av i svg path:first-child{ fill:none; }
+.credit-kicker{ position:relative; margin:0 0 6px; font:650 var(--fs-cap2)/1.3 var(--sans); letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--credit); }
+.credit-card h3.credit-name{ position:relative; margin:0 0 4px; font:650 var(--fs-t1)/1.15 var(--sans); letter-spacing:var(--tr-title); color:var(--ink); }
+.credit-line{ position:relative; margin:0 0 17px; font:500 var(--fs-sub)/1.4 var(--sans); letter-spacing:var(--tr-body); color:var(--ink-soft); }
+.credit-words{ margin:0 0 13px; padding:13px 15px; border-radius:14px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); text-align:left;
+  font:italic 400 var(--fs-sub)/1.5 'IBM Plex Serif', Georgia, serif; color:var(--ink); }
+.credit-words small{ display:block; margin-top:6px; font:500 var(--fs-cap)/1.3 var(--sans); font-style:normal; color:var(--ink-faint); }
+.credit-meta{ margin:0 0 17px; font:500 var(--fs-cap)/1.4 var(--sans); color:var(--ink-faint); }
+.credit-row{ display:flex; gap:9px; }
+.credit-btn{ flex:1; min-height:46px; border:0; border-radius:14px; font:650 var(--fs-sub)/1 var(--sans); letter-spacing:var(--tr-body); cursor:pointer;
+  transition:transform .368s var(--spring0, var(--ease)); }
+.credit-btn-main{ background:var(--credit); color:#fff; }
+.credit-btn-soft{ background:var(--bg); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); }
+.credit-btn-danger{ flex:0 0 auto; padding:0 13px; background:transparent; color:var(--danger); }
+.credit-btn:active, .credit-btn.is-pressed{ transform:scale(.97); }
+.credit-btn:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+
+.credit-sheet{ text-align:left; padding:22px 20px 20px; }
+.credit-owner{ display:inline-flex; align-items:center; margin-bottom:9px; padding:4px 9px; border-radius:999px; background:#FFF4D6; color:#8A5A00;
+  font:650 var(--fs-cap2)/1 var(--sans); letter-spacing:var(--tr-caps); text-transform:uppercase; }
+html[data-theme="dark"] .credit-owner{ background:rgba(247,201,72,.16); color:#F7C948; }
+.credit-sheet h3{ margin:0 0 4px; font:650 var(--fs-t2)/1.2 var(--sans); letter-spacing:var(--tr-title); color:var(--ink); }
+.credit-lede{ margin:0 0 17px; font:500 var(--fs-foot)/1.45 var(--sans); color:var(--ink-soft); }
+.credit-lede b{ color:var(--ink); font-weight:650; }
+.credit-sheet .field input, .credit-sheet .field textarea{ font-size:var(--fs-call); }   /* iPhone zooms under 16px */
+.credit-label{ display:block; font-family:var(--mono); font-size:var(--fs-cap2); letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; }
+.credit-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.field .credit-chip{ position:relative; display:inline-block; margin:0; cursor:pointer; font:inherit; letter-spacing:0; text-transform:none; color:inherit; }   /* not the form's caps label */
+.credit-chip input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+.credit-chip span{ display:inline-flex; align-items:center; min-height:36px; padding:0 13px; border-radius:999px; background:var(--bg); color:var(--ink-soft);
+  box-shadow:inset 0 0 0 1px var(--line); font:550 var(--fs-foot)/1 var(--sans); }
+.credit-chip input:checked + span{ background:var(--credit); color:#fff; box-shadow:none; }
+.credit-chip input:focus-visible + span{ outline:2px solid var(--accent-2); outline-offset:2px; }
+.credit-sheet .credit-row{ margin-top:20px; }
+@media (prefers-reduced-motion:reduce){ .credit-tag, .credit-btn{ transition:none; } .credit-tag:active, .credit-tag.is-pressed, .credit-btn:active, .credit-btn.is-pressed{ transform:none; } }

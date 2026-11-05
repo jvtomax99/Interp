@@ -641,6 +641,7 @@
 <script src="./features/duplicate-doctors.js"></script>
 <script src="./features/backfill.js"></script>
 <script src="./features/ask-hub.js"></script>
+<script src="./features/credits.js"></script>
 <script>
 /* ============ Seed data (from the shared reference doc) ============ */
 const DEFAULT_DATA = {
@@ -5794,9 +5795,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'practice',    tone:'gd-n1', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Finish an exam area and its building celebrates: fireworks over the roof, a Finished ribbon, and a gold badge for good' },
-  { id:'places',      tone:'gd-n2', pin:'pins/doctor-directory.webp',  eyebrow:'Places',                title:'Put a place in the North or the South: tap the pencil beside it in the Where list' },
-  { id:'memory',      tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Memory trainer',        title:'See who is talking: the doctor, a nurse or the patient leans in while the line plays' },
+  { id:'credits',     tone:'gd-n1', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen was: tap the small purple tag under its title, or double-tap the title' },
+  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Finish an exam area and its building celebrates: fireworks over the roof, a Finished ribbon, and a gold badge for good' },
+  { id:'places',      tone:'gd-n3', pin:'pins/doctor-directory.webp',  eyebrow:'Places',                title:'Put a place in the North or the South: tap the pencil beside it in the Where list' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -10555,7 +10556,7 @@ const MOTIVATIONAL_QUOTES = [
 // and stylus; mouse still uses :hover.
 (function(){
   const LIFTS = '.tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
-    '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+    '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini, .credit-tag, .credit-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -17783,6 +17784,8 @@ try{
 // Your own face from the local cache, before any round trip.
 applyMyPhotoCache(false);
 updateTopbarAvatar();
+// Idea credits: the tag under a credited screen's title (features/credits.js).
+creditWatch();
 // Everything below talks to the database. Once the Hub is locked a request
 // made before this phone's sign-in is restored is refused -- and a refused
 // listener stays dead -- so they all wait for it. Usually well under 100 ms.
@@ -17806,6 +17809,7 @@ hubAuthReady.then(()=>{
   startPlacesListener();
   startAnnouncementsListener();
   startTypingListener();
+  startCredits();
 
   startCeListener();
 });

@@ -200,6 +200,26 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 60;
       allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
     }
+    // Idea credits: whose idea a screen was (features/credits.js,
+    // docs/features/credits.md). One document per credited screen, keyed by
+    // its title. The whole team reads them; only the owner gives, changes or
+    // removes one. Without this line the tags simply never appear.
+    match /hub-credits/{key} {
+      allow read: if team();
+      allow create, update: if isOwner() && validCredit(key);
+      allow delete: if isOwner();
+    }
+    function validCredit(key) {
+      let d = request.resource.data;
+      return key.matches('^[a-z0-9-]{1,40}$')
+        && d.keys().hasOnly(['section', 'name', 'role', 'words', 'by', 'at'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 60
+        && d.section is string && d.section.size() > 0 && d.section.size() <= 60
+        && d.role in ['idea', 'content', 'spanish', 'testing']
+        && (!('words' in d) || (d.words is string && d.words.size() <= 300))
+        && (!('by' in d) || (d.by is string && d.by.size() <= 60))
+        && (!('at' in d) || d.at is number);
+    }
     // Ephemeral "someone is typing" markers, written constantly while a
     // message is being composed.
     match /chat-typing/{docId}    { allow read, write: if team(); }
