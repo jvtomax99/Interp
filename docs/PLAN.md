@@ -215,7 +215,7 @@ under way, then what waits on Jose, then small leftovers.
       (`docs/features/campus-weather.md`, his go the same day, "as written"), then
       `claude/campus-weather`: the sun from 3 days at the left of the sky, a rainbow
       from 7 over the board, CSS only, sliding with the sky; nothing for a missed day.
-      **2c is done with this.**
+      #217, live b1105.1421. **2c is done with this.**
 3. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
    distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The
