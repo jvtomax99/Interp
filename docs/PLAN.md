@@ -202,7 +202,7 @@ under way, then what waits on Jose, then small leftovers.
       missed day).
       **2026-11-05 (Jose's pick, the first of these): 5, the celebration.** Spec first
       (`docs/features/campus-celebration.md`, his go the same day), then #213 on
-      `claude/campus-celebration`: three fireworks around the badge after the last
+      `claude/campus-celebration`, live b1105.0959: three fireworks around the badge after the last
       climb, a Finished ribbon for the visit, the badge gold with a star for good,
       once per phone (`ih_campusDone`); no sound, no cheer, no finale in this
       version. Next of the three: 4 (tap a person) or 6 (weather), his pick.
