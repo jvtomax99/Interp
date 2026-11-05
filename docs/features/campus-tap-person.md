@@ -2,7 +2,36 @@
 
 Jose picked this on 2026-11-05 as the next campus piece (item 2c in `docs/PLAN.md`: "tap a person: a term from your
 glossary, counts as practice; tap area bigger than the figure"). This is the spec, written before any code (his rule,
-`AGENTS.md`, "How Jose works with AI tools"). Waiting for his go.
+`AGENTS.md`, "How Jose works with AI tools"). His go the same day: "Go, Term Review only".
+
+## As built (2026-11-05, branch `claude/campus-tap-person`)
+
+- `features/campus.js`, section "Tap a person for a word": `campusFolkGroups()` groups the idlers and sitters of
+  `CAMPUS_MAP.live` (each joins the first group whose middle is within 22 css px at the phone's scale, else starts
+  one; five groups today, named from `CAMPUS_FOLK_SPOTS` by the nearest, else "on the campus"). `renderCampus`
+  writes one `.cp-folk` button per group, placed in the markup before the buildings' `.cp-bld` boxes, so a wall
+  still takes the tap; `is-word` on the group with the dots (`campusWordGroup`, kept in `ih_campusWord.g`), `is-sel`
+  on the picked one. Dr. Smiley's line names that group until a word is answered on the phone (`ih_campusTalked`).
+  `renderCampus` also starts loading your Term Review record if it is not in yet (`ensureLoaded('termReviews')`).
+- The tap (`campusFolkTap`): the name first (`requireName`), a building pick closed, the held word or a new one
+  (`campusWordDraw`: `reviewBuild(null, 2)`, the first that is not the word before, kept in `ih_campusWord.id`), then
+  the card (`campusFolkCard`) in the `.cp-pick` region: the English with `reviewWhy`'s reason, Show, then Got it and
+  Missed it; Saving…; Not saved with Try again and Skip; "Saved to your Term Review record", and the card closes
+  itself 1.6 s later. A second tap on the ringed group is Show. `campusFolkAnswer` writes through
+  `saveTermReview(id, box, count + 1, { result, confirm: true })` (box up or 0, as `reviewRecord` does), then the
+  next word waits with another group (`campusFolkMark` moves the dots without a redraw). `campusPick` closes a word
+  (`campusFolkClose(true)` keeps the card for the building); a tap elsewhere or Escape closes either.
+- `app.css` beside `.cp-clouds`: `.cp-folk` is a 44 x 44 px transparent round button centred by margins, its ring a
+  14 px `::after` on `is-sel`, `:active`, `.is-pressed` and focus (both classes are in `LIFTS`); `.cp-folk-say`, the
+  bubble, three 3 px dots on `cpDots` (1.4 s, staggered), 5 px above the group's middle; the word card stacks
+  (`.cp-folk-in`, column) and the `.cp-pick` region anchors it to the foot's bottom with `:has`, so a long term grows
+  it up over the picture and never past the card. Once the Spanish shows, the English steps back (`.is-asked`).
+  Reduced motion: the dots stand still; `is-away` pauses them; Still stops them through the page's rule.
+- Checks: `tests/suites/campus-alive.cjs`, "tap a person" (the list under Checks below, all in). `campus-pick.cjs`'s
+  empty-scene sweep skips the spots. Guide: the practice answer's new paragraph and keywords (`guide/topics.js`); the
+  first New lately card (`GUIDE_NEWS`, `index.html`), the memory trainer's card gone.
+- Not done from the spec: nothing. Beyond it: nothing (no team point for an answer, unlike Term Review's `teamPoints(1)`;
+  add it if Jose wants his rank to count these).
 
 ## What it does
 

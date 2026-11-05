@@ -122,7 +122,7 @@ drawing just draw. Reduced motion: no swing, flip, climb, flash or
 flicker. Suite: `campus-alive.cjs`.
 A building finished (every question known, 100%) celebrates once per phone: three fireworks over its roof after the
 climb, a Finished ribbon for that visit, its badge gold with a star for good (`ih_campusDone`; 2026-11-05,
-`docs/features/campus-celebration.md`).
+`docs/features/campus-celebration.md`). The people standing and sitting about are tappable in groups: someone asks you a glossary word, saved as a Term Review answer (`docs/features/campus-tap-person.md`, 2026-11-05).
 Then (Jose sent Google Maps screenshots; his pick: fix the campus from
 them, no Google data in the app): Terminology's tower is red-brown brick
 ("the brick tower"), and the right side of the drive is one big dark
