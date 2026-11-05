@@ -7962,6 +7962,12 @@ html.op-cover::after{ content:""; position:fixed; inset:0; z-index:2147483001; b
 .op.is-leaving{ opacity:0; transition:opacity .26s var(--ease); pointer-events:none; }
 .op-scene{ position:absolute; inset:0; overflow:hidden; }
 .op.is-opening .op-scene{ background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat; }
+/* the light by time of day (openingLook): the morning and evening stills, and the badge in that light */
+html.op-cover[data-op-look="morning"]::after, .op.op-morning, .op.op-morning.is-opening .op-scene{ background-image:url(./opening/pavilion-morning-1.webp); }
+html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-opening .op-scene{ background-image:url(./opening/pavilion-evening-1.webp); }
+.op.op-morning .op-holder, .op.op-morning .op-purp{ filter:sepia(.12) saturate(1.05) brightness(1.02); }
+.op.op-evening .op-holder, .op.op-evening .op-purp{ filter:brightness(.88) saturate(.9); }
+.op.op-evening .op-holder::after, .op.op-evening .op-purp::after{ content:""; position:absolute; inset:0; border-radius:inherit; z-index:5; pointer-events:none; background:rgba(56,78,170,.2); mix-blend-mode:multiply; }
 .op-bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s linear; pointer-events:none; }
 .op-bg.is-on{ opacity:1; }
 .op-stage{ position:absolute; left:50%; top:50%; width:390px; height:844px; transform:translate(-50%,-50%) scale(var(--op-k,1)); color:#fff; }

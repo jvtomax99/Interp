@@ -65,6 +65,29 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
     await ctx.close();
   }
 
+  console.log('== the light follows the clock');
+  {
+    const table = await (async () => { const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, settle: 300 });
+      const t = await page.evaluate(() => [0, 4, 5, 10, 11, 15, 16, 23].map(h => h + ':' + openingLook(h)).join(' ')); await ctx.close(); return t; })();
+    ok(table === '0:evening 4:evening 5:morning 10:morning 11:midday 15:midday 16:evening 23:evening', 'morning 5-11, midday 11-4, evening and night 4 pm-5 am', table);
+    for (const [at, look, clip] of [['2026-11-06T08:00:00', 'morning', 'pavilion-morning-1'], ['2026-11-06T13:00:00', 'midday', 'pavilion-1'], ['2026-11-06T21:00:00', 'evening', 'pavilion-evening-1']]) {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, settle: 500, clock: at });
+      const s = await page.evaluate(() => { const v = document.querySelector('.op-bg'), op = document.querySelector('.op');
+        return { attr: document.documentElement.getAttribute('data-op-look'), cls: op && op.className, src: v && [...v.querySelectorAll('source')].map(x => x.getAttribute('src')).join(' '),
+          poster: v && v.getAttribute('poster'), bg: op && getComputedStyle(op).backgroundImage }; });
+      ok(s.attr === look && s.cls.includes('op-' + look) && s.src.includes(clip + '.mp4') && s.src.includes(clip + '.webm') && s.poster.includes(clip + '.webp') && s.bg.includes(clip + '.webp'),
+        at.slice(11, 16) + ': the ' + look + ' look (its loop, its still behind it)', s);
+      if (look === 'evening') {
+        const w = await page.evaluate(() => getComputedStyle(document.querySelector('.op-holder'), '::after').backgroundColor);
+        ok(/rgba\(56, 78, 170/.test(w), 'the evening badge takes the cool light', w);
+      }
+      await page.waitForTimeout(1900);
+      await page.screenshot({ path: O + 'look-' + look + '.png' });
+      ok(!page.__errors.length, 'no page errors', page.__errors);
+      await ctx.close();
+    }
+  }
+
   console.log('== a tap before the badge arrives');
   {
     const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, settle: 500, init: WATCH });

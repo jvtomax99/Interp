@@ -33,6 +33,14 @@ function openingNames(){
   const first = parts[0].slice(0, 16), last = parts.length > 1 ? parts[parts.length - 1] : '';
   return { card: last ? `${first} ${last[0].toUpperCase()}.` : first, first };
 }
+// The pavilion's light follows the phone's clock: morning 5-11, midday 11-4 pm,
+// evening and night from 4 pm to 5 am. Each look is its own loop in opening/;
+// index.html's first script makes the same choice for the cover (data-op-look).
+const OP_CLIPS = { morning: 'pavilion-morning-1', midday: 'pavilion-1', evening: 'pavilion-evening-1' };
+function openingLook(h){
+  if(h === undefined) h = new Date().getHours();
+  return h >= 5 && h < 11 ? 'morning' : h >= 11 && h < 16 ? 'midday' : 'evening';
+}
 // Up and not yet gone: Home's hello waits while this is true (home-polish.js).
 function hubOpeningUp(){ return !!OP.el; }
 
@@ -41,11 +49,11 @@ const opSpan = (t, a, b) => opClamp((t - a) / (b - a));
 const opSine = x => .5 - .5 * Math.cos(Math.PI * opClamp(x));
 const opOut = x => 1 - Math.pow(1 - opClamp(x), 3);
 
-function openingHtml(){
-  const n = openingNames(), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function openingHtml(look){
+  const clip = './opening/' + OP_CLIPS[look] + '.', n = openingNames(), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   return `<div class="op-scene">
-      <video class="op-bg" muted playsinline loop preload="auto" disablepictureinpicture aria-hidden="true" poster="./opening/pavilion-1.webp">
-        <source src="./opening/pavilion-1.mp4" type="video/mp4"><source src="./opening/pavilion-1.webm" type="video/webm"></video>
+      <video class="op-bg" muted playsinline loop preload="auto" disablepictureinpicture aria-hidden="true" poster="${clip}webp">
+        <source src="${clip}mp4" type="video/mp4"><source src="${clip}webm" type="video/webm"></video>
       <div class="op-stage">
         <div class="op-ttl"><span class="op-logo"></span><span class="op-wm"><b><em>Interpreter</em> <strong>Hub</strong></b><small>HUMC LANGUAGE SERVICES</small></span></div>
         <div class="op-reader"><span class="op-lr"></span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8.5 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M14.5 3.5a12 12 0 0 1 0 17"/><circle cx="5.5" cy="12" r="1.3" fill="#fff"/></svg></div>
@@ -80,13 +88,16 @@ function openingStart(replay){
   const root = document.documentElement;
   if(OP.el){ root.classList.remove('op-cover'); return; }
   try{
+    // The cover's look (index.html) on a real start; the clock's on a Replay.
+    const look = OP_CLIPS[root.getAttribute('data-op-look')] && !replay ? root.getAttribute('data-op-look') : openingLook();
+    root.setAttribute('data-op-look', look);
     const el = document.createElement('div');
-    el.className = 'op';
+    el.className = 'op op-' + look;
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-label', 'Opening. Tap your badge to begin');
     el.tabIndex = -1;
-    el.innerHTML = openingHtml();
+    el.innerHTML = openingHtml(look);
     document.body.appendChild(el);
     OP.el = el; OP.tap = null; OP.cues = {}; OP.leaving = false;
     OP.still = (typeof drStill === 'function' && drStill()) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);

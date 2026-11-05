@@ -21,6 +21,9 @@
     if(!opReload && localStorage.getItem('ih_opening') !== 'off' && !/[?&]open=/.test(location.search)
        && Math.min(screen.width, screen.height) < 600){   // phones only (the screen: the page's width isn't set yet here)
       window.__opPlay = true;
+      // The pavilion's light by the phone's clock: morning 5-11, midday 11-4, evening and night (openingLook in features/opening.js).
+      var opH = new Date().getHours();
+      document.documentElement.setAttribute('data-op-look', opH >= 5 && opH < 11 ? 'morning' : opH >= 11 && opH < 16 ? 'midday' : 'evening');
       document.documentElement.classList.add('op-cover');
       setTimeout(function(){ if(!window.__opMounted) document.documentElement.classList.remove('op-cover'); }, 6000);
     }
