@@ -4,8 +4,9 @@ The first thing the Hub shows every time it starts: your staff
 badge drops in on its lanyard in front of the Helena Theurer Pavilion, you
 tap it, it scans green, and the green ring opens into Home. Jose,
 2026-11-05, after about fifteen mockups ("I want an opening similar to the
-CPA app... not with the train moving"). **Status: plan only, no code yet.**
-The picked mockup is in `docs/mockups/opening/` (video and stills).
+CPA app... not with the train moving"). **Status: built 2026-11-05**
+(`features/opening.js`; "As built" below). The picked mockup is in
+`docs/mockups/opening/` (video and stills).
 
 ## What it does
 
@@ -114,7 +115,56 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 3. **Sound is on by default, quiet,** and only after the tap. More's
    **Opening** card gets a **Sound** switch next to on / off and Replay.
 
-## Checks (when built)
+## As built (2026-11-05)
+
+- **Deciding, before the first paint:** index.html's first script (before
+  `<head>`). It plays unless `ih_opening` is `off`, the address has
+  `?open=` (a notification), `sessionStorage.ih_opReload` is set (the
+  reload after an update sets it just before reloading, and it is used
+  once), or the screen's shortest side is 600px or more (a tablet or a
+  computer). That script runs before the viewport tag, when a phone still
+  reports a 980px page, so it reads the screen, not the page. It then sets
+  `html.op-cover`: the opening's still over everything, until
+  `openingStart()` mounts (the first line of index.html's main script),
+  never more than 6 s.
+- **Resume:** nothing to do. Coming back from another app doesn't run the
+  page's scripts again, so the opening can't play.
+- **The timeline** is the mockup's, on one clock (`opFrame(t)`): lockup
+  0.2-2 s, the badge drops at 1.3 s and has settled at 2.05 s
+  (`OP_BADGE_AT`; a tap before that skips to Home with a 260 ms fade);
+  after the tap: lower 0-0.5 s, scan 0.5-0.95 s (beep), green at 0.95 s
+  (chime, wink, the lanyard pulse, the glow), "Welcome in" 1.05-2 s, the
+  ring 1.7-2.5 s (a mask on the scene, so the live Home shows inside it),
+  then `hub-opening-done`. Escape skips; Enter or Space taps.
+- **The stage** is the mockup's 390 x 844, scaled to fit the screen
+  (`--op-k`, the smaller of width/390 and height/844); the pavilion loop
+  covers the whole screen behind it.
+- **The loop:** `opening/pavilion-1.mp4` (H.264, 0.7 MB, what iPhones
+  and Chrome play) and `.webm` (VP9, 0.25 MB, for browsers without H.264),
+  584 x 1264, 8 s, every motion a whole number of cycles in 8 s so it
+  joins seamlessly. Rendered from the mockup's scene (the photo on its
+  depth map, the light from its own sky, faint dust) with its drift made
+  periodic; the still `pavilion-1.webp` (15 KB) is frame 0. `sw.js`
+  precaches the MP4 and the still, carries them over from the last
+  version's cache instead of downloading them again on every deploy, and
+  answers an iPhone's Range requests from the saved clip. A new clip must
+  get a new name (`pavilion-2`). If a phone won't autoplay it (iPhone Low
+  Power Mode), the still stays: the same picture, not moving.
+- **Dr. Smiley on the card** is `drSmileyArt()` on his smile frame, the
+  wink frames on green. The team's rank outfit is hidden on the card
+  (`.op-pic .lv-acc`): bare-headed, like the photo on a real badge.
+- **Sound** is made on the phone (Web Audio, nothing to download): the
+  mockup's beep, chime and swell, at a lower volume, only after the tap.
+  On iPhone it follows the silent switch.
+- **Home's hello waits:** `home-polish.js` holds the startup hello and the
+  name pen's 6 s cap while `hubOpeningUp()` is true, and starts them on
+  `hub-opening-done`.
+- **More's Opening card** (above Measure smoothness): Badge opening and
+  Sound switches, the Badge title field (28 characters, empty means Staff
+  Interpreter), Replay the opening (goes Home first; not during a timed
+  exam).
+
+## Checks
 
 A new suite, `tests/suites/opening.cjs`: it plays on a fresh start and not on a resume; not with `?open=`; a tap before the badge skips
 it; after it, nothing is left over Home (`elementFromPoint` reaches Home's

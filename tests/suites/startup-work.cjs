@@ -41,7 +41,7 @@ const init = () => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await L.route(page, {});
     await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-      try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
+      try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
     await page.addInitScript(init);
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
@@ -69,7 +69,7 @@ const init = () => {
     const page = await ctx.newPage();
     await L.route(page, {});
     await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-      try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
+      try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
     await page.addInitScript(init);
     await page.addInitScript(() => {
       // Only the pen's frames: it asks for them from inside the greeting's row.

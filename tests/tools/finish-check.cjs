@@ -271,7 +271,7 @@ function safeAreas() {
     const errors = []; page.on('pageerror', e => errors.push(e.message.slice(0, 120)));
     await route(page, {});
     await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-      try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); if (o.dark) localStorage.setItem('ih_theme', 'dark'); } catch (e) {} }, { seed: SEED, dark });
+      try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); if (o.dark) localStorage.setItem('ih_theme', 'dark'); } catch (e) {} }, { seed: SEED, dark });
     await page.addInitScript(INIT);
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(12000);

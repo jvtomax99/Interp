@@ -79,6 +79,7 @@ const PRECACHE = [
   './features/backfill.js',
   './features/ask-hub.js',
   './features/credits.js',
+  './features/opening.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the
@@ -140,14 +141,22 @@ const PRECACHE = [
   './pins/ophthalmology.webp',
   './pins/surgery-anesthesia.webp',
   './pins/anatomy.webp',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  // The opening's pavilion (features/opening.js): its still and the loop
+  // iPhones play. Kept from the last version's cache on install (below), so
+  // a deploy doesn't fetch the 0.7 MB clip again; a new clip gets a new name.
+  './opening/pavilion-1.webp',
+  './opening/pavilion-1.mp4'
 ];
+const CARRY = ['./opening/pavilion-1.webp', './opening/pavilion-1.mp4'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
       // Individual failures shouldn't abort the whole install.
-      .then(cache => Promise.allSettled(PRECACHE.map(url => cache.add(url))))
+      .then(cache => Promise.allSettled(PRECACHE.map(url => CARRY.includes(url)
+        ? caches.match(url).then(hit => hit ? cache.put(url, hit) : cache.add(url))
+        : cache.add(url))))
       .then(() => self.skipWaiting())
   );
 });
@@ -234,6 +243,32 @@ self.addEventListener('fetch', event => {
   // iPhones need to play and skip). The cache below would hand back the whole
   // 8 MB file instead, so they never go through it.
   if (url.pathname.startsWith('/media/')) return;
+  // The opening's loop (opening/): small, so saved whole and played from the
+  // saved copy, offline too; the pieces an iPhone asks for (Range) are cut
+  // from it here. Never re-fetched in the background: a new clip has a new name.
+  if (/^\/opening\/[\w-]+\.(?:mp4|webm)$/.test(url.pathname)) {
+    event.respondWith((async () => {
+      const key = url.origin + url.pathname;
+      let hit = await caches.match(key);
+      if (!hit) {
+        const res = await fetch(key);
+        if (!res || res.status !== 200) return res;
+        try { await (await caches.open(CACHE_VERSION)).put(key, res.clone()); } catch (e) {}
+        hit = res;
+      }
+      const range = req.headers.get('range');
+      const m = range && /bytes=(\d*)-(\d*)/.exec(range);
+      if (!m) return hit;
+      const buf = await hit.arrayBuffer(), size = buf.byteLength;
+      let start = m[1] ? +m[1] : 0, end = m[2] ? Math.min(+m[2], size - 1) : size - 1;
+      if (!m[1] && m[2]) { start = Math.max(0, size - +m[2]); end = size - 1; }
+      if (start >= size || start > end) return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
+      return new Response(buf.slice(start, end + 1), { status: 206, headers: {
+        'Content-Type': hit.headers.get('Content-Type') || (url.pathname.endsWith('.webm') ? 'video/webm' : 'video/mp4'),
+        'Content-Range': `bytes ${start}-${end}/${size}`, 'Content-Length': String(end - start + 1), 'Accept-Ranges': 'bytes' } });
+    })());
+    return;
+  }
 
   const isDocument = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');

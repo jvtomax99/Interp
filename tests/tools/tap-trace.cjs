@@ -30,7 +30,7 @@ async function once(browser) {
   const cdp = await ctx.newCDPSession(page);
   await route(page, {});
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     window.__ev = []; try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'click') window.__ev.push({ d: Math.round(e.duration), wait: Math.round(e.processingStart - e.startTime), run: Math.round(e.processingEnd - e.processingStart) }); })).observe({ type: 'event', buffered: true, durationThreshold: 16 }); } catch (e) {} }, { seed: SEEDX });
   await page.goto('https://interp.test/', { waitUntil: 'load' });
   if (process.env.CSS) await page.addStyleTag({ content: process.env.CSS });

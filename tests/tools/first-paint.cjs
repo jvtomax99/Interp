@@ -77,7 +77,7 @@ async function once(browser, site, net) {
   for (const f of ['app.css', 'guide/topics.js', 'practice/questions.js', 'falsefriends/list.js', 'home-polish.css', 'home-polish.js', 'pin-icons.js']) await page.unroute('**/' + f);
   await page.unroute(/^https:\/\/interp\.test\/features\/[\w-]+\.js(\?.*)?$/);
   await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-    try { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
+    try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Jose'); localStorage.setItem('ih_region', 'north'); } catch (e) {}
     document.addEventListener('ih:home-paint', () => { if (!window.__home) window.__home = performance.now(); }); }, { seed: SEED });
   const cdp = await ctx.newCDPSession(page);
   await cdp.send('Network.enable');

@@ -9,6 +9,22 @@
       document.documentElement.setAttribute('data-theme', 'dark');
     }
   }catch(e){}
+  /* ---------- The opening, before the first paint ----------
+     features/opening.js; docs/features/opening.md. Plays on every real
+     start on a phone, unless it is switched off in More, a notification
+     started the app (?open=), or this is the reload after an update (the
+     flag set just before it). Until the opening mounts, its still covers
+     the page so Home never flashes first; never longer than 6 s. */
+  try{
+    var opReload = sessionStorage.getItem('ih_opReload');
+    if(opReload) sessionStorage.removeItem('ih_opReload');
+    if(!opReload && localStorage.getItem('ih_opening') !== 'off' && !/[?&]open=/.test(location.search)
+       && Math.min(screen.width, screen.height) < 600){   // phones only (the screen: the page's width isn't set yet here)
+      window.__opPlay = true;
+      document.documentElement.classList.add('op-cover');
+      setTimeout(function(){ if(!window.__opMounted) document.documentElement.classList.remove('op-cover'); }, 6000);
+    }
+  }catch(e){}
 </script>
 <head>
 <meta charset="UTF-8">
@@ -47,7 +63,7 @@
      550, 650 and 700 all rendered as 600 -- three weights collapsed into one,
      which is most of why the type read flat. One variable file also replaces
      three static ones. -->
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&family=Inter:wght@100..700&family=Lora:ital,wght@1,500&family=Parisienne&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&family=Inter:wght@100..700&family=Lora:ital,wght@1,500&family=Parisienne&family=Cormorant+Garamond:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./app.css">
 <link rel="stylesheet" href="./home-polish.css">
 <script src="./home-polish.js" defer></script>
@@ -642,7 +658,10 @@
 <script src="./features/backfill.js"></script>
 <script src="./features/ask-hub.js"></script>
 <script src="./features/credits.js"></script>
+<script src="./features/opening.js"></script>
 <script>
+/* The opening (features/opening.js), decided before the first paint (the first script). */
+if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover'); } }
 /* ============ Seed data (from the shared reference doc) ============ */
 const DEFAULT_DATA = {
   categories: [
@@ -5847,9 +5866,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'credits',     tone:'gd-n1', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen or a glossary domain was: tap its small credit tag, or double-tap its title' },
-  { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Study three days in a row and the sun comes out over your campus; seven, and a rainbow. Tap the people there for a glossary word' },
-  { id:'places',      tone:'gd-n3', pin:'pins/doctor-directory.webp',  eyebrow:'Places',                title:'Put a place in the North or the South: tap the pencil beside it in the Where list' },
+  { id:'opening',     tone:'gd-n1', pin:'pins/wave.webp',              eyebrow:'The opening',           title:'Your badge greets you when the Hub starts: tap it to scan in. Turn it off, or set your badge title, in More' },
+  { id:'credits',     tone:'gd-n2', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen or a glossary domain was: tap its small credit tag, or double-tap its title' },
+  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Study three days in a row and the sun comes out over your campus; seven, and a rainbow. Tap the people there for a glossary word' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -12198,6 +12217,7 @@ function openMoreSheet(){
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
+    ${openingMoreHtml()}
     ${frameMeterMoreHtml()}
     ${voiceCheckMoreHtml()}
     <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
@@ -18095,7 +18115,7 @@ if('serviceWorker' in navigator && window.isSecureContext){
     if(d.type === 'open-section' && d.section) setCategory(d.section);
     // The worker's build, asked for above: reload once if this page is older.
     if(d.type === 'sw-version' && typeof d.version === 'string' && !swReloaded){
-      if(d.version.split('-').pop() !== BUILD_ID){ swReloaded = true; window.location.reload(); }
+      if(d.version.split('-').pop() !== BUILD_ID){ swReloaded = true; try{ sessionStorage.setItem('ih_opReload', '1'); }catch(e){} window.location.reload(); }
     }
   });
 }

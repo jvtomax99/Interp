@@ -50,6 +50,7 @@ const SUITES = [
   ['startup-work.cjs',    'Startup: name pen in a worker, no repeat repaint, Home measured before paint'],
   ['glossary-hero.cjs',   'Bold glossary: the colour hero, a long name never breaking a word, ••• tappable, the glass search sticking, cards in the domain colour'],
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
+  ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
   ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once'],

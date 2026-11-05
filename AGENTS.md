@@ -104,6 +104,7 @@ So:
 | HUMC Brain (double-tap Dr. Smiley's head) | `brain/index.html` (the page), `brain/data.json` (from `tests/tools/brain-data.cjs`), opener in `home-polish.js`; `docs/features/humc-brain.md` |
 | Your knowledge brain (Term Review's small live brain, CoreCHI Practice tile; separate from his) | `brain/you.html`; the Hub's side (its data `knowledgeBrainData`, your record, the small brain `kbMiniHtml`) in `features/knowledge-brain.js`; `docs/features/knowledge-brain.md` |
 | Idea credits: the tag under a credited screen's title, its card, the owner's Give credit sheet (`creditDecorate`, `creditOpen`, `creditEdit`, `hub-credits`) | `features/credits.js`; styles in `app.css`; `docs/features/credits.md` |
+| The opening, Badge in (`openingStart`, `opFrame`, More's Opening card `openingMoreHtml`); the pavilion loop in `opening/` | `features/opening.js`; styles in `app.css` ("Opening"); `docs/features/opening.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
