@@ -21,6 +21,10 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
   if (!s) return { found: false }; const r = s.getBoundingClientRect(), el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
   return { found: true, hit: !!el && (s === el || s.contains(el) || el.contains(s)), under: el && (el.className || el.tagName) + '' }; });
 
+// The music (opening/music-1.m4a): asked for when the opening mounts, played only after a tap.
+const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus, playing: !!(OP.mus && OP.mus.src), ac: OP.ac ? OP.ac.state : null,
+  aac: new Audio().canPlayType('audio/mp4; codecs="mp4a.40.2"') }));
+
 (async () => {
   const b = await L.chromium.launch();
 
@@ -40,6 +44,8 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
     await page.screenshot({ path: O + 'arriving.png' });
     await wait(2300);
     await page.screenshot({ path: O + 'badge.png' });
+    const m0 = await music(page);
+    ok(m0.asked && !m0.on && !m0.ac, 'the music is fetched on mount but nothing plays before the tap', m0);
     ok((await state(page)).log.indexOf('hello') < 0, 'the hello has not started under the opening', await state(page));
     const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.touchscreen.tap(box.x, box.y);
@@ -47,10 +53,13 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
     await page.waitForFunction(() => +getComputedStyle(document.querySelector('.op-wel')).opacity > .5, null, { timeout: 2500 }).catch(() => {});
     const g = await page.evaluate(() => ({ wel: +getComputedStyle(document.querySelector('.op-wel')).opacity, lc: getComputedStyle(document.querySelector('.op-lr')).getPropertyValue('--lc').trim() }));
     ok(g.wel > .5 && g.lc === '#5de3a0', 'the tap: green, and the welcome shows', g);
+    const m1 = await music(page);
+    ok(m1.on && m1.ac === 'running' && (m1.playing || !m1.aac), 'the tap starts the music' + (m1.aac ? '' : ' (this browser has no AAC, so it is only asked for)'), m1);
     await page.screenshot({ path: O + 'green.png' });
     await page.waitForFunction(() => !document.querySelector('.op'), null, { timeout: 4000 }).catch(() => {});
     const after = await state(page);
     ok(!after.up && after.log[0] === 'done', 'it ends by itself and says so (hub-opening-done)', after);
+    ok(!(await music(page)).on, 'the music is fading out over Home (let go when the opening ends)');
     const reach = await homeReached(page);
     ok(reach.found && reach.hit, 'nothing is left over Home: a tap on its search reaches it', reach);
     await wait(3500);
@@ -154,11 +163,15 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
     ok(off.on === 'off' && off.snd === 'off' && off.a === 'false', 'the switches turn it and its sound off, on this phone', off);
     await page.click('#opOnSwitch');
     ok(await page.evaluate(() => localStorage.getItem('ih_opening') === null), 'and back on');
+    ok(await page.evaluate(() => { const t = openingMoreHtml(); return /Soft music/.test(t); }), 'the Sound switch says it covers the music');
+    await page.click('#opSoundSwitch');
     await page.fill('#opTitleInput', 'Per Diem <b>Interpreter</b>');
     await page.click('text=Replay the opening');
     await wait(600);
     const r = await page.evaluate(() => ({ up: !!document.querySelector('.op'), rl: document.querySelector('.op-rl') && document.querySelector('.op-rl').innerHTML, saved: localStorage.getItem('ih_badgeTitle') }));
     ok(r.up && r.rl === 'Per Diem &lt;b&gt;Interpreter&lt;/b&gt;' && r.saved === 'Per Diem <b>Interpreter</b>', 'Replay plays it with the new title, as plain text', r);
+    const m2 = await music(page);
+    ok(m2.on && m2.ac === 'running', 'Replay is a tap, so the music plays while the badge waits', m2);
     await page.keyboard.press('Escape');
     await wait(400);
     ok(!(await state(page)).up, 'Escape skips it');
