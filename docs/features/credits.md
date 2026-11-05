@@ -34,10 +34,14 @@ the only way in: a credit nobody finds isn't much of a credit.
   key is the domain's id, not its name, `domain-<id>` (`domain-onco-rad`),
   so a rename keeps the credit; `section` holds the name at the time. The
   tag (`.credit-tag.on-banner`, the banner's own glass) goes on its own line
-  under "7 terms". Same four roles, so the rules didn't change, but two
-  read as a list of terms (`CREDIT_DOMAIN_ROLES`): content is "Added the
-  terms" / "Terms by Ana" / "put these terms together", testing is
-  "Reviewed the terms" / "Reviewed by Ana". A parent's credit is not its
+  under "7 terms". Some roles read as a list of terms
+  (`CREDIT_DOMAIN_ROLES`): content is "Added the terms" / "Terms by Ana" /
+  "put these terms together", testing is "Reviewed the terms" / "Reviewed
+  by Ana". A fifth role, domains only (Jose, the same day, "show created
+  for the suggestion"; he picked a fifth choice over rewording The idea):
+  `suggested`, "Suggested it" / "Created at Sylvia's suggestion" /
+  "suggested this domain". It needed the rules' role list widened, so the
+  rules file had to be pasted again. A parent's credit is not its
   subgroups', nor the other way round. Not on All domains.
 - **Which screen.** The title is the first heading in `#content`, when it
   sits in the screen's own head: `#content > .section-head h2` or the
@@ -65,7 +69,7 @@ the only way in: a credit nobody finds isn't much of a credit.
   touch lands on the card's backdrop the instant it appears; backdrop
   clicks in the first 450 ms are ignored, or the card closed itself.
 - **Data.** `hub-credits/{key}` = `{ section, name, role, words, by, at }`
-  (`role` one of `idea`, `content`, `spanish`, `testing`; `words` up to
+  (`role` one of `idea`, `suggested` (domains), `content`, `spanish`, `testing`; `words` up to
   300 characters; `by` is `whoAmI()`; `at` is ms). One document per
   screen, not a shared blob. Everyone listens (`startCredits`, in the
   `hubAuthReady` list); the phone keeps a copy in `ih_credits` so the tag

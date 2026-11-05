@@ -18,14 +18,17 @@
 const CREDIT_STORE = 'ih_credits';
 const CREDIT_ROLES = {
   idea:    { chip: 'The idea',            tag: n => `${n}'s idea`,              line: 'came up with this idea',          kicker: s => `The idea behind ${s}` },
+  // Domains only (Jose, 2026-11-05: "show created for the suggestion").
+  suggested: { chip: 'Suggested it',      tag: n => `Created at ${n}'s suggestion`, line: 'suggested this',             kicker: s => `Behind ${s}`, domainOnly: true },
   content: { chip: 'Wrote the content',   tag: n => `Written by ${n}`,          line: 'wrote what is in it',             kicker: s => `Behind ${s}` },
   spanish: { chip: 'Checked the Spanish', tag: n => `Spanish checked by ${n}`,  line: 'checked the Spanish',             kicker: s => `Behind ${s}` },
   testing: { chip: 'Tested it',           tag: n => `Tested by ${n}`,           line: 'tested it before the team got it', kicker: s => `Behind ${s}` },
 };
-// A glossary domain's credit is for its list of terms, so two of the four
-// read differently there (same four roles, so the rules need no change).
+// A glossary domain's credit is for its list of terms, so some roles read
+// differently there; "suggested" is offered on domains only.
 const CREDIT_DOMAIN_ROLES = {
   idea:    { line: 'came up with this domain' },
+  suggested: { line: 'suggested this domain' },
   content: { chip: 'Added the terms',    tag: n => `Terms by ${n}`,    line: 'put these terms together' },
   testing: { chip: 'Reviewed the terms', tag: n => `Reviewed by ${n}`, line: 'reviewed these terms' },
 };
@@ -169,7 +172,7 @@ function creditEdit(key, section) {
   const c = CREDITS.map[key];
   const sec = (c && c.section) || section || '';
   const role = (c && c.role) || 'idea';
-  const chips = Object.keys(CREDIT_ROLES).map(k => `
+  const chips = Object.keys(CREDIT_ROLES).filter(k => !CREDIT_ROLES[k].domainOnly || String(key).startsWith(CREDIT_DOMAIN) || k === role).map(k => `
     <label class="credit-chip"><input type="radio" name="creditRole" value="${k}"${k === role ? ' checked' : ''}><span>${escapeHtml(creditRole(k, key).chip)}</span></label>`).join('');
   creditShow(`
     <div class="modal credit-sheet" data-key="${escapeAttr(key)}" data-section="${escapeAttr(sec)}">

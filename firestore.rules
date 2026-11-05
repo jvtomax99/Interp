@@ -215,7 +215,7 @@ service cloud.firestore {
         && d.keys().hasOnly(['section', 'name', 'role', 'words', 'by', 'at'])
         && d.name is string && d.name.size() > 0 && d.name.size() <= 60
         && d.section is string && d.section.size() > 0 && d.section.size() <= 60
-        && d.role in ['idea', 'content', 'spanish', 'testing']
+        && d.role in ['idea', 'suggested', 'content', 'spanish', 'testing']
         && (!('words' in d) || (d.words is string && d.words.size() <= 300))
         && (!('by' in d) || (d.by is string && d.by.size() <= 60))
         && (!('at' in d) || d.at is number);

@@ -105,6 +105,7 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
     });
     ok(sheet && sheet.h === 'Give credit' && /False Friends/.test(sheet.lede) && !sheet.remove, 'an owner double-tapping an uncredited title gets Give credit', sheet);
     ok(sheet && sheet.fonts.every(f => f >= 16), 'its inputs are 16px or more (no iPhone zoom)', sheet);
+    ok(await page.evaluate(() => [...document.querySelectorAll('#creditOverlay .credit-chip span')].map(x => x.textContent).join('|') === 'The idea|Wrote the content|Checked the Spanish|Tested it'), 'a tool screen offers the four, no Suggested it');
     await page.screenshot({ path: O + 'owner-give.png' });
     // An empty name is refused.
     await page.click('#creditOverlay .credit-btn-main'); await wait(200);
@@ -139,9 +140,9 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
     const dsheet = await page.evaluate(() => { const s = document.querySelector('#creditOverlay .credit-sheet');
       return s && { key: s.dataset.key, lede: s.querySelector('.credit-lede').textContent, chips: [...s.querySelectorAll('.credit-chip span')].map(x => x.textContent) }; });
     ok(dsheet && dsheet.key === 'domain-onco-hematology' && /Hematology/.test(dsheet.lede) && /banner/.test(dsheet.lede), 'a domain: double-tap its name for Give credit, keyed by its id', dsheet);
-    ok(dsheet && dsheet.chips.join('|') === 'The idea|Added the terms|Checked the Spanish|Reviewed the terms', 'a domain\'s choices read as a list of terms', dsheet);
+    ok(dsheet && dsheet.chips.join('|') === 'The idea|Suggested it|Added the terms|Checked the Spanish|Reviewed the terms', 'a domain\'s choices read as a list of terms, with Suggested it', dsheet);
     await page.fill('#creditName', 'Sylvia');
-    await page.click('#creditOverlay .credit-chip:nth-child(2) input');
+    await page.click('#creditOverlay .credit-chip:nth-child(3) input');
     await page.click('#creditOverlay .credit-btn-main'); await wait(400);
     const dtag = await page.evaluate(() => { const t = document.querySelector('.domain-banner .credit-tag'), m = document.querySelector('.domain-banner-meta'), ban = document.querySelector('.domain-banner');
       if (!t) return null; const r = t.getBoundingClientRect(), mr = m.getBoundingClientRect(), br = ban.getBoundingClientRect();
@@ -160,9 +161,22 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
     ok(await page.evaluate(() => !document.querySelector('.credit-tag')), 'not on a tool screen');
     await go(page, 'onco-hematology');
     ok(await page.evaluate(() => (document.querySelector('.domain-banner .credit-tag') || {}).textContent === 'Terms by Sylvia'), 'back on the domain, the tag is there');
+    // Suggested it: "Created at Sylvia's suggestion", a domain's choice only.
+    await page.tap('.domain-banner .credit-tag'); await wait(300);
+    await page.click('#creditOverlay .credit-btn-soft'); await wait(300);
+    await page.click('#creditOverlay .credit-chip:nth-child(2) input');
+    await page.click('#creditOverlay .credit-btn-main'); await wait(400);
+    const sug = await page.evaluate(() => { const t = document.querySelector('.domain-banner .credit-tag'), ban = document.querySelector('.domain-banner');
+      const r = t && t.getBoundingClientRect(), br = ban.getBoundingClientRect();
+      return t && { text: t.textContent, role: ((__DB['hub-credits'] || {})['domain-onco-hematology'] || {}).role, inside: r.right <= br.right && r.left >= br.left }; });
+    ok(sug && sug.text === "Created at Sylvia's suggestion" && sug.role === 'suggested' && sug.inside, 'Suggested it: "Created at Sylvia\'s suggestion", inside the banner', sug);
+    await page.screenshot({ path: O + 'domain-suggested.png' });
+    await page.tap('.domain-banner .credit-tag'); await wait(300);
+    ok(await page.evaluate(() => (document.querySelector('#creditOverlay .credit-line') || {}).textContent === 'suggested this domain'), 'its card: "suggested this domain"');
+    await page.keyboard.press('Escape'); await wait(200);
     await page.evaluate(() => { const c = DATA.categories.find(x => x.id === 'onco-hematology'); c.name = 'Blood'; render(); });
     await wait(300);
-    ok(await page.evaluate(() => (document.querySelector('.domain-banner .credit-tag') || {}).textContent === 'Terms by Sylvia'), 'a renamed domain keeps its credit');
+    ok(await page.evaluate(() => (document.querySelector('.domain-banner .credit-tag') || {}).textContent === "Created at Sylvia's suggestion"), 'a renamed domain keeps its credit');
 
     // A refused write is taken back.
     await go(page, 'falsefriends');
