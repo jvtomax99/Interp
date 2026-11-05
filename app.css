@@ -7839,7 +7839,7 @@ html[data-theme="dark"]{ --credit:#9B7BD0; --credit-ink:#CDB8F0; --credit-soft:c
 .credit-av i svg{ width:17px; height:17px; }
 .credit-av i svg path:first-child{ fill:none; }
 .credit-kicker{ position:relative; margin:0 0 6px; font:650 var(--fs-cap2)/1.3 var(--sans); letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--credit); }
-.credit-card h3.credit-name{ position:relative; margin:0 0 4px; font:650 var(--fs-t1)/1.15 var(--sans); letter-spacing:var(--tr-title); color:var(--ink); }
+.credit-card h3.credit-name{ position:relative; margin:0 0 4px; font:650 var(--fs-t1)/1.15 var(--sans); letter-spacing:var(--tr-big); color:var(--ink); }
 .credit-line{ position:relative; margin:0 0 17px; font:500 var(--fs-sub)/1.4 var(--sans); letter-spacing:var(--tr-body); color:var(--ink-soft); }
 .credit-words{ margin:0 0 13px; padding:13px 15px; border-radius:14px; background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft); text-align:left;
   font:italic 400 var(--fs-sub)/1.5 'IBM Plex Serif', Georgia, serif; color:var(--ink); }
