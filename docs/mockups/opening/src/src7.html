@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hub Badge In Lockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;650&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Playfair+Display:ital,wght@0,600;1,500&family=Parisienne&display=swap" rel="stylesheet">
+<style>
+{{galcss}}
+.stage canvas{position:absolute;inset:0;width:390px;height:844px;display:block}
+.gl{transform-origin:50% 40%}
+.tint{inset:0;background:radial-gradient(120% 70% at 50% 40%,rgba(20,24,52,0),rgba(20,24,52,.36)),linear-gradient(rgba(20,24,52,.22),rgba(20,24,52,.04) 40%,rgba(20,24,52,.42))}
+/* the lockup at the bottom: the app's logo on its tile, the name in a display face (?font=cg Cormorant, pf Playfair, ps Parisienne), HUMC LANGUAGE SERVICES under it */
+.ttl{left:0;right:0;bottom:30px;display:flex;justify-content:center;align-items:center;gap:13px;color:#fff}
+.ttl .logo{width:44px;height:37px;background:url({{mark}}) center/contain no-repeat;filter:drop-shadow(0 0 7px rgba(255,255,255,.55)) drop-shadow(0 2px 8px rgba(10,14,40,.5))}
+.ttl .wm{filter:drop-shadow(0 2px 12px rgba(16,20,46,.65))}
+.ttl b{display:block;white-space:nowrap;color:transparent;background:linear-gradient(100deg,#fff 0%,#f6efe2 38%,#fff 46%,#e9eefb 70%,#fff 100%);background-size:220% 100%;background-position:var(--sh,100%) 0;-webkit-background-clip:text;background-clip:text;
+  -webkit-mask-image:linear-gradient(90deg,#000 var(--r,0%),transparent calc(var(--r,0%) + 16%));mask-image:linear-gradient(90deg,#000 var(--r,0%),transparent calc(var(--r,0%) + 16%));letter-spacing:var(--ls,0)}
+.ttl em,.ttl strong{font-style:normal}
+.ttl small{display:block;font-size:9px;font-weight:550;letter-spacing:.36em;color:rgba(255,255,255,.86);margin-top:3px}
+.ttl.cg b{font-family:"Cormorant Garamond",Georgia,serif;font-size:33px;line-height:1}.ttl.cg em{font-style:italic;font-weight:500}.ttl.cg strong{font-weight:600}
+.ttl.pf b{font-family:"Playfair Display",Georgia,serif;font-size:27px;line-height:1.05}.ttl.pf em{font-style:italic;font-weight:500}.ttl.pf strong{font-weight:600}
+.ttl.ps b{font-size:30px;line-height:1.1}.ttl.ps em{font-family:Parisienne,cursive;font-size:38px;font-weight:400}.ttl.ps strong{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;margin-left:4px}
+{{badgecss}}
+.lan .acc{position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(transparent,rgba(120,255,190,.95) 50%,transparent);mix-blend-mode:screen}
+.scan{position:absolute;left:8px;right:8px;top:8px;height:3px;border-radius:2px;background:#9ff6ff;box-shadow:0 0 12px 4px rgba(120,240,255,.85),0 0 30px 10px rgba(120,240,255,.35)}
+.cta{left:0;right:0;top:708px;text-align:center}
+.cta span{font-size:13px;font-weight:550;letter-spacing:.12em;color:#fff;text-shadow:0 1px 10px rgba(16,20,46,.7)}
+.wel{left:0;right:0;top:700px;text-align:center;color:#fff;text-shadow:0 2px 14px rgba(20,24,52,.7)}
+.wel b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em}
+.bid{right:14px;top:14px;font-size:10px;color:rgba(255,255,255,.7);font-family:ui-monospace,monospace}
+.white{inset:0;background:#fff}
+.home{inset:0;background:url({{home}}) center/cover}
+.morph{left:0;top:0;width:0;height:0;overflow:hidden;background:#fff;border-radius:14px;opacity:0;box-shadow:0 30px 60px -20px rgba(10,14,40,.6)}
+.morph .mh{position:absolute;left:0;top:0;width:390px;height:844px;background:url({{home}}) 0 0/390px 844px;opacity:0;transform-origin:0 0}
+.morph .cc{position:absolute;left:0;top:0;width:250px;height:166px;transform-origin:0 0}
+.morph .cc .card{left:8px;top:8px}
+.ring2{left:0;top:0;width:0;height:0;border-radius:50%;opacity:0;border:3px solid rgba(140,255,200,.95);box-shadow:0 0 26px rgba(93,227,160,.85),inset 0 0 26px rgba(93,227,160,.6)}
+.bands{inset:0}
+.band{position:absolute;left:0;width:390px;background-image:url({{home}});background-size:390px 844px;opacity:0}
+</style>
+</head>
+<body>
+<div class="gal" id="gal">
+  <h1>Badge in, game style</h1>
+  <p class="lede">The pavilion alive behind the badge, the title written in light, you tap the badge, a scan, green, then up through the sky into Home. With sound after the tap.</p>
+  <div class="frame" id="frame"></div>
+  <div class="row"><button class="btn" id="tapb" type="button">Tap your badge</button><button class="btn" id="replay" type="button">Replay</button></div>
+</div>
+
+<template id="tpl">
+<div class="stage">
+  <canvas class="gl"></canvas>
+  <div class="ov tint"></div>
+  <canvas class="ov fx"></canvas>
+  <div class="ov ttl cg"><div class="logo"></div><div class="wm"><b><em>Interpreter</em> <strong>Hub</strong></b><small>HUMC LANGUAGE SERVICES</small></div></div>
+  {{badgehtml}}
+  <div class="ov cta"><span>Tap your badge to begin</span></div>
+  <div class="ov wel"><b>Welcome in, Jose</b></div>
+  <div class="ov bid">b1105.1308</div>
+  <canvas class="ov fx2"></canvas>
+  <div class="ov white"></div>
+  <div class="ov home"></div>
+  <div class="ov morph"><div class="cc"></div><div class="mh"></div></div>
+  <div class="ov ring2"></div>
+  <div class="ov bands"><div class="band" style="top:0;height:50px;background-position:0 0"></div><div class="band" style="top:50px;height:280px;background-position:0 -50px"></div><div class="band" style="top:330px;height:45px;background-position:0 -330px"></div><div class="band" style="top:375px;height:90px;background-position:0 -375px"></div><div class="band" style="top:465px;height:379px;background-position:0 -465px"></div></div>
+  <canvas class="ov fx3"></canvas>
+</div>
+</template>
+
+<script type="text/plain" id="three-src">{{three}}</script>
+<script type="module">
+const THREE = await import(URL.createObjectURL(new Blob([document.getElementById('three-src').textContent], { type: 'text/javascript' })));
+const q = new URLSearchParams(location.search), SOLO = q.has('t'), FIXT = +q.get('t') || 0, TSTYLE = q.get('font') || 'cg', LIGHT = +(q.get('light') || 1), EXIT = +(q.get('exit') || 1);
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const sine = x => .5 - .5*Math.cos(Math.PI*clamp(x));
+const outc = x => 1 - Math.pow(1 - clamp(x), 3);
+const inc = x => Math.pow(clamp(x), 2.4);
+const span = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a)*k;
+const load = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+const IMG = { pav: await load('{{pav}}'), pavD: await load('{{pavD}}') };
+const W = 390, H = 844, D2R = Math.PI/180;
+
+function photoMesh(img, dimg, vfov, a, b, cap, cols, rows){
+  const cv = document.createElement('canvas'); cv.width = cols + 1; cv.height = rows + 1; const cg = cv.getContext('2d'); cg.drawImage(dimg, 0, 0, cols + 1, rows + 1);
+  const px = cg.getImageData(0, 0, cols + 1, rows + 1).data, tv = Math.tan(vfov/2*D2R), th = tv * img.width/img.height;
+  const pos = new Float32Array((cols + 1)*(rows + 1)*3), uv = new Float32Array((cols + 1)*(rows + 1)*2), idx = [];
+  const Z = d => a / Math.max(d - b, a/cap);
+  for (let r = 0; r <= rows; r++) for (let c = 0; c <= cols; c++){
+    const i = r*(cols + 1) + c, u = c/cols, v = r/rows, z = Z(px[i*4]/255);
+    pos[i*3] = (u - .5)*2*th*z; pos[i*3 + 1] = (.5 - v)*2*tv*z; pos[i*3 + 2] = -z; uv[i*2] = u; uv[i*2 + 1] = 1 - v; }
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++){ const i = r*(cols + 1) + c; idx.push(i, i + cols + 1, i + 1, i + 1, i + cols + 1, i + cols + 2); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.setIndex(idx);
+  const t = new THREE.Texture(img); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.needsUpdate = true;
+  const at = (u, v, d) => { const z = Z(d); return new THREE.Vector3((u - .5)*2*th*z, (.5 - v)*2*tv*z, -z); };
+  return { m: new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide })), at };
+}
+const SPR = (w, h, f) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'), im = g.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const [r, gg, b, al] = f(x/(w - 1), y/(h - 1)), i = (y*w + x)*4; im.data[i] = r; im.data[i + 1] = gg; im.data[i + 2] = b; im.data[i + 3] = al*255; } g.putImageData(im, 0, 0); return c; };
+// a beam: soft gaussian across, bright near its source and fading down its length, faint streaks inside like haze
+const BEAM = SPR(96, 512, (u, v) => { const x = (u - .5)*2, streak = .75 + .25*Math.sin(u*31) * Math.sin(u*13 + 1.3); return [255, 246, 226, Math.exp(-x*x*5.5)*Math.pow(1 - v, 1.6)*streak]; });
+const BOKEH = SPR(64, 64, (u, v) => { const r = Math.hypot(u - .5, v - .5)*2; return [255, 250, 238, r > 1 ? 0 : (.35 + .4*Math.pow(r, 6))*(1 - Math.pow(r, 14))]; });
+const DUST = SPR(32, 32, (u, v) => { const r = Math.hypot(u - .5, v - .5)*2; return [255, 252, 240, Math.exp(-r*r*9)]; });
+const STAR = SPR(96, 96, (u, v) => { const x = (u - .5)*2, y = (v - .5)*2, ax = Math.abs(x), ay = Math.abs(y);
+  const core = Math.exp(-(x*x + y*y)*40), cross = Math.exp(-y*y*900)*Math.pow(1 - ax, 3) + Math.exp(-x*x*900)*Math.pow(1 - ay, 3), diag = (Math.exp(-Math.pow(x - y, 2)*1400) + Math.exp(-Math.pow(x + y, 2)*1400))*Math.pow(Math.max(0, 1 - Math.hypot(x, y)*1.6), 3)*.5;
+  return [255, 250, 240, Math.min(1, core + cross*.9 + diag)]; });
+const rnd = (() => { let s = 7; return () => (s = (s*16807) % 2147483647) / 2147483647; })();
+const BEAMS = Array.from({ length: 9 }, (_, i) => ({ a: .2 + (i - 4)*.07 + (rnd() - .5)*.04, w: 60 + rnd()*130, l: 900 + rnd()*300, al: .45 + rnd()*.55, ph: rnd()*6, sp: .2 + rnd()*.35 }));
+const DUSTS = Array.from({ length: 120 }, () => ({ x: rnd()*W, y: rnd()*H, z: .3 + rnd(), sp: 3 + rnd()*9, ph: rnd()*6 }));
+const BOKEHS = Array.from({ length: 14 }, () => ({ x: rnd()*W, y: rnd()*H*.85, r: 14 + rnd()*34, sp: 2 + rnd()*5, ph: rnd()*6, al: .05 + rnd()*.09 }));
+const STARS = Array.from({ length: 12 }, (_, i) => ({ x: 30 + rnd()*330, y: 60 + rnd()*520, per: 2.2 + rnd()*2.6, ph: rnd()*5, s: 16 + rnd()*22 }));
+const PUFFS = Array.from({ length: 16 }, (_, i) => [i/16*Math.PI*2 + Math.random()*.3, .4 + Math.random()*.8, .6 + Math.random()*.7]);
+const cloudC = document.createElement('canvas'); cloudC.width = 256; cloudC.height = 160;
+{ const g = cloudC.getContext('2d'); for (let i = 0; i < 18; i++){ const x = 50 + Math.random()*156, y = 60 + Math.random()*40, r = 26 + Math.random()*34, rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(255,255,255,.92)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); } }
+const STREAKS = Array.from({ length: 70 }, () => [Math.random()*Math.PI*2, Math.random(), .4 + Math.random()*.6]);
+
+// a little synthesized sound, only after the tap (phones allow sound only after one): the reader's beep, a chime, the whoosh up
+let AC = null;
+function sound(kind){
+  try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const t = AC.currentTime, out = AC.createGain(); out.gain.value = .5; out.connect(AC.destination);
+    const tone = (f, at, dur, vol, type = 'sine') => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t + at); g.gain.linearRampToValueAtTime(vol, t + at + .01); g.gain.exponentialRampToValueAtTime(.0001, t + at + dur); o.connect(g); g.connect(out); o.start(t + at); o.stop(t + at + dur + .05); };
+    if (kind === 'beep') tone(1760, 0, .09, .25, 'triangle');
+    if (kind === 'chime'){ tone(1318.5, 0, 1.2, .3); tone(1975.5, .09, 1.4, .25); tone(2637, .18, 1.1, .12); }
+    if (kind === 'whoosh'){ const n = AC.sampleRate*1.4, buf = AC.createBuffer(1, n, AC.sampleRate), ch = buf.getChannelData(0); for (let i = 0; i < n; i++) ch[i] = Math.random()*2 - 1;
+      const src = AC.createBufferSource(), bp = AC.createBiquadFilter(), g = AC.createGain(); src.buffer = buf; bp.type = 'bandpass'; bp.Q.value = 1.2; bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(3200, t + 1.1);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.5, t + .7); g.gain.exponentialRampToValueAtTime(.001, t + 1.35); src.connect(bp); bp.connect(g); g.connect(out); src.start(t); }
+  } catch (e) {}
+}
+
+function build(stage){
+  const canvas = stage.querySelector('canvas.gl'), dpr = Math.min(devicePixelRatio || 1, 2);
+  const R = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true }); R.setPixelRatio(dpr); R.setSize(W, H, false); R.setClearColor(0xffffff);
+  const S = new THREE.Scene(), P = photoMesh(IMG.pav, IMG.pavD, 90, 5.0, .053, 300, 200, 284); S.add(P.m);
+  const cam = new THREE.PerspectiveCamera(80, W/H, .05, 800);
+  const skyP = P.at(.564, .234, 0), skyDir = skyP.clone().normalize(), v = new THREE.Vector3();
+  const fx = stage.querySelector('canvas.fx'), fx2 = stage.querySelector('canvas.fx2');
+  const SM = document.createElement('canvas'); SM.width = 130; SM.height = 281; const SMG = SM.getContext('2d', { willReadFrequently: true });
+  const AC2 = document.createElement('canvas'); AC2.width = 130; AC2.height = 281; const ACG = AC2.getContext('2d');
+  const fx3 = stage.querySelector('canvas.fx3');
+  for (const c of [fx, fx2, fx3]){ c.width = W*dpr; c.height = H*dpr; }
+  return function frame(t, tap){
+    const a = tap === null ? -1 : t - tap;
+    // the pavilion, alive: a slow drift and sway; on the way out the camera rushes up through the sky opening
+    const up = tap === null || EXIT !== 1 ? 0 : inc(span(a, 1.75, 2.85));
+    cam.position.set(Math.sin(t*.35)*.35, -1.6 + Math.sin(t*.27)*.2, .6 - t*.12).addScaledVector(skyDir, up*95);
+    cam.fov = 80 - up*18; cam.updateProjectionMatrix();
+    v.copy(skyDir).multiplyScalar(60).add(cam.position); v.y -= (1 - up)*22; cam.lookAt(v); cam.rotation.z += Math.sin(t*.3)*.012;
+    R.render(S, cam);
+    const blur = (LIGHT === 3 ? .4 + 4.1*sine(span(t, 1.15, 2.1)) : 4.5)*(EXIT === 1 ? 1 - (tap === null ? 0 : sine(span(a, 1.6, 2.1))) : 1) + (EXIT === 4 && tap !== null ? 16*sine(span(a, 1.75, 2.2)) : 0);
+    canvas.style.filter = `blur(${blur.toFixed(2)}px) saturate(1.1)`; canvas.style.transform = `scale(${(1.03 + blur*.004).toFixed(4)})`;
+    // where the sky opening sits on screen: the light comes from there
+    v.copy(skyP).project(cam); const sx = (v.x*.5 + .5)*W, sy = (-v.y*.5 + .5)*H;
+    const g = fx.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    const live = tap === null ? 1 : 1 - span(a, 1.8, 2.3);
+    if (LIGHT === 1){
+      // real light shafts: the bright sky and clouds in the photo itself, streaked outward from the opening through the haze
+      const sw2 = SM.width, sh2 = SM.height, k = sw2/W, cx = sx*k, cy = sy*k;
+      SMG.drawImage(canvas, 0, 0, sw2, sh2); const im = SMG.getImageData(0, 0, sw2, sh2), p = im.data;
+      for (let y = 0; y < sh2; y++) for (let x = 0; x < sw2; x++){ const i = (y*sw2 + x)*4, L = (p[i]*.3 + p[i+1]*.55 + p[i+2]*.15)/255, near = Math.exp(-((x - cx)**2 + (y - cy)**2)/(2*(46*k*3.2)**2));
+        const skyish = (p[i+2] - p[i]) > 28 ? 1 : L > .9 ? .8 : 0; const m = skyish*Math.max(0, (L - .5)/.35)*near; p[i] = 255; p[i+1] = 240; p[i+2] = 212; p[i+3] = 255*Math.min(1, m); }
+      SMG.putImageData(im, 0, 0);
+      ACG.clearRect(0, 0, sw2, sh2); ACG.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 26; i++){ const sc = 1 + i*.075, al = Math.pow(.92, i)*.17; ACG.globalAlpha = al; ACG.drawImage(SM, cx - cx*sc, cy - cy*sc, sw2*sc, sh2*sc); }
+      ACG.globalAlpha = 1;
+      g.globalCompositeOperation = 'lighter'; g.globalAlpha = live*span(t, .2, 1.4)*(.7 + .12*Math.sin(t*.8)); g.filter = 'blur(4px)'; g.drawImage(AC2, 0, 0, W, H); g.filter = 'none'; g.globalAlpha = 1;
+      g.globalCompositeOperation = 'lighter';
+      for (const m of DUSTS){ const y = ((m.y - t*m.sp*m.z) % H + H) % H, x = m.x + Math.sin(t*.45 + m.ph)*10*m.z;
+        const lit = Math.exp(-(((x - sx)/120)**2 + ((y - sy - 260)/420)**2)); const al = live*(.05 + lit*.55)*(.6 + .4*Math.sin(t*2.2 + m.ph*3))*span(t, .4, 1.6), r = 1 + m.z*1.4;
+        g.globalAlpha = al; g.drawImage(DUST, x - r*3, y - r*3, r*6, r*6); }
+    } else if (LIGHT === 2){
+      // morning glow: the sun comes out over the opening; a warm bloom, a soft haze, a faint flare toward the centre
+      const rise = sine(span(t, .1, 2.2));
+      canvas.style.filter = (canvas.style.filter || '') + ` brightness(${(.82 + .2*rise).toFixed(3)}) sepia(${(.12*rise).toFixed(3)})`;
+      g.globalCompositeOperation = 'screen';
+      const bl = g.createRadialGradient(sx, sy, 0, sx, sy, 330*(.7 + .3*rise)); bl.addColorStop(0, `rgba(255,236,200,${(.6*rise*live).toFixed(3)})`); bl.addColorStop(.35, `rgba(255,222,180,${(.22*rise*live).toFixed(3)})`); bl.addColorStop(1, 'rgba(255,222,180,0)');
+      g.fillStyle = bl; g.fillRect(0, 0, W, H);
+      const hz = g.createLinearGradient(0, 0, 0, H); hz.addColorStop(0, `rgba(255,240,220,${(.1*rise*live).toFixed(3)})`); hz.addColorStop(1, 'rgba(255,240,220,0)'); g.fillStyle = hz; g.fillRect(0, 0, W, H);
+      g.globalCompositeOperation = 'lighter';
+      const dx = W/2 - sx, dy = H*.55 - sy;
+      for (const [f, r, col, al] of [[.45, 26, '190,220,255', .1], [.8, 60, '255,210,170', .06], [1.25, 18, '200,255,230', .12], [1.6, 90, '210,200,255', .045]]){ const x = sx + dx*f, y = sy + dy*f, gr = g.createRadialGradient(x, y, r*.6, x, y, r);
+        gr.addColorStop(0, `rgba(${col},${(al*rise*live).toFixed(3)})`); gr.addColorStop(.85, `rgba(${col},${(al*.7*rise*live).toFixed(3)})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+      const an = g.createLinearGradient(sx - 220, 0, sx + 220, 0); an.addColorStop(0, 'rgba(255,235,210,0)'); an.addColorStop(.5, `rgba(255,235,210,${(.28*rise*live).toFixed(3)})`); an.addColorStop(1, 'rgba(255,235,210,0)'); g.fillStyle = an; g.fillRect(sx - 220, sy - 1.5, 440, 3);
+      for (const k of BOKEHS){ const y = ((k.y - t*k.sp) % H + H) % H, x = k.x + Math.sin(t*.25 + k.ph)*12; g.globalAlpha = live*k.al*rise*(.7 + .3*Math.sin(t*.6 + k.ph)); g.drawImage(BOKEH, x - k.r, y - k.r, k.r*2, k.r*2); }
+      for (const m of DUSTS){ const y = ((m.y - t*m.sp*m.z) % H + H) % H, x = m.x + Math.sin(t*.45 + m.ph)*10*m.z, r = 1 + m.z*1.3; g.globalAlpha = live*rise*.22*(.6 + .4*Math.sin(t*2.2 + m.ph*3)); g.drawImage(DUST, x - r*3, y - r*3, r*6, r*6); }
+    } else {
+      // just the photo: sharp, drifting, the focus pulls to the badge as it drops in; faint dust only
+      g.globalCompositeOperation = 'lighter';
+      for (const m of DUSTS){ const y = ((m.y - t*m.sp*m.z) % H + H) % H, x = m.x + Math.sin(t*.45 + m.ph)*10*m.z, r = 1 + m.z*1.2; g.globalAlpha = live*.16*(.6 + .4*Math.sin(t*2.2 + m.ph*3)); g.drawImage(DUST, x - r*3, y - r*3, r*6, r*6); }
+    }
+    // the badge catching the light, and the green flash, kept in every version
+    const gl = Math.sin(Math.PI*span(t, 2.45, 2.95)); if (gl > .01){ const sz = 26 + gl*22; g.globalAlpha = gl*.85; g.save(); g.translate(98 + 196*span(t, 2.3, 3.1), 238 + 40*span(t, 2.3, 3.1)); g.rotate(t*.8); g.drawImage(STAR, -sz, -sz, sz*2, sz*2); g.restore(); }
+    if (tap !== null){ const gg = Math.sin(Math.PI*span(a, .95, 1.5)); if (gg > .01){ const sz = 30 + gg*26; g.globalAlpha = gg; for (const [px, py] of [[78, 461], [312, 487]]){ g.save(); g.translate(px, py); g.rotate(a); g.drawImage(STAR, -sz, -sz, sz*2, sz*2); g.restore(); } } }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    // the way out: streaks of light from the opening, then a rush of cloud
+    const h = fx2.getContext('2d'); h.setTransform(dpr, 0, 0, dpr, 0, 0); h.clearRect(0, 0, W, H);
+    if (EXIT === 1 && tap !== null && a > 1.85){ const k = span(a, 1.85, 2.85), cx = W/2, cy = H*.42; h.globalCompositeOperation = 'lighter';
+      for (const [ang, ph, wv] of STREAKS){ const r0 = ((ph + k*2.6) % 1)*560, r1 = r0 + 40 + k*260*wv; h.strokeStyle = `rgba(220,245,255,${(.55*wv*Math.sin(Math.PI*k)).toFixed(3)})`; h.lineWidth = 1 + wv*1.5;
+        h.beginPath(); h.moveTo(cx + Math.cos(ang)*r0, cy + Math.sin(ang)*r0); h.lineTo(cx + Math.cos(ang)*r1, cy + Math.sin(ang)*r1); h.stroke(); }
+      h.globalCompositeOperation = 'source-over';
+      const c = span(a, 2.2, 2.95); if (c > 0) for (const [ang, rr, sz] of PUFFS){ const r = (1 - c)*rr*220 + 20, sc = (.5 + c*3.4)*sz; h.globalAlpha = Math.sin(c*Math.PI)*.95; const w = 256*sc, hh = 160*sc;
+        h.drawImage(cloudC, cx + Math.cos(ang)*r*(1 + c*2.4) - w/2, cy + Math.sin(ang)*r*(1 + c*2.4) - hh/2, w, hh); } h.globalAlpha = 1; }
+    // version 1: the last clouds drift apart over Home as it settles
+    const h3 = fx3.getContext('2d'); h3.setTransform(dpr, 0, 0, dpr, 0, 0); h3.clearRect(0, 0, W, H);
+    if (EXIT === 1 && tap !== null && a > 2.85 && a < 3.9){ const c = span(a, 2.85, 3.85), cx = W/2, cy = H*.45;
+      for (const [ang, rr, sz] of PUFFS){ const r = 60 + rr*120 + outc(c)*420*rr, sc = (1.6 + c*1.4)*sz; h3.globalAlpha = (1 - outc(c))*.92; const w = 256*sc, hh = 160*sc;
+        h3.drawImage(cloudC, cx + Math.cos(ang)*r - w/2, cy + Math.sin(ang)*r*1.4 - hh/2, w, hh); } h3.globalAlpha = 1; }
+  };
+}
+
+function overlay(st, t, tap){
+  const $ = s => st.querySelector(s), o = (el, v) => el.style.opacity = clamp(v).toFixed(3);
+  const a = tap === null ? -1 : t - tap, gone = tap === null ? 0 : span(a, 1.7, 2.0);
+  // the lockup: the logo tile appears with a glint, then the name is revealed left to right by a soft edge while its spacing settles, one slow sheen
+  const tt = $('.ttl'), w = sine(span(t, .55, 1.95)), tb = $('.ttl b'), lg = $('.ttl .logo');
+  o(lg, span(t, .2, .6)); lg.style.transform = `scale(${(.86 + .14*outc(span(t, .2, .8))).toFixed(3)})`; 
+  tb.style.setProperty('--r', `${(w*116 - 16).toFixed(1)}%`); tb.style.setProperty('--ls', `${((1 - outc(span(t, .55, 2.1)))*.08).toFixed(3)}em`);
+  tb.style.setProperty('--sh', `${(100 - 100*sine(span(t, 2.0, 3.4))).toFixed(1)}%`);
+  o($('.ttl small'), span(t, 1.3, 1.9)); o(tt, 1 - gone);
+  // the badge: drops in, swings, catches the light; then you tap it and it lowers onto the reader for a scan
+  const d = t - 1.3, drop = outc(span(d, 0, .75));
+  const sw = d > .5 ? Math.exp(-(d - .5)*1.6)*Math.sin((d - .5)*5.4) : 0;
+  const lower = tap === null ? 0 : sine(span(a, 0, .5));
+  const ang = sw*7*(1 - lower), tw = sw*16*(1 - lower) + (tap === null ? Math.sin(t*1.1)*2*span(d, 2, 3) : 0);
+  $('.rig').style.transform = `translateY(${(-640*(1 - drop) + lower*216).toFixed(1)}px) rotateZ(${(ang + (tap === null ? Math.sin(t*.9)*.8*span(d, 2, 3) : 0)).toFixed(2)}deg)`;
+  $('.holder').style.transform = `rotateY(${tw.toFixed(2)}deg) rotateX(${(sw*4).toFixed(2)}deg)`;
+  $('.glint').style.transform = `translateX(${(-150 + 300*sine(span(t, 2.3, 3.1)) + tw*3).toFixed(1)}px)`;
+  o($('.glint'), .3 + Math.abs(tw)/36 + .45*Math.sin(Math.PI*span(t, 2.3, 3.1)));
+  const scan = tap === null ? -1 : span(a, .5, .95); $('.scan').style.transform = `translateY(${(scan*148).toFixed(1)}px)`; o($('.scan'), scan > 0 && scan < 1 ? 1 : 0);
+  const green = tap !== null && a >= .95;
+  $('.sheet').setAttribute('x', green && a < 1.5 ? -906 : -1359);
+  o($('.rig'), d > 0 ? 1 - span(a, 1.75, 2.05) : 0);
+  const gw = green ? Math.sin(Math.PI*span(a, .95, 1.4)*.5 + (a > 1.2 ? Math.PI*.5*span(a, 1.2, 1.8) : 0)) : 0;
+  $('.rig').style.filter = gw > .01 ? `drop-shadow(0 0 ${(gw*10).toFixed(1)}px rgba(93,227,160,.95)) drop-shadow(0 0 ${(gw*24).toFixed(1)}px rgba(93,227,160,.7))` : '';
+  // access granted: a pulse of green light runs up the lanyard
+  const up = span(a, .95, 1.55); $('.lan .acc').style.transform = `translateY(${(452 - up*600).toFixed(1)}px)`; o($('.lan .acc'), green && up < 1 ? 1 : 0);
+  $('.lan').style.boxShadow = gw > .01 ? `inset 2px 0 0 rgba(255,255,255,.12),inset -2px 0 0 rgba(0,0,0,.25),0 0 ${(gw*14).toFixed(1)}px rgba(93,227,160,${(gw*.9).toFixed(2)})` : '';
+  o($('.reader'), span(d, .5, 1.1)*(1 - gone)); $('.reader').style.transform = `translateY(${((1 - outc(span(d, .5, 1.2)))*18).toFixed(1)}px)`;
+  $('.reader .lr').style.setProperty('--lc', green ? '#5de3a0' : scan > 0 ? '#9ff6ff' : `rgba(255,143,163,${(.55 + .35*Math.sin(t*4)).toFixed(2)})`);
+  const r = span(a, .95, 1.65); o($('.ring'), green ? .9*(1 - r) : 0); $('.ring').style.transform = `scale(${(1 + r*1.9).toFixed(3)},${(1 + r*3.2).toFixed(3)})`;
+  o($('.cta'), span(d, 1.6, 2)*(tap === null ? .65 + .35*Math.cos((t - 3.3)*2.6) : 1 - span(a, 0, .2)));
+  o($('.wel'), tap === null ? 0 : span(a, 1.05, 1.3)*(1 - span(a, 1.75, 2.05))); $('.wel').style.transform = `translateY(${(tap === null ? 10 : (1 - outc(span(a, 1.05, 1.5)))*10).toFixed(1)}px)`;
+  o($('.bid'), 1 - gone);
+  const E1 = EXIT === 1, spring = x => { x = clamp(x); return 1 - Math.exp(-6*x)*Math.cos(5.2*x); };
+  o($('.white'), tap === null ? 0 : E1 ? span(a, 2.55, 2.9)*(1 - span(a, 3.2, 3.7)) : EXIT === 4 ? span(a, 1.75, 2.15) : 0);
+  if (EXIT === 4) $('.white').style.background = 'radial-gradient(70% 45% at 15% 10%,rgba(1,184,230,.18),transparent),radial-gradient(70% 50% at 95% 80%,rgba(46,139,208,.16),transparent),#F4F6FA';
+  let hm = 0;
+  if (tap !== null){
+    if (E1){ hm = sine(span(a, 2.9, 3.45)); const k = outc(span(a, 2.9, 3.8)); $('.home').style.transform = `scale(${(1.07 - .07*k).toFixed(4)})`; $('.home').style.filter = `blur(${((1 - k)*9).toFixed(2)}px)`; }
+    if (EXIT === 2){ const k = spring(span(a, 1.75, 2.45)), m = $('.morph');
+      const x = lerp(70, 0, k), y = lerp(448, 0, k), w = lerp(250, 390, k), hh = lerp(166, 844, k);
+      Object.assign(m.style, { left: x.toFixed(1) + 'px', top: y.toFixed(1) + 'px', width: w.toFixed(1) + 'px', height: hh.toFixed(1) + 'px', borderRadius: Math.max(0, lerp(14, 0, k)).toFixed(1) + 'px' });
+      o(m, a >= 1.75 && a < 2.6 ? 1 : 0); if (a >= 1.75) o($('.rig'), 0);
+      const sc = w/390; $('.morph .mh').style.transform = `translate(0px, ${((hh - 844*sc)/2).toFixed(1)}px) scale(${sc.toFixed(4)})`; o($('.morph .mh'), span(a, 1.85, 2.3));
+      $('.morph .cc').style.transform = `scale(${(w/250).toFixed(4)})`; o($('.morph .cc'), 1 - span(a, 1.8, 2.05));
+      hm = a >= 2.55 ? 1 : 0; }
+    if (EXIT === 3){ const r = Math.pow(span(a, 1.7, 2.5), 1.7)*1000; $('.home').style.clipPath = `circle(${r.toFixed(1)}px at 195px 668px)`; hm = a >= 1.7 ? 1 : 0;
+      const rg = $('.ring2'); Object.assign(rg.style, { left: (195 - r).toFixed(1) + 'px', top: (668 - r).toFixed(1) + 'px', width: (2*r).toFixed(1) + 'px', height: (2*r).toFixed(1) + 'px' }); o(rg, a >= 1.7 ? 1 - span(a, 2.15, 2.5) : 0); }
+    if (EXIT === 4){ st.querySelectorAll('.band').forEach((b, i) => { const k = span(a, 2.1 + i*.09, 2.55 + i*.09); b.style.opacity = sine(k).toFixed(3); b.style.transform = `translateY(${((1 - outc(k))*24).toFixed(1)}px)`; }); hm = a >= 3.05 ? 1 : 0; }
+  }
+  o($('.home'), hm);
+}
+
+function mount(host){ host.innerHTML = ''; host.appendChild(document.getElementById('tpl').content.cloneNode(true)); const st = host.querySelector('.stage'); st.querySelector('.morph .cc').appendChild(st.querySelector('.card').cloneNode(true)); st.querySelector('.ttl').className = 'ov ttl ' + TSTYLE; return st; }
+if (SOLO){
+  document.body.className = 'solo'; document.getElementById('gal').remove();
+  const h = document.createElement('div'); document.body.appendChild(h); const st = mount(h), fr = build(st);
+  window.__at = (t, tap) => { fr(t, tap); overlay(st, t, tap); }; window.__at(FIXT/1000, q.has('tap') ? +q.get('tap')/1000 : null); document.body.dataset.done = '1';
+} else {
+  const f = document.getElementById('frame'); let st, fr, t0, tap, raf, cues;
+  const start = () => { cancelAnimationFrame(raf); st = mount(f); fr = build(st); t0 = performance.now(); tap = null; cues = {};
+    const loop = () => { const t = (performance.now() - t0)/1000; fr(t, tap); overlay(st, t, tap);
+      if (tap !== null){ const a = t - tap; if (a > .5 && !cues.b) { cues.b = 1; sound('beep'); } if (a > .95 && !cues.c) { cues.c = 1; sound('chime'); } if (a > 1.75 && !cues.w) { cues.w = 1; sound('whoosh'); } }
+      if (tap === null || t - tap < 3.6) raf = requestAnimationFrame(loop); }; loop(); };
+  const go = () => { const t = (performance.now() - t0)/1000; if (tap === null && t > 2.6) { tap = t; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); AC.resume(); } catch (e) {} } };
+  f.onclick = go; document.getElementById('tapb').onclick = go; document.getElementById('replay').onclick = start;
+  start();
+}
+</script>
+</body>
+</html>
