@@ -7967,6 +7967,7 @@ html.op-cover[data-op-look="morning"]::after, .op.op-morning, .op.op-morning.is-
 html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-opening .op-scene{ background-image:url(./opening/pavilion-evening-1.webp); }
 .op.op-morning .op-holder, .op.op-morning .op-purp{ filter:sepia(.12) saturate(1.05) brightness(1.02); }
 .op.op-evening .op-holder, .op.op-evening .op-purp{ filter:brightness(.88) saturate(.9); }
+.op.op-morning.is-opening, .op.op-evening.is-opening{ background:none; }   /* the ring shows Home, not the still (it outranks .op.is-opening) */
 .op.op-evening .op-holder::after, .op.op-evening .op-purp::after{ content:""; position:absolute; inset:0; border-radius:inherit; z-index:5; pointer-events:none; background:rgba(56,78,170,.2); mix-blend-mode:multiply; }
 .op-bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s linear; pointer-events:none; }
 .op-bg.is-on{ opacity:1; }

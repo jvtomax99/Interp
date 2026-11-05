@@ -43,11 +43,12 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
     ok((await state(page)).log.indexOf('hello') < 0, 'the hello has not started under the opening', await state(page));
     const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.touchscreen.tap(box.x, box.y);
-    await wait(1250);
+    // Green from 0.95 s after the tap, the welcome from 1.05 s; on a busy machine frames come late, so wait for it (2.5 s at most).
+    await page.waitForFunction(() => +getComputedStyle(document.querySelector('.op-wel')).opacity > .5, null, { timeout: 2500 }).catch(() => {});
     const g = await page.evaluate(() => ({ wel: +getComputedStyle(document.querySelector('.op-wel')).opacity, lc: getComputedStyle(document.querySelector('.op-lr')).getPropertyValue('--lc').trim() }));
     ok(g.wel > .5 && g.lc === '#5de3a0', 'the tap: green, and the welcome shows', g);
     await page.screenshot({ path: O + 'green.png' });
-    await wait(1700);
+    await page.waitForFunction(() => !document.querySelector('.op'), null, { timeout: 4000 }).catch(() => {});
     const after = await state(page);
     ok(!after.up && after.log[0] === 'done', 'it ends by itself and says so (hub-opening-done)', after);
     const reach = await homeReached(page);
@@ -77,6 +78,13 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
           poster: v && v.getAttribute('poster'), bg: op && getComputedStyle(op).backgroundImage }; });
       ok(s.attr === look && s.cls.includes('op-' + look) && s.src.includes(clip + '.mp4') && s.src.includes(clip + '.webm') && s.poster.includes(clip + '.webp') && s.bg.includes(clip + '.webp'),
         at.slice(11, 16) + ': the ' + look + ' look (its loop, its still behind it)', s);
+      // While the ring opens, Home shows inside it: nothing behind the scene but Home.
+      const ring = await page.evaluate(() => { cancelAnimationFrame(OP.raf); OP.t0 = 1e12; OP.tap = 3; OP.cues = { b: 1, c: 1, w: 1 }; opFrame(5.2);
+        const op = document.querySelector('.op'), r = document.querySelector('.op-reader').getBoundingClientRect();
+        const el = document.elementsFromPoint(r.left + r.width / 2, r.top - 60);
+        return { bg: getComputedStyle(op).backgroundImage, opening: op.classList.contains('is-opening'), mask: document.querySelector('.op-scene').style.maskImage || document.querySelector('.op-scene').style.webkitMaskImage }; });
+      ok(ring.opening && ring.bg === 'none' && /radial-gradient/.test(ring.mask), at.slice(11, 16) + ': inside the opening ring is Home, not the still', ring);
+      await page.evaluate(() => { OP.tap = null; OP.ring = null; document.querySelector('.op').classList.remove('is-opening'); const sc = document.querySelector('.op-scene'); sc.style.maskImage = sc.style.webkitMaskImage = ''; OP.t0 = performance.now() - 2000; });
       if (look === 'evening') {
         const w = await page.evaluate(() => getComputedStyle(document.querySelector('.op-holder'), '::after').backgroundColor);
         ok(/rgba\(56, 78, 170/.test(w), 'the evening badge takes the cool light', w);
