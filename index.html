@@ -853,11 +853,14 @@ function regionOfGroup(groupName){
   return (p && isRegion(p.region)) ? p.region : '';
 }
 function regionOfLocation(raw){ return regionOfGroup(canonicalLocation(raw)); }
-// A doctor's region: the one set by hand on the edit sheet, else the one
-// their location implies. '' = not placed (shown in every region).
+// A doctor's region: the one their place has, else the one stored on the
+// doctor (a doctor with no specific site, or at a place with no region yet:
+// the adder's). The place wins so that moving a place moves its doctors
+// (2026-11-04). '' = not placed (shown in every region).
 function doctorRegion(d){
-  if(d && isRegion(d.region)) return d.region;
-  return regionOfGroup(locationGroupName(d, d && d.hospitalLocation));
+  const r = regionOfGroup(locationGroupName(d, d && d.hospitalLocation));
+  if(r) return r;
+  return (d && isRegion(d.region)) ? d.region : '';
 }
 
 function setMyRegion(id){
@@ -994,7 +997,8 @@ function placeList(){
     if(!p || !p.custom || !p.name || out.has(p.name)) return;
     out.set(p.name, { name: p.name, region: isRegion(p.region) ? p.region : '' });
   });
-  const inUse = name => { if(name && name !== NO_LOCATION_LABEL && name !== HMH_NETWORK_LABEL && !out.has(name)) out.set(name, { name, region: '' }); };
+  // A place in use can have a region set from the picker (PLACES, not custom).
+  const inUse = name => { if(name && name !== NO_LOCATION_LABEL && name !== HMH_NETWORK_LABEL && !out.has(name)) out.set(name, { name, region: regionOfGroup(name) }); };
   DOCTOR_DIRECTORY.forEach(d => inUse(locationGroupName(d, d.hospitalLocation)));
   (PROVIDERS || []).forEach(p => inUse(locationGroupName(p, p.facility)));
   return [...out.values()];
@@ -5791,8 +5795,8 @@ const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
   { id:'practice',    tone:'gd-n2', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Finish an exam area and its building celebrates: fireworks over the roof, a Finished ribbon, and a gold badge for good' },
+  { id:'places',      tone:'gd-n2', pin:'pins/doctor-directory.webp',  eyebrow:'Places',                title:'Put a place in the North or the South: tap the pencil beside it in the Where list' },
   { id:'memory',      tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Memory trainer',        title:'See who is talking: the doctor, a nurse or the patient leans in while the line plays' },
-  { id:'doctorgaps',  tone:'gd-n1', pin:'pins/find-doctor.webp',       eyebrow:'Doctor Directory',      title:'Find the doctors still missing a place, a floor or prep terms, and see exactly what each one needs' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -10551,7 +10555,7 @@ const MOTIVATIONAL_QUOTES = [
 // and stylus; mouse still uses :hover.
 (function(){
   const LIFTS = '.tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
-    '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
+    '.cp-play, .cp-3d, .cp-exam, .cp-key, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
     if(e.pointerType === 'mouse') return;            // mouse has hover already
@@ -10581,8 +10585,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1104.2338';
-const BUILD_TIME = '2026-11-04 23:38 UTC';
+const BUILD_ID = 'b1105.0107';
+const BUILD_TIME = '2026-11-05 01:07 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high

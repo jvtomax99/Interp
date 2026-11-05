@@ -7100,6 +7100,15 @@ html[data-theme="dark"] .group-icon-pick.is-on{ background:rgba(46,139,208,.16);
 .place-row-text small{ font-size:var(--fs-cap); color:var(--ink-soft); }
 .place-row-tick{ color:var(--accent); display:flex; }
 .place-row-tick svg{ width:20px; height:20px; }
+.place-item{ display:flex; align-items:center; gap:var(--sp-1); }
+.place-item .place-row{ flex:1; min-width:0; }
+.place-row-edit{ flex:0 0 44px; height:44px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:var(--r-md);
+  background:none; color:var(--ink-soft); cursor:pointer; -webkit-tap-highlight-color:transparent; transition:background .15s var(--ease), transform .15s var(--ease); }
+.place-row-edit svg{ width:20px; height:20px; }
+.place-row-edit:active, .place-row-edit.is-pressed{ transform:scale(.94); background:var(--line-soft); color:var(--accent); }
+@media (hover:hover){ .place-row-edit:hover{ background:var(--line-soft); } }
+.place-row-edit:focus-visible{ outline:3px solid var(--accent-2); outline-offset:-2px; }
+.place-edit-head{ display:flex; align-items:center; gap:var(--sp-3); padding:0 var(--sp-1) var(--sp-1); }
 .place-none{ margin:var(--sp-3) var(--sp-2); font-size:var(--fs-foot); color:var(--ink-soft); }
 .place-add{ display:flex; align-items:center; gap:var(--sp-2); width:100%; min-height:48px; margin:var(--sp-1) 0 var(--sp-2); padding:0 var(--sp-3);
   border:1px dashed var(--line); border-radius:var(--r-md); background:none; color:var(--accent); font:650 var(--fs-sub) var(--sans); cursor:pointer; }
@@ -7111,7 +7120,7 @@ html[data-theme="dark"] .group-icon-pick.is-on{ background:rgba(46,139,208,.16);
 .place-addform input{ font-size:var(--fs-call); min-height:44px; padding:0 var(--sp-3); border:1px solid var(--line); border-radius:var(--r-md); background:var(--bg-hi); color:var(--ink); font-family:var(--sans); }
 .place-addbtns{ display:flex; justify-content:flex-end; gap:var(--sp-2); }
 html[data-theme="dark"] .place-row.is-on{ background:rgba(46,139,208,.16); }
-@media (prefers-reduced-motion: reduce){ .place-field, .place-row, .place-add, .group-icon-pick{ transition:none; } }
+@media (prefers-reduced-motion: reduce){ .place-field, .place-row, .place-row-edit, .place-add, .group-icon-pick{ transition:none; } }
 .ta-switch.is-calm[aria-checked="true"]{ background:var(--navy); }
 html[data-theme="dark"] .ta-switch.is-calm[aria-checked="true"]{ background:var(--cyan); }
 @media (prefers-reduced-motion: reduce){
