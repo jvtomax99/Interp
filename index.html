@@ -7169,6 +7169,44 @@ function watchDomainDock(){
   domainDockObserver.observe(banner);
 }
 window.addEventListener('resize', () => { if(document.getElementById('domainDock')) watchDomainDock(); }, { passive:true });
+/* The banner's name never breaks inside a word (Jose, 2026-11-05: "Hematolog / y"
+   on a phone). domainBannerHtml guesses a size from the letter count; the room
+   beside the pin depends on the screen, so here the longest word is measured
+   in place and the banner steps down (is-long 28px, then is-longer 22px with a
+   smaller pin) until it fits. A word too long even then still wraps, as before. */
+function fitDomainBannerName(){
+  const banner = document.querySelector('.domain-banner');
+  const name = banner && banner.querySelector('.domain-banner-name');
+  if(!name || !name.textContent.trim()) return;
+  const words = name.textContent.trim().split(/\s+/);
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute; visibility:hidden; white-space:nowrap; left:0; top:0;';
+  name.appendChild(probe);
+  const fits = () => {
+    // Exact widths: clientWidth rounds, and "Hematology" at 28px on a 360px
+    // phone is 156.4px in a 156.2px line.
+    const cs = getComputedStyle(name);
+    const room = name.getBoundingClientRect().width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return words.every(w => { probe.textContent = w; return probe.getBoundingClientRect().width <= room; });
+  };
+  const steps = ['', 'is-long', 'is-longer'];
+  // Start from domainBannerHtml's own guess each time, so a wider screen
+  // (turning the phone) steps back up.
+  if(banner.dataset.fitBase === undefined)
+    banner.dataset.fitBase = banner.classList.contains('is-longer') ? '2' : banner.classList.contains('is-long') ? '1' : '0';
+  let i = +banner.dataset.fitBase;
+  banner.classList.remove('is-long', 'is-longer');
+  if(steps[i]) banner.classList.add(steps[i]);
+  while(i < steps.length - 1 && !fits()){
+    if(steps[i]) banner.classList.remove(steps[i]);
+    i++;
+    banner.classList.add(steps[i]);
+  }
+  probe.remove();
+}
+window.addEventListener('resize', () => { if(document.querySelector('.domain-banner')) fitDomainBannerName(); }, { passive:true });
+// Inter arrives after the first paint; its letters are wider than the stand-in's.
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitDomainBannerName()).catch(() => {});
 
 let domainMenuReturn = null;
 function openDomainMenu(){
@@ -7365,6 +7403,7 @@ function render(){
   });
 
   syncTopBar();
+  fitDomainBannerName();
   renderContent();
   anatomySync();
   smileyRider.sync();
