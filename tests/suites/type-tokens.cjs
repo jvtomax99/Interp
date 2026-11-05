@@ -10,7 +10,8 @@ const fs = require('fs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 
 const WEIGHTS = ['400', '500', '550', '650'];
-const KEPT_SEL = /home-greeting|home-wave/;
+// The opening's badge, lanyard and lockup (.op-*) are a drawn object too: Jose's real badge (docs/features/opening.md).
+const KEPT_SEL = /home-greeting|home-wave|^\.op[-\s.]/;
 const KEPT_FACE = /--serif|--mono|Plex|Lora|Parisienne|ui-rounded/i;
 
 (async () => {

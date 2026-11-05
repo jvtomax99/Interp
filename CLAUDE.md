@@ -80,6 +80,8 @@ between assignments.
 | `features/backfill.js` | 154 | The terminology backfill: doctors whose research is still the old flat list (`doctorsNeedingTiers`) re-researched one at a time (`runTierBackfill`, `cancelTierBackfill`, `tierBackfill`) and its card in the doctor list's tidy sheet (`backfillBannerHtml`). Moved verbatim (2026-10-25) |
 | `features/ask-hub.js` | 2,040 | Ask the Hub with Dr. Smiley's side of it: retrieval and the answer (`askRetrieve`, `submitAsk`, `askTurnHtml`, `askLayout`), following a conversation (`ASK.convo`), context and actions (`askContext`, `ASK_ACTION_TYPES`, `ASK_RUN`), what he remembers (`drMemGet`, `ih_smileyMemory`), the memory screen (`openMemory`), your practice and the next step, corrections, feedback, sources and the owner's team notes review (`renderAskReview`). Moved verbatim (2026-10-25), 7 sections at once; a few lines stay in `index.html` where the group began (`ASK_STOP`, the waiting questions brought back, the `online`/`resize` listeners, `window.openAskHub`): they run at load and need `index.html`'s names. `docs/features/ask-the-hub.md` |
 | `features/credits.js` | 300 | Idea credits: whose idea a screen or glossary domain was. The small purple tag under a credited screen's title (on a domain's banner, keyed by its id), the card it opens (tap, or double-tap the title), the owner's Give credit sheet, `hub-credits/{key}` keyed by the title (`creditDecorate`, `creditOpen`, `creditEdit`, `startCredits`, `creditWatch`). 2026-11-05; `docs/features/credits.md` |
+| `features/opening.js` | 291 | The opening, Badge in: every start on a phone, your badge over the pavilion, tap, scan, green, the ring opens into Home (`openingStart`, `opFrame`, `openingFinish`, `hubOpeningUp`, the `hub-opening-done` event Home's hello waits for) and More's Opening card (`openingMoreHtml`: on/off, Sound, Badge title, Replay; `ih_opening`, `ih_openingSound`, `ih_badgeTitle`). Decided and covered before the first paint by index.html's first script. 2026-11-05; `docs/features/opening.md` |
+| `opening/` | — | The opening's pavilion: `pavilion-1.mp4` (0.7 MB) / `.webm` (0.25 MB), an 8 s seamless loop, and its still `pavilion-1.webp`; rendered once from `docs/mockups/opening/`. A new clip gets a new name (`sw.js` carries this one over between versions) |
 | `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
 | `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together), stale-while-revalidate for the rest |
@@ -158,6 +160,7 @@ different places is what silently killed the coloured press glow: a
 | Dr. Smiley's engine: art, animation, how lively, task states | `features/smiley-engine.js` |
 | Your HUMC campus (the scene and the building pick) | `features/campus.js` |
 | Idea credits (whose idea a screen was) | `features/credits.js`; styles in `app.css` |
+| The opening (Badge in) and More's Opening card | `features/opening.js`; styles in `app.css` ("Opening") |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
@@ -280,6 +283,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
 - The campus celebration (a building finished), tap a person for a word (`campusFolkTap`, `ih_campusWord`) and the friendly weather for a streak (`CAMPUS_SKY`, `ih_campusSky`): `campus-celebration.md`, `campus-tap-person.md`, `campus-weather.md`
 - Idea credits, whose idea a screen was: the tag, the card, the owner's sheet (`creditDecorate`, `hub-credits`): `credits.md`
+- The opening, Badge in: when it plays, the loop, More's card (`openingStart`, `ih_opening`, `opening/`): `opening.md`
 - Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's

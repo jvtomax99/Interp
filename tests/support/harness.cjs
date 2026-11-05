@@ -66,12 +66,12 @@ async function route(page, opts = {}) {
   await page.route('**/sw.js', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: fs.readFileSync(FONTS + 'g.css', 'utf8') }));
   await page.route('https://fonts.gstatic.com/**', r => { const f = FONTS + r.request().url().replace('https://fonts.gstatic.com/s/', '').replace(/\//g, '_'); return fs.existsSync(f) ? r.fulfill({ status: 200, contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(f) }) : r.abort(); });
-  await page.route(/\.(jpe?g|png|PNG|webp|svg|gif|ico|webmanifest)(\?.*)?$/, r => {
+  await page.route(/\.(jpe?g|png|PNG|webp|svg|gif|ico|webmanifest|mp4|webm)(\?.*)?$/, r => {
     const f = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\//,''));
     let p = R + f; if (!fs.existsSync(p)) p = __dirname + '/' + f; if (!fs.existsSync(p) || /^missing/.test(f)) return r.fulfill({ status: 404, body: '' });
     const ext = f.toLowerCase().split('.').pop();
     r.fulfill({ status: 200, contentType: { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml',
-      gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json' }[ext], body: fs.readFileSync(p) });
+      gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json', mp4: 'video/mp4', webm: 'video/webm' }[ext], body: fs.readFileSync(p) });
   });
   for (const f of ['app.css', 'guide/topics.js', 'practice/questions.js', 'falsefriends/list.js', 'soundalikes/list.js', 'home-polish.css', 'home-polish.js', 'pin-icons.js'])
     await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(process.env.POLISH_DIR && fs.existsSync(path.join(process.env.POLISH_DIR, f)) ? path.join(process.env.POLISH_DIR, f) : R + f) }));
@@ -111,9 +111,11 @@ async function boot(browser, opts = {}) {
   await page.addInitScript((o) => {
     window.__SEED_CATS = o.seed; window.__ACCESS = o.access;
     try {
+      // The opening (features/opening.js) stays off unless a suite asks for it (tests/suites/opening.cjs).
+      if (!o.opening) localStorage.setItem('ih_opening', 'off');
       if (!o.fresh) { localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', o.name || 'Jose'); }
     } catch (e) {}
-  }, { fresh: !!opts.fresh, name: opts.name, seed: SEED, access: opts.access || { mode: 'none' } });
+  }, { fresh: !!opts.fresh, opening: !!opts.opening, name: opts.name, seed: SEED, access: opts.access || { mode: 'none' } });
   if (opts.init) await page.addInitScript(opts.init);
   const t0 = Date.now();
   await page.goto('https://interp.test/' + (opts.query || ''), { waitUntil: 'domcontentloaded' });

@@ -577,6 +577,8 @@
     clearTimeout(startupTimer);
     startupTimer=setTimeout(()=>{
       startupDeadline=0;const w=startupWave;startupWave=null;
+      // The opening (features/opening.js) is still over Home: the hello waits for it.
+      if(w&&window.hubOpeningUp&&window.hubOpeningUp()){window.addEventListener('hub-opening-done',()=>{if(w.isConnected&&!hasWavedHello)scheduleStartup(w);},{once:true});return;}
       if(w&&w.isConnected&&!hasWavedHello)playGreeting(w);
     },Math.max(0,Math.min(STARTUP_QUIET,startupDeadline-now)));
   }
@@ -986,7 +988,9 @@
     function hold(name){
       if(run||waiting||!name||still())return;
       held=name;name.classList.add('is-penning');
-      clearTimeout(safety);safety=setTimeout(()=>{if(!run)show(held);},6000);
+      // While the opening is up the 6 s start counting only once it is done.
+      const cap=()=>{clearTimeout(safety);safety=setTimeout(()=>{if(run)return;if(window.hubOpeningUp&&window.hubOpeningUp()){window.addEventListener('hub-opening-done',cap,{once:true});return;}show(held);},6000);};
+      cap();
     }
     function release(){clearTimeout(safety);if(waiting){const w=waiting;waiting=null;show(w.name);}if(run)run.stop();else show(held);held=null;}
     /* Write the name: with every hello (the app opening, or coming back to

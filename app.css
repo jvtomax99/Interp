@@ -7948,3 +7948,89 @@ html[data-theme="dark"] .credit-owner{ background:rgba(247,201,72,.16); color:#F
 .credit-chip input:focus-visible + span{ outline:2px solid var(--accent-2); outline-offset:2px; }
 .credit-sheet .credit-row{ margin-top:20px; }
 @media (prefers-reduced-motion:reduce){ .credit-tag, .credit-btn{ transition:none; } .credit-tag:active, .credit-tag.is-pressed, .credit-btn:active, .credit-btn.is-pressed{ transform:none; } }
+
+/* ---------- Opening (Badge in) ----------
+   features/opening.js; docs/features/opening.md. The pavilion loop fills
+   the screen; the badge, reader and words are drawn for a 390 x 844 stage
+   scaled to fit (--op-k). The badge is a drawn object (Jose's real badge),
+   so its lettering keeps its own sizes and faces, like the Home hello
+   banner (kept outside the type rule: tests/suites/type-tokens.cjs). */
+html.op-cover::after{ content:""; position:fixed; inset:0; z-index:2147483001; background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat; }
+.op{ position:fixed; inset:0; z-index:2147483000; overflow:hidden; background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat;
+  touch-action:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; cursor:pointer; outline:none; contain:strict; }
+.op.is-opening{ background:none; }
+.op.is-leaving{ opacity:0; transition:opacity .26s var(--ease); pointer-events:none; }
+.op-scene{ position:absolute; inset:0; overflow:hidden; }
+.op.is-opening .op-scene{ background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat; }
+.op-bg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .3s linear; pointer-events:none; }
+.op-bg.is-on{ opacity:1; }
+.op-stage{ position:absolute; left:50%; top:50%; width:390px; height:844px; transform:translate(-50%,-50%) scale(var(--op-k,1)); color:#fff; }
+.op-stage > *{ position:absolute; }
+.op-ttl{ left:0; right:0; bottom:40px; display:flex; justify-content:center; align-items:center; gap:13px; opacity:0; }
+.op-logo{ display:block; width:44px; height:37px; opacity:0; background:url(./hmh-mark.png) center/contain no-repeat; filter:drop-shadow(0 0 7px rgba(255,255,255,.55)) drop-shadow(0 2px 8px rgba(10,14,40,.5)); }
+.op-wm{ display:block; filter:drop-shadow(0 2px 12px rgba(16,20,46,.65)); }
+.op-wm b{ display:block; white-space:nowrap; font-family:"Cormorant Garamond", Georgia, serif; font-size:33px; line-height:1; color:transparent;
+  background:linear-gradient(100deg,#fff 0%,#f6efe2 38%,#fff 46%,#e9eefb 70%,#fff 100%); background-size:220% 100%; background-position:var(--sh,100%) 0;
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-mask-image:linear-gradient(90deg,#000 var(--r,0%),transparent calc(var(--r,0%) + 16%)); mask-image:linear-gradient(90deg,#000 var(--r,0%),transparent calc(var(--r,0%) + 16%)); letter-spacing:var(--ls,0); }
+.op-wm em{ font-style:italic; font-weight:500; }
+.op-wm strong{ font-style:normal; font-weight:600; }
+.op-wm small{ display:block; font-size:9px; font-weight:550; letter-spacing:.36em; color:rgba(255,255,255,.86); margin-top:3px; opacity:0; }
+/* the badge, after Jose's real one: a landscape card in a clear holder, the purple INTERPRETER card behind,
+   a clear vinyl strap with a metal snap, a blue connector, the woven lanyard */
+.op-rig{ left:70px; top:0; width:250px; height:600px; transform-origin:125px -120px; perspective:900px; opacity:0; will-change:transform; }
+.op-lan{ position:absolute; left:112px; top:-300px; width:26px; height:452px; border-radius:0 0 4px 4px; overflow:hidden;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px),linear-gradient(90deg,#18205a,#2b3a8f 45%,#22307a 55%,#18205a);
+  box-shadow:inset 2px 0 0 rgba(255,255,255,.12),inset -2px 0 0 rgba(0,0,0,.25),0 4px 10px rgba(10,14,40,.35); }
+.op-lan::before,.op-lan::after{ content:""; position:absolute; top:0; bottom:0; width:1px; background:repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 3px,transparent 3px 6px); }
+.op-lan::before{ left:3px; } .op-lan::after{ right:3px; }
+.op-lan span{ position:absolute; left:50%; top:300px; writing-mode:vertical-rl; transform:translateX(-50%) rotate(180deg); font-size:8px; font-weight:650; letter-spacing:.34em; color:rgba(255,255,255,.85); white-space:nowrap; }
+.op-acc{ position:absolute; left:0; right:0; top:0; height:150px; opacity:0; background:linear-gradient(transparent,rgba(120,255,190,.95) 50%,transparent); mix-blend-mode:screen; }
+.op-clasp{ position:absolute; left:109px; top:146px; width:32px; height:44px; }
+.op-conn{ position:absolute; left:113px; top:184px; width:24px; height:22px; border-radius:4px; background:linear-gradient(160deg,#3b4fd0,#1f2fa0 60%,#18237c); box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 6px rgba(10,14,40,.35); }
+.op-conn::after{ content:""; position:absolute; left:7px; top:5px; width:10px; height:12px; border-radius:2px; background:#101a5c; box-shadow:inset 0 2px 3px rgba(0,0,0,.5); }
+.op-strap{ position:absolute; left:114px; top:202px; width:22px; height:44px; border-radius:6px 6px 3px 3px; background:linear-gradient(90deg,rgba(255,255,255,.28),rgba(255,255,255,.55) 45%,rgba(255,255,255,.22)); border:1px solid rgba(255,255,255,.7); }
+.op-strap i{ position:absolute; left:4px; top:7px; width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#fff,#c3cad6 45%,#7d8699 75%,#aab3c2); box-shadow:0 1px 2px rgba(0,0,0,.35); }
+.op-purp{ position:absolute; left:12px; top:262px; width:226px; height:162px; border-radius:12px; background:linear-gradient(160deg,#6a2fb8,#4b1d93); overflow:hidden; box-shadow:0 18px 30px -16px rgba(10,14,40,.7); }
+.op-purp b{ position:absolute; left:0; right:0; bottom:4px; text-align:center; font-size:21px; font-weight:650; letter-spacing:.02em; color:#fff; }
+.op-holder{ position:absolute; left:0; top:232px; width:250px; height:166px; border-radius:14px; overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,.4),rgba(255,255,255,.12) 40%,rgba(255,255,255,.24)); border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 30px 50px -24px rgba(10,14,40,.7),0 10px 22px -12px rgba(10,14,40,.45),inset 0 1px 0 rgba(255,255,255,.9); }
+.op-slot{ position:absolute; left:107px; top:7px; width:36px; height:7px; border-radius:4px; background:rgba(30,40,70,.28); box-shadow:inset 0 1px 2px rgba(0,0,0,.3); }
+.op-card{ position:absolute; left:8px; top:8px; width:234px; height:150px; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(20,30,60,.2); color:#111; }
+.op-pic{ position:absolute; left:12px; top:14px; width:66px; height:86px; border-radius:5px; overflow:hidden; background:linear-gradient(170deg,#eaf3fc,#cfe2f5); }
+/* bare-headed, like the photo on a real badge: the team's rank outfit stays off the card */
+.op-pic .lv-acc{ display:none; }
+.op-pic svg.op-face{ position:absolute; left:-4px; top:2px; width:74px; height:92px; }
+.op-nm{ position:absolute; left:90px; top:14px; right:8px; font-size:23px; font-weight:650; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.op-rl{ position:absolute; left:90px; top:50px; right:8px; font-family:Georgia,"Times New Roman",serif; font-style:italic; font-size:13.5px; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.op-org{ position:absolute; left:90px; top:72px; display:flex; gap:6px; align-items:center; }
+.op-org img{ width:30px; height:30px; }
+.op-org div{ font-family:Georgia,"Times New Roman",serif; font-size:8.6px; line-height:1.22; color:#5d6270; }
+.op-dept{ position:absolute; left:12px; bottom:11px; font-size:11.5px; font-weight:650; }
+.op-glint{ position:absolute; inset:0; border-radius:14px; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.65) 44%,rgba(255,255,255,0) 54%); mix-blend-mode:screen; opacity:0; }
+.op-scan{ position:absolute; left:8px; right:8px; top:8px; height:3px; border-radius:2px; opacity:0; background:#9ff6ff; box-shadow:0 0 12px 4px rgba(120,240,255,.85),0 0 30px 10px rgba(120,240,255,.35); }
+/* the reader: a frosted glass puck with a ring of light */
+.op-reader{ left:135px; top:640px; width:120px; height:56px; border-radius:28px; display:grid; place-items:center; opacity:0;
+  background:rgba(255,255,255,.18); -webkit-backdrop-filter:blur(18px) saturate(170%); backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.55); box-shadow:0 16px 30px -14px rgba(10,14,40,.7),inset 0 1px 0 rgba(255,255,255,.7); }
+.op-reader svg{ width:26px; height:26px; }
+.op-lr{ position:absolute; inset:-3px; border-radius:31px; border:2px solid var(--lc,#ff8fa3); box-shadow:0 0 14px var(--lc,#ff8fa3); }
+.op-ring{ left:135px; top:640px; width:120px; height:56px; border-radius:28px; border:2px solid #5de3a0; opacity:0; }
+.op-cta{ left:0; right:0; top:708px; text-align:center; font-size:var(--fs-foot); font-weight:550; letter-spacing:var(--tr-caps); color:#fff; text-shadow:0 1px 10px rgba(16,20,46,.7); opacity:0; }
+.op-wel{ left:0; right:0; top:700px; text-align:center; font-size:var(--fs-t2); font-weight:650; letter-spacing:var(--tr-title); color:#fff; text-shadow:0 2px 14px rgba(20,24,52,.7); opacity:0; }
+.op-ring2{ position:absolute; left:0; top:0; width:0; height:0; border-radius:50%; opacity:0; pointer-events:none;
+  border:3px solid rgba(140,255,200,.95); box-shadow:0 0 26px rgba(93,227,160,.85),inset 0 0 26px rgba(93,227,160,.6); }
+/* Still (reduced motion, or Still in Dr. Smiley's settings): no drift or swing, everything already in place */
+.op.is-still .op-bg{ display:none; }
+.op.is-still .op-ttl, .op.is-still .op-logo{ opacity:1; }
+.op.is-still.is-green .op-rig{ filter:drop-shadow(0 0 10px rgba(93,227,160,.95)) drop-shadow(0 0 24px rgba(93,227,160,.7)); }
+@media (prefers-reduced-motion: reduce){ .op-bg{ display:none; } }
+/* More's Opening card */
+.op-more{ margin-top:26px; }
+.op-more .home-sec-head{ margin-bottom:10px; }
+.op-more-card{ display:flex; flex-direction:column; gap:13px; padding:13px; border-radius:var(--r-md); background:var(--paper); border:1px solid var(--line-soft);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22); }
+.op-more-title{ display:flex; flex-direction:column; gap:6px; font-size:var(--fs-sub); color:var(--ink); }
+.op-more-title input{ font-size:var(--fs-call); padding:9px 13px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); font-family:inherit; }
+.op-more-title input:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }

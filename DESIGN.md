@@ -82,6 +82,15 @@ the author in small Inter capitals behind a short rule. Block "Hello banner
 lettering" at the end of `home-polish.css`. These two faces appear nowhere
 else, and the banner's own weights and spacing are outside the token rule.
 
+### The opening's badge: the other exception
+The opening (`features/opening.js`, block "Opening (Badge in)" in
+`app.css`) draws Jose's real staff badge: its lettering keeps the badge's
+own sizes (8 to 23px), Georgia italic for the title and the HMH lettering,
+and the lockup "*Interpreter* Hub" in Cormorant Garamond (italic 500,
+upright 600). Its `.op-*` rules are outside the token rule like the hello
+banner; Cormorant appears nowhere else. The words around it ("Tap your
+badge to begin", "Welcome in") are Inter on the tokens.
+
 ### Type scale
 
 **Every size is one of these ten steps** (Apple's iPhone type scale, which the Hub's look is built on); `tests/suites/type-tokens.cjs` fails on any other, except display sizes of 36px and up (the Home hello name, big numerals). Nothing is under 11px, Apple's smallest. Tokens `--fs-*` in the "Visual refinement" block of `app.css`. "Weights seen": the most common, measured on 17 screens, phone and desktop (2026-11-03); 17px and up is always 650.

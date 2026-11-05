@@ -304,14 +304,9 @@ photos stay. One PR per step; User Guide in each.
 D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    replay (he sends `doctors.json`, steps in the review); the 5-minute
    interpreter test on iPhones (Spanish voice on ES included).
-5. **The opening, Badge in (Jose, 2026-11-05).** Plan and mockup picked:
-   `docs/features/opening.md`, `docs/mockups/opening/`. Every start of the
-   app (Jose, 2026-11-05): the badge drops in over the Helena Theurer Pavilion, a tap scans it
-   green, the green ring opens into Home. Jose answered the three questions
-   (his own photo; each person picks the badge title once; sound on,
-   quiet). Next, one PR: `features/opening.js`, an "Opening" block in
-   `app.css`, the background as a pre-rendered loop in `opening/`,
-   `tests/suites/opening.cjs`, the User Guide answer and a New lately card.
+5. **The opening, Badge in (Jose, 2026-11-05): built,** waiting for his
+   OK (see Done). Later, if he asks: real sounds, tilting the phone to
+   swing the badge, playing on a computer.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -366,6 +361,16 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-11-05 The opening, Badge in (`docs/features/opening.md`): every
+  start on a phone, your badge on its lanyard over the pavilion, tap, scan,
+  green, "Welcome in", the ring opens onto the live Home. `features/opening.js`,
+  "Opening" block in `app.css`, the pavilion as an 8 s loop in `opening/`
+  (0.7 MB MP4, 0.25 MB WebM, rendered once from the mockup), More's Opening
+  card, `tests/suites/opening.cjs`. Facts: a script before `<head>` sees a
+  980 px page on a phone (no viewport yet), so "phone" is the screen's
+  shortest side under 600; iPhones fetch video in Range pieces, so `sw.js`
+  cuts them from the saved clip and carries it over between versions.
 
 - 2026-11-05 A domain's name never breaks inside a word on its banner
   ("Hematolog / y" on a phone). `fitDomainBannerName` in `index.html`
