@@ -107,6 +107,14 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     ${L.birds ? `<span class="cp-veh cp-birds" ${data(L.birds)} style="${pos(...L.birds.img[0])};${origin(L.birds, L.birds.img[0])}"><img src="./city/birds0.webp" alt="" decoding="async"><img src="./city/birds1.webp" alt="" decoding="async"></span>` : ''}`;
   try { localStorage.setItem('ih_campusLv', JSON.stringify(now)); } catch (e) {}
   try { localStorage.setItem('ih_campusDone', JSON.stringify(nowDone)); } catch (e) {}
+  // Friendly weather for a study streak (docs/features/campus-weather.md): the sun from 3 days, a rainbow from 7, both far
+  // things that slide with the sky; never anything for a missed day. ih_campusSky remembers what this phone has drawn, so
+  // only the first qualifying drawing fades them in; a streak that ends takes them off and forgets them.
+  const days = (st && st.days) || 0, sun = days >= CAMPUS_SKY.sun, bow = days >= CAMPUS_SKY.bow;
+  let skyWas = {}; try { skyWas = JSON.parse(localStorage.getItem('ih_campusSky') || 'null') || {}; } catch (e) {}
+  const weather = (sun ? `<span class="cp-sky-fx cp-sun${skyWas.sun ? '' : ' is-new'}" style="${at(CAMPUS_SKY.at[0], CAMPUS_SKY.at[1])}" aria-hidden="true"><i></i></span>` : '')
+    + (bow ? `<span class="cp-sky-fx cp-bow${skyWas.bow ? '' : ' is-new'}" aria-hidden="true"></span>` : '');
+  try { if (sun || bow) localStorage.setItem('ih_campusSky', JSON.stringify({ sun, bow })); else localStorage.removeItem('ih_campusSky'); } catch (e) {}
   // Dr. Smiley stands at the building to paint next
   const wk = worst ? CAMPUS.find(x => x.id === worst).key : null;
   // left of its badge, or right of it when that would cover another badge
@@ -136,7 +144,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     </div>
     <div class="cp-say"><p><small>Dr. Smiley</small>${say}</p></div>
     <div class="cp-world${CAMPUS_PICK.key ? ' has-sel' : ''}" style="aspect-ratio:${W} / ${H}" data-top="${top}" onclick="campusTapOut(event)">
-      ${M.layers ? `<img class="cp-depth cp-d-sky" src="./city/sky.webp" alt="" decoding="async" style="${pos(...M.layers.sky)}"><img class="cp-depth cp-d-far" src="./city/far.webp" alt="" decoding="async" style="${pos(...M.layers.far)}">
+      ${M.layers ? `<img class="cp-depth cp-d-sky" src="./city/sky.webp" alt="" decoding="async" style="${pos(...M.layers.sky)}">${weather}<img class="cp-depth cp-d-far" src="./city/far.webp" alt="" decoding="async" style="${pos(...M.layers.far)}">
       <img class="cp-ground" src="./city/near.webp" alt="" decoding="async" style="${pos(...M.layers.near)}">` : `<img class="cp-ground" src="./city/entrance.webp" alt="" decoding="async" style="${pos(...M.g)}">`}
       <button class="cp-3d" type="button" onclick="event.stopPropagation();openCampus3d()" aria-label="Explore your campus in 3D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7.2v9.6L12 21.2 4 16.8V7.2z"/><path d="M4 7.2 12 11.6l8-4.4M12 11.6v9.6"/></svg>3D</button>
       ${paint}${live}<span class="cp-shade"${CAMPUS_PICK.key ? ` style="${campusShadeAt(CAMPUS_PICK.key, top)}"` : ''}></span>${CAMPUS_PICK.key ? campusSelPaint(CAMPUS_PICK.key, top) : ''}${spots}${hits.sort((a, b) => a[0] - b[0]).map(h => h[1]).join('')}${tags}${dr}
@@ -161,6 +169,8 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
    starts. A tap on the empty scene, the card's close or Escape puts it back. Kept across the
    screen's re-renders, dropped on a fresh arrival (renderCampus). */
 const CAMPUS_PICK = { key: null, folk: null };
+// Friendly weather (docs/features/campus-weather.md): the streak days for the sun and the rainbow, and the sun's place in render px (left of the sky, the side the scene's light comes from).
+const CAMPUS_SKY = { sun: 3, bow: 7, at: [125, 100] };
 function campusPos(top){ const M = CAMPUS_MAP, H = M.g[1] + M.g[3] - top;
   return { box: (x, y, w, h) => `left:${(x/M.w*100).toFixed(3)}%;top:${((y-top)/H*100).toFixed(3)}%;width:${(w/M.w*100).toFixed(3)}%;height:${(h/H*100).toFixed(3)}%`,
     pt: (x, y) => [(x/M.w*100).toFixed(2) + '%', ((y-top)/H*100).toFixed(2) + '%'], H }; }

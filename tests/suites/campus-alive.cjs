@@ -194,5 +194,41 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
   ok(noName.n === 5 && !noName.name && !noName.folk && !noName.card, 'no name yet: the tap opens nothing until a name is set', noName);
   ok(noName.anim === 'none', 'reduced motion: the dots stand still', noName);
   if (p4.__errors.length) ok(false, 'no page errors', p4.__errors);
+
+  // Friendly weather (docs/features/campus-weather.md): the sun from 3 days at the left of the sky, a rainbow from 7 over the
+  // board behind the town, both sliding with the sky; the first drawing fades them in, later ones just draw; a streak that
+  // ends takes them off and forgets them; never anything for a missed day.
+  console.log('== weather');
+  const p5 = (await L.boot(b, { device: 'iphone' })).page;
+  await L.go(p5, 'practice', 1800);
+  const sky = (page, days) => page.evaluate(d => { localStorage.setItem('ih_practice_streak_v1', JSON.stringify({ days: d, last: '', answered: 0, on: '' })); renderContent();
+    const w = document.querySelector('#content .cp-world'), R = w.getBoundingClientRect(), kids = [...w.children], box = s => { const e = w.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left - R.left, t: r.top - R.top, w: r.width, h: r.height, b: r.bottom - R.top }; };
+    const sun = box('.cp-sun'), bow = box('.cp-bow'), n = box('.cp-tag[data-k="n"]'), ring = document.querySelector('#content .ready-ring').getBoundingClientRect();
+    const towerTop = CAMPUS_MAP.b.t.box[1] / CAMPUS_MAP.h * R.height;   // the highest building's top, where the sky ends
+    const idx = s => kids.findIndex(k => k.matches(s));
+    return { days: d, sun, bow, n, towerTop, ringBottom: ring.bottom - R.top, order: { sky: idx('.cp-d-sky'), sun: idx('.cp-sun'), bow: idx('.cp-bow'), far: idx('.cp-d-far') },
+      sunNew: !!w.querySelector('.cp-sun.is-new'), bowNew: !!w.querySelector('.cp-bow.is-new'), rays: sun ? getComputedStyle(w.querySelector('.cp-sun i')).animationName : null,
+      fade: sun ? getComputedStyle(w.querySelector('.cp-sun')).animationName : null, bowFade: bow ? getComputedStyle(w.querySelector('.cp-bow')).animationName : null,
+      slide: sun ? getComputedStyle(w.querySelector('.cp-sun')).translate : null, skySlide: getComputedStyle(w.querySelector('.cp-d-sky')).translate, saved: localStorage.getItem('ih_campusSky'), W: R.width }; }, days);
+  const d0 = await sky(p5, 0), d2 = await sky(p5, 2);
+  ok(!d0.sun && !d0.bow && !d0.saved && !d2.sun && !d2.bow && !d2.saved, 'no streak, or two days: plain daylight, nothing remembered', { d0, d2 });
+  const d3 = await sky(p5, 3);
+  ok(d3.sun && !d3.bow && d3.sun.t >= 0 && d3.sun.b <= d3.towerTop + 2 && d3.sun.l + d3.sun.w / 2 < d3.W * 0.3 && d3.sun.b <= d3.n.t, '3 days: the sun, in the sky at the left, above the buildings and the US Systems badge, no rainbow', d3);
+  ok(d3.order.sky < d3.order.sun && d3.order.sun < d3.order.far && d3.rays === 'cpRays' && d3.sunNew && d3.fade === 'cpSkyIn' && d3.saved === '{"sun":true,"bow":false}', 'behind the town, its rays turning, faded in the first time and remembered', d3);
+  const d3b = await sky(p5, 3);
+  ok(d3b.sun && !d3b.sunNew && d3b.fade === 'none', 'drawn again: the sun is simply there', d3b);
+  const d7 = await sky(p5, 7);
+  ok(d7.sun && d7.bow && d7.bow.t < d7.towerTop && d7.bow.t >= -2 && d7.bow.w > d7.W * 0.85 && d7.order.sky < d7.order.bow && d7.order.bow < d7.order.far && d7.bowNew && d7.bowFade === 'cpBowIn' && !d7.sunNew && d7.saved === '{"sun":true,"bow":true}', '7 days: the rainbow over the board, behind the town, its top in the sky, faded in; the sun stays', d7);
+  ok(d7.slide === d7.skySlide, 'the sun slides with the sky', { slide: d7.slide, sky: d7.skySlide });
+  const bands = await p5.evaluate(() => (getComputedStyle(document.querySelector('#content .cp-bow')).backgroundImage.match(/rgb\(/g) || []).length);
+  ok(bands >= 6, 'six bands', bands);
+  const d0b = await sky(p5, 0);
+  ok(!d0b.sun && !d0b.bow && !d0b.saved, 'the streak over: both gone, forgotten', d0b);
+  if (p5.__errors.length) ok(false, 'no page errors', p5.__errors);
+  const p6 = (await L.boot(b, { device: 'iphone', reducedMotion: true })).page;
+  await L.go(p6, 'practice', 1800);
+  const rmw = await sky(p6, 7);
+  ok(rmw.sun && rmw.bow && rmw.rays === 'none' && rmw.fade === 'none' && rmw.bowFade === 'none', 'reduced motion: the sun and rainbow simply there, no rays turning, no fade', rmw);
+  if (p6.__errors.length) ok(false, 'no page errors', p6.__errors);
   await b.close();
 })();
