@@ -27,12 +27,24 @@ the only way in: a credit nobody finds isn't much of a credit.
 
 ## How it works
 
+- **Glossary domains** (Jose, 2026-11-05, the same day: "also give credit
+  to medical terminology domains"). A domain or subgroup's title is its name
+  on the colour banner (`.domain-banner-name`, drawn by `domainBannerHtml`
+  outside `#content`, so the frame watch on `#app` is what catches it). Its
+  key is the domain's id, not its name, `domain-<id>` (`domain-onco-rad`),
+  so a rename keeps the credit; `section` holds the name at the time. The
+  tag (`.credit-tag.on-banner`, the banner's own glass) goes on its own line
+  under "7 terms". Same four roles, so the rules didn't change, but two
+  read as a list of terms (`CREDIT_DOMAIN_ROLES`): content is "Added the
+  terms" / "Terms by Ana" / "put these terms together", testing is
+  "Reviewed the terms" / "Reviewed by Ana". A parent's credit is not its
+  subgroups', nor the other way round. Not on All domains.
 - **Which screen.** The title is the first heading in `#content`, when it
   sits in the screen's own head: `#content > .section-head h2` or the
   Doctors list's `.hub-head h1`. That covers Sound-Alikes, False Friends,
   CoreCHI Practice, Term Review, Translate, the Memory trainer, Provider
   Pictures, Training & Events, Code of Ethics, Recent Updates, Doctors.
-  Not Home, Team Chat, Ask the Hub, the glossary domains or the 3D Body
+  Not Home, Team Chat, Ask the Hub or the 3D Body
   (their heads are built differently; not in this version).
 - **The key is the title.** "Sound-Alikes" -> `sound-alikes`
   (`creditKeyOf`: accents folded, anything else to `-`, at most 40
@@ -70,7 +82,8 @@ the only way in: a credit nobody finds isn't much of a credit.
 ## Not in this version
 
 A thanks button or count; photos; more than one person per screen;
-credits on single terms or on Home, Chat, Ask, the glossary domains;
+credits on single terms or on Home, Chat, Ask, All domains; a Give
+credit item in a domain's ••• menu;
 telling the person they were credited; a page listing every credit.
 
 ## User Guide

@@ -15,7 +15,7 @@ const SYLVIA = { 'sound-alikes': { section: 'Sound-Alikes', name: 'Sylvia', role
   words: 'We kept mixing up ileum and ilium on the phone.', by: 'Jose', at: Date.UTC(2026, 10, 5, 15) } };
 
 const go = (page, cat) => page.evaluate(async (cat) => { setCategory(cat); window.scrollTo(0, 0); await new Promise(r => setTimeout(r, 500)); }, cat);
-const titleAt = page => page.evaluate(() => { const r = document.querySelector('#content .credit-title').getBoundingClientRect(); return { x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2 }; });
+const titleAt = page => page.evaluate(() => { const r = document.querySelector('.credit-title').getBoundingClientRect(); return { x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2 }; });
 const doubleTap = async (page) => { const p = await titleAt(page); await page.touchscreen.tap(p.x, p.y); await wait(120); await page.touchscreen.tap(p.x, p.y); await wait(350); };
 // The team's credits, as the database sends them.
 const seed = page => page.evaluate(async (m) => { __DB['hub-credits'] = m; __notify('hub-credits'); await new Promise(r => setTimeout(r, 200)); }, SYLVIA);
@@ -132,7 +132,40 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
     const gone = await page.evaluate(() => ({ tag: !!document.querySelector('#content .credit-tag'), doc: (__DB['hub-credits'] || {})['false-friends'] }));
     ok(!gone.tag && !gone.doc, 'Remove takes the tag and the document away', gone);
 
+    // A glossary domain: double-tap its name on the banner; the credit is the
+    // domain's (its id), with the wording for a list of terms, beside "N terms".
+    await go(page, 'onco-hematology');
+    await doubleTap(page);
+    const dsheet = await page.evaluate(() => { const s = document.querySelector('#creditOverlay .credit-sheet');
+      return s && { key: s.dataset.key, lede: s.querySelector('.credit-lede').textContent, chips: [...s.querySelectorAll('.credit-chip span')].map(x => x.textContent) }; });
+    ok(dsheet && dsheet.key === 'domain-onco-hematology' && /Hematology/.test(dsheet.lede) && /banner/.test(dsheet.lede), 'a domain: double-tap its name for Give credit, keyed by its id', dsheet);
+    ok(dsheet && dsheet.chips.join('|') === 'The idea|Added the terms|Checked the Spanish|Reviewed the terms', 'a domain\'s choices read as a list of terms', dsheet);
+    await page.fill('#creditName', 'Sylvia');
+    await page.click('#creditOverlay .credit-chip:nth-child(2) input');
+    await page.click('#creditOverlay .credit-btn-main'); await wait(400);
+    const dtag = await page.evaluate(() => { const t = document.querySelector('.domain-banner .credit-tag'), m = document.querySelector('.domain-banner-meta'), ban = document.querySelector('.domain-banner');
+      if (!t) return null; const r = t.getBoundingClientRect(), mr = m.getBoundingClientRect(), br = ban.getBoundingClientRect();
+      return { text: t.textContent, below: r.top >= mr.bottom - 1, left: Math.abs(r.left - mr.left) < 2, inside: r.right <= br.right && r.bottom <= br.bottom,
+        doc: (__DB['hub-credits'] || {})['domain-onco-hematology'] }; });
+    ok(dtag && dtag.text === 'Terms by Sylvia' && dtag.doc && dtag.doc.role === 'content' && dtag.doc.section === 'Hematology', 'the tag "Terms by Sylvia" on the banner, saved for the domain', dtag);
+    ok(dtag && dtag.below && dtag.left && dtag.inside, 'the tag sits under "N terms", lined up, inside the banner', dtag);
+    await page.screenshot({ path: O + 'domain-tag.png' });
+    await page.tap('.domain-banner .credit-tag'); await wait(300);
+    const dcard = await page.evaluate(() => { const c = document.querySelector('#creditOverlay .credit-card'); return c && [c.querySelector('.credit-kicker').textContent, c.querySelector('.credit-line').textContent]; });
+    ok(dcard && dcard[0] === 'Behind Hematology' && dcard[1] === 'put these terms together', 'the domain\'s card', dcard);
+    await page.keyboard.press('Escape'); await wait(200);
+    await go(page, 'onco');
+    ok(await page.evaluate(() => !document.querySelector('.credit-tag')), 'not on the parent domain');
+    await go(page, 'soundalikes');
+    ok(await page.evaluate(() => !document.querySelector('.credit-tag')), 'not on a tool screen');
+    await go(page, 'onco-hematology');
+    ok(await page.evaluate(() => (document.querySelector('.domain-banner .credit-tag') || {}).textContent === 'Terms by Sylvia'), 'back on the domain, the tag is there');
+    await page.evaluate(() => { const c = DATA.categories.find(x => x.id === 'onco-hematology'); c.name = 'Blood'; render(); });
+    await wait(300);
+    ok(await page.evaluate(() => (document.querySelector('.domain-banner .credit-tag') || {}).textContent === 'Terms by Sylvia'), 'a renamed domain keeps its credit');
+
     // A refused write is taken back.
+    await go(page, 'falsefriends');
     await page.evaluate(() => { const real = db.collection.bind(db);
       db.collection = c => c === 'hub-credits' ? { doc: () => ({ set: () => Promise.reject(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })) }), onSnapshot: () => () => {} } : real(c); });
     await doubleTap(page);

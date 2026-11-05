@@ -355,6 +355,12 @@ come from this alone.
 
 ## Done
 
+- 2026-11-05 Idea credits on glossary domains and subgroups (Jose: "also
+  give credit to medical terminology domains"). Double-tap the name on
+  the colour banner; the tag sits under "N terms"; keyed by the
+  domain's id so a rename keeps it; wording for a list of terms ("Terms
+  by Ana", "Reviewed by Ana"). No rules change. `docs/features/credits.md`.
+
 - 2026-11-05 Idea credits (Jose: "Sylvia came up with the idea of
   Sound-Alikes"). Four mockups; Jose picked "line + card". A credited
   screen shows a small purple tag under its title; a tap on it or a
