@@ -117,6 +117,8 @@ async function boot(browser, opts = {}) {
     } catch (e) {}
   }, { fresh: !!opts.fresh, opening: !!opts.opening, name: opts.name, seed: SEED, access: opts.access || { mode: 'none' } });
   if (opts.init) await page.addInitScript(opts.init);
+  // A set clock (Date only; timers run as usual): opening.cjs's time-of-day looks.
+  if (opts.clock) await page.clock.setFixedTime(new Date(opts.clock));
   const t0 = Date.now();
   await page.goto('https://interp.test/' + (opts.query || ''), { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(opts.settle || 4200);

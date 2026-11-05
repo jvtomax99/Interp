@@ -150,6 +150,21 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   answers an iPhone's Range requests from the saved clip. A new clip must
   get a new name (`pavilion-2`). If a phone won't autoplay it (iPhone Low
   Power Mode), the still stays: the same picture, not moving.
+- **The light by time of day** (Jose's pick, 2026-11-05, from four ways
+  to raise the opening): the phone's clock picks one of three looks,
+  morning 5-11 (`pavilion-morning-1`: warm, softer gold shafts), midday
+  11-4 pm (`pavilion-1`, as first built) and evening and night 4 pm-5 am
+  (`pavilion-evening-1`: blue hour, darker, faint cool shafts, less
+  dust). `openingLook(h)` in `features/opening.js`; index.html's first
+  script makes the same choice for the cover (`data-op-look` on `<html>`).
+  The badge takes the light too: a touch warm in the morning, dimmer and
+  under a cool wash in the evening (never a hue shift: that turned Dr.
+  Smiley blue). Each look is the same photo graded and lit, rendered from
+  the mockup's scene; no lit windows (the photo is daylight). The three
+  stills are precached; the morning and evening loops are saved the first
+  time each plays, and `sw.js` carries everything in `opening/` over
+  between versions. Not in this version: weather, seasons, sunrise times
+  by date, a sunset look.
 - **Dr. Smiley on the card** is `drSmileyArt()` on his smile frame, the
   wink frames on green. The team's rank outfit is hidden on the card
   (`.op-pic .lv-acc`): bare-headed, like the photo on a real badge.

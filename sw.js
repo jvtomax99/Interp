@@ -146,17 +146,32 @@ const PRECACHE = [
   // iPhones play. Kept from the last version's cache on install (below), so
   // a deploy doesn't fetch the 0.7 MB clip again; a new clip gets a new name.
   './opening/pavilion-1.webp',
-  './opening/pavilion-1.mp4'
+  './opening/pavilion-1.mp4',
+  // Its morning and evening stills; their loops are saved the first time each plays.
+  './opening/pavilion-morning-1.webp',
+  './opening/pavilion-evening-1.webp'
 ];
-const CARRY = ['./opening/pavilion-1.webp', './opening/pavilion-1.mp4'];
+// Kept over from the last version's cache: everything in opening/, so no
+// deploy fetches a loop again (a new clip gets a new name).
+const carryOpening = async cache => {
+  for (const k of await caches.keys()) {
+    if (k === CACHE_VERSION) continue;
+    const old = await caches.open(k);
+    for (const req of await old.keys()) {
+      if (new URL(req.url).pathname.startsWith('/opening/') && !(await cache.match(req))) {
+        const hit = await old.match(req); if (hit) await cache.put(req, hit);
+      }
+    }
+  }
+};
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
       // Individual failures shouldn't abort the whole install.
-      .then(cache => Promise.allSettled(PRECACHE.map(url => CARRY.includes(url)
+      .then(cache => Promise.allSettled(PRECACHE.map(url => url.startsWith('./opening/')
         ? caches.match(url).then(hit => hit ? cache.put(url, hit) : cache.add(url))
-        : cache.add(url))))
+        : cache.add(url))).then(() => carryOpening(cache).catch(() => {})))
       .then(() => self.skipWaiting())
   );
 });

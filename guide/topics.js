@@ -38,8 +38,9 @@ const GUIDE_TOPICS = [
     <p>It's handy for showing someone new what the app does. To send it, tap <b>Copy link</b> below and paste it in Chat or a text.</p>
     <p>On Home, the hello banner always has a round <b>Watch</b> bubble in its bottom-right corner. Its ring of colours turns until you've watched the video once, then holds still.</p>` },
 
-  { id:'opening', section:'start', k:'opening badge lanyard start intro scan tap welcome splash launch sound beep chime title staff per diem coordinator replay turn off skip pavilion', q:'What is the badge that shows when the Hub starts?', a:`
+  { id:'opening', section:'start', k:'opening badge lanyard start intro scan tap welcome splash launch sound beep chime title staff per diem coordinator replay turn off skip pavilion morning evening night light time of day dark blue gold', q:'What is the badge that shows when the Hub starts?', a:`
     <p>On a phone, every time the Hub starts, your staff badge drops in on its lanyard in front of the Helena Theurer Pavilion. Tap the badge: it scans on the reader, turns green, Dr. Smiley winks, it says <b>Welcome in</b> with your first name, and a green ring opens into Home.</p>
+    <p>The light on the pavilion follows your phone's clock: warm morning light from 5 to 11, daylight from 11 to 4, and a blue evening from 4 pm through the night.</p>
     <p>In a hurry? Tap anywhere before the badge has arrived and you go straight to Home. It doesn't play when you open the Hub from a notification, or when you come back to it from another app without it restarting.</p>
     <p>The badge shows your first name and the first letter of your last name (from your name in the app), and your badge title. It has no photo, barcode or number: it is not an ID.</p>
     <p>To change it, open <b>More</b> (bottom right) and scroll to <b>Opening</b>: turn <b>Badge opening</b> off or on, turn the <b>Sound</b> (a quiet beep and chime after the tap) off or on, type your <b>Badge title</b> (Staff Interpreter unless you change it: Per Diem Interpreter, Coordinator…), or tap <b>Replay the opening</b>. These stay on your phone.</p>

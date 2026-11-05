@@ -305,8 +305,11 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    replay (he sends `doctors.json`, steps in the review); the 5-minute
    interpreter test on iPhones (Spanish voice on ES included).
 5. **The opening, Badge in (Jose, 2026-11-05): built,** waiting for his
-   OK (see Done). Later, if he asks: real sounds, tilting the phone to
-   swing the badge, playing on a computer.
+   OK (see Done); live b1105.2126. Its light by time of day: see Done.
+   Other ways to raise it, offered 2026-11-05, not picked yet: pins you
+   earn on your lanyard (my pick), a quick second open later the same day,
+   drag the badge onto the reader with better sounds. Later, if he asks:
+   tilting the phone to swing the badge, playing on a computer.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
@@ -361,6 +364,13 @@ come from this alone.
   breaks the unread badge (it counts events), so it needs a new badge rule.
 
 ## Done
+
+- 2026-11-05 The opening's light by time of day (Jose's pick of four ways
+  to raise it): morning gold, midday, evening blue, by the phone's clock;
+  the badge in the same light. `docs/features/opening.md`. Facts: a hue
+  shift on the badge turns Dr. Smiley blue, so the evening badge gets a
+  multiply wash instead; Playwright's `clock.setFixedTime` (harness
+  `clock`) sets the hour for a suite.
 
 - 2026-11-05 The opening, Badge in (`docs/features/opening.md`): every
   start on a phone, your badge on its lanyard over the pavilion, tap, scan,
