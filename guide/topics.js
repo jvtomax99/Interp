@@ -284,8 +284,9 @@ const GUIDE_TOPICS = [
     <p>A doctor’s old single note shows as the first tip. Anyone can edit or delete that one, as before. Notes are no longer on the doctor’s edit sheet; tips are where they live now.</p>
     <p>Tips are shared with the whole team. Never put patient details in one.</p>` },
 
-  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place doctor directory provider pictures floor suite unit', q:'How do I set where a doctor or provider works?', a:`
+  { id:'places', section:'prep', k:'where location place hospital building site office clinic group icon picture change add new place region move north south other places pencil doctor directory provider pictures floor suite unit', q:'How do I set where a doctor or provider works?', a:`
     <p>On the doctor’s or the provider’s sheet, tap <b>Where</b>. A list of places opens: your region’s first, then the other region’s, then any others. Search by name, or tap <b>Add a place</b> for one that isn’t there (give it a name and pick North or South). The floor, suite or room (for a provider, the department or unit) goes in the box under it.</p>
+    <p>To put a place in the right region, tap the pencil beside it in that list, pick <b>North</b> or <b>South</b> and tap <b>Save</b>. Its doctors move to that region’s list for everyone. The network’s own hospitals have no pencil: their region is fixed.</p>
     <p>Each place has a picture, from the same set as the Home pins. Tap the picture beside a place’s name in the Doctor Directory to change it. The places and pictures are shared: what you add or change, the whole team sees, in Provider Pictures too.</p>` },
 
   { id:'providers', section:'prep', k:'provider pictures photos healthcare providers face name specialty facility hospital where place unit department', q:'What is Provider Pictures?', a:`

@@ -50,3 +50,16 @@ doctors and providers at a place. Saving sets `locationGroup`; `facility`
 keeps its old wording while the place is unchanged and becomes the place
 when it moves (the doctors' rule). Old providers keep grouping by
 `facility` until edited; nothing is migrated.
+
+**Moving a place (2026-11-04).** Places that came from doctors' records
+(and places the team added) have a pencil beside their row in the picker
+(`startEditPlace`, `placeEditHtml`, `savePlaceRegion` in
+`features/doctor-sheets.js`): pick North or South, Save, and only that
+place's `region` is written (`savePlace`), for the whole team, logged in
+Updates. `placeList()` now gives an in-use place the region from `PLACES`,
+so it leaves "Other places". Its doctors follow at once: `doctorRegion()`
+takes the place's region over one stored on the doctor (the place decides;
+`d.region` counts only when the place has none). The network's own sites
+(`HMH_LOCATIONS`) get no pencil: their regions are Jose's, fixed in code.
+Not in this version: renaming a place (every doctor on it would need
+rewriting).
