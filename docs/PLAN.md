@@ -359,6 +359,12 @@ come from this alone.
 
 ## Done
 
+- 2026-11-05 A domain's name never breaks inside a word on its banner
+  ("Hematolog / y" on a phone). `fitDomainBannerName` in `index.html`
+  measures the longest word in place and steps the banner down (is-long,
+  then is-longer) until it fits; on a wider screen it steps back up.
+  `glossary-hero.cjs` now checks every domain and subgroup.
+
 - 2026-11-05 Idea credits on glossary domains and subgroups (Jose: "also
   give credit to medical terminology domains"). Double-tap the name on
   the colour banner; the tag sits under "N terms"; keyed by the

@@ -31,6 +31,22 @@ function ok(c, m, d) { if (c) { passed++; console.log('  PASS', m); } else { fai
           ok(!s.broken.length && !s.overPin && s.inside && s.hs <= 0, `${id}: "${s.name}" fits, no word broken, clear of the pin`, s);
           ok(s.moreHit, `${id}: ••• is on top and tappable`);
         }
+        // Every domain and subgroup, not just the five above: the size steps
+        // down until the longest word fits ("Hematology" broke at 34px on a
+        // phone, 2026-11-05; fitDomainBannerName measures it in place).
+        const every = await page.evaluate(async () => {
+          const out = [];
+          for (const c of DATA.categories) {
+            setCategory(c.id); await new Promise(r => setTimeout(r, 60));
+            const n = document.querySelector('.domain-banner-name'), t = n && n.firstChild;
+            if (!t || t.nodeType !== 3) continue;
+            let i = 0; for (const w of t.data.split(' ')) { const r = document.createRange(); r.setStart(t, i); r.setEnd(t, i + w.length);
+              if (new Set([...r.getClientRects()].map(x => Math.round(x.top))).size > 1) out.push(c.name + ': ' + w); i += w.length + 1; }
+          }
+          return { n: DATA.categories.length, out };
+        });
+        ok(every.n > 20 && !every.out.length, `all ${every.n} domains and subgroups: no word broken on the banner`, every);
+
         // All domains at rest: one colour tile per top-level domain, no word
         // broken; a tap opens it, Back returns; a search lists terms instead.
         await go(page, 'all', 900);
