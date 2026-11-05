@@ -25,9 +25,10 @@ Medicine, CDI, Mountainside, Palisades, Pascack Valley, JFK and JFK Johnson.
 South: Jersey Shore, K. Hovnanian, Ocean, Southern Ocean, Riverview, Bayshore,
 Shore Rehab, Raritan Bay (all three), Carrier. The network name has none.
 
-**Doctors.** `doctorRegion(d)` = `d.region` if set, else the region of the
-doctor's place (`regionOfGroup`, which also knows places the team added; see
-`places.md`). Since places, the edit sheet has no Region field: the place
+**Doctors.** `doctorRegion(d)` = the region of the doctor's place
+(`regionOfGroup`, which also knows places the team added or moved; see
+`places.md`), else `d.region` (2026-11-04: the place wins, so moving a place
+moves its doctors; it used to be `d.region` first). Since places, the edit sheet has no Region field: the place
 decides, and `region` is stored only for a doctor with no specific site. No region = shown
 in every region, never hidden. A new doctor at a site that doesn't say (or a
 Doctor Prep search under "Hackensack Meridian Health") gets the adder's region

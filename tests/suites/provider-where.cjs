@@ -84,6 +84,44 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
       const dd = await page.evaluate(() => ({ dd: ddPlace, pp: ppPlace, target: placePickFor, text: document.getElementById('fDDPlace').textContent }));
       ok(dd.target === 'dd' && dd.dd === 'John Theurer Cancer Center' && /John Theurer/.test(dd.text), 'the doctor sheet\'s Where still works on its own', dd);
       await page.evaluate(() => closeDoctorDirModal());
+
+      // Moving a place (2026-11-04): a place from a doctor's record sits under
+      // "Other places" with a pencil; North + Save writes only its region, it moves
+      // to the North list, and its doctor follows even with another region stored.
+      await page.evaluate(() => {
+        const id = 'imus1'; const rec = { name: 'Dr. Imus Test', specialty: 'Pediatrics', hospitalLocation: 'Don Imus Pediatric Center', region: 'south', updatedAt: 1 };
+        __DB['doctor-directory'][id] = rec; DOCTOR_DIRECTORY.push({ id, ...rec });
+        _openAddDoctorDirModal();
+      }); await wait(200);
+      await page.click('#fDDPlace'); await wait(300);
+      const before = await page.evaluate(() => {
+        const secs = [...document.querySelectorAll('#placeList .place-sec')];
+        const secOf = n => { const s = secs.find(s => [...s.querySelectorAll('.place-row b')].some(b => b.textContent === n)); return s ? ((s.querySelector('.place-sec-head') || {}).textContent || '') : null; };
+        const item = [...document.querySelectorAll('#placeList .place-item')].find(i => /Don Imus/.test(i.textContent));
+        const pen = item && item.querySelector('.place-row-edit'); if (pen) pen.scrollIntoView({ block: 'center' }); const r = pen && pen.getBoundingClientRect();
+        const hit = r && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        const humc = [...document.querySelectorAll('#placeList .place-row')].find(b => /Hackensack University Medical Center/.test(b.textContent));
+        return { sec: secOf('Don Imus Pediatric Center'), pen: !!pen, w: r && Math.round(r.width), h: r && Math.round(r.height), own: !!hit && (hit === pen || pen.contains(hit)),
+          humcPen: !!(humc && humc.parentElement.classList.contains('place-item')), region: doctorRegion(DOCTOR_DIRECTORY.find(d => d.id === 'imus1')) };
+      });
+      ok(before.sec === 'Other places' && before.pen && before.w >= 44 && before.h >= 44 && before.own, 'a place with no region sits under Other places with a 44px pencil that takes the tap', before);
+      ok(!before.humcPen && before.region === 'south', 'the network\'s own sites have no pencil; the doctor shows their stored region meanwhile', before);
+      if (device === 'iphone') await page.screenshot({ path: O + device + '-place-pencil.png' });
+      await page.evaluate(() => { const i = [...document.querySelectorAll('#placeList .place-item')].find(i => /Don Imus/.test(i.textContent)); i.querySelector('.place-row-edit').click(); }); await wait(200);
+      await page.evaluate(() => { const b = [...document.querySelectorAll('#placeList .place-editform [role=radio]')].find(b => b.textContent === 'North'); b.click(); }); await wait(150);
+      if (device === 'iphone') await page.screenshot({ path: O + device + '-place-edit.png' });
+      await page.evaluate(() => [...document.querySelectorAll('#placeList .place-editform .btn-primary')][0].click()); await wait(500);
+      const after = await page.evaluate(() => {
+        const secs = [...document.querySelectorAll('#placeList .place-sec')];
+        const s = secs.find(s => [...s.querySelectorAll('.place-row b')].some(b => b.textContent === 'Don Imus Pediatric Center'));
+        const stored = ((__DB['terminology-meta'] || {}).places || {}).places || {};
+        return { sec: s && (s.querySelector('.place-sec-head') || {}).textContent, stored: stored[placeId('Don Imus Pediatric Center')] && stored[placeId('Don Imus Pediatric Center')].region,
+          custom: stored[placeId('Don Imus Pediatric Center')] && stored[placeId('Don Imus Pediatric Center')].custom,
+          region: doctorRegion(DOCTOR_DIRECTORY.find(d => d.id === 'imus1')), open: document.getElementById('placeOverlay').classList.contains('show') };
+      });
+      ok(after.stored === 'north' && !after.custom && /^North/.test(after.sec || '') && after.open, 'Save writes only that place\'s region and it moves to the North list', after);
+      ok(after.region === 'north', 'its doctor follows the place, over the region stored on them', after);
+      await page.evaluate(() => { closePlacePicker(); closeDoctorDirModal(); });
       ok(!page.__errors || !page.__errors.length, 'no page errors', page.__errors);
     } finally { await ctx.close(); }
   }

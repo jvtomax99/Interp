@@ -19,6 +19,7 @@ let editingDoctorDirId = null;
    "no specific site", or '' for not set. */
 let ddPlace = '';
 let placeAdding = null;          // { name, region } while the add form is open
+let placeEditing = null;         // { name, region } while a place's region is being changed
 
 // The picker serves two sheets (R5, 2026-10-20): the doctor's (ddPlace,
 // fDDPlace) and the provider's (ppPlace, fPPlace). placePickFor says which.
@@ -40,6 +41,7 @@ function renderPlaceField(id, ddPlace){
 function openPlacePicker(target){
   placePickFor = target === 'pp' ? 'pp' : 'dd';
   placeAdding = null;
+  placeEditing = null;
   const q = document.getElementById('placeSearch');
   if(q) q.value = '';
   renderPlaceList();
@@ -49,6 +51,7 @@ function openPlacePicker(target){
 function closePlacePicker(){
   document.getElementById('placeOverlay').classList.remove('show');
   placeAdding = null;
+  placeEditing = null;
 }
 function pickPlace(encodedName){
   const name = decodeURIComponent(encodedName);
@@ -66,17 +69,23 @@ function placeCount(name){
 function placeRowHtml(p){
   const on = p.name === placePicked();
   const sub = p.sub || placeCount(p.name);
-  return `<button type="button" class="place-row${on ? ' is-on' : ''}" aria-pressed="${on}" onclick="pickPlace('${encGroup(p.name)}')">
+  const row = `<button type="button" class="place-row${on ? ' is-on' : ''}" aria-pressed="${on}" onclick="pickPlace('${encGroup(p.name)}')">
       <span class="place-row-icon">${groupIconHtml(groupIconKeyFor(p.name))}</span>
       <span class="place-row-text"><b>${escapeHtml(p.label || p.name)}</b>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</span>
       ${on ? `<span class="place-row-tick" aria-hidden="true">${ICON_CHECK}</span>` : ''}
     </button>`;
+  // Places the team added or that came from a doctor's record can have their
+  // region set or moved (2026-11-04). The network's own sites keep the region
+  // Jose gave them in HMH_LOCATIONS, so they get no pencil.
+  if(p.builtIn || p.name === HMH_NETWORK_LABEL) return row;
+  return `<div class="place-item">${row}<button type="button" class="place-row-edit" onclick="startEditPlace('${encGroup(p.name)}')" aria-label="Change the region of ${escapeAttr(p.name)}">${ICON_EDIT}</button></div>`;
 }
 
 function renderPlaceList(){
   const box = document.getElementById('placeList');
   if(!box) return;
   if(placeAdding){ box.innerHTML = placeAddHtml(); return; }
+  if(placeEditing){ box.innerHTML = placeEditHtml(); return; }
   const q = foldText((document.getElementById('placeSearch') || {}).value || '').trim();
   const all = placeList().filter(p => !q || foldText(p.name).includes(q));
   const mine = myRegion();
@@ -126,6 +135,49 @@ async function addPlace(){
   const saving = savePlace(name, { custom: true, region });   // known locally at once
   pickPlace(encGroup(name));
   if(await saving) logActivity(`added the place ${name} (${regionName(region)})`);
+}
+
+/* A place's region, set or moved (Jose, 2026-11-04: places that came in
+   from doctors' records sat under "Other places" though they were all in
+   the North). The pencil on a row opens this; Save writes only that place's
+   region (savePlace), for the whole team. Its doctors follow at once:
+   doctorRegion() takes the place's region over one stored on the doctor.
+   Not here: renaming a place (its doctors would need rewriting) and moving
+   the network's own sites. docs/features/places.md. */
+function startEditPlace(encodedName){
+  const name = decodeURIComponent(encodedName);
+  placeAdding = null;
+  placeEditing = { name, region: regionOfGroup(name) };
+  renderPlaceList();
+}
+function placeEditHtml(){
+  const e = placeEditing;
+  const count = placeCount(e.name);
+  return `<div class="place-addform place-editform">
+      <div class="place-edit-head"><span class="place-row-icon">${groupIconHtml(groupIconKeyFor(e.name))}</span><span class="place-row-text"><b>${escapeHtml(e.name)}</b>${count ? `<small>${escapeHtml(count)}</small>` : ''}</span></div>
+      <span class="place-addlab" id="placeEditRegLab">Region</span>
+      <div class="ds-mode-seg" role="radiogroup" aria-labelledby="placeEditRegLab">${REGIONS.map(r => `<button type="button" role="radio" aria-checked="${e.region === r.id}" onclick="placeEditing.region='${r.id}'; renderPlaceList()">${escapeHtml(r.name)}</button>`).join('')}</div>
+      <p class="field-hint">For the whole team. Its doctors move to that region’s list.</p>
+      <div class="place-addbtns">
+        <button type="button" class="btn btn-ghost" onclick="placeEditing=null; renderPlaceList()">Back</button>
+        <button type="button" class="btn btn-primary" onclick="savePlaceRegion()">Save</button>
+      </div>
+    </div>`;
+}
+async function savePlaceRegion(){
+  const e = placeEditing;
+  if(!e) return;
+  if(!isRegion(e.region)){ showToast('Pick North or South.'); return; }
+  const before = regionOfGroup(e.name);
+  placeEditing = null;
+  if(e.region === before){ renderPlaceList(); return; }
+  const saving = savePlace(e.name, { region: e.region });   // known locally at once
+  renderPlaceList();
+  if(['doctor-directory', 'providers'].includes(activeCategory)) renderContent();
+  if(await saving){
+    logActivity(`moved the place ${e.name} to the ${regionName(e.region)} region`);
+    showToast(`${e.name} is in the ${regionName(e.region)} now.`);
+  }
 }
 
 /* ---------- Doctor directory: the add and edit sheet ---------- */
