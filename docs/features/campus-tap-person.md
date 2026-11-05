@@ -29,7 +29,7 @@ glossary, counts as practice; tap area bigger than the figure"). This is the spe
   Reduced motion: the dots stand still; `is-away` pauses them; Still stops them through the page's rule.
 - Checks: `tests/suites/campus-alive.cjs`, "tap a person" (the list under Checks below, all in). `campus-pick.cjs`'s
   empty-scene sweep skips the spots. Guide: the practice answer's new paragraph and keywords (`guide/topics.js`); the
-  first New lately card (`GUIDE_NEWS`, `index.html`), the memory trainer's card gone.
+  first New lately card (`GUIDE_NEWS`, `index.html`) in the celebration's place: the three cards must point at three different answers (a card's New badge is the answer's, `ih_guideSeen`, so two cards on the practice answer cleared together; `guide.cjs` holds it), and both campus pieces open the same practice answer.
 - Not done from the spec: nothing. Beyond it: nothing (no team point for an answer, unlike Term Review's `teamPoints(1)`;
   add it if Jose wants his rank to count these).
 
@@ -132,4 +132,5 @@ memory, marked:
 ## Guide
 
 The practice answer (`guide/topics.js`, `practice`) gets a sentence: tap the people by the bench or on the plaza
-for a glossary word, your answer counts as a Term Review. A New lately card replaces the oldest of the three.
+for a glossary word, your answer counts as a Term Review. A New lately card takes the celebration's slot (both open the
+same answer, and the three cards must be three answers).
