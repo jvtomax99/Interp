@@ -55,24 +55,36 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
   // campus climbs from the old tenth to the new one, a tenth at a time, then flashes warm at its top. ih_campusLv
   // keeps the levels drawn; the first visit just draws them.
   let seen = null; try { seen = JSON.parse(localStorage.getItem('ih_campusLv') || 'null'); } catch (e) {}
+  // A building finished (every question known, 100%: campusLevel reaches 10 from 95%) celebrates once per phone
+  // (docs/features/campus-celebration.md): fireworks over its roof after the climb, a ribbon for this visit, its badge
+  // gold for good. ih_campusDone keeps which buildings this phone has celebrated; a first visit (no levels drawn yet)
+  // only draws the gold; dropping under 100% clears it, so finishing again celebrates again.
+  let done = {}; try { done = JSON.parse(localStorage.getItem('ih_campusDone') || '{}') || {}; } catch (e) {}
+  const nowDone = {};
   const now = {}, sprite = (A, it, k) => { const [aw, ah] = [A[2], A[3]], [, , w, h] = it.box, [ax, ay] = it.a[k];
     return `background-size:${(aw/w*100).toFixed(2)}% ${(ah/h*100).toFixed(2)}%;background-position:${aw > w ? (ax/(aw-w)*100).toFixed(3) : 0}% ${ah > h ? (ay/(ah-h)*100).toFixed(3) : 0}%`; };
   CAMPUS.forEach((b, i) => {
     const c = cover(b.id), lv = campusLevel(c), pct = Math.round(c*100), d = CCHI_DOMAINS.find(x => x.id === b.id) || {}, B = M.b[b.key];
-    sig.push(b.key + lv); now[b.key] = lv;
+    const fin = c >= 0.9999, cheer = fin && !!seen && !done[b.key];
+    sig.push(b.key + lv + (fin ? 'F' : '')); now[b.key] = lv; if (fin) nowDone[b.key] = true;
     const was = seen && Number.isInteger(seen[b.key]) && seen[b.key] < lv ? seen[b.key] : lv;
     // a tenth with nothing to show (hidden behind another building, or no change from the clay) has no picture
     const layer = (n, extra) => !B.lv[n-1] ? '' : `<span class="cp-paintw${extra ? ' cp-rise' : ''}" style="${pos(...B.lv[n-1])};--i:${i}${extra || ''}"><img class="cp-paint" src="./city/${b.key}-paint${n}.webp" alt="" decoding="async"></span>`;
     if (was) paint += layer(was);
     for (let n = was + 1; n <= lv; n++) paint += layer(n, `;--s:${n - was - 1}`);
     if (lv > was) paint += `<span class="cp-spark" style="${at(...B.label)};--s:${lv - was}"></span>`;
+    if (cheer){   // after the climb and its flash (or at once when nothing climbed): three bursts over the roof, then the ribbon under the badge
+      const f = (lv > was ? 1 + (lv - was) * 0.32 + 0.5 : 0.4).toFixed(2), [tx, ty] = tagsAt[b.key];   // around its badge (nudged inside the picture), over the roof
+      paint += [[-130, -10], [140, -40], [0, -72]].map(([dx, dy], n) => `<span class="cp-fire" style="${at(tx + dx, ty + dy)};--dom:${d.color||'#FFD58A'};--f:${f}s;--n:${n}">${'<i></i>'.repeat(12)}</span>`).join('')
+        + `<span class="cp-ribbon" style="${at(tx, ty + 6/K)};--f:${f}s">Finished</span>`;
+    }
     // warm windows on the painted floors, flickering; after a rise they come on at its end
     if (lv && B.gl && B.gl[lv-1]) paint += `<span class="cp-paintw cp-glw${lv > was ? ' cp-rise' : ''}" style="${pos(...B.gl[lv-1])};--i:${i};--s:${lv - was}"><img class="cp-glow" src="./city/${b.key}-glow${lv}.webp" alt="" decoding="async" style="--fl:${(3.2 + i*0.7).toFixed(1)}s"></span>`;
     // tap areas go in back to front (lowest on screen last), so a building in front takes the tap where boxes overlap
     hits.push([M.b[b.key].box[1] + M.b[b.key].box[3], `<button class="cp-bld" data-k="${b.key}" style="${pos(...M.b[b.key].box)}" tabindex="-1" aria-hidden="true"
         onclick="campusPick('${b.key}')"></button>`]);
-    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}${CAMPUS_PICK.key === b.key ? ' is-sel' : ''}" data-k="${b.key}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
-        onclick="campusPick('${b.key}')" aria-label="${escapeAttr(d.name||b.short)}, ${pct}% painted" aria-pressed="${CAMPUS_PICK.key === b.key}"><b>${escapeHtml(b.short)}</b><i>${pct}%</i></button>`;
+    tags += `<button class="cp-tag${b.id === worst ? ' is-focus' : ''}${fin ? ' is-done' : ''}${CAMPUS_PICK.key === b.key ? ' is-sel' : ''}" data-k="${b.key}" style="${at(...tagsAt[b.key])};--dom:${d.color||'#888'}"
+        onclick="campusPick('${b.key}')" aria-label="${escapeAttr(d.name||b.short)}, ${fin ? 'finished' : pct + '% painted'}" aria-pressed="${CAMPUS_PICK.key === b.key}"><b>${escapeHtml(b.short)}</b><i>${fin ? '&#9733;' : pct + '%'}</i></button>`;
     legend += `<button class="cp-key${b.id === worst ? ' is-focus' : ''}" style="--dom:${d.color||'#888'}" onclick="requireName(()=>startStudy('domain','${b.id}'))">
         <span class="cp-dot"></span>${escapeHtml(b.short)} <i>${pct}%</i></button>`;
   });
@@ -94,6 +106,7 @@ function renderCampus(ready, st, todayCount, goalPct, due, shaky, unseen){
     ${(L.sitters || []).map((o, i) => `<span class="cp-veh cp-sit" style="${pos(...o.img[0])};--i:${i}"><img src="./city/sit${i}-0.webp" alt="" decoding="async"><img src="./city/sit${i}-1.webp" alt="" decoding="async"></span>`).join('')}
     ${L.birds ? `<span class="cp-veh cp-birds" ${data(L.birds)} style="${pos(...L.birds.img[0])};${origin(L.birds, L.birds.img[0])}"><img src="./city/birds0.webp" alt="" decoding="async"><img src="./city/birds1.webp" alt="" decoding="async"></span>` : ''}`;
   try { localStorage.setItem('ih_campusLv', JSON.stringify(now)); } catch (e) {}
+  try { localStorage.setItem('ih_campusDone', JSON.stringify(nowDone)); } catch (e) {}
   // Dr. Smiley stands at the building to paint next
   const wk = worst ? CAMPUS.find(x => x.id === worst).key : null;
   // left of its badge, or right of it when that would cover another badge

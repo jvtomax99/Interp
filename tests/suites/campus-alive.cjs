@@ -4,7 +4,9 @@
    2026-10-26), warm lit windows on the painted floors, and the paint rising: a building
    whose level went up since the phone last drew the campus climbs a tenth at
    a time, then flashes at its top; the next drawing does not replay it. Under
-   reduced motion nothing flips and there is no flash. */
+   reduced motion nothing flips and there is no flash. A building finished (100%,
+   docs/features/campus-celebration.md) celebrates once per phone: three fireworks after the climb, a ribbon for the
+   visit, its badge gold with a star for good; a first visit only draws the gold. */
 const L = require('../support/harness.cjs');
 const O = L.OUT + 'campus-alive/'; require('fs').mkdirSync(O, { recursive: true });
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d).slice(0, 600))); if (!c) process.exitCode = 1; };
@@ -58,6 +60,19 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
     ok(JSON.stringify(rise.t) === JSON.stringify([['9', false], ['10', true]]) && rise.sparks === 2, 'Terminology climbs its last tenth; a flash for each building that rose', rise);
     ok(rise.glow.join() === './city/e-glow7.webp,./city/t-glow10.webp' && rise.glowRise.every(Boolean), 'lit windows on the painted floors, coming on after the climb', rise);
     ok(rise.cranes === 0 && rise.saved.e === 7 && rise.saved.t === 10, 'no cranes after the climb either; the new levels are kept', rise);
+    const fin = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), q = s => [...w.querySelectorAll(s)];
+      const d = el => parseFloat(getComputedStyle(el).animationDelay), tag = k => w.querySelector(`.cp-tag[data-k="${k}"]`);
+      const fires = q('.cp-fire'), spark = q('.cp-spark').filter(x => x.style.getPropertyValue('--s') === '1').map(d);   // Terminology's own flash (it climbed one tenth)
+      return { fires: fires.length, sparksEach: fires.map(f => f.children.length), bursts: fires.map(f => d(f.firstElementChild)), lastSpark: Math.max(...spark),
+        inside: fires.every(f => { const r = f.getBoundingClientRect(), R = w.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2; return cx >= R.left && cx <= R.right && cy >= R.top && cy <= R.bottom; }),
+        ribbon: q('.cp-ribbon').map(r => [r.textContent, d(r)]), tDone: tag('t').classList.contains('is-done'), tStar: tag('t').querySelector('i').textContent, tLabel: tag('t').getAttribute('aria-label'),
+        eDone: tag('e').classList.contains('is-done'), eText: tag('e').querySelector('i').textContent, tFocus: tag('t').classList.contains('is-focus'),
+        done: JSON.parse(localStorage.getItem('ih_campusDone')) }; });
+    ok(fin.fires === 3 && fin.sparksEach.every(n => n === 12) && fin.inside, 'Terminology finished: three fireworks over its roof, twelve sparks each, their hearts inside the picture', fin);
+    ok(fin.bursts.every((v, i) => v > fin.lastSpark && (i === 0 || v > fin.bursts[i - 1])), 'the bursts start after its own climb and flash, one after another', fin);
+    ok(fin.ribbon.length === 1 && fin.ribbon[0][0] === 'Finished' && fin.ribbon[0][1] > fin.bursts[0], 'a Finished ribbon under its badge, after the first burst', fin.ribbon);
+    ok(fin.tDone && fin.tStar === '\u2605' && /finished$/.test(fin.tLabel) && !fin.tFocus && !fin.eDone && fin.eText === '70%', 'its badge is gold with a star (and never the focus badge); Ethics keeps its number', fin);
+    ok(JSON.stringify(fin.done) === '{"t":true}', 'the celebration is remembered on this phone', fin.done);
     await wait(3200); await page.screenshot({ path: O + device + '-risen.png' });
 
     // Timing: the steps follow each other, the flash comes after the last.
@@ -71,6 +86,16 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
     const again = await page.evaluate(() => ({ rise: document.querySelectorAll('#content .cp-world .cp-rise').length, sparks: document.querySelectorAll('#content .cp-spark').length,
       e: [...document.querySelectorAll('#content .cp-paintw img.cp-paint')].map(i => i.getAttribute('src')).filter(s => /\/e-/.test(s)) }));
     ok(again.rise === 0 && again.sparks === 0 && again.e.join() === './city/e-paint7.webp', 'drawn again: the paint simply stands at 7, nothing replays', again);
+    const keep = await page.evaluate(() => ({ fires: document.querySelectorAll('#content .cp-fire').length, ribbon: document.querySelectorAll('#content .cp-ribbon').length,
+      tDone: document.querySelector('#content .cp-tag[data-k="t"]').classList.contains('is-done') }));
+    ok(keep.fires === 0 && keep.ribbon === 0 && keep.tDone, 'drawn again: no fireworks, no ribbon, the badge still gold', keep);
+    // Back under 100% (a question shaky again): the gold comes off and the memory clears; finished again, it celebrates again.
+    await page.evaluate(() => { const m = window.domainMastery; window.domainMastery = () => { const o = m(); o.terminology = { known:9, shaky:1, unseen:0, total:10 }; return o; }; });
+    await redraw(page); await wait(200);
+    const off = await page.evaluate(() => ({ tDone: document.querySelector('#content .cp-tag[data-k="t"]').classList.contains('is-done'), done: localStorage.getItem('ih_campusDone') }));
+    await page.evaluate(m => new Function(m)(), `(${MASTERY})()`); await redraw(page); await wait(200);
+    const back = await page.evaluate(() => ({ fires: document.querySelectorAll('#content .cp-fire').length, done: localStorage.getItem('ih_campusDone') }));
+    ok(!off.tDone && off.done === '{}' && back.fires === 3 && back.done === '{"t":true}', 'under 100% the gold comes off and is forgotten; finished again, it celebrates again', { off, back });
     if (page.__errors.length) ok(false, 'no page errors', page.__errors);
     await page.context().close();
   }
@@ -78,13 +103,31 @@ const redraw = page => page.evaluate(() => { renderContent(); document.querySele
   // Reduced motion: the people hold their first frame, no flash; the paint is simply there.
   console.log('== reduced motion');
   const { page } = await L.boot(b, { device: 'iphone', reducedMotion: true });
-  await page.evaluate(m => { new Function(m)(); localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); }, `(${MASTERY})()`);
-  await L.go(page, 'practice', 1800); await page.evaluate(() => document.querySelector('#content .cp-card').scrollIntoView({ block: 'start' })); await wait(400);
+  await page.evaluate(m => { new Function(m)(); localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); localStorage.removeItem('ih_campusDone'); }, `(${MASTERY})()`);
+  await L.go(page, 'practice', 1800);
+  // the screen may draw more than once while it settles: seed again and draw once, as above
+  await page.evaluate(() => { localStorage.setItem('ih_campusLv', JSON.stringify({ e:3, t:9, s:0, n:0, c:0 })); localStorage.removeItem('ih_campusDone'); });
+  await redraw(page); await wait(400);
   const r = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), q = s => [...w.querySelectorAll(s)];
     return { idleLast: getComputedStyle(q('.cp-idle i:last-child')[0]).opacity, idleAnim: getComputedStyle(q('.cp-idle i:last-child')[0]).animationName,
       anims: campusAnims.length,
       spark: q('.cp-spark').map(s => getComputedStyle(s).display), rise: q('.cp-rise').map(el => getComputedStyle(el).animationName), glowAnim: q('.cp-glow').map(i => getComputedStyle(i).animationName) }; });
   ok(r.idleLast === '0' && r.idleAnim === 'none' && r.anims === 0, 'the people hold still', r);
   ok(r.spark.every(d => d === 'none') && r.rise.every(n => n === 'none') && r.glowAnim.every(n => n === 'none'), 'no flash, no climb, no flicker: the paint and windows are simply there', r);
+  const rm = await page.evaluate(() => { const w = document.querySelector('#content .cp-world'), q = s => [...w.querySelectorAll(s)];
+    return { fire: q('.cp-fire').map(f => getComputedStyle(f).display), ribbon: q('.cp-ribbon').map(x => [getComputedStyle(x).animationName, getComputedStyle(x).opacity]),
+      tDone: w.querySelector('.cp-tag[data-k="t"]').classList.contains('is-done') }; });
+  ok(rm.fire.length === 3 && rm.fire.every(d => d === 'none') && rm.ribbon.length === 1 && rm.ribbon[0][0] === 'none' && rm.ribbon[0][1] === '1' && rm.tDone, 'reduced motion: no fireworks, the ribbon and the gold badge simply there', rm);
+  await page.context().close();
+
+  // A first visit (no levels drawn on this phone yet) with an area already finished: the gold, no fireworks.
+  console.log('== first visit');
+  const p2 = (await L.boot(b, { device: 'iphone' })).page;
+  await p2.evaluate(m => { new Function(m)(); localStorage.removeItem('ih_campusLv'); localStorage.removeItem('ih_campusDone'); }, `(${MASTERY})()`);
+  await L.go(p2, 'practice', 1800); await wait(300);
+  const first = await p2.evaluate(() => ({ fires: document.querySelectorAll('#content .cp-fire').length, ribbon: document.querySelectorAll('#content .cp-ribbon').length,
+    tDone: document.querySelector('#content .cp-tag[data-k="t"]').classList.contains('is-done'), done: localStorage.getItem('ih_campusDone') }));
+  ok(first.fires === 0 && first.ribbon === 0 && first.tDone && first.done === '{"t":true}', 'a first visit draws a finished building gold, with no fireworks, and remembers it', first);
+  if (p2.__errors.length) ok(false, 'no page errors', p2.__errors);
   await b.close();
 })();
