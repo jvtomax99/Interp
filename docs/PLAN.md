@@ -210,7 +210,8 @@ under way, then what waits on Jose, then small leftovers.
       only"), then `claude/campus-tap-person`: one 44 px spot per group of
       people under the buildings' tap boxes, three dots over the group holding
       the word, the card asks the English, Show, Got it / Missed it saved as a
-      Term Review answer; the CoreCHI streak untouched. Left of 2c: 6 (weather).
+      Term Review answer; the CoreCHI streak untouched. #214, live
+      b1105.1156. Left of 2c: 6 (weather).
 3. **Smoothness: parked.** Home taps are done (S9, Done 2026-10-26).
    Scrolling Home still reads 64 ms/s on the meter (Apple: 10+ is
    distracting), but **Jose, 2026-10-26: scrolling Home feels fine.** The
