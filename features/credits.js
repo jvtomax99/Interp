@@ -18,10 +18,25 @@
 const CREDIT_STORE = 'ih_credits';
 const CREDIT_ROLES = {
   idea:    { chip: 'The idea',            tag: n => `${n}'s idea`,              line: 'came up with this idea',          kicker: s => `The idea behind ${s}` },
+  // Domains only (Jose, 2026-11-05: "show created for the suggestion").
+  suggested: { chip: 'Suggested it',      tag: n => `Created at ${n}'s suggestion`, line: 'suggested this',             kicker: s => `Behind ${s}`, domainOnly: true },
   content: { chip: 'Wrote the content',   tag: n => `Written by ${n}`,          line: 'wrote what is in it',             kicker: s => `Behind ${s}` },
   spanish: { chip: 'Checked the Spanish', tag: n => `Spanish checked by ${n}`,  line: 'checked the Spanish',             kicker: s => `Behind ${s}` },
   testing: { chip: 'Tested it',           tag: n => `Tested by ${n}`,           line: 'tested it before the team got it', kicker: s => `Behind ${s}` },
 };
+// A glossary domain's credit is for its list of terms, so some roles read
+// differently there; "suggested" is offered on domains only.
+const CREDIT_DOMAIN_ROLES = {
+  idea:    { line: 'came up with this domain' },
+  suggested: { line: 'suggested this domain' },
+  content: { chip: 'Added the terms',    tag: n => `Terms by ${n}`,    line: 'put these terms together' },
+  testing: { chip: 'Reviewed the terms', tag: n => `Reviewed by ${n}`, line: 'reviewed these terms' },
+};
+const CREDIT_DOMAIN = 'domain-';
+function creditRole(role, key) {
+  const r = CREDIT_ROLES[role] || CREDIT_ROLES.idea;
+  return String(key || '').startsWith(CREDIT_DOMAIN) ? Object.assign({}, r, CREDIT_DOMAIN_ROLES[role] || {}) : r;
+}
 const CREDIT_BULB = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="#F7C948" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.5 18.5h5M10.5 21h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const CREDITS = {
   map: (() => { try { return creditClean(JSON.parse(localStorage.getItem(CREDIT_STORE) || '{}')); } catch (e) { return {}; } })(),
@@ -43,13 +58,24 @@ function creditKeep() {
 }
 // "Sound-Alikes" -> "sound-alikes"; accents folded, at most 40 characters.
 function creditKeyOf(title) {
-  return String(title || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  return String(title || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/, '');
 }
 
-/* The screen's title: the first heading on it, when that heading is the
-   screen's own head (a .section-head, or the Doctors list's .hub-head). */
+/* The screen's title. A glossary domain or subgroup: its name on the colour
+   banner above #content, keyed by the domain's id so a rename keeps the
+   credit ("domain-onco-rad"); the tag goes beside its "7 terms". Any other
+   screen: the first heading in #content, when that heading is the screen's
+   own head (a .section-head, or the Doctors list's .hub-head). */
 function creditTitle() {
+  const dn = document.querySelector('#app .domain-banner .domain-banner-name');
+  const cat = dn && typeof activeCategory === 'string' && activeCategory !== 'all' && typeof DATA === 'object'
+    && DATA.categories.find(c => c.id === activeCategory);
+  if (cat) {
+    const meta = dn.parentElement.querySelector('.domain-banner-meta') || dn;
+    const key = creditKeyOf(CREDIT_DOMAIN + cat.id);
+    return { el: dn, head: meta, section: String(cat.name || '').slice(0, 60), key, domain: true };
+  }
   const h = document.querySelector('#content h1, #content h2');
   if (!h) return null;
   const head = h.closest('#content > .section-head, #content .hub-head');
@@ -65,19 +91,20 @@ function creditDecorate() {
   const t = creditTitle();
   const c = t && CREDITS.map[t.key];
   const sig = c ? [t.key, c.name, c.role].join('|') : '';
-  document.querySelectorAll('#content .credit-tag').forEach(el => { if (el.dataset.sig !== sig) el.remove(); });
+  document.querySelectorAll('#app .credit-tag').forEach(el => { if (el.dataset.sig !== sig) el.remove(); });
   if (!t) return;
   if (!t.el.classList.contains('credit-title')) t.el.classList.add('credit-title');
   if (t.el.dataset.creditKey !== t.key) t.el.dataset.creditKey = t.key;
   if (t.el.dataset.creditSection !== t.section) t.el.dataset.creditSection = t.section;
-  if (!c || document.querySelector('#content .credit-tag')) return;
+  if (!c || document.querySelector('#app .credit-tag')) return;
+  const r = creditRole(c.role, t.key);
   const tag = document.createElement('button');
   tag.type = 'button';
-  tag.className = 'credit-tag';
+  tag.className = 'credit-tag' + (t.domain ? ' on-banner' : '');
   tag.dataset.sig = sig;
   tag.dataset.creditKey = t.key;
-  tag.setAttribute('aria-label', `${CREDIT_ROLES[c.role].tag(c.name)}. Open the credit`);
-  tag.innerHTML = CREDIT_BULB + `<span>${escapeHtml(CREDIT_ROLES[c.role].tag(c.name))}</span>`;
+  tag.setAttribute('aria-label', `${r.tag(c.name)}. Open the credit`);
+  tag.innerHTML = CREDIT_BULB + `<span>${escapeHtml(r.tag(c.name))}</span>`;
   t.head.insertAdjacentElement('afterend', tag);
 }
 
@@ -109,7 +136,6 @@ function creditShow(html, label, focusSel) {
   ov.setAttribute('aria-label', label);
   ov.innerHTML = html;
   ov.classList.add('show');
-  CREDITS.shownAt = performance.now();
   const f = ov.querySelector(focusSel);
   if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
 }
@@ -120,7 +146,7 @@ function creditOpen(key, section) {
   const c = CREDITS.map[key];
   const owner = typeof isHubOwner === 'function' && isHubOwner();
   if (!c) { if (owner) creditEdit(key, section); return; }
-  const r = CREDIT_ROLES[c.role];
+  const r = creditRole(c.role, key);
   const when = c.at ? new Date(c.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
   const meta = [c.by ? `Credited by ${escapeHtml(c.by)}` : '', when].filter(Boolean).join(' · ');
   const initial = escapeHtml(Array.from(c.name.trim())[0].toUpperCase());
@@ -145,13 +171,13 @@ function creditEdit(key, section) {
   const c = CREDITS.map[key];
   const sec = (c && c.section) || section || '';
   const role = (c && c.role) || 'idea';
-  const chips = Object.keys(CREDIT_ROLES).map(k => `
-    <label class="credit-chip"><input type="radio" name="creditRole" value="${k}"${k === role ? ' checked' : ''}><span>${escapeHtml(CREDIT_ROLES[k].chip)}</span></label>`).join('');
+  const chips = Object.keys(CREDIT_ROLES).filter(k => !CREDIT_ROLES[k].domainOnly || String(key).startsWith(CREDIT_DOMAIN) || k === role).map(k => `
+    <label class="credit-chip"><input type="radio" name="creditRole" value="${k}"${k === role ? ' checked' : ''}><span>${escapeHtml(creditRole(k, key).chip)}</span></label>`).join('');
   creditShow(`
     <div class="modal credit-sheet" data-key="${escapeAttr(key)}" data-section="${escapeAttr(sec)}">
       <span class="credit-owner">Owners only</span>
       <h3>${c ? 'Edit credit' : 'Give credit'}</h3>
-      <p class="credit-lede">For <b>${escapeHtml(sec)}</b>. The whole team sees it under this screen's title. Check with them before you add their words.</p>
+      <p class="credit-lede">For <b>${escapeHtml(sec)}</b>. The whole team sees it ${key.startsWith(CREDIT_DOMAIN) ? "on this domain's banner" : "under this screen's title"}. Check with them before you add their words.</p>
       <div class="field"><label for="creditName">Name</label>
         <input id="creditName" type="text" maxlength="60" autocomplete="off" placeholder="First name" value="${escapeAttr(c ? c.name : '')}"></div>
       <div class="field"><label for="creditWords">In their words (optional)</label>
@@ -181,7 +207,7 @@ function creditSave() {
   creditKeep();
   creditDecorate();
   creditClose();
-  showToast(`Credit saved: ${CREDIT_ROLES[role].tag(name)}`);
+  showToast(`Credit saved: ${creditRole(role, key).tag(name)}`);
   db.collection('hub-credits').doc(key).set(doc).catch(() => {
     if (before) CREDITS.map[key] = before; else delete CREDITS.map[key];
     creditKeep();
@@ -234,6 +260,9 @@ document.addEventListener('pointerup', e => {
   if (T.t && e.timeStamp - T.t < 350 && Math.hypot(e.clientX - T.x, e.clientY - T.y) < 30) {
     T.t = 0;
     creditOpen(el.dataset.creditKey, el.dataset.creditSection);
+    // Only a touch double-tap is followed by a stray click (a mouse's comes
+    // before its dblclick), so only this one opens the backdrop's guard.
+    CREDITS.shownAt = performance.now();
   } else { T.t = e.timeStamp; T.x = e.clientX; T.y = e.clientY; }
 });
 document.addEventListener('dblclick', e => {

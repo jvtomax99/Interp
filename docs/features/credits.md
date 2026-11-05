@@ -27,12 +27,28 @@ the only way in: a credit nobody finds isn't much of a credit.
 
 ## How it works
 
+- **Glossary domains** (Jose, 2026-11-05, the same day: "also give credit
+  to medical terminology domains"). A domain or subgroup's title is its name
+  on the colour banner (`.domain-banner-name`, drawn by `domainBannerHtml`
+  outside `#content`, so the frame watch on `#app` is what catches it). Its
+  key is the domain's id, not its name, `domain-<id>` (`domain-onco-rad`),
+  so a rename keeps the credit; `section` holds the name at the time. The
+  tag (`.credit-tag.on-banner`, the banner's own glass) goes on its own line
+  under "7 terms". Some roles read as a list of terms
+  (`CREDIT_DOMAIN_ROLES`): content is "Added the terms" / "Terms by Ana" /
+  "put these terms together", testing is "Reviewed the terms" / "Reviewed
+  by Ana". A fifth role, domains only (Jose, the same day, "show created
+  for the suggestion"; he picked a fifth choice over rewording The idea):
+  `suggested`, "Suggested it" / "Created at Sylvia's suggestion" /
+  "suggested this domain". It needed the rules' role list widened, so the
+  rules file had to be pasted again. A parent's credit is not its
+  subgroups', nor the other way round. Not on All domains.
 - **Which screen.** The title is the first heading in `#content`, when it
   sits in the screen's own head: `#content > .section-head h2` or the
   Doctors list's `.hub-head h1`. That covers Sound-Alikes, False Friends,
   CoreCHI Practice, Term Review, Translate, the Memory trainer, Provider
   Pictures, Training & Events, Code of Ethics, Recent Updates, Doctors.
-  Not Home, Team Chat, Ask the Hub, the glossary domains or the 3D Body
+  Not Home, Team Chat, Ask the Hub or the 3D Body
   (their heads are built differently; not in this version).
 - **The key is the title.** "Sound-Alikes" -> `sound-alikes`
   (`creditKeyOf`: accents folded, anything else to `-`, at most 40
@@ -51,9 +67,11 @@ the only way in: a credit nobody finds isn't much of a credit.
   `touch-action:manipulation` and no text selection, so the browser
   neither zooms nor selects a word. The click that follows the second
   touch lands on the card's backdrop the instant it appears; backdrop
-  clicks in the first 450 ms are ignored, or the card closed itself.
+  clicks in the first 450 ms after a touch double-tap are ignored, or the
+  card closed itself. A mouse has no such click (its second click comes
+  before the dblclick), so it gets no guard.
 - **Data.** `hub-credits/{key}` = `{ section, name, role, words, by, at }`
-  (`role` one of `idea`, `content`, `spanish`, `testing`; `words` up to
+  (`role` one of `idea`, `suggested` (domains), `content`, `spanish`, `testing`; `words` up to
   300 characters; `by` is `whoAmI()`; `at` is ms). One document per
   screen, not a shared blob. Everyone listens (`startCredits`, in the
   `hubAuthReady` list); the phone keeps a copy in `ih_credits` so the tag
@@ -70,7 +88,8 @@ the only way in: a credit nobody finds isn't much of a credit.
 ## Not in this version
 
 A thanks button or count; photos; more than one person per screen;
-credits on single terms or on Home, Chat, Ask, the glossary domains;
+credits on single terms or on Home, Chat, Ask, All domains; a Give
+credit item in a domain's ••• menu;
 telling the person they were credited; a page listing every credit.
 
 ## User Guide
