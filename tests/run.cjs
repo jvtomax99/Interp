@@ -52,6 +52,7 @@ const SUITES = [
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],
+  ['tool-banners.cjs',   'Tool banners: Translate, Term Review, Ask and Doctor Directory under a colour banner with their pin (one-line title, no spill, the count above the search, + Add and Ask\'s links on it, his face in a conversation, a credit\'s tag), the pin flying from Home and nothing left behind, none under reduced motion or from the tab bar, Back'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
   ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once'],
   ['feel.cjs',            'The feel guard: no empty flash or jump on data, press feedback, contrast, a scroll that searches nothing, his face on its clock, Home at rest'],

@@ -76,6 +76,14 @@ function creditTitle() {
     const key = creditKeyOf(CREDIT_DOMAIN + cat.id);
     return { el: dn, head: meta, section: String(cat.name || '').slice(0, 60), key, domain: true };
   }
+  // A tool banner (features/tool-banners.js) holds its screen's title; Doctor
+  // Directory's sits above the search, outside #content.
+  const tn = document.querySelector('#app .tool-banner .tool-banner-name');
+  if (tn) {
+    const section = tn.textContent.replace(/\s+/g, ' ').trim().slice(0, 60);
+    const key = creditKeyOf(section);
+    return key ? { el: tn, head: tn.parentElement.querySelector('.tool-banner-line') || tn, section, key, banner: true } : null;
+  }
   const h = document.querySelector('#content h1, #content h2');
   if (!h) return null;
   const head = h.closest('#content > .section-head, #content .hub-head');
@@ -100,7 +108,7 @@ function creditDecorate() {
   const r = creditRole(c.role, t.key);
   const tag = document.createElement('button');
   tag.type = 'button';
-  tag.className = 'credit-tag' + (t.domain ? ' on-banner' : '');
+  tag.className = 'credit-tag' + (t.domain || t.banner ? ' on-banner' : '');
   tag.dataset.sig = sig;
   tag.dataset.creditKey = t.key;
   tag.setAttribute('aria-label', `${r.tag(c.name)}. Open the credit`);

@@ -310,7 +310,15 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    earn on your lanyard (my pick), a quick second open later the same day,
    drag the badge onto the reader with better sounds. Later, if he asks:
    tilting the phone to swing the badge, playing on a computer.
-6. **Email sign-in, one account on every phone (Jose, 2026-11-06).**
+6. **Tool banners (Jose, 2026-11-06, "Plan it for real", then "Build it"): built,** waiting for his OK. Translate, Term
+   Review's start, Ask the Hub and Doctor Directory get the domains'
+   colour banner with their pin, and the Home pin you tap flies into it.
+   Plan, what it won't do yet, cost in height, checks:
+   `docs/features/tool-banners.md`. One pull request. Came from his ask for
+   ThreeUI and Meshy ideas; the other picks (thinking trace, card stack,
+   practice certificate, Meshy equipment drill, spinning pins) are listed
+   there as later ideas, mockups in the chat only.
+7. **Email sign-in, one account on every phone (Jose, 2026-11-06).**
    A 6-digit code emailed to you, typed into the Hub; your name, photo,
    practice and settings follow you to any phone. Spec, the "not in this
    version" list and Jose's one-time setup: `docs/features/email-sign-in.md`.

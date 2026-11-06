@@ -159,14 +159,11 @@ function renderAsk(){
   if(ASK.view === 'review' && isHubOwner()) return renderAskReview();
   ASK.view = 'chat';
   return `
-    <div class="ask-head">
-      <div class="ask-head-text"><h1>Ask the Hub</h1>
-        <p>Answers from our glossary, False Friends, Doctor Directory, Code of Ethics and guide.</p>
-</div>
-      <span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>
-      <div class="ask-head-acts"><button type="button" class="ask-mem-link" onclick="openMemory()">What I remember${(n => n ? ` · ${n}` : '')(Object.keys(drMemGet()).length)}</button>
-        <button type="button" class="ask-mem-link ask-new" id="askNew" onclick="askNewConversation()"${askHasConversation() ? '' : ' hidden'}>${ICON_ASK_NEW}New conversation</button></div>
-    </div>
+    ${toolBannerHtml('ask', '',
+      `<button type="button" class="ask-mem-link" onclick="openMemory()">What I remember${(n => n ? ` · ${n}` : '')(Object.keys(drMemGet()).length)}</button>`
+      + `<button type="button" class="ask-mem-link ask-new" id="askNew" onclick="askNewConversation()" aria-label="New conversation"${askHasConversation() ? '' : ' hidden'}>${ICON_ASK_NEW}New</button>`,
+      // His face takes the pin's place once a conversation starts (app.css, Tool banners).
+      `<span class="ask-face" id="askFace" aria-hidden="true">${askFaceSvg()}</span>`)}
     <div id="askChrome">${askChromeHtml()}</div>
     <div class="hipaa-notice-inline">${ICON_SHIELD}<span>No patient names, dates of birth or record numbers here.</span></div>
     <div class="chat-panel ask-panel">

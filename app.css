@@ -8048,3 +8048,51 @@ html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-
 .op-more-title{ display:flex; flex-direction:column; gap:6px; font-size:var(--fs-sub); color:var(--ink); }
 .op-more-title input{ font-size:var(--fs-call); padding:9px 13px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); font-family:inherit; }
 .op-more-title input:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+
+/* ---------- Tool banners (features/tool-banners.js) ----------
+   Translate, Term Review, Ask the Hub and Doctor Directory under the glossary
+   domains' colour banner, sized down so each screen's own controls stay near
+   the top (about 99px on a phone). docs/features/tool-banners.md. */
+.tool-banner{
+  --dom:#0F5FA6; position:relative; overflow:hidden; display:flex; align-items:center; gap:var(--sp-2);
+  margin:0 0 var(--sp-3); padding:var(--sp-4) var(--sp-4) var(--sp-4) 20px; border-radius:22px; color:#fff;
+  background-color:var(--dom);
+  background-image:
+    radial-gradient(120% 90% at 85% 10%, color-mix(in srgb, var(--dom) 35%, #fff) 0%, transparent 55%),
+    radial-gradient(90% 80% at 0% 100%, color-mix(in srgb, var(--dom) 60%, #0B1030) 0%, transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--dom) 88%, #fff) 0%, var(--dom) 45%, color-mix(in srgb, var(--dom) 70%, #0B1030) 100%);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.35), 0 24px 40px -22px color-mix(in srgb, var(--dom) 80%, transparent);
+}
+.tool-banner::before{ content:""; position:absolute; left:-30px; top:-60px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none; }
+.tool-banner::after{ content:""; position:absolute; right:-30px; bottom:-80px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.10); pointer-events:none; }
+.tool-banner-text{ position:relative; z-index:1; flex:1; min-width:0; }
+.tool-banner-name{ margin:0; font-family:var(--sans); font-weight:650; font-size:var(--fs-t1); letter-spacing:var(--tr-big); line-height:1.1;
+  color:#fff; text-shadow:0 1px 2px rgba(11,16,48,0.2); overflow-wrap:break-word; }
+.tool-banner.is-long .tool-banner-name{ font-size:var(--fs-t2); letter-spacing:var(--tr-title); }
+.tool-banner-line{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); margin-top:var(--sp-2); }
+.tool-banner-meta{ display:inline-block; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,0.18);
+  font-size:var(--fs-foot); font-weight:550; color:#fff; font-variant-numeric:tabular-nums; }
+.tool-banner-meta:empty{ display:none; }
+.tool-banner-pin{ position:relative; z-index:1; flex:none; width:68px; height:68px; margin:-6px 4px -6px 0;
+  transform:rotate(-8deg); filter:drop-shadow(0 12px 16px rgba(8,12,40,0.36)); }
+.tool-banner-pin img{ display:block; width:68px; height:68px; }
+/* Doctor Directory's + Add, on the banner's own glass. */
+.tool-banner .dl-add{ order:0; background:rgba(255,255,255,0.2); color:#fff; box-shadow:0 1px 0 0 inset rgba(255,255,255,0.35); }
+html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
+.tool-banner .dl-add:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+/* Ask: What I remember and New on the banner's glass; his face takes the
+   pin's place once a conversation starts (the hello shows its own big face). */
+.tool-banner .ask-mem-link{ margin-top:0; padding:0 var(--sp-3); border:0; background:rgba(255,255,255,0.2); color:#fff; font-size:var(--fs-foot); box-shadow:0 1px 0 0 inset rgba(255,255,255,0.35); }
+.tool-banner .tool-banner-line:has(.ask-mem-link){ gap:6px; }
+.tool-banner .ask-new svg{ color:#fff; }
+.tool-banner .ask-mem-link:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+.tool-banner .ask-face{ position:relative; z-index:1; flex:none; width:68px; height:68px; margin:-6px 4px -6px 0; padding:6px; border-radius:50%;
+  background:rgba(255,255,255,0.92); box-shadow:0 10px 18px -8px rgba(8,12,40,0.4); }
+.tool-banner .ask-face svg{ width:100%; height:100%; }
+#content:has(.ask-hello) .tool-banner .ask-face{ display:none; }
+#content:not(:has(.ask-hello)) .tool-banner[data-tool="ask"] .tool-banner-pin{ display:none; }
+/* The pin on its way from Home; the banner's own waits underneath. */
+.tb-fly{ position:fixed; z-index:10000; pointer-events:none; margin:0; filter:drop-shadow(0 12px 18px rgba(22,55,90,0.3)); will-change:transform; }
+.tb-flying .tool-banner-pin img{ opacity:0; }
+@media (max-width:380px){ .tool-banner-pin, .tool-banner-pin img, .tool-banner .ask-face{ width:56px; height:56px; } }
+@media print{ .tool-banner, .tb-fly{ display:none !important; } }

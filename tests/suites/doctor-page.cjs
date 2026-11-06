@@ -87,7 +87,7 @@ async function targets(page) {
         await page.evaluate(() => closeDoctorDirDetail()); await pause(page);
 
         // The list (D3): cards two to a row on a phone, labels, + Prep terms,
-        // the navy Add by the title, one "things to tidy" button.
+        // + Add on the banner by the count, one "things to tidy" button.
         await seed(page);
         await page.evaluate(() => { DOCTOR_DIR_STATE = 'ok'; doctorRegionPick = 'all'; renderContent(); });
         await pause(page, 400);
@@ -102,7 +102,7 @@ async function targets(page) {
           if (prep) prep.scrollIntoView({ block: 'center', behavior: 'instant' });
           const pr = prep && prep.getBoundingClientRect();
           const prepHit = pr ? [owns(prep, pr.left + pr.width / 2, pr.top + pr.height / 2 - 20), owns(prep, pr.left + pr.width / 2, pr.top + pr.height / 2 + 20)] : null;
-          const add = document.querySelector('#content .dl-add');
+          const add = document.querySelector('.tool-banner .dl-add');
           window.scrollTo(0, 0);
           const ar = add && add.getBoundingClientRect();
           const tidy = document.querySelector('#content .dl-tidy');
@@ -120,7 +120,7 @@ async function targets(page) {
         ok(list.floor === '4th fl · Suite 401' && list.loveFloor === null, 'the floor, or no floor line (Needs info counts it)', list);
         ok(list.prep && list.loveTags.length === 0 && list.prepHit.every(Boolean), 'no research: "+ Prep terms", 44px to hit', list);
         if (!desktop) ok(list.sameRow, 'two cards to a row on a phone', list.sameRow);
-        ok(list.add && list.add.h >= 44 && list.add.bg === 'rgb(37, 46, 109)' && list.add.own && !list.topbarAdd, 'navy "+ Add" by the title, the old "+ Add doctor" gone', list);
+        ok(list.add && list.add.h >= 44 && list.add.bg === 'rgba(255, 255, 255, 0.2)' && list.add.own && !list.topbarAdd, '"+ Add" on the banner\'s glass, by the count (tool-banners.md), the old "+ Add doctor" gone', list);
         ok(/^\d+ things? to tidy$/.test(list.tidy || '') && list.banners === 0, 'duplicates and old terminology: one "things to tidy" button, no banners on the list', list);
         ok(list.hs <= 0, 'no sideways scroll', list.hs);
         await page.screenshot({ path: O + device + '-list.png' });
