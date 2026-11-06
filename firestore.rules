@@ -200,6 +200,18 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 60;
       allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
     }
+    // Email sign-in (api/sign-in.js, features/account.js,
+    // docs/features/email-sign-in.md). accounts/{uid} is one person's
+    // account, made by the server when a code is right (email, createdAt,
+    // lastSignIn); only that account reads it, and it may change only its
+    // own name there. sign-in-codes/ has no rule on purpose: phones can't
+    // touch it at all, only the server with its service account.
+    match /accounts/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'nameAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 60;
+    }
     // Idea credits: whose idea a screen was (features/credits.js,
     // docs/features/credits.md). One document per credited screen, keyed by
     // its title. The whole team reads them; only the owner gives, changes or

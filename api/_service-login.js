@@ -73,3 +73,20 @@ export async function serviceToken(env = process.env, fetchImpl = fetch) {
 }
 
 export function forgetServiceToken() { cached = null; }
+
+/* A Firebase sign-in ticket for one account (email sign-in, api/sign-in.js):
+ * a "custom token", signed with the same service account key. The phone
+ * trades it with signInWithCustomToken and is then signed in as `uid`.
+ * Shape from Firebase's "Create custom tokens" (third-party JWT library
+ * section): RS256, iss and sub the service account, the Identity Toolkit
+ * audience, at most an hour. */
+const CUSTOM_TOKEN_AUD = 'https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit';
+export function customToken(sa, uid, nowSec = Math.floor(Date.now() / 1000)) {
+  if (!sa) throw new Error('no service account key');
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(String(uid || ''))) throw new Error('bad uid');
+  const head = b64url({ alg: 'RS256', typ: 'JWT' });
+  const body = b64url({ iss: sa.email, sub: sa.email, aud: CUSTOM_TOKEN_AUD, iat: nowSec, exp: nowSec + 3600, uid });
+  const signer = createSign('RSA-SHA256');
+  signer.update(`${head}.${body}`);
+  return `${head}.${body}.${signer.sign(sa.key).toString('base64url')}`;
+}

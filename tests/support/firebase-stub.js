@@ -328,6 +328,8 @@
         get currentUser(){ return st.user; },
         onAuthStateChanged(cb){ st.cbs.push(cb); setTimeout(() => cb(st.user), 60); return () => {}; },
         signInAnonymously(){ st.user = { uid: A.uid || 'u1', getIdToken: () => Promise.resolve('tok') }; st.cbs.forEach(f => f(st.user)); return Promise.resolve({ user: st.user }); },
+        // Email sign-in (features/account.js): the suite's /api/sign-in stand-in hands out 'ticket:<uid>'.
+        signInWithCustomToken(t){ const uid = String(t || '').replace(/^ticket:/, ''); if(!uid || uid === t) return Promise.reject(Object.assign(new Error('bad ticket'), { code: 'auth/invalid-custom-token' })); st.user = { uid, getIdToken: () => Promise.resolve('tok-' + uid) }; st.cbs.forEach(f => f(st.user)); return Promise.resolve({ user: st.user }); },
         signOut(){ st.user = null; st.cbs.forEach(f => f(null)); return Promise.resolve(); },
       };
     },

@@ -47,6 +47,13 @@ const GUIDE_TOPICS = [
     <p>To change it, open <b>More</b> (bottom right) and scroll to <b>Opening</b>: turn <b>Badge opening</b> off or on, turn the <b>Sound</b> (the music, a beep and a chime) off or on, type your <b>Badge title</b> (Staff Interpreter unless you change it: Per Diem Interpreter, Coordinator…), or tap <b>Replay the opening</b>. These stay on your phone.</p>
     <p>With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, nothing drifts or swings: the badge is already hanging, and the tap goes straight to green.</p>` },
 
+  { id:'account', section:'start', k:'account sign in signin log in login email code six digits 6 numbers two phones second phone new phone sync same name photo picture follow sign out signout gmail spam junk', q:'How do I use the Hub on two phones as the same person?', a:`
+    <p>Sign in with your email. Open <b>More</b> (bottom right) and scroll to <b>Your account</b>. Type your email and tap <b>Send me a code</b>. A few seconds later an email from the Hub arrives with 6 numbers in it. Go back to the Hub, type them in and tap <b>Sign in</b>. No password.</p>
+    <p>Do the same on your other phone, with the same email. Both phones are now you: your name, and the photo filed under it, follow you. Change your name on one phone and the other picks it up the next time it opens. Your practice score and settings will follow in a later update.</p>
+    <p>The code works for 10 minutes, only on the phone where you asked for it, and it allows 5 tries. Not in your inbox? Look in Spam or Junk. Hospital email sometimes holds automated mail, so a personal email is usually faster.</p>
+    <p>You need to be in the team first (the team code). <b>Sign out of this phone</b> keeps the phone in the team and keeps your name on it. It only stops being your account.</p>
+    <p>If it says email sign-in isn't switched on yet, the Hub's owner still has a setting to add. Let them know.</p>` },
+
   { id:'tool-banners', section:'start', k:'banner banners colour color top title header translate term review ask hub doctor directory pin flies fly new look picture', q:'Why do Translate, Term Review, Ask and the Doctor Directory have a colour banner?', a:`
     <p>They open under the same kind of colour banner as the glossary domains: the screen's name, its picture, and one line about it, like <b>435 due</b> on Term Review or the number of doctors on the Doctor Directory.</p>
     <p>When you open one from Home, its picture flies up from the tile you tapped into the banner. With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, it's simply there.</p>
