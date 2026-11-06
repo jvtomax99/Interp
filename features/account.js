@@ -3,7 +3,7 @@
    in your inbox, type it here, and this phone becomes your account. Do the
    same on another phone and both are the same person. Phase E1: the sign-in
    itself, your place in the team carried over, and your name (your photo
-   follows the name). Spec: docs/features/email-sign-in.md; the server is
+   follows the name). Phase E2, your progress and settings: account-sync.js. Spec: docs/features/email-sign-in.md; the server is
    api/sign-in.js. Styles: app.css, "Your account".
 
    A code, not a link: on iPhone a Home Screen app keeps its own storage, so
@@ -85,11 +85,11 @@ function accountCardInner(){
       </div>${msg}`;
     return `
       <p class="acct-lede">Signed in as<br><b class="acct-email">${acctEsc(a.email)}</b></p>
-      <p class="acct-sub">Sign in with the same email on your other phones and your name and photo follow you.</p>
+      <p class="acct-sub">Sign in with the same email on your other phones and your name, photo, practice and settings follow you.</p>
       <button class="btn btn-ghost" type="button" id="acctOut" onclick="accountConfirmOut(true)">Sign out of this phone</button>${msg}`;
   }
   if(typeof isHubMember === 'function' && !isHubMember()) return `
-      <p class="acct-lede">Use one email on every phone, and your name and photo follow you.</p>
+      <p class="acct-lede">Use one email on every phone, and your name, photo, practice and settings follow you.</p>
       <p class="acct-sub">First, join the team with the team code.</p>
       <button class="btn btn-ghost" type="button" onclick="try{closeMoreSheet()}catch(e){}; showAccessLock('join')">Enter the team code</button>`;
   const p = acctPending();
@@ -107,7 +107,7 @@ function accountCardInner(){
         <button class="acct-link" type="button" onclick="accountOtherEmail()">Use a different email</button>
       </div>`;
   return `
-      <p class="acct-lede">Use one email on every phone, and your name and photo follow you.</p>
+      <p class="acct-lede">Use one email on every phone, and your name, photo, practice and settings follow you.</p>
       <form class="acct-form" novalidate onsubmit="accountSend(event)">
         <label class="acct-label" for="acctEmail">Your email</label>
         <input class="acct-input" id="acctEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" value="${acctEsc((acctRead(ACCT_PENDING_KEY) || {}).email || '')}">
@@ -189,6 +189,8 @@ async function accountAdopt(r){
   acctWrite(ACCT_NAME_AT_KEY, Date.now());
   try{ checkMyMembership(); }catch(e){}
   try{ loadAccessState(); }catch(e){}
+  // Your progress and settings: this phone's and the account's joined (features/account-sync.js).
+  try{ accountSyncForget(); accountSyncStart(); accountSync('signin'); }catch(e){}
 }
 
 function accountApplyName(name){
@@ -215,6 +217,7 @@ async function accountBoot(){
   try{ await hubAuthReady; }catch(e){}
   const a = accountNow();
   if(!a || !db || (typeof navigator !== 'undefined' && navigator.onLine === false)) return;
+  try{ accountSyncStart(); accountSync('open'); }catch(e){}   // features/account-sync.js
   try{
     const snap = await db.collection('accounts').doc(a.uid).get();
     if(!snap.exists) return;
@@ -238,6 +241,7 @@ async function accountSignOut(){
   try{ await hubAuth.signOut(); }catch(e){}
   acctWrite(ACCT_KEY, null);
   acctWrite(ACCT_NAME_AT_KEY, null);
+  try{ accountSyncForget(); }catch(e){}
   try{ localStorage.removeItem('ih_adminName'); }catch(e){}
   let ok = true;
   if(me.code){ try{ await joinHub(me.code); }catch(err){ ok = false; } }

@@ -83,6 +83,7 @@ between assignments.
 | `features/tool-banners.js` | 117 | Tool banners: Translate, Term Review's start, Ask the Hub and Doctor Directory under the domains' colour banner with their pin (`TOOL_BANNERS`, `toolBannerHtml`; Doctor Directory's sits above its search, outside `#content`, its count set by `toolBannerMeta`), and the pin tapped on a Home tile or rail card flying into it (`tbFly`; none under reduced motion or Still). 2026-11-06; `docs/features/tool-banners.md` |
 | `features/opening.js` | 291 | The opening, Badge in: every start on a phone, your badge over the pavilion, tap, scan, green, the ring opens into Home (`openingStart`, `opFrame`, `openingFinish`, `hubOpeningUp`, the `hub-opening-done` event Home's hello waits for) and More's Opening card (`openingMoreHtml`: on/off, Sound, My photo on the badge, Badge title, Replay; `ih_opening`, `ih_openingSound`, `ih_badgePhoto`, `ih_badgeTitle`). Decided and covered before the first paint by index.html's first script. 2026-11-05; `docs/features/opening.md` |
 | `features/account.js` | 249 | Your account, email sign-in on the phone: More's "Your account" card (`accountMoreHtml`), the email then the 6-digit code (`accountSend`, `accountCheck`), signing in with the server's ticket (`signInWithCustomToken`, `accountAdopt`), the name following the account (`accountSaveName`, `accountBoot`), sign out back to a plain team phone (`accountSignOut`). `ih_account`, `ih_accountPending`, `ih_accountNameAt`. 2026-11-06, phase E1; `docs/features/email-sign-in.md` |
+| `features/account-sync.js` | 257 | What follows your account (phase E2): practice, streak, badges, memory trainer, Daily Drill, campus, knowledge count and settings (never Dr. Smiley's memory of you, `AGENTS.md`), kept in `account-sync/{uid}` and joined between phones (`accountSync`, `syncDecide`, `ACCT_SYNC_MERGE`, fingerprints in `ih_syncBase`). When the app opens, at sign-in, when you leave it, every 2 min while changed. 2026-11-06; `docs/features/email-sign-in.md` |
 | `features/photo-adjust.js` | 190 | Adjust your photo: after you pick one in the name sheet, drag and zoom it in a square frame with Team Chat's ring, live previews round (chat) and tall (the badge), Save draws the 320 px square for `uploadAvatar` (`photoAdjust`, `paSave`, `paClamp`). 2026-11-06; `docs/features/photo-adjust.md` |
 | `opening/` | — | The opening's pavilion in three lights by the clock (`openingLook`): `pavilion-1` midday, `pavilion-morning-1`, `pavilion-evening-1`, each an 8 s seamless loop (`.mp4` ~0.7 MB, `.webm`) and its still (`.webp`); rendered once from `docs/mockups/opening/`. `music-1.m4a` (0.34 MB), the opening's music, an original 28 s loop from `docs/mockups/opening/music/compose.py`. A new clip gets a new name (`sw.js` carries this one over between versions) |
 | `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
@@ -167,6 +168,7 @@ different places is what silently killed the coloured press glow: a
 | Tool banners (Translate, Term Review, Ask, Doctor Directory) and the pin's fly from Home | `features/tool-banners.js`; styles in `app.css` ("Tool banners") |
 | The opening (Badge in) and More's Opening card | `features/opening.js`; styles in `app.css` ("Opening") |
 | Your account, email sign-in (More's card; the server is `api/sign-in.js`) | `features/account.js`; styles in `app.css` ("Your account") |
+| What follows your account between phones (the sync and its joins) | `features/account-sync.js` |
 | Adjusting your photo before it's saved (the name sheet) | `features/photo-adjust.js`; styles in `app.css` ("Adjust your photo") |
 | Everything else | `index.html` |
 
@@ -262,7 +264,7 @@ hub-lessons/{id}                                                     <-- Ask the
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
 hub-credits/{key}                                                    <-- Idea credits, one per credited screen (credits.md)
 push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
-accounts/{uid}  sign-in-codes/{id}                                   <-- Email sign-in (email-sign-in.md)
+accounts/{uid}  sign-in-codes/{id}  account-sync/{uid}               <-- Email sign-in (email-sign-in.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you

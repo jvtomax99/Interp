@@ -6,7 +6,9 @@ request each. **E1 is built** (2026-11-06): `api/sign-in.js`, `api/_mail.js`,
 `customToken` in `api/_service-login.js`, `features/account.js`, the
 `accounts` rule, checks `tests/suites/sign-in.mjs` (server) and
 `tests/suites/account.cjs` (phone). It works once Jose's setup below is
-done; until then More says "Email sign-in isn't switched on yet". E2, E3: not yet.
+done; until then More says "Email sign-in isn't switched on yet". **E2 is
+built** (2026-11-06): `features/account-sync.js`, the `account-sync` rule,
+checks `tests/suites/account-sync.cjs`; "As built (E2)" below. E3: not yet.
 
 ## What it does
 
@@ -82,16 +84,50 @@ it; rules applied by hand in the console, as always):
   instead of the typed name)
 - CoreCHI practice: score, history, streak, badges (`ih_practice_v1`,
   `ih_practice_streak_v1`, `ih_practice_badges_v1`)
-- Dr. Smiley's memory of you (`ih_smileyMemory`)
 - memory trainer (`ih_memory`, `ih_memFlags`), Daily Drill (`ih_warmup`),
   campus progress (`ih_campusLv`, `ih_campusDone`, `ih_campusSky`),
   knowledge log (`ih_knowledgeLog`)
-- settings: theme, region, how lively Dr. Smiley is, the opening
+- settings: theme (`ih_theme`), region (`ih_region`), the opening
+  (`ih_opening`, `ih_openingSound`, `ih_badgeTitle`, `ih_badgePhoto`)
+
+**Not synced: what Dr. Smiley remembers about you** (`ih_smileyMemory`,
+and the older `ih_smileyMode`). `AGENTS.md` says it never goes to
+Firestore; this list had it, and Jose kept the rule (2026-11-06). Nor
+`ih_memFlags` (unsent line flags: two phones would send them twice).
 
 **First sign-in on a second phone merges, never overwrites:** practice
 history is joined (each answer once), streak and levels keep the higher,
 settings take the account's. Sync happens when the app opens and after a
 change; there is no live link between two phones open at once.
+
+### As built (E2)
+
+- **Where:** `account-sync/{account id}`, one document, one field per key,
+  each the phone's saved text as it is (`null` = not set), plus `at`. Only
+  that account reads or writes it (rule `account-sync`, published by hand).
+- **When:** the app opens (`accountBoot`), right after signing in
+  (`accountAdopt`), when the app is hidden or comes back, and every 2
+  minutes while a synced key changed.
+- **The merge** (`syncDecide`): the phone keeps a fingerprint of each key
+  as of the last sync (`ih_syncBase`, for that account only; signing out or
+  into another account clears it). Only one side changed since: it wins.
+  Both changed, or a phone's first sync: the key's join
+  (`ACCT_SYNC_MERGE`): practice per question, the newer answer's place
+  and the higher counts; streak, the later day (same day, the longer run);
+  badges, all of both, first date; memory trainer, the last phone's level,
+  the lines joined once, the best kept; Daily Drill, the later day, asked
+  words joined; campus, levels kept high, celebrated buildings joined;
+  knowledge count, the higher numbers per day; settings, the account's.
+  Every join is idempotent: syncing again changes nothing.
+- **Read first, then write only what differs** (`set` with merge), so a
+  phone never overwrites a key another phone added since.
+- What came down is put where the app reads it at once (`syncRefresh`:
+  the practice record reloaded, dark mode, the region controls), then the
+  screen is redrawn, never while you're typing.
+- **Not proven from here:** the real Firestore with the published rule
+  (the suite runs on the stand-in), and iPhone finishing a write as the app
+  goes to the background (if it doesn't, the next open sends it: the
+  fingerprints only move once the write succeeds).
 
 Phase E3: Term Review records (`term-reviews`, today keyed by typed name,
 `ownReview` in the rules) and titles in Team Chat move to the account.
@@ -119,8 +155,8 @@ Phase E3: Term Review records (`term-reviews`, today keyed by typed name,
 3. Vercel, project interp, Settings, Environment Variables: two entries,
    `GMAIL_USER` (the address) and `GMAIL_APP_PASSWORD` (the app password,
    pasted there only, never in chat).
-4. Publish the new rules (`accounts`, `sign-in-codes`) in the Firebase
-   console, as with every rules change.
+4. Publish the new rules (`accounts`, `sign-in-codes`, and for E2
+   `account-sync`) in the Firebase console, as with every rules change.
 
 Already done: `FIREBASE_SERVICE_ACCOUNT` is set on Vercel (checked
 2026-11-06), so the server can sign the custom token and write the codes.

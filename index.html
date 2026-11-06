@@ -664,6 +664,7 @@
 <script src="./features/tool-banners.js"></script>
 <script src="./features/opening.js"></script>
 <script src="./features/account.js"></script>
+<script src="./features/account-sync.js"></script>
 <script src="./features/photo-adjust.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
@@ -5873,8 +5874,8 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Signed in with your email, your practice, streak, badges and settings follow you to every phone. More, Your account' },
   { id:'photo',       tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'Your photo',            title:'Frame your photo before it\'s saved: drag, zoom, and see it round for Team Chat and tall for your badge' },
-  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Sign in with your email on each of your phones and your name and photo follow you. More, Your account' },
   { id:'tool-banners', tone:'gd-n1', pin:'pins/translate.webp',       eyebrow:'A new look',            title:'Translate, Term Review, Ask and the Doctor Directory open under a colour banner, and the picture you tap on Home flies into it' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.

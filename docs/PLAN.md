@@ -333,7 +333,11 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    Sender: a new Gmail just for the Hub (Jose's pick). E1 built
    2026-11-06 (sign in, the team place and owner carried over, the name
    follows); works once Jose's setup is done (the Gmail, its app password
-   in Vercel, the `accounts` rule published). Next: E2, sync.
+   in Vercel, the `accounts` rule published). E2 built 2026-11-06
+   (`features/account-sync.js`: practice, streak, badges, memory trainer,
+   Daily Drill, campus, knowledge count and settings joined between phones;
+   Dr. Smiley's memory of you stays on the phone, `AGENTS.md`, Jose's
+   call); needs the `account-sync` rule published. Next: E3.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
