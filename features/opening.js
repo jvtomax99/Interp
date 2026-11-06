@@ -21,8 +21,10 @@ const OP_TITLE_DEFAULT = 'Staff Interpreter', OP_TITLE_MAX = 28;
 const OP_BADGE_AT = 2.05;
 const OP = { el: null, raf: 0, t0: 0, tap: null, cues: {}, still: false, leaving: false, ac: null, musicData: null, musicBuf: null, mus: null };
 // The music: an original loop (harp, piano, violin; made by docs/mockups/opening/music/compose.py).
-// Phones play sound only after a tap, so on a start it begins with the tap on the badge; on Replay,
-// itself a tap, it plays while the badge waits too. After the opening it fades out over Home.
+// It is started the moment the opening mounts (Jose, 2026-11-06: "music from the moment the app is
+// opened"). A phone that allows sound before a touch plays it then; one that doesn't (iPhone) keeps
+// the audio paused until the tap on the badge wakes it, and it starts from the top there.
+// Replay is itself a tap. After the opening it fades out over Home.
 const OP_MUSIC_URL = './opening/music-1.m4a', OP_MUSIC_VOL = .4, OP_MUSIC_FADE = 4;
 
 function opGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -108,7 +110,7 @@ function openingStart(replay){
     OP.still = (typeof drStill === 'function' && drStill()) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     el.classList.toggle('is-still', OP.still);
     opMusicLoad();
-    if(replay && OP.ac) opMusicPlay();
+    opMusicAtOpen();
     if(!OP.visBound){ OP.visBound = true; document.addEventListener('visibilitychange', () => { if(document.hidden) opMusicStop(.2); }); }
     opFit();
     window.addEventListener('resize', opFit);
@@ -167,6 +169,14 @@ function opAudio(){
   if(!openingSoundOn()) return null;
   try{ OP.ac = OP.ac || new (window.AudioContext || window.webkitAudioContext)(); if(OP.ac.state !== 'running') OP.ac.resume(); }catch(e){ OP.ac = null; }
   return OP.ac;
+}
+// Try the music at once: made outside a tap, the AudioContext starts paused ('suspended') unless the
+// phone allows sound before a touch; resume() then wakes it there, or waits for the tap (opAudio).
+function opMusicAtOpen(){
+  if(!openingSoundOn()) return;
+  try{ OP.ac = OP.ac || new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ OP.ac = null; return; }
+  opMusicPlay();
+  if(OP.ac.state !== 'running'){ try{ const p = OP.ac.resume(); if(p && p.catch) p.catch(() => {}); }catch(e){} }
 }
 // The music file is fetched when the opening mounts (the saved copy, sw.js), decoded on the first play.
 function opMusicLoad(){
@@ -330,7 +340,7 @@ function openingMoreHtml(){
     <div class="home-sec-head"><h3>Opening</h3></div>
     <div class="op-more-card">
       ${sw('opOnSwitch', on, 'Badge opening', 'Your badge, every time the Hub starts', 'openingSetOn')}
-      ${sw('opSoundSwitch', snd, 'Sound', 'Soft music, a beep and a chime after the tap', 'openingSetSound')}
+      ${sw('opSoundSwitch', snd, 'Sound', 'Soft music, a beep and a chime', 'openingSetSound')}
       <label class="op-more-title"><b>Badge title</b>
         <input id="opTitleInput" type="text" maxlength="${OP_TITLE_MAX}" placeholder="${OP_TITLE_DEFAULT}" value="${t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" autocomplete="off" onchange="openingSetTitle(this.value)"></label>
       <button class="btn btn-ghost" type="button" onclick="openingReplay()">Replay the opening</button>
