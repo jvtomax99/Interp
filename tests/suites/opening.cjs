@@ -190,7 +190,7 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
   console.log('== More\'s Opening card');
   {
     const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, settle: 4200 });
-    await page.evaluate(() => { localStorage.removeItem('ih_opening'); openMoreSheet(); });
+    await page.evaluate(() => { localStorage.removeItem('ih_opening'); openMoreSheet(); moreSubOpen('opening'); });
     await wait(400);
     const c = await page.evaluate(() => { const i = document.getElementById('opTitleInput'); return { on: document.getElementById('opOnSwitch').getAttribute('aria-checked'),
       snd: document.getElementById('opSoundSwitch').getAttribute('aria-checked'), font: parseFloat(getComputedStyle(i).fontSize), ph: i.placeholder }; });
@@ -298,7 +298,7 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     }
     {
       const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, name: 'Jose Vazquez', settle: 4200 });
-      await page.evaluate(() => { openMoreSheet(); });
+      await page.evaluate(() => { openMoreSheet(); moreSubOpen('opening'); });
       await wait(400);
       const sw = () => page.evaluate(() => ({ a: document.getElementById('opPhotoSwitch').getAttribute('aria-checked'), k: localStorage.getItem('ih_badgePhoto') }));
       ok((await sw()).a === 'false', 'More: My photo on the badge is off by default', await sw());
@@ -324,7 +324,7 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
       const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, name: 'Jose Vazquez', settle: 4200, init: `sessionStorage.setItem('__srv', ${JSON.stringify(JSON.stringify(srv))});` });
       const cached = await page.evaluate(() => { try{ return JSON.parse(localStorage.getItem('ih_myPhoto') || 'null'); }catch(e){ return 'bad'; } });
       ok(cached && cached.photo === PH && cached.name === 'Jose Vazquez', 'a photo from your account (another phone) is saved on this phone too', cached && { name: cached.name, has: !!cached.photo });
-      await page.evaluate(() => { localStorage.removeItem('ih_myPhoto'); openMoreSheet(); });
+      await page.evaluate(() => { localStorage.removeItem('ih_myPhoto'); openMoreSheet(); moreSubOpen('opening'); });
       await wait(400);
       const sw = () => page.evaluate(() => ({ a: document.getElementById('opPhotoSwitch').getAttribute('aria-checked'), k: localStorage.getItem('ih_badgePhoto') }));
       await page.click('#opPhotoSwitch');

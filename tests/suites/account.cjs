@@ -34,7 +34,7 @@ const serverWrites = (page, accountName) => page.evaluate(({ ACCT, accountName }
   __DB.accounts[ACCT] = Object.assign({ email: 'maria@gmail.com', createdAt: 1, lastSignIn: 1 }, accountName ? { name: accountName, nameAt: Date.now() + 1000 } : {});
 }, { ACCT, accountName });
 
-const openMore = async page => { await page.evaluate(() => { openMoreSheet(); }); await wait(400);
+const openMore = async page => { await page.evaluate(() => { openMoreSheet(); moreSubOpen('account'); }); await wait(400);
   await page.evaluate(() => document.getElementById('acctMore').scrollIntoView({ block: 'center' })); await wait(250); };
 const card = page => page.evaluate(() => {
   const c = document.getElementById('acctCard'); if (!c) return null;

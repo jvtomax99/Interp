@@ -326,6 +326,15 @@
     <div id="moreSheetBody"></div>
   </div>
 </div>
+<!-- More's settings rows (Your account, Opening, Smoothness meter) open here, over More -->
+<div class="overlay more-sheet-overlay more-sub-overlay" id="moreSubOverlay" onclick="if(event.target===this) moreSubClose()">
+  <div class="modal more-sheet more-sub">
+    <div class="more-sheet-grip"></div>
+    <button class="more-sub-back" type="button" onclick="moreSubClose()" aria-label="Back to More"><span aria-hidden="true">‹</span> More</button>
+    <button class="dd-detail-close" title="Close" onclick="closeMoreSheet()">✕</button>
+    <div id="moreSubBody"></div>
+  </div>
+</div>
 
 <div class="overlay more-sheet-overlay" id="frameMeterOverlay" onclick="if(event.target===this) frameMeterClose()">
   <div class="modal more-sheet" role="dialog" aria-modal="true" aria-label="Smoothness results">
@@ -5881,9 +5890,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Signed in with your email, your practice, streak, badges and settings follow you to every phone. More, Your account' },
+  { id:'more',        tone:'gd-n1', pin:'pins/more.webp',              eyebrow:'More, tidied',          title:'More is in groups now: Study, Doctors, Reference and You, with every domain behind one row and numbers only when something needs you' },
   { id:'photo',       tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'Your photo',            title:'Frame your photo before it\'s saved: drag, zoom, and see it round for Team Chat and tall for your badge' },
-  { id:'tool-banners', tone:'gd-n1', pin:'pins/translate.webp',       eyebrow:'A new look',            title:'Translate, Term Review, Ask and the Doctor Directory open under a colour banner, and the picture you tap on Home flies into it' },
+  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Signed in with your email, your practice, streak, badges and settings follow you to every phone. More, Your account' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -5998,7 +6007,7 @@ const GUIDE_STEPS = {
   docprep: () => ({ steps: [`Tap ${GUIDE_UI.pill('Doctor Prep')} on Home or under ${GUIDE_UI.pill('More')}. It opens the research screen directly.`,
     'Type the doctor’s name. Add the specialty or hospital if you know it.', `Tap ${GUIDE_UI.pill('Research')}.`],
     note: 'Doctors is the broader hub for Doctor Prep and the Doctor Directory. A specialty-based appointment briefing is separate: ask Dr. Smiley to prep you for that specialty.' }),
-  doctors: () => ({ steps: [`On a phone, open ${GUIDE_UI.pill('More')} → ${GUIDE_UI.pill('Doctors')}. On a computer, choose ${GUIDE_UI.pill('Doctors')} in the sidebar.`,
+  doctors: () => ({ steps: [`On a phone, open ${GUIDE_UI.pill('More')} and tap ${GUIDE_UI.pill('Open')} beside the Doctors heading. On a computer, choose ${GUIDE_UI.pill('Doctors')} in the sidebar.`,
     `Choose ${GUIDE_UI.pill('Doctor Prep')} to research someone new, or ${GUIDE_UI.pill('Doctor Directory')} to open what the team has saved.`,
     'Use the Back arrow to retrace your route and return to where you were.'],
     note: 'Every Doctor Prep button opens research directly. A specialty-based appointment briefing remains separate in Ask Dr. Smiley.' }),
@@ -6210,8 +6219,8 @@ const GUIDE_COACH = {
   docprep: { page:'home', scroll:true, sel:[`.qa-tile[onclick="setCategory('doctor-research')"]`, `.qa-card[onclick="setCategory('doctor-research')"]`],
             text:'Doctor Prep opens the research screen directly. Type the doctor’s name, add a specialty or hospital if you know it, then tap Research.' },
   doctors: { page:'home', scroll:true, sel:[[`.side-row[onclick="setCategory('doctors')"]`, 'Doctors brings Doctor Prep and the Doctor Directory together. Choose it to research someone new or open what the team has saved.'],
-              ['.tabbar-btn[aria-label="More"]', 'Tap More, then Doctors. Doctor Prep researches someone new; Doctor Directory opens what the team has saved.']],
-            text:'Open More → Doctors on a phone, or Doctors in the sidebar on a computer.' },
+              ['.tabbar-btn[aria-label="More"]', 'Tap More, then Open beside the Doctors heading. Doctor Prep researches someone new; Doctor Directory opens what the team has saved.']],
+            text:'Open More, then Open beside Doctors on a phone, or Doctors in the sidebar on a computer.' },
   directory: { page:'doctors', scroll:true, sel:[`.qa-card[onclick="setCategory('doctor-directory')"]`],
             text:'Doctor Directory opens the research your team has saved, together with their tips about each doctor.' },
   providers: { page:'home', scroll:true, sel:[`.qa-card[onclick="setCategory('providers')"]`],
@@ -8801,6 +8810,7 @@ function setCategory(id, isBack, returnState){
   // (often to "No terms match") with no sign of why.
   if(activeCategory !== id) searchQuery = isBack && returnState ? returnState.query || '' : '';
   closeAllOverlays();
+  if(id === 'events') eventsMarkSeen();   // More's "new" count starts again from here
   if(activeCategory === 'memory' && id !== 'memory') memLeave();
   termRenderLimit = isBack && returnState ? returnState.termRenderLimit || 120 : 120;
   if(!isBack && activeCategory !== id){
@@ -10696,7 +10706,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
+  const LIFTS = '.more-sub-back, .tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
     '.cp-play, .cp-3d, .cp-exam, .cp-key, .cp-folk, .cp-folk-no, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini, .credit-tag, .credit-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
@@ -12224,37 +12234,138 @@ function renderTabBar(){
   </nav>`;
 }
 
+/* More, grouped (docs/features/more-sheet.md, 2026-11-06). Ask the Hub, then
+   Study, Doctors, Reference and You, the first three named as on Home. Not
+   rows here: Translate and Team Chat (they are tabs) and the Doctors page
+   (the Doctors heading's Open). The domains are one row, Terminology
+   domains, to the all-domains tiles. Every tool in getToolTiles() is in
+   exactly one place below or a tab; tests/suites/more-sheet.cjs holds it,
+   so a new tool that is in none of them fails the tests. */
+const MORE_GROUPS = [
+  { key:'ask',       ids:['ask'] },
+  { key:'study',     title:'Study',     ids:['practice', 'review', 'falsefriends', 'soundalikes', 'ethics', 'events'] },
+  { key:'doctors',   title:'Doctors',   open:'doctors', ids:['doctor-research', 'doctor-directory', 'providers', 'find-doctor', 'medifind'] },
+  { key:'reference', title:'Reference', ids:['__domains', '__resources', 'anatomy', 'directory', 'userguide', 'updates'] },
+  { key:'you',       title:'You',       ids:['__account', 'notifications', '__opening', '__voice', '__meter', 'trash', 'team-access'] }
+];
+const MORE_ELSEWHERE = ['translate', 'chat', 'doctors'];   // tabs, and the Doctors heading's Open
+
+// Numbers in More only when they need you. Term Review: terms you have
+// reviewed before that are due again (a never-reviewed term is not a
+// backlog). Training and Events: items added since you last opened it.
+function reviewedDueCount(){
+  const now = Date.now(), ids = new Set(allTermsFlat().map(t => t.id));
+  return Object.keys(TERM_REVIEWS).filter(id => { const r = TERM_REVIEWS[id]; return r && r.nextReviewAt <= now && ids.has(id); }).length;
+}
+const EVENTS_SEEN_KEY = 'ih_eventsSeenAt';
+function eventsMarkSeen(){ try{ localStorage.setItem(EVENTS_SEEN_KEY, String(Date.now())); }catch(e){} }
+function eventsNewCount(){
+  let seen = null;
+  try{ seen = localStorage.getItem(EVENTS_SEEN_KEY); }catch(e){ return 0; }
+  // The first time, everything already there counts as seen.
+  if(seen === null){ eventsMarkSeen(); return 0; }
+  const at = Number(seen) || 0;
+  return CE_EVENTS.filter(ev => Number(ev.timestamp) > at).length;
+}
+
+const MORE_GLYPH = {
+  play:  '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor"/></svg>',
+  gauge: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M12 16l4-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>',
+  key:   '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8" cy="12" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M11.5 12H20M17 12v3M20 12v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+function moreRowsFor(id, tools){
+  const t = tools.find(x => x.id === id);
+  const go = to => `closeMoreSheet(); setCategory('${to}')`;
+  const you = (name, color, svg, act, sub) => ({ name, sub, act, you:true, chev:true, color, icon:`<span class="more-sq" style="background:${color}">${svg}</span>` });
+  if(id === '__domains'){
+    const n = getDomainTiles().filter(d => !d.parentId).length;
+    return { name:'Terminology domains', sub: n + (n === 1 ? ' domain' : ' domains'), act: go('all'), chev:true, color:'#0F5FA6',
+      icon:'<img class="medical-pin" src="./pins/medical-terminology.webp" alt="" aria-hidden="true" draggable="false">' };
+  }
+  if(id === '__resources'){
+    const d = getDomainTiles().find(x => x.id === 'resources');
+    return d ? { name:d.name, act: go('resources'), color:d.color, icon:d.icon } : null;
+  }
+  if(id === '__account'){
+    const a = typeof accountNow === 'function' ? accountNow() : null;
+    return you('Your account', '#0F5FA6', ICON_PERSON, `moreSubOpen('account')`, a ? a.email : 'Not signed in');
+  }
+  if(id === '__opening')
+    return you('Opening', '#252E6D', MORE_GLYPH.play, `moreSubOpen('opening')`, typeof openingOn === 'function' ? (openingOn() ? 'On' : 'Off') : '');
+  if(id === '__voice') return you('Voice and mic check', '#4E9E74', ICON_SPEAKER, `voiceCheckOpen()`);
+  if(id === '__meter') return you('Smoothness meter', '#7A5BA8', MORE_GLYPH.gauge, `moreSubOpen('meter')`, FM.on ? 'Measuring now' : '');
+  if(!t) return null;   // Team access, on a phone that isn't the owner's
+  if(id === 'notifications') return you(t.name, '#C2485C', ICON_BELL, go(id));
+  if(id === 'trash') return you(t.name, '#8B8B95', MORE_GLYPH.trash, go(id));
+  if(id === 'team-access') return you(t.name, '#252E6D', MORE_GLYPH.key, go(id), 'Owner only');
+  const row = { name:t.name, color:t.color, icon:t.icon, act: t.externalUrl ? `closeMoreSheet(); window.open('${t.externalUrl}','_blank')` : go(id), ext: !!t.externalUrl };
+  if(id === 'ask') row.sub = 'Terms, doctors, how the Hub works';
+  if(id === 'review'){ const n = reviewedDueCount(); if(n) row.pill = n + ' due'; }
+  if(id === 'events'){ const n = eventsNewCount(); if(n) row.pill = n + ' new'; }
+  return row;
+}
+
+function moreRowHtml(r){
+  const label = r.name + (r.sub ? ', ' + r.sub : '') + (r.pill ? ', ' + r.pill : '') + (r.ext ? ', opens a website' : '');
+  return `
+    <button class="domain-chip more-row" type="button" style="${tileVars(r.color)}" onclick="${r.act}" aria-label="${escapeAttr(label)}">
+      <span class="${r.you ? 'more-you-icon' : 'domain-chip-icon'}">${r.icon}</span>
+      <span class="domain-chip-name">${escapeHtml(r.name)}${r.sub ? `<small class="more-sub-line">${escapeHtml(r.sub)}</small>` : ''}</span>
+      ${r.pill ? `<span class="more-pill">${escapeHtml(r.pill)}</span>` : ''}
+      ${r.ext ? `<span class="more-end more-ext" aria-hidden="true">${ICON_EXTERNAL}</span>` : ''}
+      ${r.chev ? `<span class="more-end more-chev" aria-hidden="true">${ICON_CHEVRON_RIGHT}</span>` : ''}
+    </button>`;
+}
+
 function openMoreSheet(){
   const tools = getToolTiles();
-  const allDomains = getDomainTiles();
-  const row = (t, nested) => `
-    <button class="domain-chip ${nested?'is-nested':''}" style="${tileVars(t.color)}" onclick="closeMoreSheet(); ${t.externalUrl ? `window.open('${t.externalUrl}','_blank')` : `setCategory('${t.id}')`}">
-      <span class="domain-chip-icon">${t.icon}</span>
-      <span class="domain-chip-name">${escapeHtml(t.name)}</span>
-      ${t.count===null||t.count===undefined ? '' : `<span class="domain-chip-count">${t.count}</span>`}
-    </button>`;
-  const domainRowsHtml = allDomains.filter(t=>!t.parentId).map(parent => {
-    const kids = allDomains.filter(k => k.parentId === parent.id);
-    return row(parent, false) + kids.map(k => row(k, true)).join('');
+  const groups = MORE_GROUPS.map(g => {
+    const rows = g.ids.map(id => moreRowsFor(id, tools)).filter(Boolean);
+    if(!rows.length) return '';
+    const head = g.title ? `<div class="more-head"><h4>${g.title}</h4>${g.open
+      ? `<button class="home-sec-more" type="button" onclick="closeMoreSheet(); setCategory('${g.open}')" aria-label="Open the ${g.title} page">Open →</button>` : ''}</div>` : '';
+    return `<section class="more-group" data-group="${g.key}">${head}<div class="domain-group-children">${rows.map(moreRowHtml).join('')}</div></section>`;
   }).join('');
   document.getElementById('moreSheetBody').innerHTML = `
-    <div class="home-sec-head" style="margin-bottom:10px;"><h3>Tools</h3></div>
-    <div class="domain-group-children" style="margin-bottom:20px;">${tools.map(t=>row(t,false)).join('')}</div>
-    <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
-      <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
-    <div class="domain-group-children">${domainRowsHtml}</div>
-    ${accountMoreHtml()}
-    ${openingMoreHtml()}
-    ${frameMeterMoreHtml()}
-    ${voiceCheckMoreHtml()}
-    <div style="text-align:center; margin-top:18px; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">
+    <div class="home-sec-head" style="margin-bottom:10px;"><h3>More</h3></div>
+    ${groups}
+    <div class="more-build">
       Build ${BUILD_ID} · ${BUILD_TIME}<br>${screenReport()}
     </div>`;
   document.getElementById('moreSheetOverlay').classList.add('show');
 }
 
+// A settings row's own small sheet, over More; ‹ More goes back to it.
+function moreSubOpen(kind){
+  const body = document.getElementById('moreSubBody');
+  if(kind === 'account') body.innerHTML = accountMoreHtml();
+  else if(kind === 'opening') body.innerHTML = openingMoreHtml();
+  else if(kind === 'meter') body.innerHTML = `
+    <div class="home-sec-head"><h3>Smoothness meter</h3></div>
+    <p class="more-sub-lede">Measures how smoothly the Hub moves on this phone. Tap the button, use the app for a minute, then come back and stop it.</p>
+    ${frameMeterMoreHtml()}`;
+  else return;
+  body.dataset.kind = kind;
+  document.getElementById('moreSubOverlay').classList.add('show');
+}
+function moreSubClose(){
+  document.getElementById('moreSubOverlay').classList.remove('show');
+  // The row's line (signed in, On / Off, Measuring now) may have changed.
+  if(document.getElementById('moreSheetOverlay').classList.contains('show')) openMoreSheetKeepScroll();
+}
+function openMoreSheetKeepScroll(){
+  const s = document.querySelector('#moreSheetOverlay .more-sheet');
+  const y = s ? s.scrollTop : 0;
+  openMoreSheet();
+  if(s) s.scrollTop = y;
+}
+
 function closeMoreSheet(){
   document.getElementById('moreSheetOverlay').classList.remove('show');
+  const sub = document.getElementById('moreSubOverlay');
+  if(sub) sub.classList.remove('show');
 }
 
 /* ---------- Home screen ---------- */
@@ -12275,13 +12386,13 @@ const INTERPRETER_TIPS = [
 const HOME_SECTION_COLORS = {
   'Medical Terminology': '#2E8BD0',
   'Doctors': '#7C6A9C',
-  'Study & Development': '#35A97A',
-  'Tools & Reference': '#BFA05E',
+  'Study': '#35A97A',
+  'Reference': '#BFA05E',
 };
 
 function renderHomeSection(title, moreLabel, moreAction, cardsHtml, addAction, addLabel){
   const sectionColor = HOME_SECTION_COLORS[title] || 'var(--accent)';
-  const key = {'Medical Terminology':'medical','Doctors':'doctors','Study & Development':'study','Tools & Reference':'tools'}[title] || '';
+  const key = {'Medical Terminology':'medical','Doctors':'doctors','Study':'study','Reference':'tools'}[title] || '';
   return `
     <section class="home-sec" data-home-section="${key}" style="--section-color:${sectionColor}">
       <div class="home-sec-head">
@@ -12446,8 +12557,8 @@ function renderHome(){
     ${renderHomeSection('Medical Terminology', 'View all', `openHomeSection('medical')`, termCards,
                         `openAddDomainModal()`, 'Create a new domain')}
     ${renderHomeSection('Doctors', 'View all', `openHomeSection('doctors')`, doctorCards)}
-    ${renderHomeSection('Study & Development', 'View all', `openHomeSection('study')`, studyCards)}
-    ${renderHomeSection('Tools & Reference', 'View all', `openHomeSection('tools')`, utilityCards)}
+    ${renderHomeSection('Study', 'View all', `openHomeSection('study')`, studyCards)}
+    ${renderHomeSection('Reference', 'View all', `openHomeSection('tools')`, utilityCards)}
 
     <section class="home-sec">
       <div class="home-sec-head">
