@@ -15,6 +15,7 @@ const SUITES = [
   ['deploy-rule.mjs',     'Deploy rule (no browser): only the bump commit deploys, its title matches, nothing the bump skips is deployed'],
   ['sign-in.mjs',         'Email sign-in (no browser): who may ask, the code and its limits, the ticket, the owner keeps the Hub, the mail conversation'],
   ['push.mjs',            'Notifications (no browser): sealed and signed pushes, who hears about a chat message, owner sends, gone phones'],
+  ['more-sheet.cjs',      'More, grouped: Study, Doctors, Reference, You; no tabs or domain list; every tool placed; numbers that need you; the settings sheet'],
   ['notifications-screen.cjs', 'More → Notifications: install first on iPhone, off/blocked/on, switches, owners\' Send to the team, ?open= from a notification'],
   ['api-helper.mjs',      'Claude helper (no browser): Term lookup end to end, the retry without a schema, refusals, the routine backup'],
   ['daily-drill.cjs',     'Daily Drill: rounds, levels, score, Home card'],

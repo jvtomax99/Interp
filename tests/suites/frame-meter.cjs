@@ -18,16 +18,17 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
     const build = await page.evaluate(() => BUILD_ID);
     await page.evaluate(() => openMoreSheet()); await wait(500);
-    const more = await page.evaluate(() => { const btn = [...document.querySelectorAll('#moreSheetBody .fm-more .btn')][0];
-      return { label: btn && btn.textContent.trim(), runs: document.querySelectorAll('#moreSheetBody .fm-run').length,
-        aboveBuild: !!btn && btn.compareDocumentPosition([...document.querySelectorAll('#moreSheetBody div')].find(d => /Build b/.test(d.textContent) && !d.querySelector('div'))) === Node.DOCUMENT_POSITION_FOLLOWING }; });
-    ok(more.label === 'Measure smoothness' && more.runs === 0 && more.aboveBuild, 'More: "Measure smoothness" just above the build, no runs yet', more);
+    const row = await page.evaluate(() => { const r = [...document.querySelectorAll('#moreSheetBody .more-group[data-group="you"] .more-row')].find(x => /^Smoothness meter/.test(x.textContent.trim()));
+      if (r) r.click(); return !!r; }); await wait(450);
+    const more = await page.evaluate(() => { const btn = [...document.querySelectorAll('#moreSubBody .fm-more .btn')][0];
+      return { row: true, sub: document.getElementById('moreSubOverlay').classList.contains('show'), label: btn && btn.textContent.trim(), runs: document.querySelectorAll('#moreSubBody .fm-run').length }; });
+    ok(row && more.sub && more.label === 'Measure smoothness' && more.runs === 0, 'More: You → Smoothness meter opens its sheet, "Measure smoothness", no runs yet', more);
 
-    await page.evaluate(() => document.querySelector('#moreSheetBody .fm-more .btn').click()); await wait(400);
+    await page.evaluate(() => document.querySelector('#moreSubBody .fm-more .btn').click()); await wait(400);
     const pill = await page.evaluate(() => { const p = document.querySelector('.fm-pill'); if (!p) return null; const r = p.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), centred: Math.abs(r.left + r.width / 2 - innerWidth / 2) < 2,
-        hit: !!hit && p.contains(hit), clearOfBar: [...document.querySelectorAll('.topbar-global')].filter(e => getComputedStyle(e).position !== 'static' && e.getBoundingClientRect().height).every(e => e.getBoundingClientRect().bottom <= r.top + 1), sheetShut: !document.getElementById('moreSheetOverlay').classList.contains('show'), text: p.textContent }; });
+        hit: !!hit && p.contains(hit), clearOfBar: [...document.querySelectorAll('.topbar-global')].filter(e => getComputedStyle(e).position !== 'static' && e.getBoundingClientRect().height).every(e => e.getBoundingClientRect().bottom <= r.top + 1), sheetShut: !document.getElementById('moreSheetOverlay').classList.contains('show') && !document.getElementById('moreSubOverlay').classList.contains('show'), text: p.textContent }; });
     ok(pill && pill.sheetShut && pill.hit && pill.centred && pill.h >= 36 && pill.w < 260 && pill.top < 110 && pill.clearOfBar, 'Start: More closes, a small timer under the top bar takes its own taps', pill);
 
     // Steady frames on Home, then one 400 ms stall, a scroll, and another screen.
@@ -79,12 +80,12 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     ok(/^Smoothness b\d{4}\.\d{4}/.test(copied) && /Hitches .* ms\/s/.test(copied) && /Home:/.test(copied) && /Longest stalls[\s\S]*\d+ ms · Home · no scroll yet · \d+ s after opening · [^\n]*test job/.test(copied), 'Copy numbers: plain text with the build, hitches, screens and the stall list', copied.slice(0, 600));
     if (device === 'iphone') ok(/\nTaps \d+ · from the lift: wait \d+ ms, drawn \d+ ms \(middle\)[^\n]*\n  \d+:\d\d · Home · /.test(copied), 'Copy numbers carries the taps', copied.slice(-300));
 
-    await page.evaluate(() => frameMeterClose()); await page.evaluate(() => openMoreSheet()); await wait(400);
-    const listed = await page.evaluate(() => [...document.querySelectorAll('#moreSheetBody .fm-run')].map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+    await page.evaluate(() => frameMeterClose()); await page.evaluate(() => { openMoreSheet(); moreSubOpen('meter'); }); await wait(400);
+    const listed = await page.evaluate(() => [...document.querySelectorAll('#moreSubBody .fm-run')].map(x => x.textContent.replace(/\s+/g, ' ').trim()));
     ok(listed.length === 1 && listed[0].includes(build), 'More lists the run with its build', listed);
     await page.screenshot({ path: O + tag + '-more.png' });
-    await page.evaluate(() => document.querySelector('#moreSheetBody .fm-run').click()); await wait(400);
-    ok(await page.evaluate(() => document.getElementById('frameMeterOverlay').classList.contains('show') && !document.getElementById('moreSheetOverlay').classList.contains('show')), 'tapping a listed run opens its results');
+    await page.evaluate(() => document.querySelector('#moreSubBody .fm-run').click()); await wait(400);
+    ok(await page.evaluate(() => document.getElementById('frameMeterOverlay').classList.contains('show') && !document.getElementById('moreSheetOverlay').classList.contains('show') && !document.getElementById('moreSubOverlay').classList.contains('show')), 'tapping a listed run opens its results');
     await page.evaluate(() => frameMeterClose());
 
     // Too short to judge: no run saved. Hidden time is not counted as stalls.
