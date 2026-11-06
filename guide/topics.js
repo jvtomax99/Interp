@@ -44,15 +44,15 @@ const GUIDE_TOPICS = [
     <p>The light on the pavilion follows your phone's clock: warm morning light from 5 to 11, daylight from 11 to 4, and a blue evening from 4 pm through the night.</p>
     <p>In a hurry? Tap anywhere before the badge has arrived (after <b>Tap to enter</b>, if you see it) and you go straight to Home. It doesn't play when you open the Hub from a notification, or when you come back to it from another app without it restarting.</p>
     <p>The badge shows your first name and the first letter of your last name (from your name in the app), and your badge title. Dr. Smiley is in the photo spot unless you put your own photo there (below). It has no barcode or number: it is not an ID.</p>
-    <p>To change it, open <b>More</b> (bottom right) and scroll to <b>Opening</b>: turn <b>Badge opening</b> off or on, turn the <b>Sound</b> (the music, a beep and a chime) off or on, turn on <b>My photo on the badge</b>, type your <b>Badge title</b> (Staff Interpreter unless you change it: Per Diem Interpreter, Coordinator…), or tap <b>Replay the opening</b>. These stay on your phone.</p>
+    <p>To change it, open <b>More</b> (bottom right) and tap <b>Opening</b>, under <b>You</b>: turn <b>Badge opening</b> off or on, turn the <b>Sound</b> (the music, a beep and a chime) off or on, turn on <b>My photo on the badge</b>, type your <b>Badge title</b> (Staff Interpreter unless you change it: Per Diem Interpreter, Coordinator…), or tap <b>Replay the opening</b>. These stay on your phone.</p>
     <p><b>My photo on the badge</b> uses the photo you added with your name (tap your initial at the top right to add one; it's the same one your team sees in Team Chat, and one you added on another phone signed in to your account works too). It's off unless you turn it on. With it on, Dr. Smiley steps off the badge: he stands by the reader and waves while your badge comes down, then grins and waves when it turns green. A square photo fills the tall spot, so a little of each side is trimmed: a face works best.</p>
     <p>With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, nothing drifts or swings: the badge is already hanging, and the tap goes straight to green.</p>` },
 
   { id:'account', section:'start', k:'account sign in signin log in login email code six digits 6 numbers two phones second phone new phone sync same name photo picture follow progress practice score streak badges settings dark mode region sync now synced not synced sign out signout gmail spam junk', q:'How do I use the Hub on two phones as the same person?', a:`
-    <p>Sign in with your email. Open <b>More</b> (bottom right) and scroll to <b>Your account</b>. Type your email and tap <b>Send me a code</b>. A few seconds later an email from the Hub arrives with 6 numbers in it. Go back to the Hub, type them in and tap <b>Sign in</b>. No password.</p>
+    <p>Sign in with your email. Open <b>More</b> (bottom right) and tap <b>Your account</b>, under <b>You</b>. Type your email and tap <b>Send me a code</b>. A few seconds later an email from the Hub arrives with 6 numbers in it. Go back to the Hub, type them in and tap <b>Sign in</b>. No password.</p>
     <p>Do the same on your other phone, with the same email. Both phones are now you: your name, and the photo filed under it, follow you. Change your name on one phone and the other picks it up the next time it opens.</p>
     <p>Your progress follows you too: CoreCHI practice (every question, your streak, your badges), the memory trainer, the Daily Drill, your campus and the knowledge brain's count. So do your settings: dark mode, your region and the opening's settings. What Dr. Smiley remembers about you (language, answer length, study focus, how he moves) stays on each phone, on purpose. The Hub saves them when it opens and when you leave it. If both phones changed something, the two are joined, nothing is counted twice, and nothing is wiped. Two phones open at the same moment don't update each other live; the other one catches up the next time it opens.</p>
-    <p>To check it, open <b>More</b>, <b>Your account</b>: it says when your progress last synced, or why it didn't, and <b>Sync now</b> tries again right away.</p>
+    <p>To check it, open <b>More</b> and tap <b>Your account</b>, under <b>You</b>: it says when your progress last synced, or why it didn't, and <b>Sync now</b> tries again right away.</p>
     <p>The code works for 10 minutes, only on the phone where you asked for it, and it allows 5 tries. Not in your inbox? Look in Spam or Junk. Hospital email sometimes holds automated mail, so a personal email is usually faster.</p>
     <p>On a new phone or a computer you don't need the team code once you have an account: on the screen that asks for the team code, tap <b>Have an account? Sign in with email</b>, type your email, then the 6 numbers. The very first time, you join with the team code, then sign in from More.</p>
     <p><b>Sign out of this phone</b> keeps the phone in the team and keeps your name on it. It only stops being your account.</p>
@@ -114,6 +114,17 @@ const GUIDE_TOPICS = [
       <li>Tap <b>Install app</b>.</li>
     </ol>` },
 
+  { id:'more', section:'start', k:'more menu list long where tools settings groups study doctors reference you domains find missing moved translate chat numbers due new', q:'What is in More?', a:`
+    <p><b>More</b> (bottom right) holds every tool that isn't in the bar, in groups:</p>
+    <ol>
+      <li><b>Ask the Hub</b> at the top.</li>
+      <li><b>Study</b>: CoreCHI Practice, Term Review, False Friends, Sound-Alikes, Code of Ethics, Training &amp; Events.</li>
+      <li><b>Doctors</b>: Doctor Prep, Doctor Directory, Provider Pictures, Find a Doctor and MediFind. <b>Open</b> beside the heading shows the Doctors page.</li>
+      <li><b>Reference</b>: <b>Terminology domains</b> (every domain, as tiles), Professional Resources, 3D Body, Link Directory, this guide and Recent Updates.</li>
+      <li><b>You</b>: your account, Notifications, the opening, the voice and mic check, the smoothness meter, Recently deleted.</li>
+    </ol>
+    <p>Translate and Chat are in the bar, so they aren't repeated here. A number appears only when something needs you: terms you've reviewed that are due again, or new trainings since you last looked. A ↗ means it opens a website.</p>` },
+
   { id:'around', section:'start', k:'lost navigate menu buttons where tabs bar bottom find my way dark mode night moon top', q:'Where is everything?', a:`
     <p>Five buttons sit in a bar across the <b>bottom of the screen</b>, and they are always there:</p>
     <ol>
@@ -121,7 +132,7 @@ const GUIDE_TOPICS = [
       <li><b>Search</b>: looks through everything in the app.</li>
       <li><b>Translate</b>: look up a word you don't have yet.</li>
       <li><b>Chat</b>: your team.</li>
-      <li><b>More</b>: everything else, including every domain, Doctors, Doctor Prep, Provider Pictures, practice and this guide.</li>
+      <li><b>More</b>: everything else, in groups: <b>Study</b> (practice, Term Review, False Friends…), <b>Doctors</b>, <b>Reference</b> (every domain, 3D Body, this guide) and <b>You</b> (your account and settings).</li>
     </ol>
     <p><b>Dr. Smiley</b> sits beside that bar on the right, with <b>Ask</b> under him. Tap him to ask a question. On Home he’s in the greeting instead.</p>
     <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
@@ -285,7 +296,7 @@ const GUIDE_TOPICS = [
     <p><b>Doctors</b> is the broader hub for Doctor Prep and the Doctor Directory. A specialty-based appointment briefing is separate: ask Dr. Smiley to prep you for that specialty.</p>` },
 
   { id:'doctors', section:'prep', k:'doctors hub doctor prep research directory saved doctor tools menu', q:'What is Doctors?', a:`
-    <p>Open <b>More</b> → <b>Doctors</b> on a phone, or choose <b>Doctors</b> in the sidebar on a computer. It brings the two doctor tools together:</p>
+    <p>Open <b>More</b> and tap <b>Open</b> beside the <b>Doctors</b> heading on a phone, or choose <b>Doctors</b> in the sidebar on a computer. It brings the two doctor tools together:</p>
     <ul>
       <li><b>Doctor Prep</b>: research a provider by name and prepare the terminology likely to come up.</li>
       <li><b>Doctor Directory</b>: open the research the team has saved, with their tips and photos.</li>
@@ -540,14 +551,14 @@ const GUIDE_TOPICS = [
   { id:'smoothness', section:'trouble', k:'smooth smoothness slow laggy lag choppy stutter jerky jank frames fps dropped meter measure speed performance hitch hitches tap taps delay slow tap', q:'The app feels choppy. Can I measure it?', a:`
     <p>Yes, on your own phone. It counts the frames the app shows late.</p>
     <ol>
-      <li>Open <b>More</b> and scroll to the very bottom.</li>
+      <li>Open <b>More</b> and tap <b>Smoothness meter</b>, under <b>You</b>.</li>
       <li>Tap <b>Measure smoothness</b>. A small timer appears at the top of the screen.</li>
       <li>Use the app the way that feels choppy: scroll Home, open a domain, open the chat.</li>
       <li>Tap the timer to stop. The results open.</li>
     </ol>
     <p>The big number is milliseconds of hitches per second. Apple's mark: under 5 is smooth, over 10 feels choppy. Below it you see the same for each screen and while scrolling, then the longest stalls: when each one came (time into the run, how long after a scroll, how long after the app opened) and what the app was doing then, such as the tab bar tucking or a new greeting word. "Nothing named" means the phone was busy drawing.</p>
     <p>Last come your <b>Taps</b>: every tap in the run, timed from when your finger lifts. "Wait" is how long until the app starts on it, "drawn" how long until the next screen is on view. The six slowest are listed with where you were and what you tapped.</p>
-    <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed at the bottom of More. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
+    <p>To compare two versions, do the same steps each time. Each run keeps its build number, and the last four are listed under <b>More</b> → <b>Smoothness meter</b>. <b>Copy numbers</b> puts a run's results in a message. Turn Low Power Mode off first: it halves the frames.</p>` },
   { id:'memory', section:'study', k:'memory trainer consecutive span notes speaker doctor nurse patient family who is talking note-taking listen render retention short-term memory long lines chunks flag line voice paulina samantha', q:'How does the Memory trainer work?', a:`
     <p>Practice for consecutive interpreting. The phone reads a line out loud, a provider in English or a patient in Spanish, with the words hidden. You say it in the other language, out loud, then check yourself.</p>
     <ol>
@@ -567,7 +578,7 @@ const GUIDE_TOPICS = [
   { id:'voicecheck', section:'trouble', k:'voice mic microphone record recording speech to text dictation listen hear speak audio check test memory trainer', q:'What is the Voice and mic check?', a:`
     <p>A quick test of what your phone can do with sound: the Spanish and English voices, recording yourself, and turning speech into text. It shows what the <b>Memory trainer</b> can use on your phone, and what it may add later.</p>
     <ol>
-      <li>Open <b>More</b> and scroll to the very bottom. Tap <b>Voice and mic check</b>.</li>
+      <li>Open <b>More</b> and tap <b>Voice and mic check</b>, under <b>You</b>.</li>
       <li>Do the four steps on the sheet. The phone asks before it uses the microphone. If the voice is quieter after recording, tap <b>Try the volume fix</b>.</li>
       <li>Tap <b>Copy results</b> and paste them into a chat.</li>
     </ol>

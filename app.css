@@ -1166,6 +1166,36 @@
     }
   }
   @keyframes sheetUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+
+  /* More, grouped (docs/features/more-sheet.md): small capital headings,
+     48px rows, a line under a name, a soft count, ↗ for a website, and the
+     settings rows' own small sheet (.more-sub) with ‹ More back. */
+  .more-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-3); margin:var(--sp-5) 4px var(--sp-2); }
+  .more-head h4{ margin:0; font-size:var(--fs-foot); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--ink-soft); }
+  .domain-chip.more-row{ min-height:48px; }
+  .more-row .domain-chip-name{ display:flex; flex-direction:column; gap:1px; }
+  .more-sub-line{ font-size:var(--fs-foot); font-weight:400; letter-spacing:var(--tr-sm); color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .more-pill{ flex-shrink:0; font-size:var(--fs-foot); font-weight:650; letter-spacing:var(--tr-sm); color:var(--navy); background:var(--accent-soft); padding:4px 9px; border-radius:999px; font-variant-numeric:tabular-nums; }
+  .more-end{ flex-shrink:0; display:inline-flex; color:var(--ink-faint); }
+  .more-end svg{ width:18px; height:18px; }
+  .more-ext svg{ width:16px; height:16px; }
+  .more-you-icon{ width:var(--ic-list); height:var(--ic-list); flex-shrink:0; display:inline-flex; }
+  .more-sq{ width:100%; height:100%; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; color:#fff; }
+  .more-sq svg{ width:18px; height:18px; }
+  .more-build{ text-align:center; margin-top:18px; font-family:var(--mono); font-size:var(--fs-cap2); color:var(--ink-faint); }
+  .more-sub{ position:relative; }
+  .more-head .home-sec-more{ background:transparent; border:0; box-shadow:none; min-height:44px; padding:0 6px; margin:-12px 0; color:var(--ink-soft); }
+  .more-sub #moreSubBody{ padding-top:30px; }
+  #moreSubBody > div{ margin-top:0; }
+  .more-sub-back{
+    position:absolute; top:12px; left:12px; min-height:44px; padding:0 12px; border:0; border-radius:var(--r-sm);
+    background:transparent; color:var(--ink-soft); font:inherit; font-size:var(--fs-sub); font-weight:550; letter-spacing:var(--tr-body);
+    display:inline-flex; align-items:center; gap:4px; cursor:pointer;
+  }
+  .more-sub-back span{ font-size:var(--fs-t2); line-height:1; }
+  .more-sub-back:active, .more-sub-back.is-pressed{ background:var(--line-soft); }
+  .more-sub-back:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .more-sub-lede{ font-size:var(--fs-sub); color:var(--ink-soft); margin:0 0 var(--sp-3); }
   @media (prefers-reduced-motion:reduce){ .more-sheet{ animation:none; } }
 
   /* ---------- Smoothness meter (More, at the bottom) ---------- */

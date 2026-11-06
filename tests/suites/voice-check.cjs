@@ -47,16 +47,15 @@ function noApis(){
     if (dark) await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
 
     await page.evaluate(() => openMoreSheet()); await wait(500);
-    const more = await page.evaluate(() => { const vc = document.querySelector('#moreSheetBody .vc-more .btn'), fm = document.querySelector('#moreSheetBody .fm-more');
-      const build = [...document.querySelectorAll('#moreSheetBody div')].find(d => /Build b/.test(d.textContent) && !d.querySelector('div'));
+    const more = await page.evaluate(() => { const rows = [...document.querySelectorAll('#moreSheetBody .more-group[data-group="you"] .more-row')];
+      const vc = rows.find(x => x.textContent.trim() === 'Voice and mic check'), fm = rows.find(x => /^Smoothness meter/.test(x.textContent.trim()));
       vc && vc.scrollIntoView({ block: 'center' }); const r = vc && vc.getBoundingClientRect(); const hit = vc && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-      return { label: vc && vc.textContent.trim(), afterMeter: !!vc && fm.compareDocumentPosition(vc) === Node.DOCUMENT_POSITION_FOLLOWING,
-        aboveBuild: !!vc && vc.compareDocumentPosition(build) === Node.DOCUMENT_POSITION_FOLLOWING, h: r && Math.round(r.height), hit: !!hit && vc.contains(hit) }; });
-    ok(more.label === 'Voice and mic check' && more.afterMeter && more.aboveBuild, 'More: "Voice and mic check" under the smoothness meter, above the build', more);
-    ok(more.h >= 40 && more.hit, 'More: the button takes the tap', more);
+      return { label: vc && vc.textContent.trim(), nextToMeter: !!vc && !!fm && rows.indexOf(fm) === rows.indexOf(vc) + 1, h: r && Math.round(r.height), hit: !!hit && vc.contains(hit) }; });
+    ok(more.label === 'Voice and mic check' && more.nextToMeter, 'More: "Voice and mic check" in You, just above the smoothness meter', more);
+    ok(more.h >= 44 && more.hit, 'More: the row takes the tap', more);
     if (device === 'iphone' && !dark) await page.screenshot({ path: O + 'more-bottom.png' });
 
-    await page.evaluate(() => document.querySelector('#moreSheetBody .vc-more .btn').click()); await wait(600);
+    await page.evaluate(() => [...document.querySelectorAll('#moreSheetBody .more-row')].find(x => x.textContent.trim() === 'Voice and mic check').click()); await wait(600);
     const open = await page.evaluate(() => { const s = document.querySelector('#voiceCheckOverlay .more-sheet'), r = s.getBoundingClientRect();
       const btns = [...document.querySelectorAll('#voiceCheckBody button:not([hidden])')].map(x => { x.scrollIntoView({ block: 'center' }); const q = x.getBoundingClientRect();
         const hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return { t: x.textContent.trim(), h: Math.round(q.height), hit: !!hit && x.contains(hit) }; });
