@@ -12,7 +12,8 @@ function ok(condition, message, detail) {
 const pause = (page, ms = 350) => page.waitForTimeout(ms);
 const card = (page, name, scope = '#content') => page.locator(`${scope} .qa-card`).filter({ has: page.locator('.qa-title').filter({ hasText: new RegExp('^' + name + '$') }) }).first();
 const quick = (page, name) => page.locator('#content .qa-tile').filter({ has: page.locator('.qa-tile-label').filter({ hasText: new RegExp('^' + name + '$') }) }).first();
-const navRow = (page, name, desktop) => page.locator(desktop ? '.side-row' : '#moreSheetBody .domain-chip')
+// On a phone, Doctors is the Doctors heading's Open in More (docs/features/more-sheet.md).
+const navRow = (page, name, desktop) => !desktop && name === 'Doctors' ? page.locator('#moreSheetBody .more-group[data-group="doctors"] .more-head .home-sec-more') : page.locator(desktop ? '.side-row' : '#moreSheetBody .domain-chip')
   .filter({ has: page.locator(desktop ? '.side-row-name' : '.domain-chip-name').filter({ hasText: new RegExp('^' + name + '$') }) }).first();
 async function menu(page, name, desktop) {
   if (!desktop) await openPhoneMenu(page);
