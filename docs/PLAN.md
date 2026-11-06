@@ -318,6 +318,14 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    ThreeUI and Meshy ideas; the other picks (thinking trace, card stack,
    practice certificate, Meshy equipment drill, spinning pins) are listed
    there as later ideas, mockups in the chat only.
+7. **Email sign-in, one account on every phone (Jose, 2026-11-06).**
+   A 6-digit code emailed to you, typed into the Hub; your name, photo,
+   practice and settings follow you to any phone. Spec, the "not in this
+   version" list and Jose's one-time setup: `docs/features/email-sign-in.md`.
+   Three PRs: E1 sign in, E2 sync, E3 Term Review and titles by account.
+   Sender: a new Gmail just for the Hub (Jose's pick). Waits on Jose's
+   setup (the Gmail, its app password in Vercel) before E1 goes live;
+   E1 can be built and tested before that.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
