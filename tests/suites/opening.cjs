@@ -37,6 +37,11 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     const home = await page.evaluate(() => { const c = document.querySelector('#content'); return !!c && c.classList.contains('is-home') && c.children.length > 0; });
     ok(home, 'Home is drawn underneath meanwhile (the opening adds no wait to it)');
     ok(await page.evaluate(() => hubOpeningUp()), 'hubOpeningUp() says so, for the hello');
+    const bar = () => page.evaluate(() => ({ meta: document.querySelector('meta[name="theme-color"]').content, html: getComputedStyle(document.documentElement).backgroundColor }));
+    const barUp = await bar();
+    barUp.body = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    ok(/^#[0-9a-f]{6}$/.test(barUp.meta) && barUp.meta !== '#f3f6fc' && barUp.html === barUp.body && barUp.body !== 'rgb(244, 246, 250)',
+      'the phone\'s top bar (theme-color and the page\'s background) takes the scene\'s color while it is up, not white', barUp);
     const card = await page.evaluate(() => ({ nm: document.querySelector('.op-nm').textContent, rl: document.querySelector('.op-rl').textContent,
       wel: document.querySelector('.op-wel').textContent, face: !!document.querySelector('.op-pic svg.ds-art .ds-sheet'),
       noId: !document.querySelector('.op img[src*="photo"], .op [class*="barcode"]') }));
@@ -63,6 +68,9 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     ok(!(await music(page)).on, 'the music is fading out over Home (let go when the opening ends)');
     const reach = await homeReached(page);
     ok(reach.found && reach.hit, 'nothing is left over Home: a tap on its search reaches it', reach);
+    const barAfter = await bar();
+    barAfter.body = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    ok(barAfter.meta === '#f3f6fc' && barAfter.body === 'rgb(244, 246, 250)' && !(await page.evaluate(() => document.documentElement.classList.contains('op-on'))), 'the top bar is Home\'s again after the hand-over', barAfter);
     await wait(3500);
     const log = await page.evaluate(() => window.__opLog);
     const d = log.find(e => e[0] === 'done'), h = log.find(e => e[0] === 'hello');
@@ -88,12 +96,17 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
           poster: v && v.getAttribute('poster'), bg: op && getComputedStyle(op).backgroundImage }; });
       ok(s.attr === look && s.cls.includes('op-' + look) && s.src.includes(clip + '.mp4') && s.src.includes(clip + '.webm') && s.poster.includes(clip + '.webp') && s.bg.includes(clip + '.webp'),
         at.slice(11, 16) + ': the ' + look + ' look (its loop, its still behind it)', s);
+      const top = await page.evaluate(() => ({ meta: document.querySelector('meta[name="theme-color"]').content, body: getComputedStyle(document.body).backgroundColor }));
+      const want = { morning: ['#5c5459', 'rgb(92, 84, 89)'], midday: ['#52515a', 'rgb(82, 81, 90)'], evening: ['#1a1923', 'rgb(26, 25, 35)'] }[look];
+      ok(top.meta === want[0] && top.body === want[1], at.slice(11, 16) + ': the top bar takes this light\'s top edge', top);
       // While the ring opens, Home shows inside it: nothing behind the scene but Home.
       const ring = await page.evaluate(() => { cancelAnimationFrame(OP.raf); OP.t0 = 1e12; OP.tap = 3; OP.cues = { b: 1, c: 1, w: 1 }; opFrame(5.2);
         const op = document.querySelector('.op'), r = document.querySelector('.op-reader').getBoundingClientRect();
         const el = document.elementsFromPoint(r.left + r.width / 2, r.top - 60);
         return { bg: getComputedStyle(op).backgroundImage, opening: op.classList.contains('is-opening'), mask: document.querySelector('.op-scene').style.maskImage || document.querySelector('.op-scene').style.webkitMaskImage }; });
       ok(ring.opening && ring.bg === 'none' && /radial-gradient/.test(ring.mask), at.slice(11, 16) + ': inside the opening ring is Home, not the still', ring);
+      ok(await page.evaluate(() => !document.documentElement.classList.contains('op-on') && document.querySelector('meta[name="theme-color"]').content === '#f3f6fc'),
+        at.slice(11, 16) + ': once the ring opens, the top bar is Home\'s again');
       await page.evaluate(() => { OP.tap = null; OP.ring = null; document.querySelector('.op').classList.remove('is-opening'); const sc = document.querySelector('.op-scene'); sc.style.maskImage = sc.style.webkitMaskImage = ''; OP.t0 = performance.now() - 2000; });
       if (look === 'evening') {
         const w = await page.evaluate(() => getComputedStyle(document.querySelector('.op-holder'), '::after').backgroundColor);

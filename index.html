@@ -24,8 +24,8 @@
       // The pavilion's light by the phone's clock: morning 5-11, midday 11-4, evening and night (openingLook in features/opening.js).
       var opH = new Date().getHours();
       document.documentElement.setAttribute('data-op-look', opH >= 5 && opH < 11 ? 'morning' : opH >= 11 && opH < 16 ? 'midday' : 'evening');
-      document.documentElement.classList.add('op-cover');
-      setTimeout(function(){ if(!window.__opMounted) document.documentElement.classList.remove('op-cover'); }, 6000);
+      document.documentElement.classList.add('op-cover', 'op-on');   // op-on: the phone's top bar takes the scene's color until the ring opens (syncTheme)
+      setTimeout(function(){ if(!window.__opMounted) document.documentElement.classList.remove('op-cover', 'op-on'); }, 6000);
     }
   }catch(e){}
 </script>
@@ -664,7 +664,7 @@
 <script src="./features/opening.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
-if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover'); } }
+if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover', 'op-on'); } }
 /* ============ Seed data (from the shared reference doc) ============ */
 const DEFAULT_DATA = {
   categories: [
@@ -18012,8 +18012,13 @@ document.addEventListener('focusout', (e)=>{
   syncViewport();
 
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  const syncTheme = ()=>{ if(themeMeta) themeMeta.content = root.dataset.theme === 'dark' ? '#0d1727' : '#f3f6fc'; };
-  new MutationObserver(syncTheme).observe(root, { attributes:true, attributeFilter:['data-theme'] });
+  // While the opening (Badge in) is up (html.op-on), the top bar takes the pavilion's top edge (--op-top, app.css), not white over the dark scene.
+  const syncTheme = ()=>{
+    if(!themeMeta) return;
+    const c = root.classList.contains('op-on') ? (getComputedStyle(root).getPropertyValue('--op-top').trim() || '#1a1923') : root.dataset.theme === 'dark' ? '#0d1727' : '#f3f6fc';
+    if(themeMeta.content !== c) themeMeta.content = c;
+  };
+  new MutationObserver(syncTheme).observe(root, { attributes:true, attributeFilter:['data-theme', 'class'] });
   syncTheme();
 
   /* Dialogs. The panels are long-lived elements toggled with a `show` class
