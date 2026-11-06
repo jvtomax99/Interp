@@ -137,8 +137,13 @@ const settle = page => page.evaluate(() => new Promise(r => {
     const slim = () => hp.evaluate(() => document.body.classList.contains('dock-mini'));
     await hp.waitForTimeout(5000);
     ok(!(await slim()), 'no timer: 5 s untouched at the top of Home, the bar stays full');
-    // Scrolled from the page: mobile WebKit has no wheel.
-    const scroll = d => hp.evaluate(d => window.scrollBy(0, d), d);
+    // Scrolled from the page: mobile WebKit has no wheel. Each step waits
+    // for its own scroll event (the bar's listener runs first), since CI's
+    // WebKit delivers it at a slow rendering update, well after a fixed wait.
+    const scroll = d => hp.evaluate(d => new Promise(r => {
+      addEventListener('scroll', () => setTimeout(r, 50), { once: true });
+      window.scrollBy(0, d); setTimeout(r, 2000);
+    }), d);
     await scroll(40); await hp.waitForTimeout(400);
     ok(!(await slim()), 'a 40px nudge down does not change it');
     await scroll(200); await hp.waitForTimeout(600);
@@ -158,7 +163,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
     await hp.evaluate(() => { window.__flips = 0; let was = document.body.classList.contains('dock-mini');
       new MutationObserver(() => { const m = document.body.classList.contains('dock-mini'); if (m !== was) { was = m; window.__flips++; } }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
       scrollTo(0, document.documentElement.scrollHeight); });
-    await hp.waitForTimeout(600);
+    await hp.waitForTimeout(1500);
     const f0 = await hp.evaluate(() => window.__flips);
     for (const d of [-20, 20, -15, 15, -20, 20]) { await scroll(d); await hp.waitForTimeout(120); }
     await hp.waitForTimeout(400);
