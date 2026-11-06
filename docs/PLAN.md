@@ -323,9 +323,10 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    practice and settings follow you to any phone. Spec, the "not in this
    version" list and Jose's one-time setup: `docs/features/email-sign-in.md`.
    Three PRs: E1 sign in, E2 sync, E3 Term Review and titles by account.
-   Sender: a new Gmail just for the Hub (Jose's pick). Waits on Jose's
-   setup (the Gmail, its app password in Vercel) before E1 goes live;
-   E1 can be built and tested before that.
+   Sender: a new Gmail just for the Hub (Jose's pick). E1 built
+   2026-11-06 (sign in, the team place and owner carried over, the name
+   follows); works once Jose's setup is done (the Gmail, its app password
+   in Vercel, the `accounts` rule published). Next: E2, sync.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).

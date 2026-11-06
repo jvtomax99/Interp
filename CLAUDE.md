@@ -82,6 +82,7 @@ between assignments.
 | `features/credits.js` | 300 | Idea credits: whose idea a screen or glossary domain was. The small purple tag under a credited screen's title (on a domain's banner, keyed by its id), the card it opens (tap, or double-tap the title), the owner's Give credit sheet, `hub-credits/{key}` keyed by the title (`creditDecorate`, `creditOpen`, `creditEdit`, `startCredits`, `creditWatch`). 2026-11-05; `docs/features/credits.md` |
 | `features/tool-banners.js` | 117 | Tool banners: Translate, Term Review's start, Ask the Hub and Doctor Directory under the domains' colour banner with their pin (`TOOL_BANNERS`, `toolBannerHtml`; Doctor Directory's sits above its search, outside `#content`, its count set by `toolBannerMeta`), and the pin tapped on a Home tile or rail card flying into it (`tbFly`; none under reduced motion or Still). 2026-11-06; `docs/features/tool-banners.md` |
 | `features/opening.js` | 291 | The opening, Badge in: every start on a phone, your badge over the pavilion, tap, scan, green, the ring opens into Home (`openingStart`, `opFrame`, `openingFinish`, `hubOpeningUp`, the `hub-opening-done` event Home's hello waits for) and More's Opening card (`openingMoreHtml`: on/off, Sound, My photo on the badge, Badge title, Replay; `ih_opening`, `ih_openingSound`, `ih_badgePhoto`, `ih_badgeTitle`). Decided and covered before the first paint by index.html's first script. 2026-11-05; `docs/features/opening.md` |
+| `features/account.js` | 249 | Your account, email sign-in on the phone: More's "Your account" card (`accountMoreHtml`), the email then the 6-digit code (`accountSend`, `accountCheck`), signing in with the server's ticket (`signInWithCustomToken`, `accountAdopt`), the name following the account (`accountSaveName`, `accountBoot`), sign out back to a plain team phone (`accountSignOut`). `ih_account`, `ih_accountPending`, `ih_accountNameAt`. 2026-11-06, phase E1; `docs/features/email-sign-in.md` |
 | `opening/` | — | The opening's pavilion in three lights by the clock (`openingLook`): `pavilion-1` midday, `pavilion-morning-1`, `pavilion-evening-1`, each an 8 s seamless loop (`.mp4` ~0.7 MB, `.webm`) and its still (`.webp`); rendered once from `docs/mockups/opening/`. `music-1.m4a` (0.34 MB), the opening's music, an original 28 s loop from `docs/mockups/opening/music/compose.py`. A new clip gets a new name (`sw.js` carries this one over between versions) |
 | `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
@@ -101,6 +102,7 @@ between assignments.
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
 | `api/_routine.js` | — | The one Claude helper: every request to the Messages API (`callClaude`: the retries, the refusal check, `parseAnswer`, `clip`), and Haiku 5.5 first then the backup model for Translate and the term check (`callRoutine`). Not an endpoint itself |
 | `api/ask.js` | 508 | Ask the Hub — answers from the entries the app sends, plus approved team notes |
+| `api/sign-in.js` | — | Email sign-in: emails a 6-digit code (`send`), checks it and returns a Firebase sign-in ticket (`check`), moves the phone's place in the team (and the owner's line) to the account. Codes in `sign-in-codes/`, server only. `_mail.js` beside it sends through the Hub's Gmail (SMTP over Node's TLS, no package; `GMAIL_USER`, `GMAIL_APP_PASSWORD`); the ticket is `customToken` in `_service-login.js`. `docs/features/email-sign-in.md` |
 | `api/push.js` | — | Notifications that reach a closed phone (Web Push): Team Chat, owners' sends, a test; the key phones sign up with. `_push-team.js` (who gets what, gone phones) and `_webpush.js` (encryption + VAPID signing, Node crypto) beside it. `docs/features/notifications.md` |
 | `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
@@ -163,6 +165,7 @@ different places is what silently killed the coloured press glow: a
 | Idea credits (whose idea a screen was) | `features/credits.js`; styles in `app.css` |
 | Tool banners (Translate, Term Review, Ask, Doctor Directory) and the pin's fly from Home | `features/tool-banners.js`; styles in `app.css` ("Tool banners") |
 | The opening (Badge in) and More's Opening card | `features/opening.js`; styles in `app.css` ("Opening") |
+| Your account, email sign-in (More's card; the server is `api/sign-in.js`) | `features/account.js`; styles in `app.css` ("Your account") |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
@@ -257,6 +260,7 @@ hub-lessons/{id}                                                     <-- Ask the
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
 hub-credits/{key}                                                    <-- Idea credits, one per credited screen (credits.md)
 push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
+accounts/{uid}  sign-in-codes/{id}                                   <-- Email sign-in (email-sign-in.md)
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you
@@ -287,6 +291,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Idea credits, whose idea a screen was: the tag, the card, the owner's sheet (`creditDecorate`, `hub-credits`): `credits.md`
 - Tool banners on Translate, Term Review, Ask and Doctor Directory, and the pin's fly from Home (`toolBannerHtml`, `toolBannerMeta`, `tbFly`): `tool-banners.md`
 - The opening, Badge in: when it plays, the loop, More's card (`openingStart`, `ih_opening`, `opening/`): `opening.md`
+- Email sign-in, one account on every phone: the code, the ticket, the owner carried over, what syncs and what doesn't yet (`api/sign-in.js`, `features/account.js`, `accounts/`): `email-sign-in.md`
 - Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's

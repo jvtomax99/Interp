@@ -663,6 +663,7 @@
 <script src="./features/credits.js"></script>
 <script src="./features/tool-banners.js"></script>
 <script src="./features/opening.js"></script>
+<script src="./features/account.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
 if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover', 'op-on'); } }
@@ -5870,9 +5871,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Sign in with your email on each of your phones and your name and photo follow you. More, Your account' },
   { id:'tool-banners', tone:'gd-n1', pin:'pins/translate.webp',       eyebrow:'A new look',            title:'Translate, Term Review, Ask and the Doctor Directory open under a colour banner, and the picture you tap on Home flies into it' },
   { id:'opening',     tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'The opening',           title:'Your badge greets you when the Hub starts: tap it to scan in, with soft music. Put your own photo on it, set your badge title, or turn it off, in More' },
-  { id:'credits',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen or a glossary domain was: tap its small credit tag, or double-tap its title' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -9265,6 +9266,7 @@ function saveMyName(){
   // clean Ask conversation (the one on screen was the person before's).
   const memNote = drMemNameChanged(before, name);
   syncAccessWho();
+  if(name && typeof accountSaveName === 'function') accountSaveName(name);   // your account keeps it (features/account.js)
   // Clearing your name does NOT delete the member document: other people's
   // messages still carry that name and should keep showing the face.
   if(name) persistMyPhoto(name);
@@ -12224,6 +12226,7 @@ function openMoreSheet(){
     <div class="home-sec-head" style="margin-bottom:10px;"><h3>Terminology domains</h3>
       <button class="home-sec-more" onclick="closeMoreSheet(); setCategory('all')">View all →</button></div>
     <div class="domain-group-children">${domainRowsHtml}</div>
+    ${accountMoreHtml()}
     ${openingMoreHtml()}
     ${frameMeterMoreHtml()}
     ${voiceCheckMoreHtml()}
@@ -17890,6 +17893,7 @@ loadNotifyPref();
 // Team access first: a phone that isn't on the team gets the lock screen
 // before anything else. See the Team access section.
 accessBoot();
+accountBoot();   // a name changed on your other phone arrives (features/account.js)
 // Paints from the glossary saved on this phone straight away; it waits for
 // the sign-in (hubAuthReady) itself before going to the network.
 loadData();
