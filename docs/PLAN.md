@@ -310,6 +310,14 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    earn on your lanyard (my pick), a quick second open later the same day,
    drag the badge onto the reader with better sounds. Later, if he asks:
    tilting the phone to swing the badge, playing on a computer.
+6. **Tool banners (Jose, 2026-11-06, "Plan it for real", then "Build it"): built,** waiting for his OK. Translate, Term
+   Review's start, Ask the Hub and Doctor Directory get the domains'
+   colour banner with their pin, and the Home pin you tap flies into it.
+   Plan, what it won't do yet, cost in height, checks:
+   `docs/features/tool-banners.md`. One pull request. Came from his ask for
+   ThreeUI and Meshy ideas; the other picks (thinking trace, card stack,
+   practice certificate, Meshy equipment drill, spinning pins) are listed
+   there as later ideas, mockups in the chat only.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
