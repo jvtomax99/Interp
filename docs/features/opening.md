@@ -126,7 +126,14 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   reports a 980px page, so it reads the screen, not the page. It then sets
   `html.op-cover`: the opening's still over everything, until
   `openingStart()` mounts (the first line of index.html's main script),
-  never more than 6 s.
+  never more than 6 s. With it, `html.op-on`, until the ring starts
+  opening into Home (`opFrame`; `openingFinish` for a skip; a Replay sets
+  it too): the page's background (what an iPhone paints behind its clock;
+  it was Home's `#f4f6fa`, a white strip over the dark scene, Jose,
+  2026-11-05) and the `theme-color` (`syncTheme` in index.html) take
+  `--op-top`, the pavilion's top edge per light (app.css). Evening
+  `#1a1923` was measured on Jose's phone; morning and midday come from the
+  clips' top edge, dimmed the same, not yet seen on a phone.
 - **Resume:** nothing to do. Coming back from another app doesn't run the
   page's scripts again, so the opening can't play.
 - **The timeline** is the mockup's, on one clock (`opFrame(t)`): lockup

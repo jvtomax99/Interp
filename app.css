@@ -7955,6 +7955,13 @@ html[data-theme="dark"] .credit-owner{ background:rgba(247,201,72,.16); color:#F
    scaled to fit (--op-k). The badge is a drawn object (Jose's real badge),
    so its lettering keeps its own sizes and faces, like the Home hello
    banner (kept outside the type rule: tests/suites/type-tokens.cjs). */
+/* html.op-on, until the ring opens: the strip behind the phone's clock takes the top edge of the pavilion,
+   per light (an iPhone paints it the page's background; syncTheme in index.html copies --op-top to the theme-color).
+   Evening measured on Jose's phone; morning and midday from the clips' top edge, dimmed the same. */
+html.op-on{ --op-top:#52515a; }
+html.op-on[data-op-look="morning"]{ --op-top:#5c5459; }
+html.op-on[data-op-look="evening"]{ --op-top:#1a1923; }
+html.op-on, html.op-on body{ background-color:var(--op-top); }
 html.op-cover::after{ content:""; position:fixed; inset:0; z-index:2147483001; background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat; }
 .op{ position:fixed; inset:0; z-index:2147483000; overflow:hidden; background:#1d2140 url(./opening/pavilion-1.webp) center/cover no-repeat;
   touch-action:none; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; cursor:pointer; outline:none; contain:strict; }

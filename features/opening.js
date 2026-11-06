@@ -87,6 +87,7 @@ function openingHtml(look){
 function openingStart(replay){
   const root = document.documentElement;
   if(OP.el){ root.classList.remove('op-cover'); return; }
+  root.classList.add('op-on');   // the top bar takes the scene's color (syncTheme in index.html, app.css --op-top) until the ring opens
   try{
     // The cover's look (index.html) on a real start; the clock's on a Replay.
     const look = OP_CLIPS[root.getAttribute('data-op-look')] && !replay ? root.getAttribute('data-op-look') : openingLook();
@@ -120,7 +121,7 @@ function openingStart(replay){
     const loop = () => { if(!OP.el) return; opFrame((performance.now() - OP.t0) / 1000); OP.raf = requestAnimationFrame(loop); };
     loop();
   }catch(e){
-    root.classList.remove('op-cover');
+    root.classList.remove('op-cover', 'op-on');
     if(OP.el){ OP.el.remove(); OP.el = null; }
   }
 }
@@ -242,6 +243,7 @@ function opFrame(t){
       const rr = $('.op-reader').getBoundingClientRect(), cx = rr.left + rr.width / 2, cy = rr.top + rr.height / 2;
       OP.ring = { cx, cy, max: Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy)) + 30 };
       el.classList.add('is-opening');
+      document.documentElement.classList.remove('op-on');   // Home shows through the ring: its own top bar and background come back
     }
     const R = Math.pow(opSpan(a, 1.7, 2.5), 1.7) * OP.ring.max, { cx, cy } = OP.ring, scene = $('.op-scene'), rg = $('.op-ring2');
     const m = `radial-gradient(circle ${R.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px, transparent calc(100% - 1px), #000 100%)`;
@@ -261,6 +263,7 @@ function openingFinish(fade){
   window.removeEventListener('resize', opFit);
   const end = () => {
     el.remove();
+    document.documentElement.classList.remove('op-on');
     if(OP.el === el){ OP.el = null; OP.ring = null; OP.face = null; OP.leaving = false; }
     try{ window.dispatchEvent(new Event('hub-opening-done')); }catch(e){}
   };
