@@ -8138,6 +8138,18 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .acct-link:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
 .acct-link[disabled], .acct-card .btn[disabled]{ opacity:.55; pointer-events:none; }
 
+/* Sign in with email on the team-code screen (features/account.js, #accessEmail):
+   the same glass box as the team code, at reading size for an address. */
+.access-email{ gap:9px; }
+/* .access-form's display:flex would beat the hidden attribute: the swap needs this. */
+.access-form[hidden]{ display:none; }
+.access-email .access-form{ gap:9px; }
+.access-code.access-email-input{ font:550 var(--fs-call)/1 var(--sans); letter-spacing:var(--tr-body); text-transform:none; text-align:left; padding:0 17px; }
+.access-email-note{ margin:0 0 4px; text-align:center; font-size:var(--fs-sub); letter-spacing:var(--tr-body); line-height:1.45; color:rgba(235,240,255,.86); overflow-wrap:anywhere; }
+.access-email-note b{ color:#fff; font-weight:650; }
+.access-email-row{ display:flex; justify-content:center; flex-wrap:wrap; gap:0 9px; }
+.access-use-email{ color:#fff; }
+
 /* ---------- Adjust your photo (features/photo-adjust.js; docs/features/photo-adjust.md) ----------
    Over the name sheet (its overlay is 100). The square is what is saved; the ring is how Team Chat
    rounds it; the two previews are the photo where the Hub shows it. */

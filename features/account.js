@@ -20,7 +20,7 @@
 
 const ACCT_KEY = 'ih_account', ACCT_PENDING_KEY = 'ih_accountPending', ACCT_NAME_AT_KEY = 'ih_accountNameAt';
 const ACCT_PENDING_MS = 10 * 60 * 1000;
-const ACCT = { step: '', busy: false, msg: '', msgKind: '', confirmOut: false };
+const ACCT = { step: '', busy: false, msg: '', msgKind: '', confirmOut: false, lastEmail: '' };
 
 function acctRead(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
 function acctWrite(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -51,6 +51,7 @@ function acctError(code, data){
     case 'wrong_code':  return data && data.left ? `That code isn't right. ${data.left} ${data.left === 1 ? 'try' : 'tries'} left.` : "That code isn't right. It's the 6 numbers in the email.";
     case 'expired':     return data && data.tooMany ? 'Too many wrong tries. Ask for a new code.' : 'That code has run out. Ask for a new one.';
     case 'other_phone': return 'That code was asked for on another phone. Ask for a new one here.';
+    case 'no_account':  return 'No account with that email yet. The first time, use the team code, then sign in from More.';
     case 'signin_failed': return `Signing in didn't finish. Try again, or let ${who} know.`;
     default:            return (typeof navigator !== 'undefined' && navigator.onLine === false) ? "You're offline. Connect and try again." : "Couldn't reach the Hub. Try again in a moment.";
   }
@@ -110,7 +111,7 @@ function accountCardInner(){
       <p class="acct-lede">Use one email on every phone, and your name, photo, practice and settings follow you.</p>
       <form class="acct-form" novalidate onsubmit="accountSend(event)">
         <label class="acct-label" for="acctEmail">Your email</label>
-        <input class="acct-input" id="acctEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" value="${acctEsc((acctRead(ACCT_PENDING_KEY) || {}).email || '')}">
+        <input class="acct-input" id="acctEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com" value="${acctEsc(ACCT.lastEmail || (acctRead(ACCT_PENDING_KEY) || {}).email || '')}">
         <button class="btn btn-primary" type="submit" id="acctSendBtn"${busy}>${ACCT.busy ? 'Sending…' : 'Send me a code'}</button>
       </form>
       ${msg}
@@ -130,6 +131,7 @@ async function accountSend(e, email){
   if(ACCT.busy) return;
   const input = document.getElementById('acctEmail');
   email = String(email || (input && input.value) || '').trim().toLowerCase();
+  ACCT.lastEmail = email;   // an error keeps what you typed in the box
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ acctSay(acctError('bad_email'), 'bad'); accountRedraw('acctEmail'); return; }
   ACCT.busy = true; acctSay(''); accountRedraw();
   const r = await acctCall({ action: 'send', email });
@@ -250,4 +252,121 @@ async function accountSignOut(){
   if(!ok){ try{ onRemovedFromHub(); }catch(e){} }
   accountRedraw();
   try{ showToast(ok ? 'Signed out. This phone is on its own again.' : 'Signed out. Enter the team code to keep using the Hub.'); }catch(e){}
+}
+
+/* ---------- Sign in with email, on the team-code screen ----------
+   A new phone or a computer whose person already has an account in the
+   team: email, then the code, then in, no team code. The server allows it
+   only for an account already in the team (api/sign-in.js, "no_account"
+   otherwise), so a first-timer still uses the team code. The markup it
+   fills is #accessEmail in index.html's lock screen; "Use the team code
+   instead" puts the team-code form back. */
+const ACCT_LOCK = { on: false, busy: false, msg: '', email: '', step: '' };
+
+function accountLockToggle(on){
+  const form = document.getElementById('accessForm'), box = document.getElementById('accessEmail'), sub = document.getElementById('accessSub');
+  if(!form || !box) return;
+  ACCT_LOCK.on = !!on; ACCT_LOCK.msg = '';
+  if(on){
+    if(sub && !sub.dataset.teamText) sub.dataset.teamText = sub.textContent;
+    if(sub) sub.textContent = 'Sign in with the email you use on your other phone or computer.';
+    form.hidden = true; box.hidden = false;
+    accountLockRender(acctLockPending() ? 'acctLockCode' : 'acctLockEmail');
+  }else{
+    if(sub && sub.dataset.teamText){ sub.textContent = sub.dataset.teamText; delete sub.dataset.teamText; }
+    box.hidden = true; box.innerHTML = ''; form.hidden = false;
+    ACCT_LOCK.step = '';
+    const c = document.getElementById('accessCode'); if(c) try{ c.focus({ preventScroll: true }); }catch(e){}
+  }
+}
+
+function acctLockPending(){ const p = acctPending(); return p && p.lock && ACCT_LOCK.step !== 'email' ? p : null; }
+
+// From renderAccessLock: a code asked for here, then off to Mail and back.
+function accountLockResume(){ if(acctLockPending() && !ACCT_LOCK.on) accountLockToggle(true); }
+
+function accountLockRender(focusId){
+  const box = document.getElementById('accessEmail');
+  if(!box) return;
+  const p = acctLockPending();
+  const busy = ACCT_LOCK.busy ? ' disabled aria-busy="true"' : '';
+  const msg = `<p class="access-msg" id="acctLockMsg" role="status" aria-live="polite">${acctEsc(ACCT_LOCK.msg)}</p>`;
+  box.innerHTML = p ? `
+      <p class="access-email-note">We sent a code to <b>${acctEsc(p.email)}</b>. Look in Spam too.</p>
+      <form class="access-form" novalidate onsubmit="accountLockCheck(event)">
+        <label for="acctLockCode" class="sr-only">The 6 numbers in the email</label>
+        <input class="access-code access-email-code" id="acctLockCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+        ${msg}
+        <button class="access-go" id="acctLockCheckBtn" type="submit"${busy}>${ACCT_LOCK.busy ? 'Signing in…' : 'Sign in'}</button>
+      </form>
+      <div class="access-email-row">
+        <button class="access-skip" type="button" onclick="accountLockSend(null, '${acctEsc(p.email).replace(/'/g, '&#39;')}')"${busy}>Send a new code</button>
+        <button class="access-skip" type="button" onclick="accountLockOther()">Different email</button>
+      </div>
+      <button class="access-skip" type="button" onclick="accountLockToggle(false)">Use the team code instead</button>` : `
+      <form class="access-form" novalidate onsubmit="accountLockSend(event)">
+        <label for="acctLockEmail" class="sr-only">Your email</label>
+        <input class="access-code access-email-input" id="acctLockEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="name@example.com" value="${acctEsc(ACCT_LOCK.email)}">
+        ${msg}
+        <button class="access-go" id="acctLockSendBtn" type="submit"${busy}>${ACCT_LOCK.busy ? 'Sending…' : 'Send me a code'}</button>
+      </form>
+      <button class="access-skip" type="button" onclick="accountLockToggle(false)">Use the team code instead</button>`;
+  if(focusId && (typeof prefersAutoFocus !== 'function' || prefersAutoFocus())){ const f = document.getElementById(focusId); if(f) try{ f.focus({ preventScroll: true }); }catch(e){} }
+}
+function acctLockSay(t){ ACCT_LOCK.msg = t || ''; }
+function accountLockOther(){ ACCT_LOCK.step = 'email'; acctLockSay(''); accountLockRender('acctLockEmail'); }
+
+// The lock screen's phone may not be signed in to Firebase at all yet.
+async function acctLockSignedIn(){
+  try{ await firebaseReady; }catch(e){}
+  if(!hubAuth) return false;
+  try{ if(!hubAuth.currentUser) await hubAuth.signInAnonymously(); }catch(e){ return false; }
+  return !!hubAuth.currentUser;
+}
+
+async function accountLockSend(e, email){
+  if(e) e.preventDefault();
+  if(ACCT_LOCK.busy) return;
+  const input = document.getElementById('acctLockEmail');
+  email = String(email || (input && input.value) || '').trim().toLowerCase();
+  ACCT_LOCK.email = email;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ acctLockSay(acctError('bad_email')); accountLockRender('acctLockEmail'); try{ accessShake(); }catch(err){} return; }
+  ACCT_LOCK.busy = true; acctLockSay(''); accountLockRender();
+  const ready = await acctLockSignedIn();
+  const r = ready ? await acctCall({ action: 'send', email }) : { ok: false, error: 'network' };
+  ACCT_LOCK.busy = false;
+  if(r.ok){
+    acctWrite(ACCT_PENDING_KEY, { email, at: Date.now(), lock: true });
+    ACCT_LOCK.step = 'code'; acctLockSay('');
+    accountLockRender('acctLockCode');
+  }else{
+    acctLockSay(acctError(r.error, r));
+    accountLockRender('acctLockEmail');
+  }
+}
+
+async function accountLockCheck(e){
+  if(e) e.preventDefault();
+  if(ACCT_LOCK.busy) return;
+  const p = acctPending();
+  const input = document.getElementById('acctLockCode');
+  const code = String((input && input.value) || '').replace(/\D/g, '');
+  if(!p){ ACCT_LOCK.step = 'email'; acctLockSay(acctError('expired')); accountLockRender('acctLockEmail'); return; }
+  if(code.length !== 6){ acctLockSay(acctError('wrong_code')); accountLockRender('acctLockCode'); try{ accessShake(); }catch(err){} return; }
+  ACCT_LOCK.busy = true; acctLockSay(''); accountLockRender();
+  const r = await acctCall({ action: 'check', email: p.email, code });
+  if(r.ok){
+    try{ await hubAuth.signInWithCustomToken(r.token); }
+    catch(err){ r.ok = false; r.error = 'signin_failed'; }
+  }
+  if(!r.ok){
+    ACCT_LOCK.busy = false; acctLockSay(acctError(r.error, r)); accountLockRender('acctLockCode');
+    return;
+  }
+  await accountAdopt(r);
+  ACCT_LOCK.busy = false; ACCT_LOCK.on = false; ACCT_LOCK.step = '';
+  const box = document.getElementById('accessEmail'), form = document.getElementById('accessForm');
+  if(box){ box.hidden = true; box.innerHTML = ''; }
+  if(form) form.hidden = false;
+  try{ celebrateAccess({ role: r.role }); }catch(err){ try{ hideAccessLock(); }catch(e2){} }
 }

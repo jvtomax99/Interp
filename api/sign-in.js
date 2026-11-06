@@ -4,11 +4,13 @@
  *   POST { action: 'send',  email }        emails a code to that address
  *   POST { action: 'check', email, code }  returns a Firebase sign-in ticket
  *
- * Both need the phone's own sign-in (Authorization: Bearer ...) and a
- * hub-members/{uid} for it: only a phone that already joined with the team
- * code can ask, so a stranger typing an address gets nothing sent. Firestore
- * itself checks that token when we read the member document with it (the
- * same trick as _hub-access.js), whether or not the Hub is locked.
+ * Both need the phone's own sign-in (Authorization: Bearer ...). A phone
+ * that joined with the team code (hub-members/{uid}; Firestore itself checks
+ * the token when we read that document with it, the same trick as
+ * _hub-access.js) may ask for any address. A phone that hasn't joined (the
+ * team-code screen's "Sign in with email") may ask only for an address whose
+ * account is already in the team; its token is checked with Firebase's own
+ * accounts:lookup. A first-timer still joins with the team code.
  *
  * Codes live in sign-in-codes/, which phones can't read or write (no rule
  * matches it); only this endpoint touches it, with the service account. A
@@ -26,6 +28,9 @@ import crypto from 'node:crypto';
 import { readToken, claimsOf } from './_hub-access.js';
 import { serviceToken, serviceAccount, customToken } from './_service-login.js';
 import { FS, plain, typed } from './_push-team.js';
+
+const FIREBASE_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg';
+const LOOKUP = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_KEY}`;
 import { mailConfig, sendMail } from './_mail.js';
 
 const CODE_LIFE_MS = 10 * 60 * 1000;
@@ -88,7 +93,16 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
     if (!callerToken || !/^[A-Za-z0-9_-]{1,128}$/.test(callerUid)) return res.status(401).json({ error: 'join_first' });
     let member;
     try { member = await doc(callerToken).get(`hub-members/${callerUid}`); } catch (e) { member = null; }
-    if (!member) return res.status(401).json({ error: 'join_first' });
+    if (!member) {
+      // Not in the team (yet): the token must still be a real sign-in of this project.
+      let real = false;
+      try {
+        const r = await fetchImpl(LOOKUP, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: callerToken }) });
+        const d = r.ok ? await r.json() : null;
+        real = !!(d && Array.isArray(d.users) && d.users.some(u => u.localId === callerUid));
+      } catch (e) { real = false; }
+      if (!real) return res.status(401).json({ error: 'join_first' });
+    }
 
     const email = tidyEmail(body.email);
     if (!email) return res.status(400).json({ error: 'bad_email' });
@@ -99,6 +113,13 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
     const db = doc(token);
     const t = now();
     const codePath = `sign-in-codes/${emailDoc(email)}`;
+
+    // A phone outside the team signs in only to an account already in it.
+    const uid = accountIdFor(email);
+    if (!member) {
+      const inTeam = await db.get(`accounts/${uid}`).catch(() => null) && await db.get(`hub-members/${uid}`).catch(() => null);
+      if (!inTeam) return res.status(404).json({ error: 'no_account' });
+    }
 
     if (action === 'send') {
       const cfg = mailConfig(env);
@@ -141,21 +162,28 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
     // Spent: a right code works once. The send history goes with it, which is fine.
     await db.remove(codePath);
 
-    const uid = accountIdFor(email);
     // The phone's place in the team, carried to the account.
     const existing = uid === callerUid ? member : await db.get(`hub-members/${uid}`).catch(() => null);
-    const pick = existing && existing.role === 'owner' ? existing : member;
-    const role = pick.role === 'owner' || member.role === 'owner' ? 'owner' : (pick.role || 'member');
-    const from = member.role === 'owner' ? member : pick;
-    await db.set(`hub-members/${uid}`, {
-      invite: from.invite || '', name: from.name || '', role,
-      joinedAt: Number((existing || member).joinedAt) || t, lastSeen: t,
-      device: member.device || '', who: member.who || ''
-    });
-    try {
-      const owner = await db.get('hub-access/owner');
-      if (owner && owner.uid === callerUid && uid !== callerUid) await db.set('hub-access/owner', { uid }, ['uid']);
-    } catch (e) { console.error('sign-in: owner move failed:', e.message); }
+    let role;
+    if (!member) {
+      // From the team-code screen: the account's own place, as it is.
+      if (!existing) return res.status(404).json({ error: 'no_account' });
+      role = existing.role || 'member';
+      await db.set(`hub-members/${uid}`, { lastSeen: t }, ['lastSeen']);
+    } else {
+      const pick = existing && existing.role === 'owner' ? existing : member;
+      role = pick.role === 'owner' || member.role === 'owner' ? 'owner' : (pick.role || 'member');
+      const from = member.role === 'owner' ? member : pick;
+      await db.set(`hub-members/${uid}`, {
+        invite: from.invite || '', name: from.name || '', role,
+        joinedAt: Number((existing || member).joinedAt) || t, lastSeen: t,
+        device: member.device || '', who: member.who || ''
+      });
+      try {
+        const owner = await db.get('hub-access/owner');
+        if (owner && owner.uid === callerUid && uid !== callerUid) await db.set('hub-access/owner', { uid }, ['uid']);
+      } catch (e) { console.error('sign-in: owner move failed:', e.message); }
+    }
 
     const acct = await db.get(`accounts/${uid}`).catch(() => null);
     if (acct) await db.set(`accounts/${uid}`, { lastSignIn: t }, ['lastSignIn']);

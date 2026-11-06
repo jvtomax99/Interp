@@ -333,7 +333,9 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    Sender: a new Gmail just for the Hub (Jose's pick). E1 built
    2026-11-06 (sign in, the team place and owner carried over, the name
    follows); works once Jose's setup is done (the Gmail, its app password
-   in Vercel, the `accounts` rule published). E2 built 2026-11-06
+   in Vercel, the `accounts` rule published). Gmail set up and sending
+   (2026-11-06). Then "Sign in with email" on the team-code screen, for an
+   account already in the team. E2 built 2026-11-06
    (`features/account-sync.js`: practice, streak, badges, memory trainer,
    Daily Drill, campus, knowledge count and settings joined between phones;
    Dr. Smiley's memory of you stays on the phone, `AGENTS.md`, Jose's

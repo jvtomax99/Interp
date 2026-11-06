@@ -461,8 +461,11 @@
       <input class="access-code" id="accessCode" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" oninput="accessCodeInput(this)">
       <p class="access-msg" id="accessMsg" role="status" aria-live="polite"></p>
       <button class="access-go" id="accessGo" type="submit">Open the Hub</button>
+      <button class="access-skip access-use-email" id="accessUseEmail" type="button" onclick="accountLockToggle(true)">Have an account? Sign in with email</button>
       <button class="access-skip" id="accessSkip" type="button" onclick="skipAccessLock()">Skip for now</button>
     </form>
+    <!-- Sign in with email (features/account.js): for a phone whose person already has an account in the team. -->
+    <div class="access-form access-email" id="accessEmail" hidden></div>
   </div>
 </div>
 
@@ -1345,6 +1348,10 @@ function startMembersListener(){
     const next = {};
     snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
     TEAM_MEMBERS = next;
+    // Your photo set on another phone (it follows your name): kept on this
+    // phone too, so the badge opening has it before this list arrives.
+    const meNow = whoAmI(), mine = meNow && next[memberKey(meNow)];
+    if(mine && mine.photo) saveMyPhotoCache(meNow, mine.photo, mine.photoPath || null);
     applyMyPhotoCache(true);
     // A face arriving has to repaint the messages that were drawn without it.
     if(activeCategory === 'chat') renderChatMessages();
@@ -10720,8 +10727,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1106.1641';
-const BUILD_TIME = '2026-11-06 16:41 UTC';
+const BUILD_ID = 'b1106.1859';
+const BUILD_TIME = '2026-11-06 18:59 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -15773,6 +15780,8 @@ function renderAccessLock(mode){
   }
   // No way past once the owner has locked the Hub.
   document.getElementById('accessSkip').hidden = ACCESS.state === 'locked';
+  // A code on its way from "Sign in with email" (back from Mail): straight to the code box.
+  if(typeof accountLockResume === 'function') accountLockResume();
 }
 
 function showAccessLock(mode){
