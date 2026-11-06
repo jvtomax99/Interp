@@ -664,6 +664,7 @@
 <script src="./features/tool-banners.js"></script>
 <script src="./features/opening.js"></script>
 <script src="./features/account.js"></script>
+<script src="./features/photo-adjust.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
 if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover', 'op-on'); } }
@@ -1270,11 +1271,12 @@ function compressAvatarToBlob(file){
   });
 }
 
-async function uploadAvatar(file, key){
+// ready: the square you adjusted (features/photo-adjust.js); without it, the middle square, as before.
+async function uploadAvatar(file, key, ready){
   if(!file) throw new Error('No file selected.');
   if(!file.type.startsWith('image/')) throw new Error('Pick an image file.');
   if(!storage) throw new Error('Photo storage isn\'t set up yet.');
-  const blob = await compressAvatarToBlob(file);
+  const blob = ready || await compressAvatarToBlob(file);
   // The Firestore key tolerates spaces; a Storage object path should not have
   // to be URL-encoded to be read back, so the filename gets its own slug.
   const slug = String(key||'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'member';
@@ -5871,9 +5873,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
+  { id:'photo',       tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'Your photo',            title:'Frame your photo before it\'s saved: drag, zoom, and see it round for Team Chat and tall for your badge' },
   { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account',          title:'Sign in with your email on each of your phones and your name and photo follow you. More, Your account' },
   { id:'tool-banners', tone:'gd-n1', pin:'pins/translate.webp',       eyebrow:'A new look',            title:'Translate, Term Review, Ask and the Doctor Directory open under a colour banner, and the picture you tap on Home flies into it' },
-  { id:'opening',     tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'The opening',           title:'Your badge greets you when the Hub starts: tap it to scan in, with soft music. Put your own photo on it, set your badge title, or turn it off, in More' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -9169,7 +9171,8 @@ function renderNamePhoto(){
   if(hint){
     hint.textContent = membersBlocked && photo
       ? 'Saved on this device. Your team won\'t see it until the team-members rule is published in Firebase.'
-      : 'A photo is optional \u2014 your team sees it beside your messages in Team Chat.';
+      : (photo ? 'Tap your photo to pick it again and adjust it. Your team sees it beside your messages in Team Chat.'
+               : 'A photo is optional \u2014 your team sees it beside your messages in Team Chat.');
     hint.classList.toggle('is-warn', membersBlocked && !!photo);
   }
   actions.innerHTML = uploadingMyPhoto
@@ -9200,10 +9203,16 @@ async function handleMyPhotoSelected(event){
     showToast('Type your name first, then add a photo.');
     return;
   }
+  // You choose the square first: drag, zoom, Save (features/photo-adjust.js). Cancel keeps your photo as it was.
+  let ready = null;
+  if(typeof photoAdjust === 'function'){
+    ready = await photoAdjust(file);
+    if(!ready) return;
+  }
   uploadingMyPhoto = true;
   renderNamePhoto();
   try{
-    pendingMyPhoto = await uploadAvatar(file, key);
+    pendingMyPhoto = await uploadAvatar(file, key, ready);
     pendingMyPhotoRemove = false;
   }catch(err){
     showToast(err && err.message ? err.message : 'Could not add that photo.');

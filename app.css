@@ -8137,3 +8137,32 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .acct-link:active{ opacity:.6; }
 .acct-link:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
 .acct-link[disabled], .acct-card .btn[disabled]{ opacity:.55; pointer-events:none; }
+
+/* ---------- Adjust your photo (features/photo-adjust.js; docs/features/photo-adjust.md) ----------
+   Over the name sheet (its overlay is 100). The square is what is saved; the ring is how Team Chat
+   rounds it; the two previews are the photo where the Hub shows it. */
+.pa{ position:fixed; inset:0; z-index:120; outline:none; display:flex; align-items:center; justify-content:center; padding:17px;
+  background:rgba(15,23,30,0.55); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); animation:overlayIn .15s var(--ease); }
+.pa-sheet{ width:100%; max-width:380px; max-height:100%; overflow:auto; background:var(--paper); border-radius:var(--r-lg); padding:17px;
+  box-shadow:var(--sh-3); animation:modalIn .22s var(--ease); }
+.pa-sheet h3{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
+.pa-sub{ margin:6px 0 13px; font-size:var(--fs-foot); color:var(--ink-soft); }
+.pa-stage{ position:relative; width:100%; aspect-ratio:1/1; overflow:hidden; border-radius:var(--r-md); background:#1b2140;
+  touch-action:none; cursor:grab; user-select:none; -webkit-user-select:none; }
+.pa-stage:active{ cursor:grabbing; }
+.pa-stage:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+.pa-img{ position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; will-change:transform; pointer-events:none; }
+.pa-ring{ position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 0 999px rgba(15,23,40,.32); }
+.pa-zoom{ display:flex; align-items:center; gap:9px; margin:13px 0 9px; color:var(--ink-soft); font-size:var(--fs-head); }
+.pa-zoom input{ flex:1; min-height:44px; accent-color:var(--navy); }
+.pa-previews{ display:flex; justify-content:center; align-items:flex-end; gap:26px; margin:0 0 17px; }
+.pa-previews figure{ margin:0; display:flex; flex-direction:column; align-items:center; gap:6px; }
+.pa-previews figcaption{ font-size:var(--fs-cap); color:var(--ink-soft); }
+.pa-pv{ position:relative; overflow:hidden; background:var(--bg-hi); box-shadow:0 0 0 1px var(--line); }
+.pa-pv img{ position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; }
+.pa-pv-chat{ width:56px; height:56px; border-radius:50%; }
+.pa-pv-badge{ width:66px; height:86px; border-radius:5px; }
+.pa-actions{ display:flex; justify-content:flex-end; gap:9px; }
+.pa-actions .btn{ min-height:44px; min-width:96px; }
+@media (prefers-reduced-motion: reduce){ .pa, .pa-sheet{ animation:none; } }

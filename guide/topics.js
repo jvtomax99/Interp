@@ -69,7 +69,17 @@ const GUIDE_TOPICS = [
       <li>Type your name.</li>
       <li>Tap <b>Save</b>.</li>
     </ol>
-    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too. It's optional, and your team sees it beside your messages in Team Chat.</p>` },
+    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too, and choose how it's framed (below). It's optional, and your team sees it beside your messages in Team Chat.</p>` },
+  { id:'photo', section:'start', k:'photo picture profile avatar face cut cropped crop adjust move zoom pinch frame fit head chin badge selfie change', q:'How do I adjust my photo?', a:`
+    <p>When you add a photo of yourself, the Hub lets you frame it before it's saved.</p>
+    <ol>
+      <li>Tap the round button with your initial in the <b>top-right corner</b>, then tap the round photo spot next to your name.</li>
+      <li>Pick a photo. <b>Adjust your photo</b> opens.</li>
+      <li>Drag the photo to move it. Pinch, or use the slider, to zoom in.</li>
+      <li>Check the two small previews: <b>Team Chat</b> shows it round, <b>Your badge</b> (the opening, with My photo on the badge) shows it tall, with a little of each side trimmed.</li>
+      <li>Tap <b>Save</b>, then <b>Save</b> on your name.</li>
+    </ol>
+    <p>To change how it's framed later, tap your photo and pick it again. <b>Cancel</b> keeps the photo you had.</p>` },
 
   { id:'namelight', section:'start', k:'name written light ball pen navy glow home greeting hello animation writing signature turn off stop', q:'Why is my name written in light on Home?', a:`
     <p>When you open the app, a small <b>navy light</b> writes your name in the Home greeting, letter by letter, the way a pen would, while Dr. Smiley says hello. It takes a few seconds, then your name stays as usual. With no name set, it writes <b>Welcome</b>.</p>

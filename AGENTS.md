@@ -107,6 +107,7 @@ So:
 | Tool banners: the colour banner on Translate, Term Review, Ask the Hub and Doctor Directory, and the pin that flies into it from Home (`toolBannerHtml`, `toolBannerMeta`, `tbFly`) | `features/tool-banners.js`; styles in `app.css` ("Tool banners"); `docs/features/tool-banners.md` |
 | The opening, Badge in (`openingStart`, `opFrame`, More's Opening card `openingMoreHtml`); the pavilion loop and the music in `opening/` | `features/opening.js`; styles in `app.css` ("Opening"); `docs/features/opening.md` |
 | Your account, email sign-in: More's card (`accountMoreHtml`, `accountCheck`, `accountSignOut`); the server `api/sign-in.js` with `api/_mail.js` | `features/account.js`; styles in `app.css` ("Your account"); `docs/features/email-sign-in.md` |
+| Adjust your photo, before it's saved (`photoAdjust`; the name sheet's `handleMyPhotoSelected`, `uploadAvatar`) | `features/photo-adjust.js`; styles in `app.css` ("Adjust your photo"); `docs/features/photo-adjust.md` |
 | Everything else | `index.html` |
 
 **The app's stylesheet is `app.css`** (2026-10-21, phase 1 of
