@@ -119,7 +119,7 @@ const sync = (page, why) => page.evaluate(w => accountSync(w), why || 'test');
   ok((await get(pb, 'ih_theme')) === 'light', 'and reaches phone 2 the next time it opens');
 
   // More's card says what happened last: synced at a time, or the reason it didn't.
-  await pb.evaluate(() => openMoreSheet()); await wait(400);
+  await pb.evaluate(() => { openMoreSheet(); moreSubOpen('account'); }); await wait(400);
   let line = await pb.evaluate(() => { const e = document.getElementById('acctSync'); return e ? { t: e.innerText, bad: e.classList.contains('is-bad'), btn: !!e.querySelector('button') } : null; });
   ok(line && /Progress synced at/.test(line.t) && !line.bad && line.btn, 'More\'s account card: "Progress synced at …" and Sync now', line);
   const fs = await pb.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#acctSync p')).fontSize));
