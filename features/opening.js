@@ -84,17 +84,17 @@ function openingHtml(look){
           <div class="op-holder"><div class="op-slot"></div>
             <div class="op-card${photo ? ' has-photo' : ''}">
               <div class="op-pic">${typeof drSmileyArt === 'function' ? drSmileyArt('op-face') : ''}${photo
-                // Over Dr. Smiley, shown once it has loaded; one that can't load leaves him there, and takes the seal with it.
-                ? `<img class="op-photo" src="${esc(photo)}" alt="" decoding="async" draggable="false" onload="this.classList.add('is-in');this.parentNode.classList.add('is-photo')" onerror="var c=this.closest('.op-card');if(c)c.classList.remove('has-photo');this.remove()">` : ''}</div>
+                // Over Dr. Smiley, shown once it has loaded; one that can't load leaves him there, and he doesn't step off it.
+                ? `<img class="op-photo" src="${esc(photo)}" alt="" decoding="async" draggable="false" onload="this.classList.add('is-in');this.parentNode.classList.add('is-photo')" onerror="var c=this.closest('.op-card'),o=this.closest('.op');if(c)c.classList.remove('has-photo');if(o)o.classList.remove('op-photo-on');this.remove()">` : ''}</div>
               <div class="op-nm">${esc(n.card)}</div>
               <div class="op-rl">${esc(openingTitle())}</div>
               <div class="op-org"><img src="./hmh-mark.png" alt=""><div>Hackensack<br>Meridian <i>Health</i><br>Hackensack University<br>Medical Center</div></div>
               <div class="op-dept">Language Services</div>
-              ${photo && typeof drSmileyArt === 'function' ? `<div class="op-seal">${drSmileyArt('op-face')}</div>` : ''}
             </div>
             <div class="op-glint"></div><div class="op-scan"></div>
           </div>
         </div>
+        ${photo ? opDrHtml() : ''}
         <div class="op-cta">Tap your badge to begin</div>
         <div class="op-wel">${n.first ? 'Welcome in, ' + esc(n.first) : 'Welcome in'}</div>
       </div>
@@ -113,7 +113,7 @@ function openingStart(replay){
     const look = OP_CLIPS[root.getAttribute('data-op-look')] && !replay ? root.getAttribute('data-op-look') : openingLook();
     root.setAttribute('data-op-look', look);
     const el = document.createElement('div');
-    el.className = 'op op-' + look;
+    el.className = 'op op-' + look + (openingPhoto() ? ' op-photo-on' : '');
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-label', 'Opening. Tap your badge to begin');
@@ -140,6 +140,7 @@ function openingStart(replay){
     });
     // Its own Dr. Smiley rests on his smile frame, not on the engine's clock.
     opFace('smile');
+    opDrStart();
     const v = el.querySelector('.op-bg');
     if(v && !OP.still){ v.addEventListener('playing', () => v.classList.add('is-on'), { once: true }); const p = v.play(); if(p && p.catch) p.catch(() => {}); }
     root.classList.remove('op-cover');
@@ -181,6 +182,7 @@ function openingTap(){
   if(OP.still){
     // Still: straight to green, then Home fades in.
     OP.el.classList.add('is-green');
+    opDrStill('grin');
     opSound('chime');
     setTimeout(() => openingFinish(true), 700);
   }
@@ -275,6 +277,7 @@ function opFrame(t){
     o($('.op-ttl small'), 1); o($('.op-rig'), 1); o($('.op-reader'), 1); o($('.op-cta'), tap === null ? 1 : 0); o($('.op-wel'), tap === null ? 0 : 1);
     $('.op-lr').style.setProperty('--lc', tap === null ? '#ff8fa3' : '#5de3a0');
     if(tap !== null) opFace('wink');
+    opDrStill(tap === null ? 'wave' : 'grin');
     cancelAnimationFrame(OP.raf);
     return;
   }
@@ -316,6 +319,7 @@ function opFrame(t){
   $('.op-acc').style.transform = `translate3d(0,${(452 - up * 600).toFixed(1)}px,0)`; o($('.op-acc'), green && up < 1 ? 1 : 0);
   $('.op-lan').style.boxShadow = gw > .01 ? `inset 2px 0 0 rgba(255,255,255,.12),inset -2px 0 0 rgba(0,0,0,.25),0 0 ${(gw * 14).toFixed(1)}px rgba(93,227,160,${(gw * .9).toFixed(2)})` : '';
   o($('.op-reader'), opSpan(d, .5, 1.1) * (1 - gone));
+  opDrFrame(d, tap === null ? -1 : a, gone);
   $('.op-reader').style.transform = `translate3d(0,${((1 - opOut(opSpan(d, .5, 1.2))) * 18).toFixed(1)}px,0)`;
   $('.op-lr').style.setProperty('--lc', green ? '#5de3a0' : scan > 0 ? '#9ff6ff' : `rgba(255,143,163,${(.55 + .35 * Math.sin(t * 4)).toFixed(2)})`);
   const r = opSpan(a, .95, 1.65);
@@ -355,6 +359,7 @@ function openingFinish(fade){
   window.removeEventListener('resize', opFit);
   opMusicStop(OP.tap === null ? .4 : OP_MUSIC_FADE);
   const end = () => {
+    opDrStop();
     el.remove();
     document.documentElement.classList.remove('op-on');
     if(OP.el === el){ OP.el = null; OP.ring = null; OP.face = null; OP.leaving = false; }
@@ -362,6 +367,104 @@ function openingFinish(fade){
   };
   if(fade){ el.classList.add('is-leaving'); setTimeout(end, 270); }
   else end();
+}
+
+/* ---------- Dr. Smiley beside the reader (your photo on the badge) ----------
+   With your photo on the badge he steps off it and stands at the bottom right,
+   by the reader (Jose, 2026-11-06, his own clips): a gentle wave, looping,
+   while the badge drops and waits; on green, a big grin and wave. Each clip is a
+   video with his colours on top and a black-and-white matte below (made by
+   docs/mockups/opening/smiley-body/build.py); each new frame is drawn onto a
+   canvas with the matte as its see-through amount, which every browser can do.
+   His still shows until a clip has drawn, and is all there is in Still. */
+const OP_DR_CLIPS = { wave: './opening/smiley-wave-1.', grin: './opening/smiley-grin-1.' };
+function opDrHtml(){
+  return `<div class="op-dr" aria-hidden="true"><i class="op-dr-floor"></i><img class="op-dr-still" src="${OP_DR_CLIPS.wave}webp" alt="" draggable="false"><canvas class="op-dr-cv"></canvas></div>`;
+}
+function opDrStill(k){
+  const img = OP.el && OP.el.querySelector('.op-dr-still');
+  if(img && !img.src.endsWith(OP_DR_CLIPS[k].slice(1) + 'webp')) img.src = OP_DR_CLIPS[k] + 'webp';
+}
+function opDrStart(){
+  const box = OP.el && OP.el.querySelector('.op-dr');
+  if(!box || OP.still) return;
+  const mk = (k, loop) => {
+    const v = document.createElement('video');
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = loop; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.disablePictureInPicture = true;
+    v.innerHTML = `<source src="${OP_DR_CLIPS[k]}mp4" type="video/mp4"><source src="${OP_DR_CLIPS[k]}webm" type="video/webm">`;
+    v.load();
+    return v;
+  };
+  OP.dr = { box, cv: box.querySelector('.op-dr-cv'), v: { wave: mk('wave', true), grin: mk('grin', false) }, cur: 'wave', on: false, last: -1, buf: null, out: null };
+}
+// Draw the clip's newest frame: colours from the top half, see-through amount from the matte below.
+// On the graphics chip (WebGL: the frame goes up as a texture, a tiny shader takes alpha from the
+// matte), so nothing is read back; where WebGL is missing, the same on a 2D canvas, a pixel at a time.
+function opDrGl(dr){
+  const gl = dr.cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
+  if(!gl) return null;
+  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); return gl.getShaderParameter(x, gl.COMPILE_STATUS) ? x : null; };
+  const vs = sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}');
+  const fs = sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform sampler2D t;varying vec2 u;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;gl_FragColor=vec4(c*a,a);}');
+  if(!vs || !fs) return null;
+  const pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const at = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(at); gl.vertexAttribPointer(at, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  for(const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+  return gl;
+}
+function opDrDraw(){
+  const dr = OP.dr, v = dr.v[dr.cur];
+  if(v.readyState < 2 || v.currentTime === dr.last || !v.videoWidth) return;
+  dr.last = v.currentTime;
+  try{
+    const w = v.videoWidth, h = v.videoHeight >> 1;
+    if(dr.cv.width !== w || dr.cv.height !== h){ dr.cv.width = w; dr.cv.height = h; }
+    if(dr.gl === undefined) dr.gl = opDrGl(dr);
+    if(dr.gl){
+      const gl = dr.gl;
+      gl.viewport(0, 0, w, h);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    } else {
+      if(!dr.buf){
+        dr.buf = document.createElement('canvas'); dr.buf.width = w; dr.buf.height = h * 2;
+        dr.bx = dr.buf.getContext('2d', { willReadFrequently: true });
+        dr.cx = dr.cv.getContext('2d'); dr.out = dr.cx.createImageData(w, h); dr.out32 = new Uint32Array(dr.out.data.buffer);
+      }
+      dr.bx.drawImage(v, 0, 0, w, h * 2);
+      // A pixel at a time as one 32-bit number (bytes R,G,B,A): its colour, and the matte's red as its alpha.
+      const src = new Uint32Array(dr.bx.getImageData(0, 0, w, h * 2).data.buffer), out = dr.out32, n = w * h;
+      for(let i = 0; i < n; i++) out[i] = (src[i] & 0xFFFFFF) | ((src[n + i] & 0xFF) << 24);
+      dr.cx.putImageData(dr.out, 0, 0);
+    }
+    if(!dr.box.classList.contains('is-live')) dr.box.classList.add('is-live');
+  }catch(e){ opDrStop(); }   // a browser that won't let us draw the frame: his still stays
+}
+// Each frame of the opening: he comes in with the reader, waves, and grins on green (a: seconds since the tap, -1 before).
+function opDrFrame(d, a, gone){
+  const box = OP.el && OP.el.querySelector('.op-dr'); if(!box) return;
+  const inn = opSpan(d, .5, 1.1);
+  box.style.opacity = (inn * (1 - gone)).toFixed(3);
+  box.style.transform = `translate3d(0,${((1 - opOut(inn)) * 14).toFixed(1)}px,0)`;
+  const dr = OP.dr; if(!dr) return;
+  if(!dr.on && inn > 0){ dr.on = true; const p = dr.v.wave.play(); if(p && p.catch) p.catch(() => {}); }
+  if(a >= .95 && dr.cur !== 'grin'){
+    dr.cur = 'grin'; dr.last = -1; dr.v.wave.pause(); opDrStill('grin');
+    try{ dr.v.grin.currentTime = 0; }catch(e){}
+    const p = dr.v.grin.play(); if(p && p.catch) p.catch(() => {});
+  }
+  if(dr.on) opDrDraw();
+}
+function opDrStop(){
+  const dr = OP.dr; OP.dr = null;
+  if(!dr) return;
+  for(const k in dr.v){ try{ dr.v[k].pause(); dr.v[k].removeAttribute('src'); dr.v[k].innerHTML = ''; dr.v[k].load(); }catch(e){} }
 }
 
 /* ---------- More's Opening card: on / off, Sound, the badge photo, the badge title, Replay ---------- */

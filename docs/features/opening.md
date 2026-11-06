@@ -245,20 +245,45 @@ chose it anyway, **opt-in**: off unless each person turns it on.
   photo fades over him once it has loaded (`.op-photo.is-in`; he is then
   hidden under it, `.op-pic.is-photo`). A photo that can't load removes
   itself and Dr. Smiley stays.
-- **The wink:** with your photo on, Dr. Smiley moves to a small round seal
-  at the card's bottom right (`.op-seal`, 30px on the 390-wide badge,
-  measured clear of the name, the logo lettering and Language Services)
-  and winks there on green (`opFace` sets every copy).
+- **Dr. Smiley steps off the badge** (Jose, 2026-11-06, the same day): at
+  first he moved to a small round seal in the card's corner; Jose wanted him
+  elsewhere on the screen, didn't like the flat cut under his shoulders
+  (he was drawn head and shoulders only), and sent full-body clips of him.
+  Now he stands at the bottom right, by the reader (`.op-dr`, 190px tall on
+  the 390-wide stage, measured clear of the badge at rest and as it comes
+  down for the scan, the reader, Tap your badge and the Hub's name). He
+  comes in with the reader, does a gentle wave on a loop while the badge
+  drops and waits, and on green his big grin and wave (`opDrFrame`).
+  - **The clips** (`opening/smiley-wave-1.*`, `smiley-grin-1.*`, made by
+    `docs/mockups/opening/smiley-body/`, its README): each is a video with
+    his colours on top and a black-and-white matte below; every new frame
+    is drawn onto a canvas with the matte as its see-through amount
+    (`opDrDraw`). A video with real transparency plays only in some
+    browsers (VP9 in Chrome, HEVC in Safari); this plays in all of them.
+    MP4 first, WebM for a browser without H.264.
+  - **His still** (`smiley-wave-1.webp`, `smiley-grin-1.webp`) shows until
+    a clip has drawn, so the opening never waits on them; in Still or
+    Reduce Motion it is all there is (the grin on the tap). Low Power Mode
+    on an iPhone, which stops videos, leaves the still too.
+  - **Not saved ahead** in `sw.js`'s first list (only people with the photo
+    on use them): the first open fetches them, and the `opening/` rule
+    keeps them from then on. Until then, his still.
+  - A photo that can't load puts him back on the badge (`op-photo-on` comes
+    off the opening).
 - The square photo fills the tall slot (`object-fit: cover`), so its
   sides are trimmed.
 - **Not in this version:** a badge-only photo separate from your chat
-  picture; moving or zooming the photo inside the slot.
+  picture; moving or zooming the photo inside the slot; his other two
+  clips (thinking, sad then cheering up; not saved yet) and his full body
+  anywhere else in the app.
 
 ## Checks
 
 `tests/suites/opening.cjs`, "your photo on the badge": the photo over him
-once loaded, the seal inside the card and clear of its words, both copies
-winking together; Dr. Smiley when the switch is off, when the photo is
+once loaded; Dr. Smiley off the badge, on the screen and clear of the
+badge, the reader and the words, at rest and on green; his wave drawn cut
+out (solid in the middle, see-through at the corner), the grin on green,
+his clips let go after; a still in Still, grinning on the tap; Dr. Smiley when the switch is off, when the photo is
 another name's, and when it can't load; More's switch off by default,
 refusing with no photo, on and off on this phone.
 

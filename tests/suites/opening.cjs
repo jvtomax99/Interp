@@ -220,31 +220,54 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     await ctx.close();
   }
   // Your photo on the badge (More, My photo on the badge): off unless chosen; the photo you added
-  // with your name (ih_myPhoto), only while that name is the one set here; he winks from a seal.
+  // with your name (ih_myPhoto), only while that name is the one set here. Dr. Smiley steps off the
+  // badge then: he stands by the reader, waving (his clip drawn through its matte), and grins on green.
   console.log('== your photo on the badge');
   {
     const PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#c0392b"/></svg>');
     // A string, not a closure: the page gets the script's text only (addInitScript).
     const withPhoto = (name, photo, on) => `localStorage.setItem('ih_myPhoto', ${JSON.stringify(JSON.stringify({ name, photo }))});` + (on ? `localStorage.setItem('ih_badgePhoto', 'on');` : '');
     const badge = page => page.evaluate(() => { const q = s => document.querySelector(s), box = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; };
-      const img = q('.op-photo'), seal = q('.op-seal'), card = q('.op-card');
+      const apart = (a, o) => a.r <= o.l || a.l >= o.r || a.b <= o.t || a.t >= o.b;
+      const img = q('.op-photo'), dr = q('.op-dr'), card = q('.op-card'), cs = dr && getComputedStyle(dr);
+      const shown = !!dr && cs.display !== 'none' && +cs.opacity > .9;
+      // His drawn frame: how much of it is solid (him), its corner see-through, and the box of his
+      // visible pixels on screen (what must stay clear; his frame's empty corners may overlap).
+      let px = null, d = dr && box(dr); const cv = q('.op-dr-cv');
+      if (cv && cv.width && dr.classList.contains('is-live')) {
+        // Read through a 2D copy: his canvas may be WebGL (opDrGl) or 2D.
+        const w = cv.width, h = cv.height, c = Object.assign(document.createElement('canvas'), { width: w, height: h }).getContext('2d');
+        c.drawImage(cv, 0, 0); const a = c.getImageData(0, 0, w, h).data, r = cv.getBoundingClientRect(), k = r.width / w;
+        let n = 0, x0 = w, y0 = h, x1 = 0, y1 = 0;
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (a[(y * w + x) * 4 + 3] > 20) { n++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        px = { solid: +(n / (w * h)).toFixed(2), corner: a[3] };
+        if (n) d = { l: r.left + x0 * k, t: r.top + y0 * k, r: r.left + (x1 + 1) * k, b: r.top + (y1 + 1) * k };
+      }
       return { img: !!img, loaded: !!img && img.classList.contains('is-in') && +getComputedStyle(img).opacity === 1, under: getComputedStyle(q('.op-pic svg.op-face')).visibility,
-        seal: !!seal && getComputedStyle(seal).display !== 'none', has: card.classList.contains('has-photo'),
-        inCard: !!seal && (() => { const s = box(seal), c = box(card); return s.l >= c.l && s.r <= c.r && s.t >= c.t && s.b <= c.b; })(),
-        clear: !!seal && ['.op-dept', '.op-org', '.op-pic'].every(k => { const a = box(seal), o = box(q(k)); return a.r <= o.l || a.l >= o.r || a.b <= o.t || a.t >= o.b; }),
-        faces: [...document.querySelectorAll('.op-face .ds-sheet')].map(x => x.getAttribute('x')) }; });
+        has: card.classList.contains('has-photo'), dr: !!dr, shown, live: !!dr && dr.classList.contains('is-live'), px, cur: OP.dr ? OP.dr.cur : null,
+        grinAt: OP.dr ? +OP.dr.v.grin.currentTime.toFixed(2) : null, still: dr ? q('.op-dr-still').getAttribute('src') : null,
+        onScreen: !!d && d.l >= 0 && d.r <= innerWidth && d.t >= 0 && d.b <= innerHeight,
+        clear: !!d && ['.op-holder', '.op-ttl', '.op-cta', '.op-reader'].map(k => [k, apart(d, box(q(k)))]).filter(x => !x[1]).map(x => x[0]),
+        faces: document.querySelectorAll('.op-face .ds-sheet').length }; });
     {
       const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init: withPhoto('jose  vazquez', PH, true) });
       await page.touchscreen.tap(195, 420); await wait(2600);
+      await page.waitForFunction(() => document.querySelector('.op-dr.is-live'), null, { timeout: 4000 }).catch(() => {});
       const s = await badge(page);
       ok(s.img && s.loaded && s.under === 'hidden', 'turned on: your photo where Dr. Smiley was, over him once loaded', s);
-      ok(s.seal && s.inCard && s.clear, 'he moves to a small seal inside the card, clear of the name, the logo and Language Services', s);
+      ok(s.shown && s.onScreen && s.faces === 1, 'he steps off the badge and stands on the screen', s);
+      ok(s.clear.length === 0, 'clear of the badge, the reader, Tap your badge and the Hub\'s name', s.clear);
+      ok(s.live && s.px && s.px.solid > .2 && s.px.solid < .8 && s.px.corner < 10 && s.cur === 'wave', 'his wave plays, cut out: solid where he is, see-through around him', s);
       await page.screenshot({ path: O + 'photo-badge.png' });
       const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
       await page.touchscreen.tap(box.x, box.y);
-      await page.waitForFunction(() => { const f = [...document.querySelectorAll('.op-face .ds-sheet')].map(x => x.getAttribute('x')); return f[0] !== String(-DR_FACE_W * DR_FACE_FRAMES.indexOf('smile')); }, null, { timeout: 2500 }).catch(() => {});
-      const w = await badge(page), wink = await page.evaluate(() => String(-DR_FACE_W * DR_FACE_FRAMES.indexOf('smile')));
-      ok(w.faces.length === 2 && w.faces[0] === w.faces[1] && w.faces[1] !== wink, 'on green the seal winks (both copies on the same frame)', w.faces);
+      await page.waitForFunction(() => OP.dr && OP.dr.cur === 'grin' && OP.dr.v.grin.currentTime > .2, null, { timeout: 2500 }).catch(() => {});
+      const g = await badge(page);
+      ok(g.cur === 'grin' && g.grinAt > .2 && /smiley-grin/.test(g.still), 'on green: his big grin and wave', g);
+      ok(g.clear.indexOf('.op-holder') < 0, 'still clear of the badge as it comes down onto the reader', g.clear);
+      await page.screenshot({ path: O + 'photo-green.png' });
+      await page.waitForFunction(() => !document.querySelector('.op'), null, { timeout: 4000 }).catch(() => {});
+      ok(await page.evaluate(() => !OP.dr), 'his clips are let go once the opening ends');
       ok(!page.__errors.length, 'no page errors', page.__errors);
       await ctx.close();
     }
@@ -254,14 +277,23 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     ]) {
       const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init });
       const s = await badge(page);
-      ok(!s.img && !s.seal && !s.has && s.faces.length === 1, label + ': Dr. Smiley, as before', s);
+      ok(!s.img && !s.dr && !s.has && s.faces === 1, label + ': Dr. Smiley on the badge, as before', s);
       await ctx.close();
     }
     {
       const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init: withPhoto('Jose Vazquez', 'https://interp.test/no-such-photo.jpg', true) });
       await wait(500);
       const s = await badge(page);
-      ok(!s.img && !s.seal && !s.has && s.under === 'visible', 'a photo that cannot load: Dr. Smiley stays, no seal', s);
+      ok(!s.img && !s.shown && !s.has && s.under === 'visible', 'a photo that cannot load: Dr. Smiley stays on the badge, not beside the reader', s);
+      await ctx.close();
+    }
+    {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, reducedMotion: true, name: 'Jose Vazquez', settle: 900, init: withPhoto('Jose Vazquez', PH, true) });
+      const s = await badge(page);
+      ok(s.shown && !s.live && /smiley-wave/.test(s.still) && s.cur === null, 'Still: he stands there as a picture, no clip', s);
+      await page.touchscreen.tap(195, 300); await wait(300);
+      const g = await badge(page);
+      ok(/smiley-grin/.test(g.still), 'and grins on the tap', g.still);
       await ctx.close();
     }
     {
