@@ -34,11 +34,16 @@ function openingSoundOn(){ return opGet(OP_SOUND_KEY) !== 'off'; }
 // Your photo on the badge (Jose, 2026-11-06): off unless you turn it on in More. It is the photo
 // you added with your name (index.html's ih_myPhoto, saved on this phone), only while that name is
 // still the one set here. None, or a different name: Dr. Smiley, as before.
+// A photo added on another phone (it follows your name, so your account) is not in ih_myPhoto
+// here until the team list arrives: then it is the team list's photo for your name (memberPhotoFor),
+// and index.html saves it into ih_myPhoto for the next start (Jose, 2026-11-06).
 function openingPhotoOn(){ return opGet(OP_PHOTO_KEY) === 'on'; }
 function openingMyPhoto(){
   try{
     const v = JSON.parse(opGet('ih_myPhoto') || 'null'), k = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-    return v && v.photo && k(v.name) && k(v.name) === k(opGet('ih_myName')) ? String(v.photo) : '';
+    const me = opGet('ih_myName');
+    if(v && v.photo && k(v.name) && k(v.name) === k(me)) return String(v.photo);
+    return k(me) && typeof memberPhotoFor === 'function' ? String(memberPhotoFor(me) || '') : '';
   }catch(e){ return ''; }
 }
 function openingPhoto(){ return openingPhotoOn() ? openingMyPhoto() : ''; }

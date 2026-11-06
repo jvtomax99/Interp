@@ -316,6 +316,23 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
       ok(!page.__errors.length, 'no page errors', page.__errors);
       await ctx.close();
     }
+    // A photo added on another phone signed in to the same account (Jose, 2026-11-06): it is in the
+    // team list for your name, never in this phone's ih_myPhoto. The switch takes it, and the list's
+    // listener saves it on this phone so the next start's badge has it before the list arrives.
+    {
+      const srv = { 'team-members': { 'jose vazquez': { name: 'Jose Vazquez', photo: PH, photoPath: null, updatedAt: 1 } } };
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, name: 'Jose Vazquez', settle: 4200, init: `sessionStorage.setItem('__srv', ${JSON.stringify(JSON.stringify(srv))});` });
+      const cached = await page.evaluate(() => { try{ return JSON.parse(localStorage.getItem('ih_myPhoto') || 'null'); }catch(e){ return 'bad'; } });
+      ok(cached && cached.photo === PH && cached.name === 'Jose Vazquez', 'a photo from your account (another phone) is saved on this phone too', cached && { name: cached.name, has: !!cached.photo });
+      await page.evaluate(() => { localStorage.removeItem('ih_myPhoto'); openMoreSheet(); });
+      await wait(400);
+      const sw = () => page.evaluate(() => ({ a: document.getElementById('opPhotoSwitch').getAttribute('aria-checked'), k: localStorage.getItem('ih_badgePhoto') }));
+      await page.click('#opPhotoSwitch');
+      ok(JSON.stringify(await sw()) === JSON.stringify({ a: 'true', k: 'on' }), 'More: My photo on the badge turns on with the account\'s photo, even before it is saved here', await sw());
+      ok(await page.evaluate(PH => openingPhoto() === PH, PH), 'and the badge uses it');
+      ok(!page.__errors.length, 'no page errors', page.__errors);
+      await ctx.close();
+    }
   }
   await b.close();
 })();

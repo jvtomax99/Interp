@@ -241,6 +241,11 @@ chose it anyway, **opt-in**: off unless each person turns it on.
 - **Which photo:** `ih_myPhoto` (index.html saves it beside your name on
   this phone), only while its name matches `ih_myName`
   (`openingMyPhoto`). No photo or another name: Dr. Smiley, as before.
+  A photo added on another phone (it follows the name, so the account)
+  was never in this phone's `ih_myPhoto`, so the switch said "Add a photo
+  first" (Jose, 2026-11-06). Now it falls back to the team list's photo for
+  your name (`memberPhotoFor`), and the team list's listener saves your
+  photo into `ih_myPhoto`, so the next start has it before the list loads.
   The opening never waits on it: Dr. Smiley is drawn underneath and the
   photo fades over him once it has loaded (`.op-photo.is-in`; he is then
   hidden under it, `.op-pic.is-photo`). A photo that can't load removes
