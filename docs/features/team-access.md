@@ -47,4 +47,16 @@ code or its line in `hub-admins`, never a name match against that list).
 and by phone: the Hub owner's phone (`hub-access/owner.uid`, read into
 `ACCESS.ownerUid`, through `hubOwnerUid()` because `ACCESS` is declared later
 in the script). Names are compared without accents (`titleKey`).
+Jose (2026-11-06) asked that "Jose V" count as Jose Vazquez the Developer:
+the title already did (above, and by account since sign-in moved
+`hub-access/owner.uid` to his account id). What didn't was his face: chat
+photos and colours were filed by exact name, so "Jose V" showed a plain
+circle. Now a message from an email account (`uid` "acct_...") shows the
+photo of the name that account goes by now (`chatFaceName`,
+`refreshChatFaceNames` beside `memberPhotoFor`: this phone's own name, the
+owner line in `hub-admins`, then the account's newest message with a
+photo), for everyone, not just Jose. Accounts only, on purpose: a plain team
+phone can pass between people, so its messages keep the exact-name match,
+and so do messages sent before signing in. Matching any "Jose V..." name to
+his photo was turned down: anyone typing that name would get his face.
 

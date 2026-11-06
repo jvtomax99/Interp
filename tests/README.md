@@ -36,6 +36,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | `glossary-cv.cjs` | Glossary taps (S4), on 150-term domains: a fresh domain skips off-screen cards' layout; every box on screen sits where it would with all laid out; a redraw while scrolled, Back and a jump to one term land on the same card |
 | `deploy-open.cjs` | The first open after a deploy (`docs/feel-audit.md`, phase 1): the offline worker allowed, the checkout served by a small local server; a first visit, an open after a deploy and an open with nothing new never reload and play the hello once; a page older than the worker that just took control reloads once |
 | `chat-titles.cjs` | Team Chat titles: Admin follows the owner-code phone (a typed name can't borrow it), Supervisor of Language Services by name and spellings, new messages carry the phone |
+| `chat-faces.cjs` | Team Chat faces: a message from an email account shows that account's photo and colour under any name ("Jose V" = Jose Vazquez); a plain team phone or no phone keeps the exact-name match |
 | `chat-keyboard.cjs` | Team Chat while typing on a phone: the screen pins to the part the keyboard leaves (a stand-in for `visualViewport`), the box right on the keyboard and the header at the top through a pan, a page scroll, a late keyboard height and a short screen; back in the page after; a computer unchanged |
 
 ## Run them
