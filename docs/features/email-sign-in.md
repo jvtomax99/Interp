@@ -1,8 +1,12 @@
-# Email sign-in: one account, every phone (plan)
+# Email sign-in: one account, every phone
 
 Jose, 2026-11-06: "Let's have the ability of accounts syncing based on a
-code sent to their email." Not built yet. This is the spec; build it in
-the three phases at the end, one pull request each.
+code sent to their email." The spec; three phases at the end, one pull
+request each. **E1 is built** (2026-11-06): `api/sign-in.js`, `api/_mail.js`,
+`customToken` in `api/_service-login.js`, `features/account.js`, the
+`accounts` rule, checks `tests/suites/sign-in.mjs` (server) and
+`tests/suites/account.cjs` (phone). It works once Jose's setup below is
+done; until then More says "Email sign-in isn't switched on yet". E2, E3: not yet.
 
 ## What it does
 
@@ -135,6 +139,26 @@ Already done: `FIREBASE_SERVICE_ACCOUNT` is set on Vercel (checked
   changes.
 - **The owner moving to an account id** (step 4) is the one step that can
   lock Jose out. Tested in the Firebase emulator before E1 ships.
+
+## As built (E1), and what is not proven yet
+
+- The code box survives the Hub restarting while you read Mail
+  (`ih_accountPending`, 10 minutes).
+- Signing in on a phone leaves its old phone id in `hub-members` (the
+  owner's Team access list may show that phone twice). Harmless; tidy later.
+- `hub-access/owner.uid` moves to the account when the server checks the
+  code, before the phone has used its ticket. If that last step failed,
+  the owner's "Developer" title by phone would point at no phone until he
+  signs in; the title also matches his name, and his owner powers come
+  from `hub-members`, which the account has. Checked in `sign-in.mjs`.
+- **Not proven against the real services from here** (the cloud session
+  can't reach them): that Firebase accepts the ticket from this service
+  account (shape from its docs; signature and claims checked in the test),
+  and that Gmail takes the sign-in (the conversation checked against a fake
+  mail server). The first real sign-in after Jose's setup is the proof.
+- The new `accounts` rule must be published in the Firebase console, or
+  the name doesn't follow (sign-in itself still works: the server writes
+  with its own login).
 
 ## Phases
 

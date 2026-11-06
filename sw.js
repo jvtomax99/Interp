@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v357-b1106.1246';
+const CACHE_VERSION = 'interpreter-hub-v358-b1106.1352';
 const PRECACHE = [
   './',
   './index.html',
@@ -81,6 +81,7 @@ const PRECACHE = [
   './features/credits.js',
   './features/tool-banners.js',
   './features/opening.js',
+  './features/account.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the

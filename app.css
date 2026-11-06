@@ -8110,3 +8110,30 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .tb-flying .tool-banner-pin img{ opacity:0; }
 @media (max-width:380px){ .tool-banner-pin, .tool-banner-pin img, .tool-banner .ask-face{ width:56px; height:56px; } }
 @media print{ .tool-banner, .tb-fly{ display:none !important; } }
+
+/* ---------- Your account (email sign-in) ----------
+   More's "Your account" card (features/account.js, docs/features/email-sign-in.md):
+   your email, the 6-digit code from it, then "Signed in as". Same finish as
+   the Opening card beside it; inputs at 16px so iOS never zooms. */
+.acct-more{ margin-top:26px; }
+.acct-more .home-sec-head{ margin-bottom:10px; }
+.acct-card{ display:flex; flex-direction:column; gap:13px; padding:13px; border-radius:var(--r-md); background:var(--paper); border:1px solid var(--line-soft);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22); }
+.acct-lede{ margin:0; font-size:var(--fs-sub); letter-spacing:var(--tr-body); line-height:1.4; color:var(--ink); }
+.acct-email{ font-weight:650; overflow-wrap:anywhere; }
+.acct-sub{ margin:0; font-size:var(--fs-foot); letter-spacing:var(--tr-sm); line-height:1.4; color:var(--ink-soft); }
+.acct-form{ display:flex; flex-direction:column; gap:9px; margin:0; }
+.acct-label{ font-size:var(--fs-foot); letter-spacing:var(--tr-sm); font-weight:550; color:var(--ink-soft); }
+.acct-input{ font-family:inherit; font-size:var(--fs-call); letter-spacing:var(--tr-body); padding:11px 13px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--bg-hi); color:var(--ink); width:100%; box-sizing:border-box; }
+.acct-input:focus-visible{ outline:2px solid var(--accent-2); outline-offset:1px; }
+.acct-code{ font-size:var(--fs-t2); letter-spacing:var(--tr-title); font-weight:650; font-variant-numeric:tabular-nums; text-align:center; word-spacing:0; }
+.acct-code::placeholder{ color:var(--ink-faint); font-weight:400; }
+.acct-msg{ margin:0; font-size:var(--fs-foot); letter-spacing:var(--tr-sm); color:var(--ink-soft); }
+.acct-msg:empty{ display:none; }
+.acct-msg.is-bad{ color:var(--danger); }
+.acct-row{ display:flex; flex-wrap:wrap; gap:9px 17px; align-items:center; }
+.acct-row .btn{ flex:1 1 auto; }
+.acct-link{ appearance:none; background:none; border:0; padding:6px 0; font-family:inherit; font-size:var(--fs-sub); letter-spacing:var(--tr-body); font-weight:550; color:var(--navy); cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line); }
+.acct-link:active{ opacity:.6; }
+.acct-link:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
+.acct-link[disabled], .acct-card .btn[disabled]{ opacity:.55; pointer-events:none; }
