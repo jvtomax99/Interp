@@ -54,7 +54,8 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     await wait(2300);
     const g0 = await gate(page), m0 = await music(page);
     ok(m0.asked && m0.on && m0.ac === 'suspended', 'the music is started at open, held paused by a browser that wants a touch first (as an iPhone does)', m0);
-    ok(g0.gate && g0.cta === 'Tap to enter' && g0.ctaOp > .5 && g0.rig === 0, 'so it waits at Tap to enter, the badge not dropped yet', g0);
+    // Tap to enter pulses between .3 and 1 on purpose (opFrame): visible means over .25, whatever the phase.
+    ok(g0.gate && g0.cta === 'Tap to enter' && g0.ctaOp > .25 && g0.rig === 0, 'so it waits at Tap to enter, the badge not dropped yet', g0);
     await page.screenshot({ path: O + 'enter.png' });
     await page.touchscreen.tap(195, 420);
     await wait(300);

@@ -280,7 +280,8 @@ function opFrame(t){
   }
   // Waiting at Tap to enter, the badge's clock holds still; if the audio wakes by itself, go on.
   if(OP.gate){ if(OP.ac && OP.ac.state === 'running') opEnter(t); else OP.wait = Math.max(0, t - 1.3); }
-  const bt = t - OP.wait;
+  // Held exactly at 1.3 while it waits: t - (t - 1.3) can come out a hair over 1.3, and the badge counted as dropped.
+  const bt = OP.gate ? 1.3 : t - OP.wait;
   const gone = tap === null ? 0 : opSpan(a, 1.7, 2.0);
   // The lockup: the mark appears, the name is revealed left to right while its spacing settles, one slow sheen.
   const w = opSine(opSpan(t, .55, 1.95)), tb = $('.op-ttl b'), lg = $('.op-logo');
