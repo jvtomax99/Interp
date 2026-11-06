@@ -22,8 +22,9 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
   return { found: true, hit: !!el && (s === el || s.contains(el) || el.contains(s)), under: el && (el.className || el.tagName) + '' }; });
 
 // The music (opening/music-1.m4a): asked for when the opening mounts, played only after a tap.
+// A browser that can't decode AAC (the open-source Chromium on GitHub) says so in OP.musicErr and plays nothing, silently.
 const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus, playing: !!(OP.mus && OP.mus.src), ac: OP.ac ? OP.ac.state : null,
-  aac: new Audio().canPlayType('audio/mp4; codecs="mp4a.40.2"') }));
+  noAac: !!OP.musicErr }));
 
 (async () => {
   const b = await L.chromium.launch();
@@ -54,7 +55,7 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     const g = await page.evaluate(() => ({ wel: +getComputedStyle(document.querySelector('.op-wel')).opacity, lc: getComputedStyle(document.querySelector('.op-lr')).getPropertyValue('--lc').trim() }));
     ok(g.wel > .5 && g.lc === '#5de3a0', 'the tap: green, and the welcome shows', g);
     const m1 = await music(page);
-    ok(m1.on && m1.ac === 'running' && (m1.playing || !m1.aac), 'the tap starts the music' + (m1.aac ? '' : ' (this browser has no AAC, so it is only asked for)'), m1);
+    ok(m1.ac === 'running' && (m1.on && m1.playing || m1.noAac), 'the tap starts the music' + (m1.noAac ? ' (this browser cannot decode AAC: none, and no error)' : ''), m1);
     await page.screenshot({ path: O + 'green.png' });
     await page.waitForFunction(() => !document.querySelector('.op'), null, { timeout: 4000 }).catch(() => {});
     const after = await state(page);
@@ -171,7 +172,7 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     const r = await page.evaluate(() => ({ up: !!document.querySelector('.op'), rl: document.querySelector('.op-rl') && document.querySelector('.op-rl').innerHTML, saved: localStorage.getItem('ih_badgeTitle') }));
     ok(r.up && r.rl === 'Per Diem &lt;b&gt;Interpreter&lt;/b&gt;' && r.saved === 'Per Diem <b>Interpreter</b>', 'Replay plays it with the new title, as plain text', r);
     const m2 = await music(page);
-    ok(m2.on && m2.ac === 'running', 'Replay is a tap, so the music plays while the badge waits', m2);
+    ok(m2.ac === 'running' && (m2.on || m2.noAac), 'Replay is a tap, so the music plays while the badge waits', m2);
     await page.keyboard.press('Escape');
     await wait(400);
     ok(!(await state(page)).up, 'Escape skips it');

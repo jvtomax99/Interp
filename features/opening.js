@@ -176,7 +176,9 @@ function opMusicPlay(){
   const AC = OP.ac;
   if(!AC || OP.mus || !OP.musicData || !openingSoundOn()) return;
   const m = OP.mus = { src: null, g: null, gone: false };
-  OP.musicData.then(data => OP.musicBuf || (data && !m.gone ? new Promise((ok, no) => AC.decodeAudioData(data.slice(0), ok, no)) : null))
+  // Older Safari has only the callback form; newer browsers also return a promise, caught here too.
+  const decode = data => new Promise((ok, no) => { const p = AC.decodeAudioData(data.slice(0), ok, no); if(p && p.catch) p.catch(no); });
+  OP.musicData.then(data => OP.musicBuf || (data && !m.gone ? decode(data) : null))
     .then(buf => {
       if(!buf) return;
       OP.musicBuf = buf;
@@ -186,7 +188,7 @@ function opMusicPlay(){
       g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(OP_MUSIC_VOL, t + .6);
       src.connect(g); g.connect(AC.destination); src.start(t);
       m.src = src; m.g = g;
-    }).catch(() => {});
+    }).catch(() => { OP.musicErr = true; OP.musicData = Promise.resolve(null); }); // a browser that can't decode it: no music, no error
 }
 // Fade it out over sec seconds (Home after the opening, a skip, the phone going to another app).
 function opMusicStop(sec){
