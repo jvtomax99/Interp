@@ -310,6 +310,13 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    earn on your lanyard (my pick), a quick second open later the same day,
    drag the badge onto the reader with better sounds. Later, if he asks:
    tilting the phone to swing the badge, playing on a computer.
+   **2026-11-06:** your own photo on the badge, opt-in in More (#228,
+   live b1106.1246; `docs/features/opening.md`, "Your photo on the
+   badge"); with it on, Dr. Smiley stands by the reader, full body, from
+   Jose's clips (#231, live b1106.1507). Adjust your photo before it's
+   saved, the name sheet (#232, live b1106.1641;
+   `docs/features/photo-adjust.md`). Not checked yet: how smoothly he
+   plays on a real phone (no graphics chip in the cloud machine).
 6. **Tool banners (Jose, 2026-11-06, "Plan it for real", then "Build it"): built,** waiting for his OK. Translate, Term
    Review's start, Ask the Hub and Doctor Directory get the domains'
    colour banner with their pin, and the Home pin you tap flies into it.
