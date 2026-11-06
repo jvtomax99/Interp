@@ -1342,6 +1342,10 @@ function startMembersListener(){
     const next = {};
     snap.docs.forEach(d=>{ const v = d.data() || {}; next[d.id] = v; });
     TEAM_MEMBERS = next;
+    // Your photo set on another phone (it follows your name): kept on this
+    // phone too, so the badge opening has it before this list arrives.
+    const meNow = whoAmI(), mine = meNow && next[memberKey(meNow)];
+    if(mine && mine.photo) saveMyPhotoCache(meNow, mine.photo, mine.photoPath || null);
     applyMyPhotoCache(true);
     // A face arriving has to repaint the messages that were drawn without it.
     if(activeCategory === 'chat') renderChatMessages();
