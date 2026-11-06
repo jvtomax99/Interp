@@ -81,7 +81,7 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   department code, ever.
 - A badge per role or per teammate in colour or layout (only the title
   changes).
-- Music before the first tap on a start: phones allow no sound before a touch (see Music below). Not tried on the Android installed app either, where it may be allowed.
+- A way round an iPhone's rule of no sound before a touch: there is none for a web app (see Music below).
 - Playing on desktop: phones only at first.
 
 ## What similar apps do, and where ours differs
@@ -180,18 +180,27 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   On iPhone it follows the silent switch.
 - **Music** (Jose, 2026-11-05: "music similar to" Genshin Impact's start
   screen, then "softer and warming, like harps, piano and violin"; picked
-  draft 2 and "start on tap"): `opening/music-1.m4a`, an original 28 s
+  draft 2 and "start on tap"; 2026-11-06: "music from the moment the app is
+  opened", picked "try at open"): `opening/music-1.m4a`, an original 28 s
   seamless loop (E major, 68 bpm: harp arpeggios the whole way, a soft
   piano melody, then a solo violin takes it, low strings under). Made from
   code, no samples or recordings, by `docs/mockups/opening/music/compose.py`
   (`python3 compose.py loop.wav`, then AAC 96 kbps at -16 LUFS); nothing
   in it comes from the game. Fetched when the opening mounts (precached
-  and carried over by `sw.js`, 0.34 MB), decoded and started by the tap on
-  the badge (`opAudio`, `opMusicPlay`), at gain .4 under the beep and
+  and carried over by `sw.js`, 0.34 MB) and started at once
+  (`opMusicAtOpen`): the AudioContext is made outside a tap, so it starts
+  paused unless the browser allows sound before a touch, and `resume()`
+  is asked for. Where it is allowed it plays from the first second; where
+  not (iPhone; headless Chromium in the tests behaves the same) it stays
+  paused, and the tap on the badge wakes it (`opAudio`) and it starts
+  from the top. Whether an Android phone with the Hub on its home screen
+  allows it was not checked on a phone or in Chrome's own pages (blocked
+  from this session); the test for that path launches Chromium with
+  `--autoplay-policy=no-user-gesture-required`. Gain .4 under the beep and
   chime; it fades out over 4 s once the opening hands over to Home, in
   0.4 s on a skip, Escape or the phone going to another app
   (`opMusicStop`). Replay is itself a tap, so there it plays while the
-  badge waits. More's Sound switch covers it. A new piece gets a new name
+  badge waits, on every phone. More's Sound switch covers it. A new piece gets a new name
   (`music-2`).
 - **Home's hello waits:** `home-polish.js` holds the startup hello and the
   name pen's 6 s cap while `hubOpeningUp()` is true, and starts them on

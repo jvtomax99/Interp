@@ -51,7 +51,7 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     await wait(2300);
     await page.screenshot({ path: O + 'badge.png' });
     const m0 = await music(page);
-    ok(m0.asked && !m0.on && !m0.ac, 'the music is fetched on mount but nothing plays before the tap', m0);
+    ok(m0.asked && m0.on && m0.ac === 'suspended', 'the music is started at open, held paused by a browser that wants a touch first (as an iPhone does)', m0);
     ok((await state(page)).log.indexOf('hello') < 0, 'the hello has not started under the opening', await state(page));
     const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.touchscreen.tap(box.x, box.y);
@@ -117,6 +117,17 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
       ok(!page.__errors.length, 'no page errors', page.__errors);
       await ctx.close();
     }
+  }
+
+  console.log('== a phone that allows sound before a touch');
+  {
+    const b2 = await L.chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
+    const { page } = await L.boot(b2, { device: 'iphone', opening: true, settle: 900 });
+    await wait(600);
+    const m = await music(page);
+    ok(m.ac === 'running' && (m.playing || m.noAac), 'the music plays from the moment the opening is up, before any tap', m);
+    ok(!page.__errors.length, 'no page errors', page.__errors);
+    await b2.close();
   }
 
   console.log('== a tap before the badge arrives');
