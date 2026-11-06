@@ -19,6 +19,8 @@
    index.html's names (hubAuth, db, readAccessMe, ...) when called. */
 
 const ACCT_KEY = 'ih_account', ACCT_PENDING_KEY = 'ih_accountPending', ACCT_NAME_AT_KEY = 'ih_accountNameAt';
+// Set when you keep this phone's name at sign-in: its settings win the next sync (features/account-sync.js).
+const ACCT_KEEP_KEY = 'ih_syncKeepMine';
 const ACCT_PENDING_MS = 10 * 60 * 1000;
 const ACCT = { step: '', busy: false, msg: '', msgKind: '', confirmOut: false, lastEmail: '' };
 
@@ -185,8 +187,15 @@ async function accountAdopt(r){
   writeAccessMe(Object.assign({}, me, { member: true, uid: r.uid, role: r.role || me.role }));
   try{ localStorage.removeItem('ih_adminName'); }catch(e){}   // so the owner's Admin line is rewritten under the account
   // The name: the account's wins if it has one; else this phone gives it its own.
+  // Two different names: you pick which one is you (accountPickSelf, below).
   const mine = (whoAmI() || '').trim();
-  if(r.name && r.name !== mine) accountApplyName(r.name);
+  const same = (x, y) => String(x || '').trim().toLowerCase().replace(/\s+/g, ' ') === String(y || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  if(r.name && mine && !same(r.name, mine)){
+    const keep = await accountPickSelf(mine, r.name);
+    if(keep === 'phone'){ accountSaveName(mine); acctWrite(ACCT_KEEP_KEY, r.uid); }
+    else accountApplyName(r.name);
+  }
+  else if(r.name && r.name !== mine) accountApplyName(r.name);
   else if(!r.name && mine) accountSaveName(mine);
   acctWrite(ACCT_NAME_AT_KEY, Date.now());
   try{ checkMyMembership(); }catch(e){}
@@ -369,4 +378,52 @@ async function accountLockCheck(e){
   if(box){ box.hidden = true; box.innerHTML = ''; }
   if(form) form.hidden = false;
   try{ celebrateAccess({ role: r.role }); }catch(err){ try{ hideAccessLock(); }catch(e2){} }
+}
+
+/* Which one is you? (Jose, 2026-11-06: when his "Jose V" phone joins the
+   account that goes by Jose Vazquez, keep Jose V's name, photo and
+   settings.) A phone signing in under another name than the account's asks
+   once, with both names and the photo filed under each. The pick becomes the
+   name on every phone (the photo follows the name, team-members is keyed by
+   it), and "this phone" also makes its settings win the first sync. Practice
+   is joined either way (ACCT_SYNC_MERGE). Only the two buttons close it:
+   there is no safe default to fall back on. Over the team-code screen too
+   (z-index above .access-lock's 2000). Resolves 'phone' or 'account'. */
+function accountPickSelf(mine, theirs){
+  return new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.className = 'acct-pick';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-labelledby', 'acctPickTitle');
+    const opt = (keep, name, where) => {
+      const photo = typeof memberPhotoFor === 'function' ? memberPhotoFor(name) : '';
+      const col = typeof nameToColor === 'function' ? nameToColor(name) : '#5A6478';
+      const ini = typeof initialsOf === 'function' ? initialsOf(name) : Array.from(name)[0].toUpperCase();
+      const st = photo
+        ? `background-color:${col};background-image:url(&quot;${escapeAttr(photo)}&quot;);background-size:cover;background-position:center;`
+        : `background-color:${col};`;
+      return `<button type="button" class="acct-pick-opt" data-keep="${keep}">
+          <span class="acct-pick-av${photo ? ' has-photo' : ''}" style="${st}" aria-hidden="true">${photo ? '' : escapeHtml(ini)}</span>
+          <span class="acct-pick-txt"><b>${escapeHtml(name)}</b><small>${where}</small></span>
+        </button>`;
+    };
+    ov.innerHTML = `<div class="acct-pick-sheet">
+        <h3 id="acctPickTitle">Which one is you?</h3>
+        <p class="acct-pick-sub">This phone goes by <b>${escapeHtml(mine)}</b>, your account by <b>${escapeHtml(theirs)}</b>. The one you pick becomes your name, photo and settings on every phone. Your practice from both is kept either way.</p>
+        <div class="acct-pick-list">
+          ${opt('phone', mine, 'This phone, with its settings')}
+          ${opt('account', theirs, 'Your account, with its settings')}
+        </div>
+      </div>`;
+    ov.addEventListener('click', e => {
+      const b = e.target.closest('.acct-pick-opt');
+      if(!b) return;
+      ov.remove();
+      resolve(b.dataset.keep === 'phone' ? 'phone' : 'account');
+    });
+    document.body.appendChild(ov);
+    const first = ov.querySelector('.acct-pick-opt');
+    if(first){ try{ first.focus({ preventScroll: true }); }catch(e){} }
+  });
 }
