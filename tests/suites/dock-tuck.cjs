@@ -137,21 +137,22 @@ const settle = page => page.evaluate(() => new Promise(r => {
     const slim = () => hp.evaluate(() => document.body.classList.contains('dock-mini'));
     await hp.waitForTimeout(5000);
     ok(!(await slim()), 'no timer: 5 s untouched at the top of Home, the bar stays full');
-    await hp.mouse.move(200, 400);
-    await hp.mouse.wheel(0, 40); await hp.waitForTimeout(400);
+    // Scrolled from the page: mobile WebKit has no wheel.
+    const scroll = d => hp.evaluate(d => window.scrollBy(0, d), d);
+    await scroll(40); await hp.waitForTimeout(400);
     ok(!(await slim()), 'a 40px nudge down does not change it');
-    await hp.mouse.wheel(0, 200); await hp.waitForTimeout(600);
+    await scroll(200); await hp.waitForTimeout(600);
     ok(await slim(), 'a real scroll down makes it slim');
     const tap = await hp.evaluate(() => [...document.querySelectorAll('.tabbar-btn')].map(t => { const r = t.getBoundingClientRect(), e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
       return { n: t.getAttribute('aria-label'), w: Math.round(r.width), h: Math.round(r.height), mine: !!e && t.contains(e), x: r.x + r.width / 2, y: r.y + r.height / 2 }; }));
     ok(tap.length === 5 && tap.every(t => t.w >= 44 && t.h >= 40 && t.mine), 'slim: all five tabs there, each takes its own tap', tap);
-    await hp.mouse.wheel(0, -20); await hp.waitForTimeout(300);
+    await scroll(-20); await hp.waitForTimeout(300);
     ok(await slim(), '20px back up does not change it');
-    await hp.mouse.wheel(0, -20); await hp.waitForTimeout(500);
+    await scroll(-20); await hp.waitForTimeout(500);
     ok(!(await slim()), '40px up opens it');
-    await hp.mouse.wheel(0, 200); await hp.waitForTimeout(600);
+    await scroll(200); await hp.waitForTimeout(600);
     const tr = tap.find(t => t.n === 'Translate');
-    await hp.mouse.click(tr.x, tr.y); await hp.waitForTimeout(700);
+    await hp.touchscreen.tap(tr.x, tr.y); await hp.waitForTimeout(700);
     ok(await hp.evaluate(() => activeCategory === 'translate' && !document.body.classList.contains('dock-mini')), 'slim, one tap on Translate opens Translate, with the bar full');
     await hp.evaluate(() => goHome()); await hp.waitForTimeout(1200);
     await hp.evaluate(() => { window.__flips = 0; let was = document.body.classList.contains('dock-mini');
@@ -159,7 +160,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
       scrollTo(0, document.documentElement.scrollHeight); });
     await hp.waitForTimeout(600);
     const f0 = await hp.evaluate(() => window.__flips);
-    for (const d of [-20, 20, -15, 15, -20, 20]) { await hp.mouse.wheel(0, d); await hp.waitForTimeout(120); }
+    for (const d of [-20, 20, -15, 15, -20, 20]) { await scroll(d); await hp.waitForTimeout(120); }
     await hp.waitForTimeout(400);
     const f = await hp.evaluate(() => window.__flips);
     ok(f === f0 && !(await slim()), 'at the bottom of the page it is full, and the bounce does not flicker it (' + (f - f0) + ' changes)');
