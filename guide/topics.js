@@ -52,7 +52,8 @@ const GUIDE_TOPICS = [
     <p>Sign in with your email. Open <b>More</b> (bottom right) and scroll to <b>Your account</b>. Type your email and tap <b>Send me a code</b>. A few seconds later an email from the Hub arrives with 6 numbers in it. Go back to the Hub, type them in and tap <b>Sign in</b>. No password.</p>
     <p>Do the same on your other phone, with the same email. Both phones are now you: your name, and the photo filed under it, follow you. Change your name on one phone and the other picks it up the next time it opens. Your practice score and settings will follow in a later update.</p>
     <p>The code works for 10 minutes, only on the phone where you asked for it, and it allows 5 tries. Not in your inbox? Look in Spam or Junk. Hospital email sometimes holds automated mail, so a personal email is usually faster.</p>
-    <p>You need to be in the team first (the team code). <b>Sign out of this phone</b> keeps the phone in the team and keeps your name on it. It only stops being your account.</p>
+    <p>On a new phone or a computer you don't need the team code once you have an account: on the screen that asks for the team code, tap <b>Have an account? Sign in with email</b>, type your email, then the 6 numbers. The very first time, you join with the team code, then sign in from More.</p>
+    <p><b>Sign out of this phone</b> keeps the phone in the team and keeps your name on it. It only stops being your account.</p>
     <p>If it says email sign-in isn't switched on yet, the Hub's owner still has a setting to add. Let them know.</p>` },
 
   { id:'tool-banners', section:'start', k:'banner banners colour color top title header translate term review ask hub doctor directory pin flies fly new look picture', q:'Why do Translate, Term Review, Ask and the Doctor Directory have a colour banner?', a:`

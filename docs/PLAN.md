@@ -326,7 +326,9 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    Sender: a new Gmail just for the Hub (Jose's pick). E1 built
    2026-11-06 (sign in, the team place and owner carried over, the name
    follows); works once Jose's setup is done (the Gmail, its app password
-   in Vercel, the `accounts` rule published). Next: E2, sync.
+   in Vercel, the `accounts` rule published). Gmail set up and sending
+   (2026-11-06). Then "Sign in with email" on the team-code screen, for an
+   account already in the team. Next: E2, sync.
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).
