@@ -202,6 +202,20 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   (`opMusicStop`). Replay is itself a tap, so there it plays while the
   badge waits, on every phone. More's Sound switch covers it. A new piece gets a new name
   (`music-2`).
+- **Tap to enter** (Jose, 2026-11-06: still no music at open on his
+  iPhone; after hearing why, picked "Add 'Tap to enter'"). Where the
+  AudioContext is still paused once the opening mounts (iPhone: no sound
+  before a touch), `OP.gate` is set: the lockup plays as usual, the badge
+  waits, and the line where "Tap your badge to begin" goes says "Tap to
+  enter". The first tap (or Enter or Space) wakes the audio inside that
+  touch (`opAudio`), so the music starts from the top, and `opEnter`
+  starts the badge's own clock (`OP.wait` holds it back; `bt` in
+  `opFrame`). It is not a skip: a second tap while the badge drops still
+  skips to Home, Escape still skips at any time. No gate with Sound off,
+  in Still, or where the audio is already running (Replay, a phone that
+  allows sound before a touch; if the audio wakes by itself while it
+  waits, it goes on without the tap). Costs iPhone users one tap per
+  start, the price Jose chose.
 - **Home's hello waits:** `home-polish.js` holds the startup hello and the
   name pen's 6 s cap while `hubOpeningUp()` is true, and starts them on
   `hub-opening-done`.
