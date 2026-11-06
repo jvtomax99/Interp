@@ -19,7 +19,7 @@ const OP_KEY = 'ih_opening', OP_SOUND_KEY = 'ih_openingSound', OP_TITLE_KEY = 'i
 const OP_TITLE_DEFAULT = 'Staff Interpreter', OP_TITLE_MAX = 28;
 // The badge has arrived (dropped and settled) at this many seconds; a tap before it skips to Home.
 const OP_BADGE_AT = 2.05;
-const OP = { el: null, raf: 0, t0: 0, tap: null, cues: {}, still: false, leaving: false, ac: null, musicData: null, musicBuf: null, mus: null };
+const OP = { el: null, raf: 0, t0: 0, tap: null, cues: {}, still: false, leaving: false, ac: null, musicData: null, musicBuf: null, mus: null, gate: false, wait: 0 };
 // The music: an original loop (harp, piano, violin; made by docs/mockups/opening/music/compose.py).
 // It is started the moment the opening mounts (Jose, 2026-11-06: "music from the moment the app is
 // opened"). A phone that allows sound before a touch plays it then; one that doesn't (iPhone) keeps
@@ -111,6 +111,11 @@ function openingStart(replay){
     el.classList.toggle('is-still', OP.still);
     opMusicLoad();
     opMusicAtOpen();
+    // Tap to enter (Jose, 2026-11-06): where the phone holds sound until a touch (iPhone), the badge
+    // waits for one first, so the music plays while it drops. Not with Sound off, in Still, or where
+    // the music already plays (Replay, a phone that allows it).
+    OP.gate = !OP.still && !!OP.ac && OP.ac.state !== 'running'; OP.wait = 0;
+    if(OP.gate){ el.querySelector('.op-cta').textContent = 'Tap to enter'; el.setAttribute('aria-label', 'Opening. Tap to enter'); }
     if(!OP.visBound){ OP.visBound = true; document.addEventListener('visibilitychange', () => { if(document.hidden) opMusicStop(.2); }); }
     opFit();
     window.addEventListener('resize', opFit);
@@ -152,8 +157,10 @@ function openingTap(){
   if(!OP.el || OP.leaving) return;
   const t = (performance.now() - OP.t0) / 1000;
   if(OP.tap !== null) return;
+  // Tap to enter: this touch wakes the music, and the badge starts dropping.
+  if(OP.gate){ opAudio(); opEnter(t); return; }
   // Before the badge has arrived: straight to Home.
-  if(!OP.still && t < OP_BADGE_AT){ openingFinish(true); return; }
+  if(!OP.still && t - OP.wait < OP_BADGE_AT){ openingFinish(true); return; }
   OP.tap = t;
   opAudio(); opMusicPlay();
   if(OP.still){
@@ -164,6 +171,13 @@ function openingTap(){
   }
 }
 
+// Past Tap to enter: the badge's clock starts from here (OP.wait holds it back; the lockup keeps its own).
+function opEnter(t){
+  if(!OP.gate || !OP.el) return;
+  OP.gate = false; OP.wait = Math.max(0, t - 1.3);
+  OP.el.querySelector('.op-cta').textContent = 'Tap your badge to begin';
+  OP.el.setAttribute('aria-label', 'Opening. Tap your badge to begin');
+}
 // An AudioContext made and woken inside a tap (phones allow sound only after one). Null with Sound off.
 function opAudio(){
   if(!openingSoundOn()) return null;
@@ -249,6 +263,9 @@ function opFrame(t){
     cancelAnimationFrame(OP.raf);
     return;
   }
+  // Waiting at Tap to enter, the badge's clock holds still; if the audio wakes by itself, go on.
+  if(OP.gate){ if(OP.ac && OP.ac.state === 'running') opEnter(t); else OP.wait = Math.max(0, t - 1.3); }
+  const bt = t - OP.wait;
   const gone = tap === null ? 0 : opSpan(a, 1.7, 2.0);
   // The lockup: the mark appears, the name is revealed left to right while its spacing settles, one slow sheen.
   const w = opSine(opSpan(t, .55, 1.95)), tb = $('.op-ttl b'), lg = $('.op-logo');
@@ -258,15 +275,15 @@ function opFrame(t){
   tb.style.setProperty('--sh', `${(100 - 100 * opSine(opSpan(t, 2.0, 3.4))).toFixed(1)}%`);
   o($('.op-ttl small'), opSpan(t, 1.3, 1.9)); o($('.op-ttl'), 1 - gone);
   // The badge drops in, swings, catches the light; the tap lowers it onto the reader for a scan.
-  const d = t - 1.3, drop = opOut(opSpan(d, 0, .75));
+  const d = bt - 1.3, drop = opOut(opSpan(d, 0, .75));
   const sw = d > .5 ? Math.exp(-(d - .5) * 1.6) * Math.sin((d - .5) * 5.4) : 0;
   const lower = tap === null ? 0 : opSine(opSpan(a, 0, .5));
   const idle = tap === null ? opSpan(d, 2, 3) : 0;
   const ang = sw * 7 * (1 - lower) + Math.sin(t * .9) * .8 * idle, tw = sw * 16 * (1 - lower) + Math.sin(t * 1.1) * 2 * idle;
   $('.op-rig').style.transform = `translate3d(0,${(-640 * (1 - drop) + lower * 216).toFixed(1)}px,0) rotate(${ang.toFixed(2)}deg)`;
   $('.op-holder').style.transform = `rotateY(${tw.toFixed(2)}deg) rotateX(${(sw * 4).toFixed(2)}deg)`;
-  $('.op-glint').style.transform = `translate3d(${(-150 + 300 * opSine(opSpan(t, 2.3, 3.1)) + tw * 3).toFixed(1)}px,0,0)`;
-  o($('.op-glint'), .3 + Math.abs(tw) / 36 + .45 * Math.sin(Math.PI * opSpan(t, 2.3, 3.1)));
+  $('.op-glint').style.transform = `translate3d(${(-150 + 300 * opSine(opSpan(bt, 2.3, 3.1)) + tw * 3).toFixed(1)}px,0,0)`;
+  o($('.op-glint'), .3 + Math.abs(tw) / 36 + .45 * Math.sin(Math.PI * opSpan(bt, 2.3, 3.1)));
   const scan = tap === null ? -1 : opSpan(a, .5, .95);
   $('.op-scan').style.transform = `translate3d(0,${(scan * 148).toFixed(1)}px,0)`; o($('.op-scan'), scan > 0 && scan < 1 ? 1 : 0);
   const green = tap !== null && a >= .95;
@@ -287,7 +304,8 @@ function opFrame(t){
   $('.op-lr').style.setProperty('--lc', green ? '#5de3a0' : scan > 0 ? '#9ff6ff' : `rgba(255,143,163,${(.55 + .35 * Math.sin(t * 4)).toFixed(2)})`);
   const r = opSpan(a, .95, 1.65);
   o($('.op-ring'), green ? .9 * (1 - r) : 0); $('.op-ring').style.transform = `scale(${(1 + r * 1.9).toFixed(3)},${(1 + r * 3.2).toFixed(3)})`;
-  o($('.op-cta'), opSpan(d, 1.6, 2) * (tap === null ? .65 + .35 * Math.cos((t - 3.3) * 2.6) : 1 - opSpan(a, 0, .2)));
+  o($('.op-cta'), OP.gate ? opSpan(t, .9, 1.4) * (.65 + .35 * Math.cos((t - 1.4) * 2.6))
+    : opSpan(d, 1.6, 2) * (tap === null ? .65 + .35 * Math.cos((bt - 3.3) * 2.6) : 1 - opSpan(a, 0, .2)));
   o($('.op-wel'), tap === null ? 0 : opSpan(a, 1.05, 1.3) * (1 - opSpan(a, 1.75, 2.05)));
   $('.op-wel').style.transform = `translate3d(0,${(tap === null ? 10 : (1 - opOut(opSpan(a, 1.05, 1.5))) * 10).toFixed(1)}px,0)`;
   if(tap === null) return;

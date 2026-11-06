@@ -26,6 +26,9 @@ const homeReached = page => page.evaluate(() => { const s = document.querySelect
 const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus, playing: !!(OP.mus && OP.mus.src), ac: OP.ac ? OP.ac.state : null,
   noAac: !!OP.musicErr }));
 
+// Tap to enter: where sound waits for a touch, the badge waits for one first.
+const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySelector('.op-cta').textContent, ctaOp: +getComputedStyle(document.querySelector('.op-cta')).opacity, rig: +getComputedStyle(document.querySelector('.op-rig')).opacity }));
+
 (async () => {
   const b = await L.chromium.launch();
 
@@ -49,9 +52,17 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     ok(card.face, 'Dr. Smiley where the photo goes');
     await page.screenshot({ path: O + 'arriving.png' });
     await wait(2300);
-    await page.screenshot({ path: O + 'badge.png' });
-    const m0 = await music(page);
+    const g0 = await gate(page), m0 = await music(page);
     ok(m0.asked && m0.on && m0.ac === 'suspended', 'the music is started at open, held paused by a browser that wants a touch first (as an iPhone does)', m0);
+    ok(g0.gate && g0.cta === 'Tap to enter' && g0.ctaOp > .5 && g0.rig === 0, 'so it waits at Tap to enter, the badge not dropped yet', g0);
+    await page.screenshot({ path: O + 'enter.png' });
+    await page.touchscreen.tap(195, 420);
+    await wait(300);
+    const g1 = await gate(page), m1e = await music(page);
+    ok(!g1.gate && g1.cta === 'Tap your badge to begin' && m1e.ac === 'running' && (m1e.playing || m1e.noAac), 'the touch starts the music and the badge drops in', { g1, m1e });
+    ok((await state(page)).up, 'Tap to enter is not a skip: the opening stays up');
+    await wait(2300);
+    await page.screenshot({ path: O + 'badge.png' });
     ok((await state(page)).log.indexOf('hello') < 0, 'the hello has not started under the opening', await state(page));
     const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.touchscreen.tap(box.x, box.y);
@@ -126,6 +137,8 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
     await wait(600);
     const m = await music(page);
     ok(m.ac === 'running' && (m.playing || m.noAac), 'the music plays from the moment the opening is up, before any tap', m);
+    const g = await gate(page);
+    ok(!g.gate && g.cta === 'Tap your badge to begin', 'so there is no Tap to enter: the badge drops in by itself', g);
     ok(!page.__errors.length, 'no page errors', page.__errors);
     await b2.close();
   }
@@ -133,7 +146,9 @@ const music = page => page.evaluate(() => ({ asked: !!OP.musicData, on: !!OP.mus
   console.log('== a tap before the badge arrives');
   {
     const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, settle: 500, init: WATCH });
-    await page.touchscreen.tap(195, 300);
+    await page.touchscreen.tap(195, 300); // Tap to enter
+    await wait(250);
+    await page.touchscreen.tap(195, 300); // then a tap while it drops
     await wait(450);
     const s = await state(page);
     ok(!s.up && s.log[0] === 'done', 'straight to Home', s);
