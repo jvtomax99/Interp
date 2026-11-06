@@ -15,7 +15,7 @@
    Home's hello waits for it (window.hubOpeningUp, 'hub-opening-done';
    home-polish.js). */
 
-const OP_KEY = 'ih_opening', OP_SOUND_KEY = 'ih_openingSound', OP_TITLE_KEY = 'ih_badgeTitle';
+const OP_KEY = 'ih_opening', OP_SOUND_KEY = 'ih_openingSound', OP_TITLE_KEY = 'ih_badgeTitle', OP_PHOTO_KEY = 'ih_badgePhoto';
 const OP_TITLE_DEFAULT = 'Staff Interpreter', OP_TITLE_MAX = 28;
 // The badge has arrived (dropped and settled) at this many seconds; a tap before it skips to Home.
 const OP_BADGE_AT = 2.05;
@@ -31,6 +31,17 @@ function opGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; 
 function opSet(k, v){ try{ if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
 function openingOn(){ return opGet(OP_KEY) !== 'off'; }
 function openingSoundOn(){ return opGet(OP_SOUND_KEY) !== 'off'; }
+// Your photo on the badge (Jose, 2026-11-06): off unless you turn it on in More. It is the photo
+// you added with your name (index.html's ih_myPhoto, saved on this phone), only while that name is
+// still the one set here. None, or a different name: Dr. Smiley, as before.
+function openingPhotoOn(){ return opGet(OP_PHOTO_KEY) === 'on'; }
+function openingMyPhoto(){
+  try{
+    const v = JSON.parse(opGet('ih_myPhoto') || 'null'), k = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    return v && v.photo && k(v.name) && k(v.name) === k(opGet('ih_myName')) ? String(v.photo) : '';
+  }catch(e){ return ''; }
+}
+function openingPhoto(){ return openingPhotoOn() ? openingMyPhoto() : ''; }
 function openingTitle(){ const t = (opGet(OP_TITLE_KEY) || '').replace(/\s+/g, ' ').trim().slice(0, OP_TITLE_MAX); return t || OP_TITLE_DEFAULT; }
 // "Jose Vazquez" -> the card says "Jose V.", the welcome "Jose". No name: "Interpreter" and "Welcome in".
 function openingNames(){
@@ -56,7 +67,7 @@ const opSine = x => .5 - .5 * Math.cos(Math.PI * opClamp(x));
 const opOut = x => 1 - Math.pow(1 - opClamp(x), 3);
 
 function openingHtml(look){
-  const clip = './opening/' + OP_CLIPS[look] + '.', n = openingNames(), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const clip = './opening/' + OP_CLIPS[look] + '.', n = openingNames(), photo = openingPhoto(), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   return `<div class="op-scene">
       <video class="op-bg" muted playsinline loop preload="auto" disablepictureinpicture aria-hidden="true" poster="${clip}webp">
         <source src="${clip}mp4" type="video/mp4"><source src="${clip}webm" type="video/webm"></video>
@@ -71,12 +82,15 @@ function openingHtml(look){
           <div class="op-conn"></div><div class="op-strap"><i></i></div>
           <div class="op-purp"><b>INTERPRETER</b></div>
           <div class="op-holder"><div class="op-slot"></div>
-            <div class="op-card">
-              <div class="op-pic">${typeof drSmileyArt === 'function' ? drSmileyArt('op-face') : ''}</div>
+            <div class="op-card${photo ? ' has-photo' : ''}">
+              <div class="op-pic">${typeof drSmileyArt === 'function' ? drSmileyArt('op-face') : ''}${photo
+                // Over Dr. Smiley, shown once it has loaded; one that can't load leaves him there, and takes the seal with it.
+                ? `<img class="op-photo" src="${esc(photo)}" alt="" decoding="async" draggable="false" onload="this.classList.add('is-in');this.parentNode.classList.add('is-photo')" onerror="var c=this.closest('.op-card');if(c)c.classList.remove('has-photo');this.remove()">` : ''}</div>
               <div class="op-nm">${esc(n.card)}</div>
               <div class="op-rl">${esc(openingTitle())}</div>
               <div class="op-org"><img src="./hmh-mark.png" alt=""><div>Hackensack<br>Meridian <i>Health</i><br>Hackensack University<br>Medical Center</div></div>
               <div class="op-dept">Language Services</div>
+              ${photo && typeof drSmileyArt === 'function' ? `<div class="op-seal">${drSmileyArt('op-face')}</div>` : ''}
             </div>
             <div class="op-glint"></div><div class="op-scan"></div>
           </div>
@@ -149,8 +163,9 @@ function opFit(){
 
 function opFace(name){
   if(!OP.el || typeof DR_FACE_FRAMES === 'undefined') return;
-  const s = OP.el.querySelector('.op-face .ds-sheet'), i = DR_FACE_FRAMES.indexOf(name);
-  if(s && i >= 0) s.setAttribute('x', String(-DR_FACE_W * i));
+  // Both of him when your photo is on: the one under it and the small seal that winks.
+  const i = DR_FACE_FRAMES.indexOf(name);
+  if(i >= 0) OP.el.querySelectorAll('.op-face .ds-sheet').forEach(s => s.setAttribute('x', String(-DR_FACE_W * i)));
 }
 
 function openingTap(){
@@ -348,9 +363,10 @@ function openingFinish(fade){
   else end();
 }
 
-/* ---------- More's Opening card: on / off, Sound, the badge title, Replay ---------- */
+/* ---------- More's Opening card: on / off, Sound, the badge photo, the badge title, Replay ---------- */
 function openingMoreHtml(){
   const on = openingOn(), snd = openingSoundOn(), t = opGet(OP_TITLE_KEY) || '';
+  const pic = openingPhotoOn() && !!openingMyPhoto();
   const sw = (id, val, label, sub, fn) => `
       <div class="ta-switchrow"><span><b>${label}</b><br><small>${sub}</small></span>
         <button class="ta-switch is-calm" id="${id}" type="button" role="switch" aria-checked="${val ? 'true' : 'false'}" aria-label="${label}" onclick="${fn}(this.getAttribute('aria-checked') !== 'true')"></button></div>`;
@@ -359,6 +375,7 @@ function openingMoreHtml(){
     <div class="op-more-card">
       ${sw('opOnSwitch', on, 'Badge opening', 'Your badge, every time the Hub starts', 'openingSetOn')}
       ${sw('opSoundSwitch', snd, 'Sound', 'Soft music, a beep and a chime', 'openingSetSound')}
+      ${sw('opPhotoSwitch', pic, 'My photo on the badge', 'The photo you added with your name, in place of Dr. Smiley', 'openingSetPhoto')}
       <label class="op-more-title"><b>Badge title</b>
         <input id="opTitleInput" type="text" maxlength="${OP_TITLE_MAX}" placeholder="${OP_TITLE_DEFAULT}" value="${t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" autocomplete="off" onchange="openingSetTitle(this.value)"></label>
       <button class="btn btn-ghost" type="button" onclick="openingReplay()">Replay the opening</button>
@@ -368,6 +385,16 @@ function openingMoreHtml(){
 function opSwitch(id, v){ const b = document.getElementById(id); if(b) b.setAttribute('aria-checked', v ? 'true' : 'false'); }
 function openingSetOn(v){ opSet(OP_KEY, v ? null : 'off'); opSwitch('opOnSwitch', v); }
 function openingSetSound(v){ opSet(OP_SOUND_KEY, v ? null : 'off'); opSwitch('opSoundSwitch', v); }
+function openingSetPhoto(v){
+  if(v && !openingMyPhoto()){
+    // No photo yet: it stays off, and says where to add one.
+    opSwitch('opPhotoSwitch', false);
+    if(typeof showToast === 'function') showToast('Add a photo first: tap your initial at the top right, next to your name.');
+    return;
+  }
+  opSet(OP_PHOTO_KEY, v ? 'on' : null); opSwitch('opPhotoSwitch', v);
+  if(typeof showToast === 'function') showToast(v ? 'Your photo is on your badge.' : 'Dr. Smiley is back on your badge.');
+}
 function openingSetTitle(v, quiet){
   const t = String(v || '').replace(/\s+/g, ' ').trim().slice(0, OP_TITLE_MAX);
   opSet(OP_TITLE_KEY, t && t !== OP_TITLE_DEFAULT ? t : null);

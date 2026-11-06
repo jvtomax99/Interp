@@ -8022,6 +8022,16 @@ html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-
 .op-org img{ width:30px; height:30px; }
 .op-org div{ font-family:Georgia,"Times New Roman",serif; font-size:8.6px; line-height:1.22; color:#5d6270; }
 .op-dept{ position:absolute; left:12px; bottom:11px; font-size:11.5px; font-weight:650; }
+/* Your photo in his place (More, My photo on the badge; opt-in): the square photo fills the tall slot,
+   over him until it has loaded. He moves to a small round seal at the card's corner and winks there. */
+.op-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 35%; opacity:0; transition:opacity .25s ease; }
+.op-photo.is-in{ opacity:1; }
+.op-pic.is-photo svg.op-face{ visibility:hidden; }
+.op-seal{ position:absolute; right:8px; bottom:5px; width:30px; height:30px; border-radius:50%; overflow:hidden;
+  background:linear-gradient(170deg,#eaf3fc,#cfe2f5); box-shadow:0 0 0 1px rgba(37,46,109,.18),0 1px 2px rgba(20,43,67,.12); }
+.op-card:not(.has-photo) .op-seal{ display:none; }
+.op-seal .lv-acc{ display:none; }
+.op-seal svg.op-face{ position:absolute; left:-8px; top:-6px; width:47px; height:47px; }
 .op-glint{ position:absolute; inset:0; border-radius:14px; background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.65) 44%,rgba(255,255,255,0) 54%); mix-blend-mode:screen; opacity:0; }
 .op-scan{ position:absolute; left:8px; right:8px; top:8px; height:3px; border-radius:2px; opacity:0; background:#9ff6ff; box-shadow:0 0 12px 4px rgba(120,240,255,.85),0 0 30px 10px rgba(120,240,255,.35); }
 /* the reader: a frosted glass puck with a ring of light */
