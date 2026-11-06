@@ -41,9 +41,8 @@ const SAMPLE = (sel, what, ms) => `new Promise(r => { const out = []; const t0 =
     const cs = getComputedStyle(i), cl = getComputedStyle(l); return { icon: cs.transitionTimingFunction, iconD: cs.transitionDuration, lens: cl.transitionTimingFunction, lensD: cl.transitionDuration, lensProps: cl.transitionProperty }; });
   ok(SPRING0.test(tf.icon) && tf.iconD === '0.368s', 'the icon: the spring, .368s (press)', tf);
   ok(SPRING0.test(tf.lens) && tf.lensD.split(',')[0].trim() === '0.588s' && tf.lensProps.startsWith('transform'), 'the lens: the spring on its transform, .588s (screen)', tf);
-  // The bar tucks after 4 s idle (dock-mini: icons at their tucked sizes,
-  // the lens hidden), so a first tap wakes it; the plain tap measured is
-  // the second, with the bar open.
+  // A first tap moves to another tab (a new screen opens the bar full);
+  // the plain tap measured is the second, with the bar open.
   await page.evaluate(() => { const btns = [...document.querySelectorAll('.tabbar-btn')].filter(b => !b.classList.contains('is-active') && !b.classList.contains('tabbar-search')); (btns[0]).click(); });
   await page.waitForTimeout(900);
   const target = await page.evaluate(() => { const btns = [...document.querySelectorAll('.tabbar-btn')].filter(b => !b.classList.contains('is-active') && !b.classList.contains('tabbar-search')); const t = btns[1] || btns[0]; return t ? t.getAttribute('aria-label') : null; });

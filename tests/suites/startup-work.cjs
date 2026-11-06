@@ -129,7 +129,7 @@ const init = () => {
     // layout now); without it the lens would jump instead of gliding.
     const { page, ctx } = await L.boot(b, { device: 'iphone', settle: 4500 });
     await L.go(page, 'home', 600);
-    // the bar tucks itself after 4 s idle; a tap on the capsule then only opens it
+    // a slim bar (from an earlier scroll) is opened first, so the glide is read full size
     await page.evaluate(() => { if (document.body.classList.contains('dock-mini')) dockOpen(); }); await page.waitForTimeout(700);
     const r = await page.evaluate(() => new Promise(res => {
       const tab = [...document.querySelectorAll('.tabbar-btn')].find(t => /translate/i.test(t.getAttribute('aria-label') || t.textContent));

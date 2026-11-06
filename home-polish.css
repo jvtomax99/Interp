@@ -271,8 +271,8 @@
      Five tabs in one glass capsule, Dr. Smiley in his own round button to its
      right (.dock-smiley, drawn by smileyRider in index.html). A glass lens
      sits under the current tab and slides to the next one; it can be dragged.
-     Scrolling down tucks the capsule into a small pill holding the current
-     tab; scrolling up, or tapping the pill, opens it again (wireDock). */
+     Scrolling down makes it slim (icons only, every tab still one tap);
+     scrolling up, or the top or bottom of the page, opens it (wireDock). */
   .tabbar{height:58px;padding:4px;border-radius:999px;border-color:var(--glass-edge);touch-action:pan-y;
     transition:right .42s var(--ease),height .3s var(--ease);}
   /* His size (Jose picked B): --ds-k is his disc against the 48px disc he's
@@ -346,102 +346,53 @@
   .dock-smiley.is-dozing .dock-smiley-z + .dock-smiley-z{animation-delay:1.1s;}
   @keyframes dockZ{0%{opacity:0;transform:translate(0,5px) scale(.6);}25%{opacity:1;}100%{opacity:0;transform:translate(9px,-16px) scale(1.15);}}
 
-  /* Tucked while you scroll down */
-  /* Tucked (scrolling down, or left alone): a medicine capsule the height of
-     Dr. Smiley's circle, on the same line. Two equal halves: glossy Hub blue
-     holding the tab's icon, glossy white holding its name, a seam between
-     them and a shine across the top. Its width (--mini-w, two equal halves)
-     is measured by dockTuck() in index.html. The capsule look is drawn on
-     ::before/::after so it fades in while the bar shrinks. */
-  .tabbar::before,.tabbar::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s var(--ease);}
-  .tabbar::before{background:
-      linear-gradient(180deg,#FFFFFF 0%,#F2F5FA 55%,#D9E1EC 100%) right/50% 100% no-repeat,
-      linear-gradient(180deg,#5CB2EC 0%,#1F78C6 52%,#0D5A9E 100%) left/50% 100% no-repeat;}
-  .tabbar::after{background:
-      linear-gradient(90deg,transparent calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - .5px),rgba(255,255,255,.75) calc(50% - .5px),rgba(255,255,255,.75) calc(50% + .5px),transparent calc(50% + .5px)),
-      linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%);
-    box-shadow:inset 0 0 0 1px rgba(8,32,70,.14);}
-  body.dock-mini .tabbar::before,body.dock-mini .tabbar::after{opacity:1;}
-  body.dock-mini .tabbar{right:calc(100% - 14px - var(--mini-w, 120px));height:54px;padding:0;border-radius:999px;border-color:transparent;}
-  body.dock-mini .tabbar-btn{height:52px;padding:0;}
-  body.dock-mini .tabbar-btn:not(.is-active){flex-grow:0;flex-basis:0;opacity:0;overflow:hidden;pointer-events:none;}
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{flex-grow:1;opacity:1;pointer-events:auto;}
-  body.dock-mini .tabbar-btn.is-active,
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child{display:grid;grid-template-columns:1fr 1fr;align-items:center;justify-items:center;
-    padding:0;font-size:var(--fs-sub);font-weight:650;letter-spacing:var(--tr-body);color:#0F5FA6;white-space:nowrap;}
-  /* The tab's name. Aimed by its class, never a bare span (S7b): a rule
-     whose last part is only "span" made every tuck restyle every span on
-     the page (~270 of ~490 elements restyled per tuck, Chrome trace).
-     span.tabbar-name:not(.tabbar-icon) weighs what the old
-     span:not(.tabbar-icon):not(.tabbar-badge) did (0,2,1); the :not keeps
-     the weight, the name is never the icon. */
-  body.dock-mini .tabbar-btn:not(.is-active) > span.tabbar-name:not(.tabbar-icon){display:none;}
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child > span.tabbar-name:not(.tabbar-icon){display:inline;}
-  body.dock-mini .tabbar-lens{opacity:0;}
-  body.dock-mini .tabbar-btn.is-active .tabbar-icon,
-  body.dock-mini .tabbar.no-current.no-current .tabbar-btn:last-child .tabbar-icon{transform:scale(1.25);filter:drop-shadow(0 1px 1.5px rgba(4,24,56,.35));}
-  body.dock-mini .tabbar-badge{top:3px;left:auto;right:calc(50% + 3px);border-color:#1F78C6;}
-  /* Tucked, he shrinks with the bar (58 to 54px), same middle line, his
+  /* Slim while you scroll down (Jose's pick B, docs/features/tab-bar.md):
+     the same bar, 46px tall instead of 58, icons only, all five tabs still
+     there and one tap each. The names leave the flow, so the icons centre,
+     and fade. The move is played by dockMorph in index.html. Each rule ends
+     on a class (S7b): a bare tag there restyles every one on the page. */
+  .tabbar-btn > span.tabbar-name{transition:opacity .2s var(--ease);}
+  body.dock-mini .tabbar{height:46px;padding:3px;}
+  body.dock-mini .tabbar-btn{height:40px;padding:0 2px;justify-content:center;}
+  body.dock-mini .tabbar-btn > span.tabbar-name{position:absolute;left:0;right:0;bottom:0;text-align:center;opacity:0;pointer-events:none;}
+  body.dock-mini .tabbar-lens{top:3px;bottom:3px;left:3px;width:calc((100% - 6px) / var(--tab-n,5));}
+  body.dock-mini .tabbar-badge{top:-1px;}
+  /* Slim, he shrinks with the bar (58 to 46px), same middle line, his
      disc's right edge where it was. A scale and a nudge, not a new size
      (S2: nothing on the dock changes layout while it moves). He scales
      about 50% 92% (the origin his sway uses, smileySway in index.html); the
      nudge moves the scale's fixed point to his disc's right edge (24k right
-     of and 19.36k above that origin), then 2px down to the tucked bar's
+     of and 19.36k above that origin), then 6px down to the slim bar's
      middle. His "Ask" tag keeps its size and hangs where it did. */
   /* No CSS transition on these: dockMorph (index.html) plays the change as a
      Web Animation that removes itself, so he always rests on exactly these
      values. WebKit ended a scale transition short of them (98% of his size). */
   .dock-smiley{transform-origin:50% 92%;scale:1;translate:0 0;}
   .dock-smiley-tag{scale:1;transform-origin:50% calc(100% - 5px);}
-  body.dock-mini .dock-smiley{scale:calc(54 / 58);
-    translate:calc(24px * var(--ds-k) * 4 / 58) calc(2px - 19.36px * var(--ds-k) * 4 / 58);}
-  body.dock-mini .dock-smiley-tag{scale:calc(58 / 54);}
+  body.dock-mini .dock-smiley{scale:calc(46 / 58);
+    translate:calc(24px * var(--ds-k) * 12 / 58) calc(6px - 19.36px * var(--ds-k) * 12 / 58);}
+  body.dock-mini .dock-smiley-tag{scale:calc(58 / 46);}
 
-  /* The move between open and tucked (dockMorph in index.html): the bar
+  /* The move between open and slim (dockMorph in index.html): the bar
      takes its new layout at once, with its own transitions off, and the
      outline is drawn by .dk-skin while it moves. Only transform and opacity
-     animate. The pieces copy the bar: glass, edge, shadow, capsule colours. */
+     animate. The pieces copy the bar: glass, edge, shadow. */
   .tabbar.is-morph{transition:none;}
   .tabbar.is-morph .tabbar-btn{transition:color .2s var(--ease),opacity .2s var(--ease);}
   body .tabbar.is-morph{background:transparent;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;}
-  .tabbar.is-morph::before,.tabbar.is-morph::after,.tabbar.is-morph.is-tuck > .tabbar-lens{visibility:hidden;}
-  body .tabbar.is-morph .tabbar-btn.dk-lead{overflow:visible;}
   .dk-skin{position:absolute;left:-1px;bottom:-1px;width:0;height:0;z-index:0;pointer-events:none;}
   .dk-skin i{position:absolute;bottom:0;display:block;box-sizing:border-box;transform-origin:0 100%;}
   .dk-skin .dk-r{transform-origin:100% 100%;}
   .dk-skin .dk-l{border-radius:999px 0 0 999px;}
   .dk-skin .dk-r{border-radius:0 999px 999px 0;}
-  .dk-cap{position:absolute;left:0;bottom:0;display:block;opacity:0;}
-  .dk-cp{border:1px solid transparent;}
-  .dk-cp.dk-l{border-right-width:0;}
-  .dk-cp.dk-m{border-left-width:0;border-right-width:0;}
-  .dk-cp.dk-r{border-left-width:0;}
   .dk-sh{box-shadow:0 10px 28px -8px rgba(21,28,44,0.30),0 2px 6px -2px rgba(21,28,44,0.18);}
   .dk-pc{background:var(--glass-bg);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
     border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 rgba(255,255,255,0.65);}
   .dk-pc.dk-l{border-right-width:0;}
   .dk-pc.dk-m{border-left-width:0;border-right-width:0;}
   .dk-pc.dk-r{border-left-width:0;}
-  .dk-skin.is-tuck .dk-pc{border-color:transparent;}
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .dk-pc{background:var(--paper);} }
-  /* The capsule (the bar's ::before and ::after, cut in three): blue and
-     white halves, the seam, the shine, the thin outline. */
-  .dk-cp > b{position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;transform-origin:0 0;
-    border:1px solid rgba(8,32,70,.14);
-    background:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%) border-box;}
-  .dk-cp.dk-l > b{border-right-width:0;
-    background-image:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%),
-      linear-gradient(180deg,#5CB2EC 0%,#1F78C6 52%,#0D5A9E 100%);background-origin:border-box;}
-  .dk-cp.dk-r > b{border-left-width:0;
-    background-image:linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%),
-      linear-gradient(180deg,#FFFFFF 0%,#F2F5FA 55%,#D9E1EC 100%);background-origin:border-box;}
-  .dk-cp.dk-m > b{border-left-width:0;border-right-width:0;right:auto;bottom:auto;transform-origin:50% 0;
-    background:
-      linear-gradient(90deg,transparent calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - 1.5px),rgba(8,32,70,.30) calc(50% - .5px),rgba(255,255,255,.75) calc(50% - .5px),rgba(255,255,255,.75) calc(50% + .5px),transparent calc(50% + .5px)) border-box,
-      linear-gradient(180deg,rgba(255,255,255,.62) 0%,rgba(255,255,255,.18) 34%,rgba(255,255,255,0) 50%,rgba(0,0,0,0) 78%,rgba(8,32,70,.10) 100%) border-box,
-      linear-gradient(180deg,#FFFFFF 0%,#F2F5FA 55%,#D9E1EC 100%) right/50% 100% no-repeat border-box,
-      linear-gradient(180deg,#5CB2EC 0%,#1F78C6 52%,#0D5A9E 100%) left/50% 100% no-repeat border-box;}
-  /* The Ask tag stays when the bar is tucked too (Jose). */
+  /* The Ask tag stays when the bar is slim too (Jose). */
 
   /* He steps aside whenever the bar does: typing, sheets, search. */
   body.kb-open .dock-smiley,body.ov-open.ov-open .dock-smiley,body.gs-open.gs-open .dock-smiley,body.dm-open.dm-open .dock-smiley{visibility:hidden;}
@@ -470,7 +421,7 @@
 }
 @media(min-width:901px){.dock-smiley{display:none;}}
 @media(prefers-reduced-motion:reduce){
-  .tabbar,.tabbar-btn,.tabbar-icon,.tabbar-lens,.tabbar::before,.tabbar::after,.dock-smiley,.dock-smiley-bob{transition:none !important;}
+  .tabbar,.tabbar-btn,.tabbar-icon,.tabbar-lens,.tabbar-name,.dock-smiley,.dock-smiley-bob{transition:none !important;}
   body.dock-has-smiley .dock-smiley-bob{animation:none;}
   .dock-smiley.is-dozing .dock-smiley-z{animation:none;}
   .dock-smiley.is-busy .dock-smiley-bob::after{animation:none;background:none;box-shadow:inset 0 0 0 3px var(--accent-2);-webkit-mask:none;mask:none;}
