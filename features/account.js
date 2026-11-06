@@ -87,6 +87,7 @@ function accountCardInner(){
     return `
       <p class="acct-lede">Signed in as<br><b class="acct-email">${acctEsc(a.email)}</b></p>
       <p class="acct-sub">Sign in with the same email on your other phones and your name, photo, practice and settings follow you.</p>
+      ${typeof accountSyncLine === 'function' ? accountSyncLine() : ''}
       <button class="btn btn-ghost" type="button" id="acctOut" onclick="accountConfirmOut(true)">Sign out of this phone</button>${msg}`;
   }
   if(typeof isHubMember === 'function' && !isHubMember()) return `

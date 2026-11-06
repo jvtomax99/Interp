@@ -118,6 +118,34 @@ const sync = (page, why) => page.evaluate(w => accountSync(w), why || 'test');
   await sync(pb, 'open');
   ok((await get(pb, 'ih_theme')) === 'light', 'and reaches phone 2 the next time it opens');
 
+  // More's card says what happened last: synced at a time, or the reason it didn't.
+  await pb.evaluate(() => openMoreSheet()); await wait(400);
+  let line = await pb.evaluate(() => { const e = document.getElementById('acctSync'); return e ? { t: e.innerText, bad: e.classList.contains('is-bad'), btn: !!e.querySelector('button') } : null; });
+  ok(line && /Progress synced at/.test(line.t) && !line.bad && line.btn, 'More\'s account card: "Progress synced at …" and Sync now', line);
+  const fs = await pb.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#acctSync p')).fontSize));
+  ok(fs >= 13, 'the line is readable (13px or more)', fs);
+  await pb.evaluate(() => { const c = db.collection.bind(db); window.__realColl = c;
+    db.collection = n => { const r = c(n); if(n !== 'account-sync') return r; const d = r.doc.bind(r);
+      r.doc = id => Object.assign(d(id), { get: () => Promise.reject(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })) }); return r; }; });
+  await pb.evaluate(() => accountSyncNow()); await wait(300);
+  line = await pb.evaluate(() => { const e = document.getElementById('acctSync'); return e ? { t: e.innerText, bad: e.classList.contains('is-bad') } : null; });
+  ok(line && line.bad && /didn't sync/.test(line.t) && /account-sync rule/.test(line.t) && /permission-denied/.test(line.t) && /Last good sync/.test(line.t),
+    'refused by the database: the card says so, names the rule and shows the reason', line);
+  await pb.evaluate(() => { db.collection = window.__realColl; });
+  await pb.evaluate(() => accountSyncNow()); await wait(300);
+  line = await pb.evaluate(() => document.getElementById('acctSync').innerText);
+  ok(/Progress synced at/.test(line), 'Sync now again, once it works: synced', line);
+  const tap = await pb.evaluate(() => { const b = document.querySelector('#acctSync button'); b.scrollIntoView({ block: 'center' }); const r = b.getBoundingClientRect();
+    const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return at === b || b.contains(at); });
+  ok(tap, 'Sync now takes its own tap');
+  await pb.evaluate(() => { try{ closeMoreSheet(); }catch(e){} }); await wait(300);
+
+  // Signed in, but the phone hasn't remembered the account yet at launch: the sync waits for it.
+  const late = await pb.evaluate(async () => { const st = window.__AUTH, keep = st.user; st.user = null;
+    setTimeout(() => { st.user = keep; st.cbs.forEach(f => f(keep)); }, 1200);
+    const t0 = Date.now(); const r = await accountSync('late'); return { ok: r && r.ok, ms: Date.now() - t0 }; });
+  ok(late.ok && late.ms >= 1000, 'at launch the sync waits for the phone to remember the account, then works', late);
+
   // Signing out forgets this account's fingerprints; nothing syncs after.
   await pb.evaluate(() => accountSignOut()); await wait(600);
   const after = await pb.evaluate(async () => ({ base: localStorage.getItem('ih_syncBase'), r: await accountSync('x') }));
