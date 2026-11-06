@@ -1,6 +1,6 @@
 /* ---------- The opening (Badge in) ----------
    docs/features/opening.md. Every real start of the app on a phone: the
-   pavilion behind (a pre-rendered loop, opening/loop.*), the staff badge
+   pavilion behind (a pre-rendered loop, opening/pavilion-1.*), music after the tap (opening/music-1.m4a), the staff badge
    drops in on its lanyard, you tap it, it scans green, Dr. Smiley winks,
    "Welcome in", and a green ring opens from the reader onto the live Home.
    Whether it plays is decided before the first paint, in index.html's
@@ -19,7 +19,11 @@ const OP_KEY = 'ih_opening', OP_SOUND_KEY = 'ih_openingSound', OP_TITLE_KEY = 'i
 const OP_TITLE_DEFAULT = 'Staff Interpreter', OP_TITLE_MAX = 28;
 // The badge has arrived (dropped and settled) at this many seconds; a tap before it skips to Home.
 const OP_BADGE_AT = 2.05;
-const OP = { el: null, raf: 0, t0: 0, tap: null, cues: {}, still: false, leaving: false, ac: null };
+const OP = { el: null, raf: 0, t0: 0, tap: null, cues: {}, still: false, leaving: false, ac: null, musicData: null, musicBuf: null, mus: null };
+// The music: an original loop (harp, piano, violin; made by docs/mockups/opening/music/compose.py).
+// Phones play sound only after a tap, so on a start it begins with the tap on the badge; on Replay,
+// itself a tap, it plays while the badge waits too. After the opening it fades out over Home.
+const OP_MUSIC_URL = './opening/music-1.m4a', OP_MUSIC_VOL = .4, OP_MUSIC_FADE = 4;
 
 function opGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function opSet(k, v){ try{ if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
@@ -102,6 +106,9 @@ function openingStart(replay){
     OP.el = el; OP.tap = null; OP.cues = {}; OP.leaving = false;
     OP.still = (typeof drStill === 'function' && drStill()) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     el.classList.toggle('is-still', OP.still);
+    opMusicLoad();
+    if(replay && OP.ac) opMusicPlay();
+    if(!OP.visBound){ OP.visBound = true; document.addEventListener('visibilitychange', () => { if(document.hidden) opMusicStop(.2); }); }
     opFit();
     window.addEventListener('resize', opFit);
     el.addEventListener('click', openingTap);
@@ -145,13 +152,54 @@ function openingTap(){
   // Before the badge has arrived: straight to Home.
   if(!OP.still && t < OP_BADGE_AT){ openingFinish(true); return; }
   OP.tap = t;
-  if(openingSoundOn()){ try{ OP.ac = OP.ac || new (window.AudioContext || window.webkitAudioContext)(); OP.ac.resume(); }catch(e){ OP.ac = null; } }
+  opAudio(); opMusicPlay();
   if(OP.still){
     // Still: straight to green, then Home fades in.
     OP.el.classList.add('is-green');
     opSound('chime');
     setTimeout(() => openingFinish(true), 700);
   }
+}
+
+// An AudioContext made and woken inside a tap (phones allow sound only after one). Null with Sound off.
+function opAudio(){
+  if(!openingSoundOn()) return null;
+  try{ OP.ac = OP.ac || new (window.AudioContext || window.webkitAudioContext)(); if(OP.ac.state !== 'running') OP.ac.resume(); }catch(e){ OP.ac = null; }
+  return OP.ac;
+}
+// The music file is fetched when the opening mounts (the saved copy, sw.js), decoded on the first play.
+function opMusicLoad(){
+  if(!openingSoundOn() || OP.musicData) return;
+  OP.musicData = fetch(OP_MUSIC_URL).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
+}
+function opMusicPlay(){
+  const AC = OP.ac;
+  if(!AC || OP.mus || !OP.musicData || !openingSoundOn()) return;
+  const m = OP.mus = { src: null, g: null, gone: false };
+  // Older Safari has only the callback form; newer browsers also return a promise, caught here too.
+  const decode = data => new Promise((ok, no) => { const p = AC.decodeAudioData(data.slice(0), ok, no); if(p && p.catch) p.catch(no); });
+  OP.musicData.then(data => OP.musicBuf || (data && !m.gone ? decode(data) : null))
+    .then(buf => {
+      if(!buf) return;
+      OP.musicBuf = buf;
+      if(m.gone) return;
+      const src = AC.createBufferSource(), g = AC.createGain(), t = AC.currentTime;
+      src.buffer = buf; src.loop = true;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(OP_MUSIC_VOL, t + .6);
+      src.connect(g); g.connect(AC.destination); src.start(t);
+      m.src = src; m.g = g;
+    }).catch(() => { OP.musicErr = true; OP.musicData = Promise.resolve(null); }); // a browser that can't decode it: no music, no error
+}
+// Fade it out over sec seconds (Home after the opening, a skip, the phone going to another app).
+function opMusicStop(sec){
+  const m = OP.mus; if(!m) return;
+  OP.mus = null; m.gone = true;
+  if(!m.src) return;
+  try{
+    const t = OP.ac.currentTime, p = m.g.gain;
+    if(p.cancelAndHoldAtTime) p.cancelAndHoldAtTime(t); else { p.cancelScheduledValues(t); p.setValueAtTime(p.value, t); }
+    p.linearRampToValueAtTime(0, t + sec); m.src.stop(t + sec + .05);
+  }catch(e){ try{ m.src.stop(); }catch(_){} }
 }
 
 // A little synthesized sound, only after the tap, quiet: the reader's beep, a chime, a soft swell.
@@ -259,6 +307,7 @@ function openingFinish(fade){
   OP.leaving = true;
   cancelAnimationFrame(OP.raf);
   window.removeEventListener('resize', opFit);
+  opMusicStop(OP.tap === null ? .4 : OP_MUSIC_FADE);
   const end = () => {
     el.remove();
     if(OP.el === el){ OP.el = null; OP.ring = null; OP.face = null; OP.leaving = false; }
@@ -278,7 +327,7 @@ function openingMoreHtml(){
     <div class="home-sec-head"><h3>Opening</h3></div>
     <div class="op-more-card">
       ${sw('opOnSwitch', on, 'Badge opening', 'Your badge, every time the Hub starts', 'openingSetOn')}
-      ${sw('opSoundSwitch', snd, 'Sound', 'A quiet beep and chime after the tap', 'openingSetSound')}
+      ${sw('opSoundSwitch', snd, 'Sound', 'Soft music, a beep and a chime after the tap', 'openingSetSound')}
       <label class="op-more-title"><b>Badge title</b>
         <input id="opTitleInput" type="text" maxlength="${OP_TITLE_MAX}" placeholder="${OP_TITLE_DEFAULT}" value="${t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" autocomplete="off" onchange="openingSetTitle(this.value)"></label>
       <button class="btn btn-ghost" type="button" onclick="openingReplay()">Replay the opening</button>
@@ -296,6 +345,7 @@ function openingSetTitle(v, quiet){
 function openingReplay(){
   if(typeof examTimer !== 'undefined' && examTimer){ if(typeof showToast === 'function') showToast('Not during a timed exam.'); return; }
   const i = document.getElementById('opTitleInput'); if(i) openingSetTitle(i.value, true);
+  opAudio(); // inside this tap, so the music can play while the badge waits
   try{ closeMoreSheet(); }catch(e){}
   try{ if(typeof goHome === 'function') goHome(); }catch(e){}
   setTimeout(() => openingStart(true), 60);

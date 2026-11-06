@@ -66,12 +66,12 @@ async function route(page, opts = {}) {
   await page.route('**/sw.js', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: fs.readFileSync(FONTS + 'g.css', 'utf8') }));
   await page.route('https://fonts.gstatic.com/**', r => { const f = FONTS + r.request().url().replace('https://fonts.gstatic.com/s/', '').replace(/\//g, '_'); return fs.existsSync(f) ? r.fulfill({ status: 200, contentType: 'font/woff2', headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(f) }) : r.abort(); });
-  await page.route(/\.(jpe?g|png|PNG|webp|svg|gif|ico|webmanifest|mp4|webm)(\?.*)?$/, r => {
+  await page.route(/\.(jpe?g|png|PNG|webp|svg|gif|ico|webmanifest|mp4|webm|m4a)(\?.*)?$/, r => {
     const f = decodeURIComponent(new URL(r.request().url()).pathname.replace(/^\//,''));
     let p = R + f; if (!fs.existsSync(p)) p = __dirname + '/' + f; if (!fs.existsSync(p) || /^missing/.test(f)) return r.fulfill({ status: 404, body: '' });
     const ext = f.toLowerCase().split('.').pop();
     r.fulfill({ status: 200, contentType: { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml',
-      gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json', mp4: 'video/mp4', webm: 'video/webm' }[ext], body: fs.readFileSync(p) });
+      gif: 'image/gif', ico: 'image/x-icon', webmanifest: 'application/manifest+json', mp4: 'video/mp4', webm: 'video/webm', m4a: 'audio/mp4' }[ext], body: fs.readFileSync(p) });
   });
   for (const f of ['app.css', 'guide/topics.js', 'practice/questions.js', 'falsefriends/list.js', 'soundalikes/list.js', 'home-polish.css', 'home-polish.js', 'pin-icons.js'])
     await page.route('**/' + f, r => r.fulfill({ status: 200, contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', body: fs.readFileSync(process.env.POLISH_DIR && fs.existsSync(path.join(process.env.POLISH_DIR, f)) ? path.join(process.env.POLISH_DIR, f) : R + f) }));

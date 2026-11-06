@@ -149,7 +149,9 @@ const PRECACHE = [
   './opening/pavilion-1.mp4',
   // Its morning and evening stills; their loops are saved the first time each plays.
   './opening/pavilion-morning-1.webp',
-  './opening/pavilion-evening-1.webp'
+  './opening/pavilion-evening-1.webp',
+  // Its music (0.34 MB), carried over the same way.
+  './opening/music-1.m4a'
 ];
 // Kept over from the last version's cache: everything in opening/, so no
 // deploy fetches a loop again (a new clip gets a new name).
