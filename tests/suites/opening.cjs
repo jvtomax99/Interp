@@ -54,7 +54,8 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     await wait(2300);
     const g0 = await gate(page), m0 = await music(page);
     ok(m0.asked && m0.on && m0.ac === 'suspended', 'the music is started at open, held paused by a browser that wants a touch first (as an iPhone does)', m0);
-    ok(g0.gate && g0.cta === 'Tap to enter' && g0.ctaOp > .5 && g0.rig === 0, 'so it waits at Tap to enter, the badge not dropped yet', g0);
+    // Tap to enter pulses between .3 and 1 on purpose (opFrame): visible means over .25, whatever the phase.
+    ok(g0.gate && g0.cta === 'Tap to enter' && g0.ctaOp > .25 && g0.rig === 0, 'so it waits at Tap to enter, the badge not dropped yet', g0);
     await page.screenshot({ path: O + 'enter.png' });
     await page.touchscreen.tap(195, 420);
     await wait(300);
@@ -217,6 +218,72 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     ok(!(await state(page)).up, 'Escape skips it');
     ok(!page.__errors.length, 'no page errors', page.__errors);
     await ctx.close();
+  }
+  // Your photo on the badge (More, My photo on the badge): off unless chosen; the photo you added
+  // with your name (ih_myPhoto), only while that name is the one set here; he winks from a seal.
+  console.log('== your photo on the badge');
+  {
+    const PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#c0392b"/></svg>');
+    // A string, not a closure: the page gets the script's text only (addInitScript).
+    const withPhoto = (name, photo, on) => `localStorage.setItem('ih_myPhoto', ${JSON.stringify(JSON.stringify({ name, photo }))});` + (on ? `localStorage.setItem('ih_badgePhoto', 'on');` : '');
+    const badge = page => page.evaluate(() => { const q = s => document.querySelector(s), box = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; };
+      const img = q('.op-photo'), seal = q('.op-seal'), card = q('.op-card');
+      return { img: !!img, loaded: !!img && img.classList.contains('is-in') && +getComputedStyle(img).opacity === 1, under: getComputedStyle(q('.op-pic svg.op-face')).visibility,
+        seal: !!seal && getComputedStyle(seal).display !== 'none', has: card.classList.contains('has-photo'),
+        inCard: !!seal && (() => { const s = box(seal), c = box(card); return s.l >= c.l && s.r <= c.r && s.t >= c.t && s.b <= c.b; })(),
+        clear: !!seal && ['.op-dept', '.op-org', '.op-pic'].every(k => { const a = box(seal), o = box(q(k)); return a.r <= o.l || a.l >= o.r || a.b <= o.t || a.t >= o.b; }),
+        faces: [...document.querySelectorAll('.op-face .ds-sheet')].map(x => x.getAttribute('x')) }; });
+    {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init: withPhoto('jose  vazquez', PH, true) });
+      await page.touchscreen.tap(195, 420); await wait(2600);
+      const s = await badge(page);
+      ok(s.img && s.loaded && s.under === 'hidden', 'turned on: your photo where Dr. Smiley was, over him once loaded', s);
+      ok(s.seal && s.inCard && s.clear, 'he moves to a small seal inside the card, clear of the name, the logo and Language Services', s);
+      await page.screenshot({ path: O + 'photo-badge.png' });
+      const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.touchscreen.tap(box.x, box.y);
+      await page.waitForFunction(() => { const f = [...document.querySelectorAll('.op-face .ds-sheet')].map(x => x.getAttribute('x')); return f[0] !== String(-DR_FACE_W * DR_FACE_FRAMES.indexOf('smile')); }, null, { timeout: 2500 }).catch(() => {});
+      const w = await badge(page), wink = await page.evaluate(() => String(-DR_FACE_W * DR_FACE_FRAMES.indexOf('smile')));
+      ok(w.faces.length === 2 && w.faces[0] === w.faces[1] && w.faces[1] !== wink, 'on green the seal winks (both copies on the same frame)', w.faces);
+      ok(!page.__errors.length, 'no page errors', page.__errors);
+      await ctx.close();
+    }
+    for (const [label, init] of [
+      ['not turned on (the photo is there, the switch is off)', withPhoto('Jose Vazquez', PH, false)],
+      ['the photo belongs to a different name', withPhoto('Ana Ruiz', PH, true)],
+    ]) {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init });
+      const s = await badge(page);
+      ok(!s.img && !s.seal && !s.has && s.faces.length === 1, label + ': Dr. Smiley, as before', s);
+      await ctx.close();
+    }
+    {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, init: withPhoto('Jose Vazquez', 'https://interp.test/no-such-photo.jpg', true) });
+      await wait(500);
+      const s = await badge(page);
+      ok(!s.img && !s.seal && !s.has && s.under === 'visible', 'a photo that cannot load: Dr. Smiley stays, no seal', s);
+      await ctx.close();
+    }
+    {
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: false, name: 'Jose Vazquez', settle: 4200 });
+      await page.evaluate(() => { openMoreSheet(); });
+      await wait(400);
+      const sw = () => page.evaluate(() => ({ a: document.getElementById('opPhotoSwitch').getAttribute('aria-checked'), k: localStorage.getItem('ih_badgePhoto') }));
+      ok((await sw()).a === 'false', 'More: My photo on the badge is off by default', await sw());
+      await page.click('#opPhotoSwitch');
+      const t0 = await sw(), toast = await page.evaluate(() => (document.querySelector('.toast, #toast') || {}).textContent || '');
+      ok(t0.a === 'false' && t0.k === null && /Add a photo first/.test(toast), 'with no photo yet it stays off and says where to add one', { t0, toast });
+      await page.evaluate(PH => localStorage.setItem('ih_myPhoto', JSON.stringify({ name: 'Jose Vazquez', photo: PH })), PH);
+      await page.click('#opPhotoSwitch');
+      ok(JSON.stringify(await sw()) === JSON.stringify({ a: 'true', k: 'on' }), 'with one, it turns on, on this phone', await sw());
+      await page.evaluate(() => document.querySelector('.op-more').scrollIntoView({ block: 'center' }));
+      await wait(300);
+      await page.screenshot({ path: O + 'more-card-photo.png' });
+      await page.click('#opPhotoSwitch');
+      ok((await sw()).k === null, 'and off again');
+      ok(!page.__errors.length, 'no page errors', page.__errors);
+      await ctx.close();
+    }
   }
   await b.close();
 })();

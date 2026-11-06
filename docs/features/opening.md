@@ -22,8 +22,9 @@ CPA app... not with the train moving"). **Status: built 2026-11-05**
    card behind. The card follows the real HUMC badge: the name as first
    name and last initial ("Jose V."), the badge title (*Staff Interpreter* unless you change it), the Hackensack
    Meridian Health / HUMC lettering with the logo, "Language Services".
-   **Dr. Smiley sits where the photo goes**; there is no photo, barcode or
-   number, so it can never pass for a real ID. It swings, catches the
+   **Dr. Smiley sits where the photo goes**, unless you put your own photo
+   there (More, My photo on the badge; 2026-11-06, below). There is no
+   barcode or number, so it can't pass for a real ID. It swings, catches the
    light, and the frosted glass reader under it pulses pink.
    "Tap your badge to begin".
 3. **The tap.** The badge lowers onto the reader, a cyan line scans it
@@ -77,8 +78,9 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 
 - Tilting the phone to swing the badge (iPhone asks a motion permission).
 - The walk up the drive or the cherry blossom photos (tried and dropped).
-- Anything from a real ID: no photo, barcode, employee number or
-  department code, ever.
+- Anything from a real ID: no barcode, employee number or department
+  code, ever. (This line said "no photo" too until 2026-11-06, when Jose
+  chose an opt-in photo; see "Your photo on the badge".)
 - A badge per role or per teammate in colour or layout (only the title
   changes).
 - A way round an iPhone's rule of no sound before a touch: there is none for a web app (see Music below).
@@ -219,12 +221,47 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
 - **Home's hello waits:** `home-polish.js` holds the startup hello and the
   name pen's 6 s cap while `hubOpeningUp()` is true, and starts them on
   `hub-opening-done`.
-- **More's Opening card** (above Measure smoothness): Badge opening and
-  Sound switches, the Badge title field (28 characters, empty means Staff
+- **More's Opening card** (above Measure smoothness): Badge opening,
+  Sound and My photo on the badge switches, the Badge title field (28 characters, empty means Staff
   Interpreter), Replay the opening (goes Home first; not during a timed
   exam).
 
+## Your photo on the badge (Jose, 2026-11-06)
+
+Asked for: "the option to replace the picture on the badge with Dr.
+Smiley with another picture". Jose picked the photo he already added with
+his name (his Team Chat picture) over a separate badge-only upload, and,
+told it goes against the no-photo rule above (a real face, name, HMH logo
+and title together look closer to a real badge, and can be screenshotted),
+chose it anyway, **opt-in**: off unless each person turns it on.
+
+- **More's Opening card: My photo on the badge** (`opPhotoSwitch`,
+  `ih_badgePhoto` = `on`, this phone only). With no photo yet, it stays
+  off and the toast says where to add one (the initial at the top right).
+- **Which photo:** `ih_myPhoto` (index.html saves it beside your name on
+  this phone), only while its name matches `ih_myName`
+  (`openingMyPhoto`). No photo or another name: Dr. Smiley, as before.
+  The opening never waits on it: Dr. Smiley is drawn underneath and the
+  photo fades over him once it has loaded (`.op-photo.is-in`; he is then
+  hidden under it, `.op-pic.is-photo`). A photo that can't load removes
+  itself and Dr. Smiley stays.
+- **The wink:** with your photo on, Dr. Smiley moves to a small round seal
+  at the card's bottom right (`.op-seal`, 30px on the 390-wide badge,
+  measured clear of the name, the logo lettering and Language Services)
+  and winks there on green (`opFace` sets every copy).
+- The square photo fills the tall slot (`object-fit: cover`), so its
+  sides are trimmed.
+- **Not in this version:** a badge-only photo separate from your chat
+  picture; moving or zooming the photo inside the slot.
+
 ## Checks
+
+`tests/suites/opening.cjs`, "your photo on the badge": the photo over him
+once loaded, the seal inside the card and clear of its words, both copies
+winking together; Dr. Smiley when the switch is off, when the photo is
+another name's, and when it can't load; More's switch off by default,
+refusing with no photo, on and off on this phone.
+
 
 A new suite, `tests/suites/opening.cjs`: it plays on a fresh start and not on a resume; not with `?open=`; a tap before the badge skips
 it; after it, nothing is left over Home (`elementFromPoint` reaches Home's
