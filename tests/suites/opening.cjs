@@ -230,10 +230,19 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
     const badge = page => page.evaluate(() => { const q = s => document.querySelector(s), box = e => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom }; };
       const apart = (a, o) => a.r <= o.l || a.l >= o.r || a.b <= o.t || a.t >= o.b;
       const img = q('.op-photo'), dr = q('.op-dr'), card = q('.op-card'), cs = dr && getComputedStyle(dr);
-      const shown = !!dr && cs.display !== 'none' && +cs.opacity > .9, d = dr && box(dr);
-      // His drawn frame: solid where he is, see-through at the frame's corner.
-      let px = null; const cv = q('.op-dr-cv');
-      if (cv && cv.width) { const c = cv.getContext('2d'), w = cv.width, h = cv.height; px = { mid: c.getImageData(w >> 1, h >> 2, 1, 1).data[3], corner: c.getImageData(1, 1, 1, 1).data[3] }; }
+      const shown = !!dr && cs.display !== 'none' && +cs.opacity > .9;
+      // His drawn frame: how much of it is solid (him), its corner see-through, and the box of his
+      // visible pixels on screen (what must stay clear; his frame's empty corners may overlap).
+      let px = null, d = dr && box(dr); const cv = q('.op-dr-cv');
+      if (cv && cv.width && dr.classList.contains('is-live')) {
+        // Read through a 2D copy: his canvas may be WebGL (opDrGl) or 2D.
+        const w = cv.width, h = cv.height, c = Object.assign(document.createElement('canvas'), { width: w, height: h }).getContext('2d');
+        c.drawImage(cv, 0, 0); const a = c.getImageData(0, 0, w, h).data, r = cv.getBoundingClientRect(), k = r.width / w;
+        let n = 0, x0 = w, y0 = h, x1 = 0, y1 = 0;
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (a[(y * w + x) * 4 + 3] > 20) { n++; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        px = { solid: +(n / (w * h)).toFixed(2), corner: a[3] };
+        if (n) d = { l: r.left + x0 * k, t: r.top + y0 * k, r: r.left + (x1 + 1) * k, b: r.top + (y1 + 1) * k };
+      }
       return { img: !!img, loaded: !!img && img.classList.contains('is-in') && +getComputedStyle(img).opacity === 1, under: getComputedStyle(q('.op-pic svg.op-face')).visibility,
         has: card.classList.contains('has-photo'), dr: !!dr, shown, live: !!dr && dr.classList.contains('is-live'), px, cur: OP.dr ? OP.dr.cur : null,
         grinAt: OP.dr ? +OP.dr.v.grin.currentTime.toFixed(2) : null, still: dr ? q('.op-dr-still').getAttribute('src') : null,
@@ -248,7 +257,7 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
       ok(s.img && s.loaded && s.under === 'hidden', 'turned on: your photo where Dr. Smiley was, over him once loaded', s);
       ok(s.shown && s.onScreen && s.faces === 1, 'he steps off the badge and stands on the screen', s);
       ok(s.clear.length === 0, 'clear of the badge, the reader, Tap your badge and the Hub\'s name', s.clear);
-      ok(s.live && s.px && s.px.mid > 200 && s.px.corner < 10 && s.cur === 'wave', 'his wave plays, cut out: solid where he is, see-through around him', s);
+      ok(s.live && s.px && s.px.solid > .2 && s.px.solid < .8 && s.px.corner < 10 && s.cur === 'wave', 'his wave plays, cut out: solid where he is, see-through around him', s);
       await page.screenshot({ path: O + 'photo-badge.png' });
       const box = await page.evaluate(() => { const r = document.querySelector('.op-holder').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
       await page.touchscreen.tap(box.x, box.y);

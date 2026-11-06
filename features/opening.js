@@ -399,23 +399,52 @@ function opDrStart(){
   OP.dr = { box, cv: box.querySelector('.op-dr-cv'), v: { wave: mk('wave', true), grin: mk('grin', false) }, cur: 'wave', on: false, last: -1, buf: null, out: null };
 }
 // Draw the clip's newest frame: colours from the top half, see-through amount from the matte below.
+// On the graphics chip (WebGL: the frame goes up as a texture, a tiny shader takes alpha from the
+// matte), so nothing is read back; where WebGL is missing, the same on a 2D canvas, a pixel at a time.
+function opDrGl(dr){
+  const gl = dr.cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: true });
+  if(!gl) return null;
+  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); return gl.getShaderParameter(x, gl.COMPILE_STATUS) ? x : null; };
+  const vs = sh(gl.VERTEX_SHADER, 'attribute vec2 p;varying vec2 u;void main(){u=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}');
+  const fs = sh(gl.FRAGMENT_SHADER, 'precision mediump float;uniform sampler2D t;varying vec2 u;void main(){vec3 c=texture2D(t,vec2(u.x,u.y*.5)).rgb;float a=texture2D(t,vec2(u.x,.5+u.y*.5)).r;gl_FragColor=vec4(c*a,a);}');
+  if(!vs || !fs) return null;
+  const pr = gl.createProgram(); gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const at = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(at); gl.vertexAttribPointer(at, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  for(const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+  return gl;
+}
 function opDrDraw(){
   const dr = OP.dr, v = dr.v[dr.cur];
   if(v.readyState < 2 || v.currentTime === dr.last || !v.videoWidth) return;
   dr.last = v.currentTime;
   try{
     const w = v.videoWidth, h = v.videoHeight >> 1;
-    if(!dr.buf || dr.buf.width !== w){
-      dr.buf = document.createElement('canvas'); dr.buf.width = w; dr.buf.height = h * 2;
-      dr.bx = dr.buf.getContext('2d', { willReadFrequently: true });
-      dr.cv.width = w; dr.cv.height = h; dr.cx = dr.cv.getContext('2d'); dr.out = dr.cx.createImageData(w, h);
+    if(dr.cv.width !== w || dr.cv.height !== h){ dr.cv.width = w; dr.cv.height = h; }
+    if(dr.gl === undefined) dr.gl = opDrGl(dr);
+    if(dr.gl){
+      const gl = dr.gl;
+      gl.viewport(0, 0, w, h);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    } else {
+      if(!dr.buf){
+        dr.buf = document.createElement('canvas'); dr.buf.width = w; dr.buf.height = h * 2;
+        dr.bx = dr.buf.getContext('2d', { willReadFrequently: true });
+        dr.cx = dr.cv.getContext('2d'); dr.out = dr.cx.createImageData(w, h); dr.out32 = new Uint32Array(dr.out.data.buffer);
+      }
+      dr.bx.drawImage(v, 0, 0, w, h * 2);
+      // A pixel at a time as one 32-bit number (bytes R,G,B,A): its colour, and the matte's red as its alpha.
+      const src = new Uint32Array(dr.bx.getImageData(0, 0, w, h * 2).data.buffer), out = dr.out32, n = w * h;
+      for(let i = 0; i < n; i++) out[i] = (src[i] & 0xFFFFFF) | ((src[n + i] & 0xFF) << 24);
+      dr.cx.putImageData(dr.out, 0, 0);
     }
-    dr.bx.drawImage(v, 0, 0, w, h * 2);
-    const src = dr.bx.getImageData(0, 0, w, h * 2).data, out = dr.out.data, n = w * h * 4;
-    for(let i = 0; i < n; i += 4){ out[i] = src[i]; out[i + 1] = src[i + 1]; out[i + 2] = src[i + 2]; out[i + 3] = src[n + i]; }
-    dr.cx.putImageData(dr.out, 0, 0);
     if(!dr.box.classList.contains('is-live')) dr.box.classList.add('is-live');
-  }catch(e){ opDrStop(); }   // a browser that won't let us read the frame: his still stays
+  }catch(e){ opDrStop(); }   // a browser that won't let us draw the frame: his still stays
 }
 // Each frame of the opening: he comes in with the reader, waves, and grins on green (a: seconds since the tap, -1 before).
 function opDrFrame(d, a, gone){
