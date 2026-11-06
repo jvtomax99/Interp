@@ -69,6 +69,7 @@ const tapsItself = (page, sel) => page.evaluate(sel => { const el = document.que
     await page.fill('#acctEmail', 'nope'); await page.click('#acctSendBtn'); await wait(250);
     c = await card(page);
     ok(c.bad && /doesn't look right/.test(c.msg) && log.length === 0, 'a broken address is caught on the phone, nothing sent', c);
+    ok(await page.evaluate(() => document.getElementById('acctEmail').value) === 'nope', 'and what you typed stays in the box to fix');
 
     await page.fill('#acctEmail', 'Maria@Gmail.com'); await page.click('#acctSendBtn'); await wait(500);
     c = await card(page);
@@ -133,6 +134,53 @@ const tapsItself = (page, sel) => page.evaluate(sel => { const el = document.que
     await page.fill('#acctCode', '482913'); await page.click('#acctCheckBtn'); await wait(900);
     const s = await page.evaluate(() => ({ who: whoAmI(), stored: localStorage.getItem('ih_myName') }));
     ok(s.who === 'Maria Lopez' && s.stored === 'Maria Lopez', 'this phone takes the account\'s name (and the photo filed under it)', s);
+    ok(!page.__errors.length, 'no page errors', page.__errors);
+    await page.close();
+  }
+
+  console.log('== the team-code screen: sign in with email');
+  for (const dark of [false, true]) {
+    const { page } = await L.boot(b, { device: 'iphone', dark, fresh: false, name: '', settle: 4500, access: { mode: 'practice' } });
+    const log = [];
+    await page.route('**/api/sign-in', async r => {
+      const bd = JSON.parse(r.request().postData() || '{}'); log.push(bd);
+      const j = (s, o) => r.fulfill({ status: s, contentType: 'application/json', body: JSON.stringify(o) });
+      if (bd.email !== 'maria@gmail.com') return j(404, { error: 'no_account' });
+      if (bd.action === 'send') return j(200, { ok: true });
+      if (bd.code !== '482913') return j(400, { error: 'wrong_code', left: 4 });
+      return j(200, { ok: true, token: 'ticket:' + ACCT, uid: ACCT, role: 'member', name: 'Maria Lopez', email: bd.email });
+    });
+    await page.evaluate(() => { showAccessLock('join'); }); await wait(600);
+    const link = await page.evaluate(() => { const b = document.getElementById('accessUseEmail'); const r = b.getBoundingClientRect();
+      const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { text: b.textContent, own: at === b, h: r.height }; });
+    ok(link.text === 'Have an account? Sign in with email' && link.own && link.h >= 44, 'the team-code screen offers "Have an account? Sign in with email", a full-size tap', link);
+    await page.tap('#accessUseEmail'); await wait(300);
+    let s = await page.evaluate(() => ({ team: document.getElementById('accessForm').getBoundingClientRect().height > 0 || document.getElementById('accessCode').getBoundingClientRect().height > 0,
+      box: document.getElementById('accessEmail').getBoundingClientRect().height > 0,
+      sub: document.getElementById('accessSub').textContent, fs: parseFloat(getComputedStyle(document.getElementById('acctLockEmail')).fontSize) }));
+    ok(!s.team && s.box && /email you use on your other phone/.test(s.sub) && s.fs >= 16, 'it swaps to an email box (16px, no zoom), the line above says what to do', s);
+    if (!dark) await page.screenshot({ path: O + 'lock-1-email.png' });
+    await page.click('#accessEmail .access-skip'); await wait(250);
+    s = await page.evaluate(() => ({ code: document.getElementById('accessCode').getBoundingClientRect().height > 0, box: document.getElementById('accessEmail').getBoundingClientRect().height > 0,
+      sub: document.getElementById('accessSub').textContent }));
+    ok(s.code && !s.box && /Type the team code/.test(s.sub), '"Use the team code instead" brings the team-code box back, and its line', s);
+    await page.tap('#accessUseEmail'); await wait(300);
+    await page.fill('#acctLockEmail', 'new@person.com'); await page.tap('#acctLockSendBtn'); await wait(500);
+    s = await page.evaluate(() => ({ msg: document.getElementById('acctLockMsg').textContent, val: document.getElementById('acctLockEmail').value }));
+    ok(/No account with that email yet/.test(s.msg) && /team code/.test(s.msg) && s.val === 'new@person.com', 'an email with no account: says to use the team code the first time, the email stays', s);
+    await page.fill('#acctLockEmail', 'maria@gmail.com'); await page.tap('#acctLockSendBtn'); await wait(500);
+    s = await page.evaluate(() => ({ note: (document.querySelector('.access-email-note') || {}).textContent || '', code: !!document.getElementById('acctLockCode'), auth: !!(hubAuth && hubAuth.currentUser) }));
+    ok(/We sent a code to maria@gmail.com/.test(s.note) && s.code && s.auth, 'the code box; the phone signed in to Firebase first so the server can see it', s);
+    if (!dark) await page.screenshot({ path: O + 'lock-2-code.png' }); else await page.screenshot({ path: O + 'lock-2-code-dark.png' });
+    await page.fill('#acctLockCode', '000000'); await page.tap('#acctLockCheckBtn'); await wait(400);
+    ok(/4 tries left/.test(await page.evaluate(() => document.getElementById('acctLockMsg').textContent)), 'a wrong code says so');
+    await page.evaluate(ACCT => { __DB['hub-members'][ACCT] = { invite: 'TEAMCODE', name: 'Team code', role: 'member', joinedAt: 1, lastSeen: 1 }; __DB.accounts = { [ACCT]: { email: 'maria@gmail.com', name: 'Maria Lopez', nameAt: Date.now() + 1000 } }; }, ACCT);
+    await page.fill('#acctLockCode', '482913'); await page.tap('#acctLockCheckBtn'); await wait(700);
+    s = await page.evaluate(() => ({ title: document.getElementById('accessTitle').textContent, happy: document.getElementById('accessLock').classList.contains('is-happy'),
+      uid: hubAuth.currentUser.uid, me: readAccessMe(), who: whoAmI() }));
+    ok(s.happy && /You're in, Maria!/.test(s.title) && s.uid === ACCT && s.me.member && s.me.uid === ACCT && s.who === 'Maria Lopez', 'the right code: "You\'re in, Maria!", this phone is her account, in the team, her name', s);
+    await wait(2200);
+    ok(await page.evaluate(() => document.getElementById('accessLock').hidden), 'and the Hub opens');
     ok(!page.__errors.length, 'no page errors', page.__errors);
     await page.close();
   }

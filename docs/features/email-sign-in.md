@@ -140,6 +140,25 @@ Already done: `FIREBASE_SERVICE_ACCOUNT` is set on Vercel (checked
 - **The owner moving to an account id** (step 4) is the one step that can
   lock Jose out. Tested in the Firebase emulator before E1 ships.
 
+## Sign in with email on the team-code screen (2026-11-06, after E1)
+
+Jose asked for the sign-in on the lock screen; on the opening was turned
+down (it plays every start and doesn't show on computers). The team-code
+screen has **Have an account? Sign in with email** under Open the Hub
+(`accountLockToggle` and the rest at the end of `features/account.js`,
+`#accessEmail` in `index.html`). A phone that hasn't joined signs in to
+Firebase first (anonymously), then asks; the server checks that token with
+Firebase's `accounts:lookup` and allows it **only for an account already in
+the team** (`accounts/{id}` and `hub-members/{id}` both there; otherwise
+`no_account`, "the first time, use the team code"). On the right code the
+account's own place in the team is used as it is; the phone itself is never
+added. The cost: someone outside the team can learn whether an address has
+an account, and send it at most 3 codes an hour. Accepted for a small team.
+
+Live, 2026-11-06: Gmail sends the codes (Jose got one). Gmail first refused
+the app password (535): 2-Step Verification on the new Gmail had gone back
+to Off, which cancels every app password; turned on again, a new one works.
+
 ## As built (E1), and what is not proven yet
 
 - The code box survives the Hub restarting while you read Mail

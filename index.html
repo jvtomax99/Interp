@@ -461,8 +461,11 @@
       <input class="access-code" id="accessCode" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="9" placeholder="XXXX-XXXX" oninput="accessCodeInput(this)">
       <p class="access-msg" id="accessMsg" role="status" aria-live="polite"></p>
       <button class="access-go" id="accessGo" type="submit">Open the Hub</button>
+      <button class="access-skip access-use-email" id="accessUseEmail" type="button" onclick="accountLockToggle(true)">Have an account? Sign in with email</button>
       <button class="access-skip" id="accessSkip" type="button" onclick="skipAccessLock()">Skip for now</button>
     </form>
+    <!-- Sign in with email (features/account.js): for a phone whose person already has an account in the team. -->
+    <div class="access-form access-email" id="accessEmail" hidden></div>
   </div>
 </div>
 
@@ -15776,6 +15779,8 @@ function renderAccessLock(mode){
   }
   // No way past once the owner has locked the Hub.
   document.getElementById('accessSkip').hidden = ACCESS.state === 'locked';
+  // A code on its way from "Sign in with email" (back from Mail): straight to the code box.
+  if(typeof accountLockResume === 'function') accountLockResume();
 }
 
 function showAccessLock(mode){

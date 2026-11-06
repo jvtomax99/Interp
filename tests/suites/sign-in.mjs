@@ -17,6 +17,8 @@ const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLen
 const SA = { type: 'service_account', client_email: 'hub@language-specialist.iam.gserviceaccount.com', private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }), project_id: 'language-specialist' };
 const ENV = { FIREBASE_SERVICE_ACCOUNT: JSON.stringify(SA), GMAIL_USER: 'humc.interp.hub@gmail.com', GMAIL_APP_PASSWORD: 'abcd efgh ijkl mnop' };
 
+// Phones signed in to Firebase but not in the team (the team-code screen).
+const REAL = new Set(['newPhone', 'pc']);
 // Fake Firestore (REST): documents as plain objects; a phone token 'tok-<uid>'
 // may read only its own hub-members document; the service token reads all.
 function world() {
@@ -28,6 +30,12 @@ function world() {
     const method = opts.method || 'GET';
     const auth = (opts.headers || {}).Authorization || '';
     if (url.startsWith('https://oauth2.googleapis.com/token')) return new Response(JSON.stringify({ access_token: 'svc', expires_in: 3600 }), { status: 200 });
+    // Firebase's accounts:lookup: a real sign-in of this project (any phone in REAL), or refused.
+    if (url.startsWith('https://identitytoolkit.googleapis.com/v1/accounts:lookup')) {
+      let uid = ''; try { uid = JSON.parse(Buffer.from(JSON.parse(opts.body).idToken.split('.')[1], 'base64url')).user_id; } catch (e) {}
+      calls.push({ method: 'LOOKUP', p: uid });
+      return REAL.has(uid) ? new Response(JSON.stringify({ users: [{ localId: uid }] }), { status: 200 }) : new Response('{"error":{"message":"INVALID_ID_TOKEN"}}', { status: 400 });
+    }
     const u = new URL(url);
     const p = decodeURIComponent(u.pathname.split('/documents/')[1] || '');
     calls.push({ method, p, auth });
@@ -166,6 +174,36 @@ console.log('== The owner keeps the Hub');
   await call(h, 'anonA', { action: 'send', email: 'maria@gmail.com' });
   await call(h, 'anonA', { action: 'check', email: 'maria@gmail.com', code: '333333' });
   ok(w.docs.get('hub-access/owner').uid === r.body.uid, 'a teammate signing in leaves the owner alone');
+}
+
+console.log('== From the team-code screen (a phone not in the team)');
+{
+  const { w, h, sent } = setup();
+  const none = await call(h, 'newPhone', { action: 'send', email: 'maria@gmail.com' });
+  ok(none.status === 404 && none.body.error === 'no_account' && sent.length === 0, 'an email with no account yet: "no account", nothing sent (a first-timer uses the team code)', none);
+  // Maria signs in on her joined phone first.
+  await call(h, 'anonA', { action: 'send', email: 'maria@gmail.com' });
+  const a = await call(h, 'anonA', { action: 'check', email: 'maria@gmail.com', code: '111111' });
+  const before = JSON.stringify(w.docs.get('hub-members/' + a.body.uid));
+  const forged = await call(h, 'stranger', { action: 'send', email: 'maria@gmail.com' });
+  ok(forged.status === 401 && forged.body.error === 'join_first', 'a token Firebase doesn\'t know: refused', forged);
+  const s1 = await call(h, 'newPhone', { action: 'send', email: 'Maria@gmail.com' });
+  ok(s1.status === 200 && sent.length === 2 && sent[1].to === 'maria@gmail.com', 'her account is in the team: the new phone may ask, the code goes to her inbox', s1);
+  const wrongPhone = await call(h, 'pc', { action: 'check', email: 'maria@gmail.com', code: '222222' });
+  ok(wrongPhone.body.error === 'other_phone', 'the code works only on the phone that asked');
+  const c1 = await call(h, 'newPhone', { action: 'check', email: 'maria@gmail.com', code: '222222' });
+  ok(c1.status === 200 && c1.body.uid === a.body.uid && c1.body.role === 'member', 'the right code: the new phone is her account, a member', c1.body);
+  const after = w.docs.get('hub-members/' + a.body.uid);
+  const b4 = JSON.parse(before);
+  ok(after.invite === b4.invite && after.who === b4.who && after.role === b4.role && after.lastSeen >= b4.lastSeen, 'her place in the team is kept as it was (only last seen moves)', after);
+  ok(!w.docs.has('hub-members/newPhone'), 'the new phone itself is never added to the team');
+  ok(w.docs.get('hub-access/owner').uid === 'ownerPhone', 'the owner\'s line is untouched');
+  // The owner, on a new phone, from the team-code screen.
+  await call(h, 'ownerPhone', { action: 'send', email: 'jvtomax99@gmail.com' });
+  const o = await call(h, 'ownerPhone', { action: 'check', email: 'jvtomax99@gmail.com', code: '333333' });
+  await call(h, 'pc', { action: 'send', email: 'jvtomax99@gmail.com' });
+  const o2 = await call(h, 'pc', { action: 'check', email: 'jvtomax99@gmail.com', code: '444444' });
+  ok(o2.status === 200 && o2.body.uid === o.body.uid && o2.body.role === 'owner', 'the owner signs in on a new computer the same way, still the owner', o2.body);
 }
 
 console.log('== Limits');
