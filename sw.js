@@ -79,6 +79,7 @@ const PRECACHE = [
   './features/backfill.js',
   './features/ask-hub.js',
   './features/credits.js',
+  './features/tool-banners.js',
   './features/opening.js',
   './home-polish.css',
   './home-polish.js',

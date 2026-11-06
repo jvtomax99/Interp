@@ -47,7 +47,7 @@ async function load(page, sort, extra) {
         let s = await page.evaluate(() => ({
           on: document.querySelector('#content .dl-sortmenu select')?.value + ':' + document.querySelector('#content .dl-sortmenu b')?.textContent,
           tabs: [...document.querySelectorAll('#content .rg-filter button')].map(b => b.textContent.trim()),
-          sub: document.querySelector('#content .dl-head .sub')?.textContent,
+          sub: document.getElementById('toolBannerMeta')?.textContent,
           foldInRow: !!document.querySelector('#content .dl-tools .dl-fold'),
           recent: !!document.querySelector('#content .dl-recent'),
           heads: [...document.querySelectorAll('#content .dl-list .group-head-name')].map(e => e.textContent),
@@ -165,7 +165,7 @@ async function load(page, sort, extra) {
         s = await page.evaluate(() => ({ cards: document.querySelectorAll('#content .dl-card').length, miss: document.querySelectorAll('#content .dl-miss').length,
           first: document.querySelector('#content .dl-miss')?.textContent, recent: !!document.querySelector('#content .dl-recent'),
           note: !!document.querySelector('#content .dl-need-note'), btn: document.querySelector('#content .dl-need')?.textContent,
-          sub: document.querySelector('#content .dl-head .sub')?.textContent,
+          sub: document.getElementById('toolBannerMeta')?.textContent,
           noteLines: (() => { const n = document.querySelector('#content .dl-need-note'); return n ? Math.round(n.getBoundingClientRect().height / parseFloat(getComputedStyle(n).lineHeight)) : 0; })(),
           pressed: document.querySelector('#content .dl-need')?.getAttribute('aria-pressed') }));
         ok(s.cards === s.miss && s.cards > 0 && /^Missing: /.test(s.first), 'filter on: only those doctors, each says what is missing', s);
