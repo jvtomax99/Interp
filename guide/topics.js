@@ -45,7 +45,7 @@ const GUIDE_TOPICS = [
     <p>In a hurry? Tap anywhere before the badge has arrived (after <b>Tap to enter</b>, if you see it) and you go straight to Home. It doesn't play when you open the Hub from a notification, or when you come back to it from another app without it restarting.</p>
     <p>The badge shows your first name and the first letter of your last name (from your name in the app), and your badge title. Dr. Smiley is in the photo spot unless you put your own photo there (below). It has no barcode or number: it is not an ID.</p>
     <p>To change it, open <b>More</b> (bottom right) and scroll to <b>Opening</b>: turn <b>Badge opening</b> off or on, turn the <b>Sound</b> (the music, a beep and a chime) off or on, turn on <b>My photo on the badge</b>, type your <b>Badge title</b> (Staff Interpreter unless you change it: Per Diem Interpreter, Coordinator…), or tap <b>Replay the opening</b>. These stay on your phone.</p>
-    <p><b>My photo on the badge</b> uses the photo you added with your name (tap your initial at the top right to add one; it's the same one your team sees in Team Chat). It's off unless you turn it on. With it on, Dr. Smiley steps off the badge: he stands by the reader and waves while your badge comes down, then grins and waves when it turns green. A square photo fills the tall spot, so a little of each side is trimmed: a face works best.</p>
+    <p><b>My photo on the badge</b> uses the photo you added with your name (tap your initial at the top right to add one; it's the same one your team sees in Team Chat, and one you added on another phone signed in to your account works too). It's off unless you turn it on. With it on, Dr. Smiley steps off the badge: he stands by the reader and waves while your badge comes down, then grins and waves when it turns green. A square photo fills the tall spot, so a little of each side is trimmed: a face works best.</p>
     <p>With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, nothing drifts or swings: the badge is already hanging, and the tap goes straight to green.</p>` },
 
   { id:'account', section:'start', k:'account sign in signin log in login email code six digits 6 numbers two phones second phone new phone sync same name photo picture follow sign out signout gmail spam junk', q:'How do I use the Hub on two phones as the same person?', a:`
@@ -70,7 +70,17 @@ const GUIDE_TOPICS = [
       <li>Type your name.</li>
       <li>Tap <b>Save</b>.</li>
     </ol>
-    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too. It's optional, and your team sees it beside your messages in Team Chat.</p>` },
+    <p>From then on your name goes on your chat messages, the terms you add or edit, and your practice. You can add a photo there too, and choose how it's framed (below). It's optional, and your team sees it beside your messages in Team Chat.</p>` },
+  { id:'photo', section:'start', k:'photo picture profile avatar face cut cropped crop adjust move zoom pinch frame fit head chin badge selfie change', q:'How do I adjust my photo?', a:`
+    <p>When you add a photo of yourself, the Hub lets you frame it before it's saved.</p>
+    <ol>
+      <li>Tap the round button with your initial in the <b>top-right corner</b>, then tap the round photo spot next to your name.</li>
+      <li>Pick a photo. <b>Adjust your photo</b> opens.</li>
+      <li>Drag the photo to move it. Pinch, or use the slider, to zoom in.</li>
+      <li>Check the two small previews: <b>Team Chat</b> shows it round, <b>Your badge</b> (the opening, with My photo on the badge) shows it tall, with a little of each side trimmed.</li>
+      <li>Tap <b>Save</b>, then <b>Save</b> on your name.</li>
+    </ol>
+    <p>To change how it's framed later, tap your photo and pick it again. <b>Cancel</b> keeps the photo you had.</p>` },
 
   { id:'namelight', section:'start', k:'name written light ball pen navy glow home greeting hello animation writing signature turn off stop', q:'Why is my name written in light on Home?', a:`
     <p>When you open the app, a small <b>navy light</b> writes your name in the Home greeting, letter by letter, the way a pen would, while Dr. Smiley says hello. It takes a few seconds, then your name stays as usual. With no name set, it writes <b>Welcome</b>.</p>

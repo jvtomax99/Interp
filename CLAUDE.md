@@ -83,6 +83,7 @@ between assignments.
 | `features/tool-banners.js` | 117 | Tool banners: Translate, Term Review's start, Ask the Hub and Doctor Directory under the domains' colour banner with their pin (`TOOL_BANNERS`, `toolBannerHtml`; Doctor Directory's sits above its search, outside `#content`, its count set by `toolBannerMeta`), and the pin tapped on a Home tile or rail card flying into it (`tbFly`; none under reduced motion or Still). 2026-11-06; `docs/features/tool-banners.md` |
 | `features/opening.js` | 291 | The opening, Badge in: every start on a phone, your badge over the pavilion, tap, scan, green, the ring opens into Home (`openingStart`, `opFrame`, `openingFinish`, `hubOpeningUp`, the `hub-opening-done` event Home's hello waits for) and More's Opening card (`openingMoreHtml`: on/off, Sound, My photo on the badge, Badge title, Replay; `ih_opening`, `ih_openingSound`, `ih_badgePhoto`, `ih_badgeTitle`). Decided and covered before the first paint by index.html's first script. 2026-11-05; `docs/features/opening.md` |
 | `features/account.js` | 249 | Your account, email sign-in on the phone: More's "Your account" card (`accountMoreHtml`), the email then the 6-digit code (`accountSend`, `accountCheck`), signing in with the server's ticket (`signInWithCustomToken`, `accountAdopt`), the name following the account (`accountSaveName`, `accountBoot`), sign out back to a plain team phone (`accountSignOut`). The team-code screen's "Sign in with email" for an account already in the team (`accountLockToggle`, `accountLockSend`, `accountLockCheck`; `#accessEmail`). `ih_account`, `ih_accountPending`, `ih_accountNameAt`. 2026-11-06, phase E1; `docs/features/email-sign-in.md` |
+| `features/photo-adjust.js` | 190 | Adjust your photo: after you pick one in the name sheet, drag and zoom it in a square frame with Team Chat's ring, live previews round (chat) and tall (the badge), Save draws the 320 px square for `uploadAvatar` (`photoAdjust`, `paSave`, `paClamp`). 2026-11-06; `docs/features/photo-adjust.md` |
 | `opening/` | — | The opening's pavilion in three lights by the clock (`openingLook`): `pavilion-1` midday, `pavilion-morning-1`, `pavilion-evening-1`, each an 8 s seamless loop (`.mp4` ~0.7 MB, `.webm`) and its still (`.webp`); rendered once from `docs/mockups/opening/`. `music-1.m4a` (0.34 MB), the opening's music, an original 28 s loop from `docs/mockups/opening/music/compose.py`. A new clip gets a new name (`sw.js` carries this one over between versions) |
 | `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
@@ -166,6 +167,7 @@ different places is what silently killed the coloured press glow: a
 | Tool banners (Translate, Term Review, Ask, Doctor Directory) and the pin's fly from Home | `features/tool-banners.js`; styles in `app.css` ("Tool banners") |
 | The opening (Badge in) and More's Opening card | `features/opening.js`; styles in `app.css` ("Opening") |
 | Your account, email sign-in (More's card; the server is `api/sign-in.js`) | `features/account.js`; styles in `app.css` ("Your account") |
+| Adjusting your photo before it's saved (the name sheet) | `features/photo-adjust.js`; styles in `app.css` ("Adjust your photo") |
 | Everything else | `index.html` |
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
@@ -291,6 +293,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Idea credits, whose idea a screen was: the tag, the card, the owner's sheet (`creditDecorate`, `hub-credits`): `credits.md`
 - Tool banners on Translate, Term Review, Ask and Doctor Directory, and the pin's fly from Home (`toolBannerHtml`, `toolBannerMeta`, `tbFly`): `tool-banners.md`
 - The opening, Badge in: when it plays, the loop, More's card (`openingStart`, `ih_opening`, `opening/`): `opening.md`
+- Adjust your photo, the frame before it's saved (`photoAdjust`, `uploadAvatar`'s `ready`): `photo-adjust.md`
 - Email sign-in, one account on every phone: the code, the ticket, the owner carried over, what syncs and what doesn't yet (`api/sign-in.js`, `features/account.js`, `accounts/`): `email-sign-in.md`
 - Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 

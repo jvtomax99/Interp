@@ -53,6 +53,7 @@ const SUITES = [
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['account.cjs',         'Your account (email sign-in, the phone): email, then the code, a wrong code, the code box after a restart, signed in as the account, the name follows, sign out back to the team, not joined yet'],
+  ['photo-adjust.cjs',    'Adjust your photo: opens after you pick one, drag and zoom with the photo always covering the frame, the two previews, Save keeps exactly the square, Cancel and Escape keep the old one'],
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],
   ['tool-banners.cjs',   'Tool banners: Translate, Term Review, Ask and Doctor Directory under a colour banner with their pin (one-line title, no spill, the count above the search, + Add and Ask\'s links on it, his face in a conversation, a credit\'s tag), the pin flying from Home and nothing left behind, none under reduced motion or from the tab bar, Back'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
