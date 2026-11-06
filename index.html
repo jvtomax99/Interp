@@ -3069,6 +3069,18 @@ function fitChatPanel(){
   const vv = window.visualViewport;
   const visBottom = vv ? vv.offsetTop + vv.height : innerHeight;
   const top = panel.getBoundingClientRect().top;
+  // The screen slides in (contentFadeIn on #content): measured mid-slide,
+  // the top is off by what's left of it (6px), so the box sat that much
+  // short of the bar. Fit again once it has landed. (Hidden until the tab
+  // bar stopped tucking by a timer: opening it refitted the chat late.)
+  if(!fitChatPanel.waiting){
+    const moving = document.getAnimations().filter(a => { const t = a.effect && a.effect.target;
+      return t && t !== panel && t.contains && t.contains(panel) && a.playState === 'running'; });
+    if(moving.length){
+      fitChatPanel.waiting = true;
+      Promise.all(moving.map(a => a.finished.catch(() => {}))).then(() => { fitChatPanel.waiting = false; fitChatPanel(); });
+    }
+  }
   let bottom = barRect && barRect.top > 0 && barRect.top < visBottom ? barRect.top - 6 : visBottom - (innerWidth > 900 ? 24 : 9);
   // Dr. Smiley rides on top of the active tab, his head about 30px above
   // it; keep the message box clear of him. (He slides in after this runs,
@@ -12053,10 +12065,15 @@ function dockTabAt(bar, x){
     return '';
   };
   const act = what => { if(what === 'slim') dockTuck(); else if(what === 'open') dockOpen(); };
+  // While the keyboard or Dr. Smiley's panel is open nothing counts toward
+  // slim (the count starts again), so closing it never slims the bar.
+  const take = (w, what, ok) => {
+    if(blocked() || !ok){ w.run = 0; if(what === 'open' && ok) act(what); return; }
+    act(what);
+  };
   window.addEventListener('scroll', () => {
     if(activeCategory === 'chat') return;
-    const what = step(pageW, window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
-    if(!blocked() || what === 'open') act(what);
+    take(pageW, step(pageW, window.scrollY, document.documentElement.scrollHeight - window.innerHeight), true);
   }, { passive:true });
   // In Team Chat: your own scrolling of the thread does the same. A new
   // message scrolling it for you doesn't count (no touch just before).
@@ -12069,9 +12086,7 @@ function dockTabAt(bar, x){
   document.addEventListener('scroll', e => {
     const t = e.target;
     if(!t || t.id !== 'chatMessages' || activeCategory !== 'chat' || !phone.matches) return;
-    const what = step(threadW, t.scrollTop, t.scrollHeight - t.clientHeight);
-    if(performance.now() - touchedAt > 1500 || (blocked() && what !== 'open')) return;
-    act(what);
+    take(threadW, step(threadW, t.scrollTop, t.scrollHeight - t.clientHeight), performance.now() - touchedAt <= 1500);
   }, { passive:true, capture:true });
   // Drag along the bar: the lens follows your thumb and lands where you let go.
   let swallowUntil = 0;
