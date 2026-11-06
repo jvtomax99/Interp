@@ -28,7 +28,7 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v355-b1106.1012';
+const CACHE_VERSION = 'interpreter-hub-v356-b1106.1155';
 const PRECACHE = [
   './',
   './index.html',
@@ -79,6 +79,7 @@ const PRECACHE = [
   './features/backfill.js',
   './features/ask-hub.js',
   './features/credits.js',
+  './features/tool-banners.js',
   './features/opening.js',
   './home-polish.css',
   './home-polish.js',

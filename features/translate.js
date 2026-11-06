@@ -35,7 +35,7 @@ let trQuery = '';
 let trContext = '';
 
 function renderTranslate(){
-  let html = `<div class="section-head"><h2>Translate</h2><span class="sub">glossary first</span></div>`;
+  let html = toolBannerHtml('translate', 'Glossary first, then the AI');
   html += `<div class="tr-panel">`;
   html += `<details class="tool-note">
     <summary>${ICON_SHIELD}<span>Reference aid, not for patient use</span><em>More</em></summary>

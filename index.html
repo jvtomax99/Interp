@@ -661,6 +661,7 @@
 <script src="./features/backfill.js"></script>
 <script src="./features/ask-hub.js"></script>
 <script src="./features/credits.js"></script>
+<script src="./features/tool-banners.js"></script>
 <script src="./features/opening.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
@@ -5658,7 +5659,7 @@ function renderReview(){
   if(reviewActive && reviewIndex < reviewQueue.length) return renderReviewCard();
   if(RS.done) return renderReviewSummary();
   const due = dueReviewCount();
-  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${due} due</span></div>`;
+  let html = toolBannerHtml('review', `${due} due`);
   html += `<p class="practice-intro">Short sessions from your own record: what you missed comes first, then what’s due, with something new for variety. Type the Spanish and Dr. Smiley checks it against the glossary.</p>`;
   if(!whoAmI()){
     html += `<div class="progress-card"><p>Set your name so your review schedule is personal to you.</p><button class="btn btn-ghost" onclick="openNameModal()">Set your name</button></div>`;
@@ -5869,9 +5870,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'opening',     tone:'gd-n1', pin:'pins/wave.webp',              eyebrow:'The opening',           title:'Your badge greets you when the Hub starts: tap it to scan in, with soft music. Put your own photo on it, set your badge title, or turn it off, in More' },
-  { id:'credits',     tone:'gd-n2', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen or a glossary domain was: tap its small credit tag, or double-tap its title' },
-  { id:'practice',    tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'CoreCHI Practice',      title:'Study three days in a row and the sun comes out over your campus; seven, and a rainbow. Tap the people there for a glossary word' },
+  { id:'tool-banners', tone:'gd-n1', pin:'pins/translate.webp',       eyebrow:'A new look',            title:'Translate, Term Review, Ask and the Doctor Directory open under a colour banner, and the picture you tap on Home flies into it' },
+  { id:'opening',     tone:'gd-n2', pin:'pins/wave.webp',              eyebrow:'The opening',           title:'Your badge greets you when the Hub starts: tap it to scan in, with soft music. Put your own photo on it, set your badge title, or turn it off, in More' },
+  { id:'credits',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Idea credits',          title:'See whose idea a screen or a glossary domain was: tap its small credit tag, or double-tap its title' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -7300,7 +7301,7 @@ function render(){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
     searchPlaceholder = 'Search providers, specialties, places…';
   } else if(activeCategory === 'doctor-directory'){
-    addBtnHtml = '';   // the navy "+ Add" sits by the title (renderDoctorDirectory)
+    addBtnHtml = '';   // "+ Add" sits on the banner, by the count (below)
     searchPlaceholder = 'Search doctors, specialties, locations…';
   } else if(activeCategory === 'ethics'){
     addBtnHtml = '';
@@ -7353,6 +7354,9 @@ function render(){
   // otherwise throw the field away mid-word.
   const bannerCat = activeCategory === 'all' ? null : DATA.categories.find(c => c.id === activeCategory);
   const bannerHtml = (activeCategory === 'all' || bannerCat) ? domainBannerHtml(bannerCat) : '';
+  // Doctor Directory's banner goes above its search, outside #content for the
+  // same reason; renderDoctorDirectory fills in the count (features/tool-banners.js).
+  const toolTopHtml = activeCategory === 'doctor-directory' ? toolBannerHtml('doctor-directory', '', doctorAddBtnHtml()) : '';
 
   // Any focused screen — a single domain or a single tool — is meant to feel
   // isolated: no sidebar, no other tiles competing for attention. Only Home
@@ -7384,7 +7388,7 @@ function render(){
     </div>
     `}
     <div class="main">
-      ${bannerHtml || (showTopbar ? `
+      ${bannerHtml || toolTopHtml + (showTopbar ? `
       <div class="topbar">
         <div class="search"><input id="searchInput" type="text" placeholder="${searchPlaceholder}" value="${escapeHtml(searchQuery)}"></div>
         ${addBtnHtml}
@@ -10704,8 +10708,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1106.1012';
-const BUILD_TIME = '2026-11-06 10:12 UTC';
+const BUILD_ID = 'b1106.1155';
+const BUILD_TIME = '2026-11-06 11:55 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -12752,7 +12756,8 @@ function doctorLetterTouch(e){
   doctorJumpTo(b.dataset.l);
 }
 
-const DOCTOR_ADD_BTN = `<button type="button" class="dl-add" onclick="openAddDoctorDirModal()" aria-label="Add a doctor">+ Add</button>`;
+// A function, not a const: render() reads it, and may run before this line does.
+function doctorAddBtnHtml(){ return `<button type="button" class="dl-add" onclick="openAddDoctorDirModal()" aria-label="Add a doctor">+ Add</button>`; }
 function renderDoctorDirectory(q){
   let list = DOCTOR_DIRECTORY.slice();
   const view = q ? 'all' : doctorRegionView();
@@ -12770,12 +12775,14 @@ function renderDoctorDirectory(q){
 
   const retry = `<button type="button" class="btn btn-ghost" onclick="loadDoctorDirectory()">Try again</button>`;
   if(list.length===0){
+    // The count on the banner above (render() draws it, toolBannerMeta in features/tool-banners.js).
+    toolBannerMeta(DOCTOR_DIRECTORY.length === 0 && DOCTOR_DIR_STATE !== 'ok' ? '' : '0 doctors');
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE === 'failed')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Couldn't load the doctors.<br>${doctorDirProblem()}<div style="margin-top:13px">${retry}</div></div>`;
     if(DOCTOR_DIRECTORY.length===0 && DOCTOR_DIR_STATE !== 'ok')
       return `<div class="empty"><div class="glyph">${ICON_GRID}</div>Loading the doctors&hellip;</div>`;
     if(DOCTOR_DIRECTORY.length && !q && view !== 'all')
-      return `<div class="section-head dl-head"><h2>Doctor Directory</h2>${DOCTOR_ADD_BTN}</div>${doctorRegionChipsHtml(view, false)}`
+      return doctorRegionChipsHtml(view, false)
         + `<div class="empty"><div class="glyph">${ICON_GRID}</div>No doctors in the ${escapeHtml(regionName(view))} region yet.<br>Add one, or run a Doctor Prep search.</div>`;
     const msg = DOCTOR_DIRECTORY.length===0
       ? `No doctors here yet.<br>Run a Doctor Prep search or add one manually to get started.`
@@ -12787,9 +12794,11 @@ function renderDoctorDirectory(q){
   const needN = list.filter(d => doctorMissing(d).length).length;
   if(doctorNeedsOnly){
     list = list.filter(d => doctorMissing(d).length);
-    if(!list.length)
-      return `<div class="section-head dl-head"><h2>Doctor Directory</h2>${DOCTOR_ADD_BTN}</div>${doctorRegionChipsHtml(view, !!q)}${doctorToolsHtml(0)}`
+    if(!list.length){
+      toolBannerMeta('0 need info');
+      return `${doctorRegionChipsHtml(view, !!q)}${doctorToolsHtml(0)}`
         + `<div class="empty"><div class="glyph">${ICON_GRID}</div>Every doctor here has a place, a floor and prep terms.</div>`;
+    }
   }
   const searching = !!q;
   const sort = doctorSortView();
@@ -12817,8 +12826,8 @@ function renderDoctorDirectory(q){
   // One number on screen, and it's what the list shows.
   const n = list.length;
   const sub = doctorNeedsOnly ? `${n} need${n === 1 ? 's' : ''} info` : `${n} doctor${n === 1 ? '' : 's'}`;
-  let html = `<div class="section-head dl-head"><h2>Doctor Directory</h2><span class="sub">${sub}</span>${DOCTOR_ADD_BTN}</div>`;
-  html += doctorRegionChipsHtml(view, searching);
+  toolBannerMeta(sub);
+  let html = doctorRegionChipsHtml(view, searching);
   if(DOCTOR_DIR_STATE === 'failed')
     html += `<div class="empty" style="padding:13px 17px;margin-bottom:13px;text-align:left">Showing the copy saved on this phone. Couldn't refresh it: ${doctorDirProblem()} ${retry}</div>`;
   html += doctorToolsHtml(needN, sort, groups, searching);

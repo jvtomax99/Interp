@@ -48,6 +48,10 @@ const GUIDE_TOPICS = [
     <p><b>My photo on the badge</b> uses the photo you added with your name (tap your initial at the top right to add one; it's the same one your team sees in Team Chat). It's off unless you turn it on. With it on, Dr. Smiley moves to a small circle in the badge's corner and winks from there. A square photo fills the tall spot, so a little of each side is trimmed: a face works best.</p>
     <p>With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, nothing drifts or swings: the badge is already hanging, and the tap goes straight to green.</p>` },
 
+  { id:'tool-banners', section:'start', k:'banner banners colour color top title header translate term review ask hub doctor directory pin flies fly new look picture', q:'Why do Translate, Term Review, Ask and the Doctor Directory have a colour banner?', a:`
+    <p>They open under the same kind of colour banner as the glossary domains: the screen's name, its picture, and one line about it, like <b>435 due</b> on Term Review or the number of doctors on the Doctor Directory.</p>
+    <p>When you open one from Home, its picture flies up from the tile you tapped into the banner. With <b>Still</b> chosen for Dr. Smiley, or Reduce Motion on your phone, it's simply there.</p>
+    <p>A few buttons moved onto the banners: <b>+ Add</b> on the Doctor Directory sits beside the count, and on Ask the Hub, <b>What I remember</b> and <b>New</b> (a new conversation) are on the banner. Once you're talking with Dr. Smiley, his face takes the picture's place.</p>` },
   { id:'pins', section:'start', k:'pins pictures icons look new 3d soft changed different art heart brain picture style images', q:'Why do the pictures on Home look different?', a:`
     <p>The pictures on Home, in the menu and in the guide (the heart, the brain, Translate, Team Chat and the rest) were redrawn in a new soft 3D style: rounded shapes, gentle light, the app's own colors. They still mean the same things and sit in the same places.</p>
     <p>The small icons match too: the tab bar at the bottom, the side menu, All Tools and the icons you can pick for a new domain. Recently deleted now shows a trash can.</p>` },
@@ -154,7 +158,7 @@ const GUIDE_TOPICS = [
     </ul>
     <p>Above the box he shows what <b>that</b> means right now. If it could mean two things, he asks which one, with a button for each. If there's nothing to go on, he says so instead of guessing.</p>
     <p><b>Now in Spanish</b> lasts for this conversation only. To keep it, tap <b>Use Spanish in every conversation</b>.</p>
-    <p><b>Stop</b>, next to the dots while he works, cancels a question. <b>New conversation</b> at the top starts fresh; what you asked him to remember stays.</p>` },
+    <p><b>Stop</b>, next to the dots while he works, cancels a question. <b>New</b>, on Ask's banner at the top, starts a new conversation; what you asked him to remember stays.</p>` },
 
   { id:'askcorrect', section:'ask', k:'wrong answer incorrect correct this fix dr smiley teach improve team note approve', q:'Dr. Smiley got something wrong', a:`
     <p>Tap <b>Correct this</b> under the answer and write what works better. For example: <i>Many of our patients understand “azúcar en la sangre” better. Say that first.</i></p>
@@ -169,7 +173,7 @@ const GUIDE_TOPICS = [
       <li><i>From now on explain things in Spanish.</i></li>
       <li><i>I'm studying oncology.</i></li>
     </ul>
-    <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> at the top of Ask, or in your name settings. Each choice has a <b>Forget</b> button.</p>
+    <p>He only says it's saved once it really is. To see or change what he remembers, tap <b>What I remember</b> on Ask's banner at the top, or in your name settings. Each choice has a <b>Forget</b> button.</p>
     <p>It stays <b>on this phone</b>, under the name set on it. Nothing goes to the team. If someone else sets their name on a shared phone, they start fresh.</p>` },
 
   { id:'askmoves', section:'ask', k:'animation moving distracting calm still focused lively motion turn off hide dr smiley follows wink laugh nod expressions brows eyebrows face faces surprised sad worried doubtful squash stretch spring bounce cheer quiz bounce wince streak right wrong answer', q:'Can I make Dr. Smiley move less, or hide him?', a:`
@@ -274,7 +278,7 @@ const GUIDE_TOPICS = [
     <p><b>Sort: Place</b>, at the right under the regions, is a menu: tap it to arrange the list by <b>Place</b> (where they work), <b>Specialty</b> (what they practice; a pediatric neurologist is under Neurology) or <b>A–Z</b> (by last name). In a long A–Z list, tap or slide along the letters on the right edge to jump. Your choice is kept on this phone. Every place has its own heading, even one with a single doctor, and each one folds. In Specialty, specialties with one or two doctors are together under <b>Other specialties</b>. Tap a bigger group’s heading to fold it away, or <b>Collapse all</b> beside Sort.</p>
     <p><b>Recent</b> shows the last doctors you opened on this phone; tap one to go straight to their page.</p>
     <p>Two to a row, each card shows their picture (or their specialty’s pin with their initials), specialty, floor (when it’s on file), and how many <b>terms</b>, <b>traps</b> (false friends, in red) and <b>tips</b> they have. No research yet? Tap <b>+ Prep terms</b> to look them up in Doctor Prep.</p>
-    <p>Tap <b>+ Add</b> beside the title to add a doctor. If the list finds possible duplicates or doctors on the old terminology, a yellow <b>things to tidy</b> button opens them in one place. To delete a doctor, open their page, tap the pencil, then <b>Delete</b>.</p>
+    <p>Tap <b>+ Add</b> on the banner at the top, beside the number of doctors, to add a doctor. If the list finds possible duplicates or doctors on the old terminology, a yellow <b>things to tidy</b> button opens them in one place. To delete a doctor, open their page, tap the pencil, then <b>Delete</b>.</p>
     <p>Tap a doctor to open their page. The useful part is what you add by hand: tap <b>Add tip</b> and note how they phrase things, what they always explain, anything a newer interpreter would want to know before walking in.</p>` },
 
   { id:'doctorgaps', section:'prep', k:'needs info missing floor place research prep terms incomplete fill in gaps doctor directory filter', q:'How do I find doctors with missing information?', a:`
@@ -497,7 +501,7 @@ const GUIDE_TOPICS = [
   { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
     <p><b>Looking things up: yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
     <p><b>Adding or changing something: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
-    <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New conversation</b> drops the ones still waiting.</p>
+    <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New</b> on Ask's banner (a new conversation) drops the ones still waiting.</p>
     <p>Translate, Doctor Prep and Look up need a connection.</p>` },
 
   { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline — 1 change waiting”', a:`
