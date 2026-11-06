@@ -82,6 +82,7 @@ const PRECACHE = [
   './features/tool-banners.js',
   './features/opening.js',
   './features/account.js',
+  './features/account-sync.js',
   './features/photo-adjust.js',
   './home-polish.css',
   './home-polish.js',
