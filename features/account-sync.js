@@ -159,15 +159,41 @@ function syncLocalPrint(){ return SYNC_KEYS.map(k => syncHash(syncLocalGet(k))).
 
 /* The sync itself. Reads the account's copy first, then writes back only the
    keys that differ, so a phone never overwrites what another phone added. */
+// At launch the phone may take a few seconds to remember it's the account
+// (hubAuthReady gives up after 2.5 s): a read sent before then goes as nobody
+// and is refused. Wait for it, up to 8 s.
+function syncAuthWait(uid){
+  const u = () => (typeof hubAuth !== 'undefined' && hubAuth) ? hubAuth.currentUser : null;
+  if(u() && u().uid === uid) return Promise.resolve(true);
+  return new Promise(res => {
+    let off = null, done = false;
+    const end = v => { if(done) return; done = true; try{ off && off(); }catch(e){} res(v); };
+    try{ off = hubAuth.onAuthStateChanged(x => { if(x && x.uid === uid) end(true); }); }catch(e){}
+    setTimeout(() => end(!!(u() && u().uid === uid)), 8000);
+  });
+}
+
 async function accountSync(why){
   if(SYNC.busy){ SYNC.again = true; return SYNC.busy; }
+  const saved0 = typeof acctRead === 'function' ? acctRead(ACCT_KEY) : null;
+  if(saved0 && saved0.uid && typeof hubAuth !== 'undefined' && hubAuth && !hubAuth.currentUser) await syncAuthWait(saved0.uid);
+  if(SYNC.busy){ SYNC.again = true; return SYNC.busy; }
   const a = typeof accountNow === 'function' ? accountNow() : null;
-  if(!a || !db || (typeof navigator !== 'undefined' && navigator.onLine === false)) return null;
+  // Signed in on this phone, but not as the account just now: say so on More's card.
+  if(!a){
+    const saved = acctRead(ACCT_KEY), u = (typeof hubAuth !== 'undefined' && hubAuth) ? hubAuth.currentUser : null;
+    if(saved && saved.uid) syncNote({ ok: false, error: 'other_user', code: u ? 'uid ' + String(u.uid).slice(0, 6) : 'no user' });
+    return null;
+  }
+  const cu = (typeof hubAuth !== 'undefined' && hubAuth) ? hubAuth.currentUser : null;
+  if(!cu){ syncNote({ ok: false, error: 'other_user', code: 'no user' }); return null; }
+  if(!db){ syncNote({ ok: false, error: 'not_ready' }); return null; }
+  if(typeof navigator !== 'undefined' && navigator.onLine === false){ syncNote({ ok: false, error: 'offline' }); return null; }
   SYNC.busy = (async () => {
     const ref = db.collection(SYNC_DOC).doc(a.uid);
     let remote = {};
     try{ const snap = await ref.get(); remote = snap.exists ? (snap.data() || {}) : {}; }
-    catch(e){ return { ok: false, why, error: 'read' }; }   // offline, or the rule isn't published yet
+    catch(e){ return syncNote({ ok: false, why, error: 'read', code: (e && e.code) || String(e && e.message || e).slice(0, 60) }); }   // offline, or the rule isn't published yet
     const base = syncReadBase(a.uid), nextBase = {}, push = {}, took = [];
     const keepMine = acctRead('ih_syncKeepMine') === a.uid;
     SYNC_KEYS.forEach(k => {
@@ -189,14 +215,14 @@ async function accountSync(why){
         Object.keys(push).forEach(f => { const k = SYNC_KEYS.find(x => syncField(x) === f); if(k) nextBase[k] = base[k]; });
         acctWrite(SYNC_BASE_KEY, { uid: a.uid, h: nextBase });
         if(took.length) syncRefresh(took);
-        return { ok: false, why, error: 'write', took };
+        return syncNote({ ok: false, why, error: 'write', took, code: (e && e.code) || String(e && e.message || e).slice(0, 60) });
       }
     }
     acctWrite(SYNC_BASE_KEY, { uid: a.uid, h: nextBase });
     if(keepMine) acctWrite('ih_syncKeepMine', null);
     SYNC.lastLocal = syncLocalPrint(); SYNC.last = Date.now(); SYNC.took += took.length;
     if(took.length) syncRefresh(took);
-    return { ok: true, why, took, sent: Object.keys(push).filter(f => f !== 'at') };
+    return syncNote({ ok: true, why, took, sent: Object.keys(push).filter(f => f !== 'at') });
   })();
   try{ return await SYNC.busy; }
   finally{
@@ -231,6 +257,47 @@ function syncRefresh(keys){
     if(!typing && typeof render === 'function' && (has('ih_theme') || has('ih_region') || keys.some(k => SYNC_PROGRESS.includes(k)))) render();
   }catch(e){}
   try{ document.dispatchEvent(new CustomEvent('ih:synced', { detail: { keys } })); }catch(e){}
+}
+
+/* What happened last, for More's account card (accountSyncLine): kept in
+   ih_syncLast so it survives the Hub restarting. code is the database's own
+   reason (permission-denied, unavailable...), shown small so Jose can send it. */
+const SYNC_LAST_KEY = 'ih_syncLast';
+function syncNote(r){
+  const prev = acctRead(SYNC_LAST_KEY) || {};
+  const rec = { at: Date.now(), ok: !!r.ok, error: r.error || '', code: r.code || '',
+    took: (r.took || []).length, sent: (r.sent || []).length, okAt: r.ok ? Date.now() : (prev.okAt || 0) };
+  acctWrite(SYNC_LAST_KEY, rec);
+  try{ if(document.getElementById('acctSync') && typeof ACCT !== 'undefined' && !ACCT.busy) document.getElementById('acctSync').outerHTML = accountSyncLine(); }catch(e){}
+  return r;
+}
+function syncClock(t){ try{ return new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }catch(e){ return ''; } }
+function accountSyncLine(){
+  const L = acctRead(SYNC_LAST_KEY);
+  const esc = typeof acctEsc === 'function' ? acctEsc : String;
+  let text, bad = false;
+  if(SYNC.busy) text = 'Syncing your progress…';
+  else if(!L) text = "Your progress hasn't synced on this phone yet.";
+  else if(L.ok) text = `Progress synced at ${syncClock(L.at)}.` + (L.took ? ` ${L.took} ${L.took === 1 ? 'thing' : 'things'} came from your other phone.` : '');
+  else {
+    bad = true;
+    const why = { other_user: "this phone isn't signed in as your account right now. Sign out, then sign in again.",
+      offline: "you're offline.", not_ready: "the Hub was still starting. Tap Sync now.",
+      read: L.code === 'permission-denied' ? 'the database refused it. Check that the account-sync rule is published.' : "the Hub couldn't reach the database.",
+      write: L.code === 'permission-denied' ? 'the database refused to save it. Check the account-sync rule.' : "the Hub couldn't save it." }[L.error] || "something went wrong.";
+    text = `Progress didn't sync at ${syncClock(L.at)}: ${why}` + (L.okAt ? ` Last good sync ${syncClock(L.okAt)}.` : '');
+  }
+  const code = bad && L && L.code ? ` <span class="acct-sync-code">(${esc(L.code)})</span>` : '';
+  return `<div class="acct-sync${bad ? ' is-bad' : ''}" id="acctSync"><p role="status">${esc(text)}${code}</p>`
+    + `<button class="acct-link" type="button" onclick="accountSyncNow()"${SYNC.busy ? ' disabled' : ''}>Sync now</button></div>`;
+}
+async function accountSyncNow(){
+  const el = document.getElementById('acctSync');
+  const p = accountSync('now');
+  if(el) el.outerHTML = accountSyncLine();
+  const r = await p;
+  const box = document.getElementById('acctSync'); if(box) box.outerHTML = accountSyncLine();
+  try{ showToast(r && r.ok ? 'Your progress is synced.' : "Progress didn't sync. The reason is on the card."); }catch(e){}
 }
 
 // When you leave the app, and every 2 minutes while something changed.
