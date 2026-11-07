@@ -19,7 +19,9 @@ concurrency:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    # The full run takes 37-40 min on a free runner (2026-11-07); at 40 it
+    # was cut off inside the last suite, so the cap has room again.
+    timeout-minutes: 55
     defaults:
       run:
         working-directory: tests

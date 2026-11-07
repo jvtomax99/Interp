@@ -1,8 +1,10 @@
-/* The tab bar's tuck and open (S2 in docs/PLAN.md): it moves with transform
-   and opacity only (dockMorph in index.html; its pieces in home-polish.css).
-   The bar takes its new layout at once, the outline and the tab glide on
-   the compositor, and at rest the bar is the same as before. Runs in WebKit
-   too (CI's webkit job): Safari is where the team uses it. */
+/* The tab bar, slim when you scroll (docs/features/tab-bar.md) and its move
+   (S2 in docs/PLAN.md): only when you scroll (no timer), a real scroll, full
+   at the top and bottom with no flicker, every tab one tap while slim. It
+   moves with transform and opacity only (dockMorph in index.html; its
+   pieces in home-polish.css): the bar takes its new layout at once, the
+   outline and the tabs glide on the compositor. Runs in WebKit too (CI's
+   webkit job): Safari is where the team uses it. */
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 
@@ -46,7 +48,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   // came 65.9-69.9 px wide (full: 70.1) with nothing counted as moving, so
   // also wait until his computed scale is the one the bar's state asks for.
   const growing = () => { const d = document.querySelector('.dock-smiley'); if (!d) return false;
-    const want = document.body.classList.contains('dock-mini') ? 54 / 58 : 1;
+    const want = document.body.classList.contains('dock-mini') ? 46 / 58 : 1;
     const sc = getComputedStyle(d).scale; const v = sc === 'none' ? 1 : parseFloat(sc);
     return Math.abs(v - want) > .0005; };
   const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
@@ -58,11 +60,10 @@ const settle = page => page.evaluate(() => new Promise(r => {
   const b = await L.chromium.launch();
   console.log('== phone, a glossary screen');
   const { page } = await L.boot(b, { device: 'iphone', settle: 5000 });
-  // Scrolled down first (the scroll itself tucks the bar), then opened;
-  // the 4 s idle tuck is restarted before each step so it never fires mid-check.
+  // Scrolled down first (the scroll itself slims the bar), then opened.
   await page.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); });
   await page.waitForTimeout(600);
-  await page.evaluate(() => { dockOpen(); dockIdleRestart(); });
+  await page.evaluate(() => { dockOpen(); });
   await page.waitForTimeout(300); await settle(page);
   const open = await rects(page);
   // The page's animation clock against the wall clock (WebKit on CI has run
@@ -73,13 +74,13 @@ const settle = page => page.evaluate(() => new Promise(r => {
 
   // Mid-tuck: the bar already has its tucked layout; only transform and
   // opacity move (the tab's colour fade aside).
-  await page.evaluate(() => { dockIdleRestart(); dockTuck(); });
+  await page.evaluate(() => { dockTuck(); });
   await page.waitForTimeout(120);
   const mid = await dockAnims(page);
   const midBar = await rects(page);
   const bad = mid.filter(a => a.props.some(p => !LAYOUT_FREE.includes(p) && !(p === 'color' && /tabbar-btn/.test(a.el))));
-  ok(mid.length > 5 && !bad.length, 'mid-tuck, ' + mid.length + ' animations, all transform or opacity', bad);
-  ok(await page.evaluate(() => !!document.querySelector('.tabbar.is-morph .dk-skin')), 'the outline is drawn by the moving pieces while it tucks');
+  ok(mid.length > 5 && !bad.length, 'mid-change, ' + mid.length + ' animations, all transform or opacity', bad);
+  ok(await page.evaluate(() => !!document.querySelector('.tabbar.is-morph .dk-skin')), 'the outline is drawn by the moving pieces while it changes');
   await page.waitForTimeout(100);
   const midBar2 = await rects(page);
   ok(Math.abs(midBar.bar.w - midBar2.bar.w) < .01, 'the bar\'s own size does not animate (no layout per frame)', [midBar.bar.w, midBar2.bar.w]);
@@ -94,18 +95,18 @@ const settle = page => page.evaluate(() => new Promise(r => {
   await goneIn();
   const left = await page.evaluate(() => ({ skins: document.querySelectorAll('.dk-skin').length, morph: !!document.querySelector('.is-morph, .dk-lead'), running: document.getAnimations().filter(a => a.effect && a.effect.target && a.effect.target.closest && a.effect.target.closest('.tabbar') && a.playState === 'running').length }));
   ok(!left.skins && !left.morph && !left.running, 'after the move nothing is left behind', left);
-  ok(Math.abs(mini.bar.h - 54) < .5 && Math.abs(mini.bar.l - open.bar.l) < .5 && Math.abs(mini.bar.b - open.bar.b) < .5, 'tucked: a 54px capsule on the same corner', mini.bar);
-  // Dr. Smiley: scaled 54/58, his disc's right edge and bottom where they were.
+  ok(Math.abs(mini.bar.h - 46) < .5 && Math.abs(mini.bar.l - open.bar.l) < .5 && Math.abs(mini.bar.r - open.bar.r) < .5 && Math.abs(mini.bar.b - open.bar.b) < .5, 'slim: 46px tall, the same width and corner', { open: open.bar, slim: mini.bar });
+  // Dr. Smiley: scaled 46/58, his disc's right edge and bottom where they were.
   const k = d => d.w / 58;                     // his scale, from his button's width
   const disc = d => ({ right: d.r - 5 * k(d), bottom: d.b });
-  ok(Math.abs(mini.dr.w / open.dr.w - 54 / 58) < .002 && Math.abs(disc(mini.dr).right - disc(open.dr).right) < .1 && Math.abs(disc(mini.dr).bottom - disc(open.dr).bottom) < .1,
+  ok(Math.abs(mini.dr.w / open.dr.w - 46 / 58) < .002 && Math.abs(disc(mini.dr).right - disc(open.dr).right) < .1 && Math.abs(disc(mini.dr).bottom - disc(open.dr).bottom) < .1,
     'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr, clock, drMoving });
   ok(Math.abs(mini.tag.h - open.tag.h) < .1 && Math.abs(mini.tag.b - open.tag.b) < .1, 'his "Ask" tag keeps its size and hangs where it did', { open: open.tag, mini: mini.tag });
 
   // Reversed halfway (scroll down, then straight back up): no jump.
   const jumps = [];
   for (const gap of [40, 120]) {
-    await page.evaluate(() => { dockIdleRestart(); dockOpen(); }); await page.waitForTimeout(300); await settle(page);
+    await page.evaluate(() => { dockOpen(); }); await page.waitForTimeout(300); await settle(page);
     // Timed in the page, so the browser's round trips don't move the moment.
     jumps.push(await page.evaluate(gap => new Promise(r => {
       dockTuck();
@@ -123,11 +124,6 @@ const settle = page => page.evaluate(() => new Promise(r => {
       }), gap);
     }), gap));
   }
-  // The bar tucks itself after 4 s idle. The loop's last restart of that
-  // count is followed by two settle() waits (each up to 3 s while Dr. Smiley
-  // sways), so a slow CI runner read the bar tucked (132 x 54). Restart it
-  // here: what follows (300 ms, one settle) stays under 4 s.
-  await page.evaluate(() => dockIdleRestart());
   const measured = jumps.filter(j => j !== 'skipped');
   ok(measured.length > 0 && measured.every(j => Math.abs(parseFloat(j)) < 1), 'turned around mid-move, the outline carries on from where it was (jumps ' + jumps.join('; ') + ' px)');
   await page.waitForTimeout(300); await settle(page);
@@ -136,12 +132,52 @@ const settle = page => page.evaluate(() => new Promise(r => {
   ok(Math.abs(back.bar.w - open.bar.w) < .5 && gone >= 0, 'and lands open, as before, the pieces gone (' + gone + ' ms after it settled)', back.bar);
   ok(!page.__errors.length, 'no page errors', page.__errors);
 
+  console.log('== phone, when it changes');
+  { const { ctx, page: hp } = await L.boot(b, { device: 'iphone', name: 'Jose Vazquez' });
+    const slim = () => hp.evaluate(() => document.body.classList.contains('dock-mini'));
+    await hp.waitForTimeout(5000);
+    ok(!(await slim()), 'no timer: 5 s untouched at the top of Home, the bar stays full');
+    // Scrolled from the page: mobile WebKit has no wheel. Each step waits
+    // for its own scroll event (the bar's listener runs first), since CI's
+    // WebKit delivers it at a slow rendering update, well after a fixed wait.
+    const scroll = d => hp.evaluate(d => new Promise(r => {
+      addEventListener('scroll', () => setTimeout(r, 50), { once: true });
+      window.scrollBy(0, d); setTimeout(r, 2000);
+    }), d);
+    await scroll(40); await hp.waitForTimeout(400);
+    ok(!(await slim()), 'a 40px nudge down does not change it');
+    await scroll(200); await hp.waitForTimeout(600);
+    ok(await slim(), 'a real scroll down makes it slim');
+    const tap = await hp.evaluate(() => [...document.querySelectorAll('.tabbar-btn')].map(t => { const r = t.getBoundingClientRect(), e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return { n: t.getAttribute('aria-label'), w: Math.round(r.width), h: Math.round(r.height), mine: !!e && t.contains(e), x: r.x + r.width / 2, y: r.y + r.height / 2 }; }));
+    ok(tap.length === 5 && tap.every(t => t.w >= 44 && t.h >= 40 && t.mine), 'slim: all five tabs there, each takes its own tap', tap);
+    await scroll(-20); await hp.waitForTimeout(300);
+    ok(await slim(), '20px back up does not change it');
+    await scroll(-20); await hp.waitForTimeout(500);
+    ok(!(await slim()), '40px up opens it');
+    await scroll(200); await hp.waitForTimeout(600);
+    const tr = tap.find(t => t.n === 'Translate');
+    await hp.touchscreen.tap(tr.x, tr.y); await hp.waitForTimeout(700);
+    ok(await hp.evaluate(() => activeCategory === 'translate' && !document.body.classList.contains('dock-mini')), 'slim, one tap on Translate opens Translate, with the bar full');
+    await hp.evaluate(() => goHome()); await hp.waitForTimeout(1200);
+    await hp.evaluate(() => { window.__flips = 0; let was = document.body.classList.contains('dock-mini');
+      new MutationObserver(() => { const m = document.body.classList.contains('dock-mini'); if (m !== was) { was = m; window.__flips++; } }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      scrollTo(0, document.documentElement.scrollHeight); });
+    await hp.waitForTimeout(1500);
+    const f0 = await hp.evaluate(() => window.__flips);
+    for (const d of [-20, 20, -15, 15, -20, 20]) { await scroll(d); await hp.waitForTimeout(120); }
+    await hp.waitForTimeout(400);
+    const f = await hp.evaluate(() => window.__flips);
+    ok(f === f0 && !(await slim()), 'at the bottom of the page it is full, and the bounce does not flicker it (' + (f - f0) + ' changes)');
+    ok(!hp.__errors.length, 'no page errors', hp.__errors);
+    await ctx.close(); }
+
   console.log('== phone, reduced motion');
   const { page: rp } = await L.boot(b, { device: 'iphone', settle: 3000, reducedMotion: true });
   await rp.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); }); await rp.waitForTimeout(500);
-  await rp.evaluate(() => { dockOpen(); dockIdleRestart(); }); await rp.waitForTimeout(300);
+  await rp.evaluate(() => { dockOpen(); }); await rp.waitForTimeout(300);
   const r = await rp.evaluate(() => { dockTuck(); return { skin: !!document.querySelector('.dk-skin'), mini: document.body.classList.contains('dock-mini') }; });
-  ok(!r.skin && r.mini, 'reduced motion: it tucks at once, nothing moves', r);
+  ok(!r.skin && r.mini, 'reduced motion: it goes slim at once, nothing moves', r);
 
   // The bar steps aside for overlays by body classes (overlayFlags in
   // index.html; S7a). Each must follow its overlay before the next frame:

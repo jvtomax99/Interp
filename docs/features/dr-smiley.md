@@ -60,7 +60,7 @@ The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
   pivot (`smileySway`: 50% 92% dock, 50% 85% Home; only the one on screen
   is pushed, and the unseen one's breathing pauses), so a scale must be
   moved back (dock: the bob's left/top; Home: `translate`), or he drifts
-  up. When the tab bar tucks (54px) he shrinks by `scale: 54/58` and a
+  up. When the tab bar goes slim (46px) he shrinks by `scale: 46/58` and a
   `translate` worked out for that 50% 92% pivot, not by a new `--ds-s`
   (S2: nothing on the dock changes layout while it moves); his "Ask" tag is
   scaled back so it keeps its size. `tests/suites/dock-tuck.cjs` checks his

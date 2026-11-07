@@ -135,10 +135,15 @@ const GUIDE_TOPICS = [
       <li><b>Chat</b>: your team.</li>
       <li><b>More</b>: everything else, in groups: <b>Study</b> (practice, Term Review, False Friends…), <b>Doctors</b>, <b>Reference</b> (every domain, 3D Body, this guide) and <b>You</b> (your account and settings).</li>
     </ol>
+    <p>Scroll down and the bar gets thinner: just the icons, and every button still works with one tap. Scroll back up and the names come back.</p>
     <p><b>Dr. Smiley</b> sits beside that bar on the right, with <b>Ask</b> under him. Tap him to ask a question. On Home he’s in the greeting instead.</p>
     <p>Across the <b>top</b>: the moon switches dark mode on and off, the bell shows what the team changed, and your initial opens your name and settings.</p>
     <p>If you ever feel lost, tap <b>Home</b>. The arrow in the top-left corner takes you back one step.</p>` },
 
+  { id:'tabbar', section:'start', k:'tab bar bottom bar thinner slim smaller shrinks shrink collapses collapse names gone icons only disappears pill capsule scrolling', q:'Why does the bar at the bottom get thinner?', a:`
+    <p>When you scroll down, the bar at the bottom gets thinner so you see more of the page. It keeps all five buttons, just without their names: the house is <b>Home</b>, the magnifying glass <b>Search</b>, EN/ES <b>Translate</b>, the bubbles <b>Chat</b> and the signpost <b>More</b>. One tap on any of them works, thin or not.</p>
+    <p>The names come back when you scroll up a little, when you reach the top or the very bottom of a page, and on every new page you open.</p>
+    <p>It only changes when you scroll on purpose. Reading without touching the screen, or nudging the page a little, leaves it as it is. Dr. Smiley gets a little smaller with it.</p>` },
   { id:'askwhat', section:'ask', k:'ask the hub dr smiley doctor smiley assistant ai question chatbot help character', q:'Who is Dr. Smiley, and what can I ask him?', a:`
     <p>Dr. Smiley is the Hub's interpreter assistant. Ask him the way you'd ask a teammate: <i>How do I explain “ejection fraction”?</i> or <i>“Embarazada” or “embarrassed”?</i></p>
     <p>To ask him, tap him beside the tab bar (or his round button at the top right on a computer): a small panel opens right there, over the page you're on. You can also tap the smiley in the Home greeting, or go to <b>More</b> → <b>Ask the Hub</b> for the full screen.</p>

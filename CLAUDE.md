@@ -298,6 +298,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Adjust your photo, the frame before it's saved (`photoAdjust`, `uploadAvatar`'s `ready`): `photo-adjust.md`
 - Email sign-in, one account on every phone: the code, the ticket, the owner carried over, what syncs and what doesn't yet (`api/sign-in.js`, `features/account.js`, `accounts/`): `email-sign-in.md`
 - Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
+- The tab bar, slim when you scroll: when it changes (no timer, a real scroll, full at the top and bottom), the slim look, the move (`wireDock`, `dockSettle`, `dockMorph`): `tab-bar.md`
 - The More sheet, grouped: Study, Doctors, Reference, You; the settings rows' own sheet; numbers that need you (`MORE_GROUPS`, `moreSubOpen`, `reviewedDueCount`, `eventsNewCount`, `ih_eventsSeenAt`): `more-sheet.md`
 
 **Every visible change updates the User Guide in the same commit** (Jose's

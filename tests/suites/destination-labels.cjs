@@ -21,16 +21,10 @@ async function menu(page, name, desktop) {
   await pause(page);
 }
 async function openPhoneMenu(page) {
-  // A preceding card click may have scrolled Home and queued dockTuck.
-  // Let that scroll event and the dock's .42s transition finish before
-  // deciding whether the visible capsule needs to be expanded.
+  // A preceding card click may have scrolled Home and made the bar slim.
+  // Let that scroll event and the bar's move finish; slim, every tab is
+  // still there and takes one tap (docs/features/tab-bar.md).
   await pause(page, 450);
-  // The existing dock tucks when scrolling. Tap its capsule to expand it,
-  // exactly as a person does, before selecting a nonactive tab.
-  if (await page.evaluate(() => document.body.classList.contains('dock-mini'))) {
-    await page.locator('.tabbar-btn.is-active, .tabbar:not(:has(.tabbar-btn.is-active)) .tabbar-btn:last-child').click();
-    await pause(page, 450);
-  }
   // The More fallback may already have opened the sheet if the capsule
   // finished expanding before the click. Its open sheet hides the dock.
   if (!await page.locator('#moreSheetOverlay').evaluate(el => el.classList.contains('show'))) {
