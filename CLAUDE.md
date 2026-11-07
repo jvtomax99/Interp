@@ -262,6 +262,7 @@ activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
 hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
 hub-lessons/{id}                                                     <-- Ask the Hub team notes
 hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
+hub-titles/{account}                                                 <-- Titles the owner gives to an email account (email-sign-in.md, E3)
 hub-credits/{key}                                                    <-- Idea credits, one per credited screen (credits.md)
 push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
 accounts/{uid}  sign-in-codes/{id}  account-sync/{uid}               <-- Email sign-in (email-sign-in.md)

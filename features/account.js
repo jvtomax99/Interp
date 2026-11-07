@@ -203,6 +203,16 @@ async function accountAdopt(r){
   try{ loadAccessState(); }catch(e){}
   // Your progress and settings: this phone's and the account's joined (features/account-sync.js).
   try{ accountSyncForget(); accountSyncStart(); accountSync('signin'); }catch(e){}
+  accountReloadReviews();
+}
+
+// Term Review's record follows the account (E3): signing in or out reloads it
+// under the new owner (reviewWho in index.html; the name's record joins the
+// account's once, reviewMoveToAccount).
+function accountReloadReviews(){
+  try{
+    loadTermReviews().then(() => { try{ if(activeCategory === 'review' || activeCategory === 'home') renderContent(); }catch(e){} });
+  }catch(e){}
 }
 
 function accountApplyName(name){
@@ -261,6 +271,7 @@ async function accountSignOut(){
   ACCT.busy = false; ACCT.confirmOut = false; ACCT.step = '';
   if(!ok){ try{ onRemovedFromHub(); }catch(e){} }
   accountRedraw();
+  accountReloadReviews();
   try{ showToast(ok ? 'Signed out. This phone is on its own again.' : 'Signed out. Enter the team code to keep using the Hub.'); }catch(e){}
 }
 

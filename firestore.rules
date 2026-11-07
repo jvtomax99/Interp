@@ -166,7 +166,14 @@ service cloud.firestore {
       allow update: if practice() || (ownReview(resource.data) && ownReview(request.resource.data));
     }
     function myName() { return get(memberPath()).data.get('who', '').trim().lower(); }
-    function ownReview(d) { return isMember() && d.get('who', '') is string && d.get('who', '') != '' && d.get('who', '') == myName(); }
+    // By account (E3, 2026-11-07): `who` is the email account's id when the
+    // phone is signed in, so a record follows its person, not a typed name;
+    // a typed name can never pass for an account id.
+    function ownReview(d) {
+      return isMember() && d.get('who', '') is string && d.get('who', '') != ''
+        && (d.get('who', '') == request.auth.uid
+            || (!d.get('who', '').matches('acct_.*') && d.get('who', '') == myName()));
+    }
 
     // Reference reading found for a term, cached so the team pays for a
     // given term's search once rather than once per interpreter.
@@ -199,6 +206,20 @@ service cloud.firestore {
         && request.resource.data.name is string && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 60;
       allow delete: if signedIn() && (request.auth.uid == uid || isOwner());
+    }
+    // Titles given to an email account by the owner (Team access; E3,
+    // docs/features/email-sign-in.md). Everyone reads them for Team Chat;
+    // only the owner gives or takes back, and only to an account.
+    match /hub-titles/{uid} {
+      allow read: if team();
+      allow create, update: if isOwner() && uid.matches('acct_.*')
+        && request.resource.data.keys().hasOnly(['title', 'kind', 'rule', 'name', 'at'])
+        && request.resource.data.title is string && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 60
+        && request.resource.data.kind in ['supervisor', 'admin']
+        && request.resource.data.get('rule', '') is string && request.resource.data.get('rule', '').size() <= 20
+        && request.resource.data.get('name', '') is string && request.resource.data.get('name', '').size() <= 60;
+      allow delete: if isOwner();
     }
     // Email sign-in (api/sign-in.js, features/account.js,
     // docs/features/email-sign-in.md). accounts/{uid} is one person's
