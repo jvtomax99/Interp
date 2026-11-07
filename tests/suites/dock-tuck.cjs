@@ -19,8 +19,16 @@ const rects = page => page.evaluate(() => {
     return n && dr && (n === dr || n.contains(dr) || dr.contains(n)) && a.effect.getComputedTiming().iterations === Infinity; });
   const was = loops.map(a => [a, a.currentTime, a.playState]);
   loops.forEach(a => { a.pause(); a.currentTime = 0; });
+  // His scroll sway too (smileySway: an inline rotate on .dock-smiley, written
+  // each frame until it dies down): taken off for the reading, put back after,
+  // all in one task, so no frame shows it. On CI's WebKit the sway outlasted
+  // settle's 3 s cap and a 0.17 degree lean read his full size 0.3% big
+  // (70.29 px for 70.08), failing the size check (#248, 2026-11-07).
+  const sway = dr ? dr.style.rotate : '';
+  if (dr) dr.style.rotate = '';
   const q = s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; };
-  const out = { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag') };
+  const out = { bar: q('.tabbar'), dr: q('.dock-smiley'), tag: q('.dock-smiley-tag'), sway };
+  if (dr) dr.style.rotate = sway;
   was.forEach(([a, t, st]) => { a.currentTime = t; if (st === 'running') a.play(); });
   return out;
 });
@@ -52,14 +60,29 @@ const settle = page => page.evaluate(() => new Promise(r => {
     const sc = getComputedStyle(d).scale; const v = sc === 'none' ? 1 : parseFloat(sc);
     return Math.abs(v - want) > .0005; };
   const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
-  const check = () => (!moving() || performance.now() - t0 > 3000) ? r() : setTimeout(check, 50);
+  // Gives up after 3 s and says what was still moving (logged, so a slow CI
+  // run shows it instead of a puzzling number further on).
+  const what = () => [swaying() && 'sway', growing() && 'scale'].concat(document.getAnimations().filter(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; })
+    .map(a => (a.transitionProperty || a.animationName || 'waapi') + ' on ' + String(a.effect.target.className.baseVal === undefined ? a.effect.target.className : a.effect.target.className.baseVal).split(' ')[0])).filter(Boolean).join(', ');
+  const check = () => !moving() ? r('') : performance.now() - t0 > 3000 ? r(what()) : setTimeout(check, 50);
   check();
-}));
+})).then(late => { if (late) console.log('  info: still moving after 3 s (' + late + '); measured anyway'); });
 
 (async () => {
-  const b = await L.chromium.launch();
+  let b = await L.chromium.launch();
   console.log('== phone, a glossary screen');
-  const { page } = await L.boot(b, { device: 'iphone', settle: 5000 });
+  // Opened again once if the page (or the whole browser) died while it
+  // loaded, before any check had run: CI's WebKit did, "Target page, context
+  // or browser has been closed" on the first evaluate (#245, 2026-11-07).
+  // Said in the log; a second death fails the suite as before.
+  const openPage = async () => { const { page } = await L.boot(b, { device: 'iphone', settle: 5000 }); await page.evaluate(() => 1); return page; };
+  let page;
+  try { page = await openPage(); }
+  catch (e) {
+    console.log('  info: the page died while loading (' + String(e.message).split('\n')[0] + '); opening it again, once');
+    if (!b.isConnected()) b = await L.chromium.launch();
+    page = await openPage();
+  }
   // Scrolled down first (the scroll itself slims the bar), then opened.
   await page.evaluate(() => { setCategory('all'); window.scrollTo(0, 300); });
   await page.waitForTimeout(600);
@@ -100,7 +123,7 @@ const settle = page => page.evaluate(() => new Promise(r => {
   const k = d => d.w / 58;                     // his scale, from his button's width
   const disc = d => ({ right: d.r - 5 * k(d), bottom: d.b });
   ok(Math.abs(mini.dr.w / open.dr.w - 46 / 58) < .002 && Math.abs(disc(mini.dr).right - disc(open.dr).right) < .1 && Math.abs(disc(mini.dr).bottom - disc(open.dr).bottom) < .1,
-    'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr, clock, drMoving });
+    'Dr. Smiley shrinks with the bar, his disc\'s right edge and bottom kept', { open: open.dr, mini: mini.dr, sway: [open.sway, mini.sway], clock, drMoving });
   ok(Math.abs(mini.tag.h - open.tag.h) < .1 && Math.abs(mini.tag.b - open.tag.b) < .1, 'his "Ask" tag keeps its size and hangs where it did', { open: open.tag, mini: mini.tag });
 
   // Reversed halfway (scroll down, then straight back up): no jump.

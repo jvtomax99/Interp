@@ -402,6 +402,11 @@ come from this alone.
 
 ## Done
 
+- 2026-11-07 The tab bar test steadied on WebKit (`tests/suites/dock-tuck.cjs`, the harness): Dr. Smiley measured with his
+  scroll sway taken off (a 0.17 degree lean read him 0.3% big, #248's red run; the same numbers reproduced in Chromium),
+  "still moving after 3 s" logged with what was moving, a page crash logged, and the first page opened again once if it
+  died while loading (#245's red run). The old test did not fail in 24 WebKit runs on GitHub, the new one passed 24 of 24.
+  Test only; no User Guide change.
 - 2026-11-07 The campus's helicopter from Meshy, slimmed in Blender (Jose's pick after the ambulance): `real-map/README.md`,
   "The Meshy helicopter". 3D view and the card (its two frames only). Meshy's blades cut off, the app's rotor kept. Triangles
   +1.3-1.5%, 3D page 820 KB to 1.05 MB. `ambulance_bake.cjs` is now `meshy_bake.cjs`, for every Meshy model.
@@ -1329,6 +1334,16 @@ come from this alone.
   ~0.003 depending on the breath's phase (#57-#60, 2026-10-19). `rects()`
   now holds those loops at 0 for the read, and `settle()` waits for his
   scale to reach rest (WebKit read him mid-grow after a tuck). Measure him that way elsewhere.
+  His scroll sway too (2026-11-07, #248's red run): `smileySway` leans
+  `.dock-smiley` with an inline `rotate` written each frame, and on CI's
+  WebKit it outlasted `settle()`'s 3 s cap; a 0.17 degree lean read him
+  70.29 px for 70.08, so the scale ratio missed by 0.0024 (allowed 0.002).
+  `rects()` now takes the inline rotate off for the read and puts it back in
+  the same task; `settle()` logs "still moving after 3 s" when it gives up.
+  #245's red run was the page (or browser) dying while it loaded ("has
+  been closed" on the first evaluate, nothing checked yet): the harness logs
+  a page crash, and dock-tuck opens the page again once, a second death
+  still fails.
 - Dr. Smiley's frames lookU, halfL and lookUR show a thin hard white edge
   around one eye patch (seen over the original base too, so it predates
   the brows). A clean-up of those three frames is open (Later).
