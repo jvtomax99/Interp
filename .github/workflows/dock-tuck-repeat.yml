@@ -26,7 +26,7 @@ jobs:
         run: |
           pass=0; fail=0
           for i in $(seq 1 12); do
-            if BROWSER=webkit node run.cjs ${{ matrix.which }} > out-$i.txt 2>&1; then pass=$((pass+1)); else fail=$((fail+1)); echo "--- run $i failed"; grep -E "FAIL|info:|Error|closed" out-$i.txt | cut -c1-600; fi
+            if BROWSER=webkit node suites/${{ matrix.which }}.cjs > out-$i.txt 2>&1; then pass=$((pass+1)); else fail=$((fail+1)); echo "--- run $i failed"; grep -E "FAIL|info:|Error|closed" out-$i.txt | cut -c1-600; fi
             grep -h "info: still moving\|info: the page" out-$i.txt || true
           done
           echo "RESULT ${{ matrix.which }}: $pass passed, $fail failed"
