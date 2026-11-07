@@ -8174,6 +8174,10 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .acct-row{ display:flex; flex-wrap:wrap; gap:9px 17px; align-items:center; }
 .acct-row .btn{ flex:1 1 auto; }
 .acct-link{ appearance:none; background:none; border:0; padding:6px 0; font-family:inherit; font-size:var(--fs-sub); letter-spacing:var(--tr-body); font-weight:550; color:var(--navy); cursor:pointer; text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--line); }
+.acct-sync{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; margin:0 0 9px; }
+.acct-sync p{ margin:0; font-size:var(--fs-foot); letter-spacing:var(--tr-sm); line-height:1.4; color:var(--ink-soft); }
+.acct-sync.is-bad p{ color:var(--danger); }
+.acct-sync-code{ font-size:var(--fs-cap2); letter-spacing:var(--tr-sm); color:var(--ink-faint); }
 .acct-link:active{ opacity:.6; }
 .acct-link:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
 .acct-link[disabled], .acct-card .btn[disabled]{ opacity:.55; pointer-events:none; }

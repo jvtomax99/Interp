@@ -124,6 +124,13 @@ change; there is no live link between two phones open at once.
 - What came down is put where the app reads it at once (`syncRefresh`:
   the practice record reloaded, dark mode, the region controls), then the
   screen is redrawn, never while you're typing.
+- **What happened last is on More's card** (`accountSyncLine`, `ih_syncLast`,
+  2026-11-06, after Jose's two phones didn't sync): "Progress synced at …",
+  or "didn't sync" with the reason and the database's own code
+  (`permission-denied`...), and **Sync now** (`accountSyncNow`). A launch
+  where the phone hasn't remembered the account yet (`hubAuthReady` gives up
+  at 2.5 s) waits up to 8 s for it (`syncAuthWait`) instead of reading as
+  nobody and being refused.
 - **Not proven from here:** the real Firestore with the published rule
   (the suite runs on the stand-in), and iPhone finishing a write as the app
   goes to the background (if it doesn't, the next open sends it: the
