@@ -50,7 +50,7 @@ src[pad] = ("// ---- the helipad on Link Pavilion's roof, where the map puts it 
  "for (const [w,h,dx] of [[0.12,0.72,-0.25],[0.12,0.72,0.25],[0.42,0.12,0]]) add(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({ color:0xf4f6fa }), PAD.x+dx, PAD.y+0.04, PAD.z, false).rotation.x = -Math.PI/2;\n"
  "CUR = '_';\nfor (let i=0;i<8;i++){ const a = i/8*Math.PI*2; glow(PAD.x+Math.cos(a)*1.2, PAD.y+0.08, PAD.z+Math.sin(a)*1.2, 0.5, i%2 ? 0x8fe3ff : 0xffb070); }")
 # the Car Kit (cars.js, its data cars.json from cars_bake.py) first: back.js parks its cars with it, and the movers use it
-i = at('let wr = 41;'); src[i] += '\n' + open(os.path.join(HERE, 'cars.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + '\n' + back_pre
+i = at('let wr = 41;'); src[i] += '\n' + open(os.path.join(HERE, 'cars.js')).read() + '\n' + back_pre
 i = at('// ---- the living things, built once each'); src[i] = back_main + '\n' + src[i]
 out='\n'.join(x for x in src if x is not None)
 def rep(a,b,cnt=1):
@@ -105,9 +105,11 @@ rep("box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.
 rep("box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);","box(BW - 0.4, 0.1, 1.2, walk, BCX, 0.22, 12.7, 0.03, false); box(BW - 0.4, 0.1, 1.0, walk, BCX, 0.22, 17.3, 0.03, false);")
 rep("for (let x = -18; x <= 18; x += 6) if (x) lamp(x, 13.4);","for (let x = -42; x <= 40; x += 6) if (x && !blockedXZ(x, 13.4, 0.2)) lamp(x, 13.4);")
 # the front's trees, beds, benches and people stay off the map's buildings and streets
-rep("function tree(x, z, s=1, kind='round'){\n","function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n")
+# the Meshy models come first (meshy.js): the benches are drawn from them (README, "The Meshy bench")
+rep("function tree(x, z, s=1, kind='round'){\n", open(os.path.join(HERE, 'meshy.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n")
 rep("function bed(pts, y=0.3, o={}){\n","function bed(pts, y=0.3, o={}){\n  if (pts.some(([px, pz]) => blockedXZ(px, pz, 0.1))) return;\n")
 rep("function bench(x, z, ry=0, y=0.3){ ","function bench(x, z, ry=0, y=0.3){ if (blockedXZ(x, z, 0.2)) return; ")
+rep("g.rotation.y = ry; G.add(g);\n  const put = (geo, mat, px, py, pz, rx=0)", "g.rotation.y = ry; G.add(g);\n  { const m = new THREE.Mesh(meshyGeo('bench'), meshyMat('bench')); m.castShadow = true; m.receiveShadow = true; g.add(m); return; }\n  const put = (geo, mat, px, py, pz, rx=0)")
 rep("function stand(kind, i, x, z, ry=0, f=0){ ","function stand(kind, i, x, z, ry=0, f=0){ if (blockedXZ(x, z, 0.3)) return null; ")
 # the garden moves into the open court between Link Pavilion and the Patient Pavilion
 # (the pond garden is dropped above: back.js builds the real little park beside the pavilion in its place)
