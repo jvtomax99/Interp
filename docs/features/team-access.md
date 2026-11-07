@@ -1,6 +1,8 @@
 # Team access
 
 Moved out of `CLAUDE.md` so sessions read it only when they touch this.
+**Locked since 2026-11-07** (Jose; 41 phones had joined): practice mode is
+off and every rule is enforced.
 Code is in `index.html` unless a file is named. Keep this in step with the code.
 
 **Team access (one team code).** Everyone types the same team code
