@@ -66,14 +66,14 @@ function openingNames(){
    match it (tests/suites/opening.cjs holds them together). */
 const OP_PINS_SEEN_KEY = 'ih_pinsSeen';
 const OP_PINS = [
-  { id: 'first10',  icon: '\ud83c\udf31', c: '#2E9E6A', name: 'First steps' },
-  { id: 'century',  icon: '\ud83d\udcda', c: '#2E6FD0', name: 'Century' },
-  { id: 'week',     icon: '\ud83d\udd25', c: '#E0662E', name: 'Week strong' },
-  { id: 'sharp',    icon: '\ud83c\udfaf', c: '#C2485C', name: 'Sharpshooter' },
-  { id: 'sweep',    icon: '\ud83e\udde0', c: '#8A6CD1', name: 'Full sweep' },
-  { id: 'domain90', icon: '\ud83c\udfc5', c: '#C99212', name: 'Domain master' },
-  { id: 'exam',     icon: '\u23f1\ufe0f', c: '#0F7C8C', name: 'Exam conditions' },
-  { id: 'perfect',  icon: '\ud83d\udcaf', c: '#3A2E8F', name: 'Perfect paper' }
+  { id: 'first10',  icon: '\ud83c\udf31', c: '#2E9E6A', name: 'First steps', note: 'Answered 10 questions' },
+  { id: 'century',  icon: '\ud83d\udcda', c: '#2E6FD0', name: 'Century', note: 'Answered 100 questions' },
+  { id: 'week',     icon: '\ud83d\udd25', c: '#E0662E', name: 'Week strong', note: 'Studied 7 days in a row' },
+  { id: 'sharp',    icon: '\ud83c\udfaf', c: '#C2485C', name: 'Sharpshooter', note: '10 right in a row' },
+  { id: 'sweep',    icon: '\ud83e\udde0', c: '#8A6CD1', name: 'Full sweep', note: 'Practised all five domains' },
+  { id: 'domain90', icon: '\ud83c\udfc5', c: '#C99212', name: 'Domain master', note: '90% in a domain, over 10+ questions' },
+  { id: 'exam',     icon: '\u23f1\ufe0f', c: '#0F7C8C', name: 'Exam conditions', note: 'Finished a full exam simulation' },
+  { id: 'perfect',  icon: '\ud83d\udcaf', c: '#3A2E8F', name: 'Perfect paper', note: '100% on a session of 20 or more' }
 ];
 // Earned pins in the order earned, each marked new if this phone hasn't shown it yet.
 function openingPins(){
@@ -82,7 +82,7 @@ function openingPins(){
   try{ seen = JSON.parse(opGet(OP_PINS_SEEN_KEY) || '[]'); }catch(e){}
   if(!Array.isArray(seen)) seen = [];
   return OP_PINS.filter(p => have[p.id]).sort((a, b) => (Number(have[a.id]) || 0) - (Number(have[b.id]) || 0))
-    .map(p => Object.assign({ fresh: !seen.includes(p.id) }, p));
+    .map(p => Object.assign({ fresh: !seen.includes(p.id), at: Number(have[p.id]) || 0 }, p));
 }
 function opPinsHtml(){
   const pins = openingPins();
@@ -91,7 +91,35 @@ function opPinsHtml(){
   return `<div class="op-pins" aria-hidden="true">${pins.map((p, i) => {
     const y = 124 - i * 17, x = i % 2 ? 6 : -6, r = [-12, 9, -5, 14, -9, 6, -14, 11][i % 8];
     return `<i class="op-pin${p.fresh ? ' is-new' : ''}" data-pin="${p.id}" style="--pc:${p.c};--px:${x}px;--py:${y}px;--pr:${r}deg"><b>${p.icon}</b><s></s></i>`;
-  }).join('')}</div>`;
+  }).join('')}<button class="op-pinhit" type="button" style="--top:${124 - (pins.length - 1) * 17 - 8}px" aria-label="Your pins: ${pins.length}. Tap to see them" onclick="opPinsOpen(event)"></button></div>`;
+}
+/* Tap the lanyard where the pins hang (Jose, 2026-11-07: the whole strip, not each pin, so a near
+   miss never scans the badge): a card lists them, each with its name, what earned it and the day.
+   The opening waits while it is open. Before the badge has arrived, at Tap to enter, or once the
+   badge was tapped, the tap goes on to the opening as before. */
+function opPinsOpen(e){
+  const t = (performance.now() - OP.t0) / 1000;
+  if(!OP.el || OP.leaving || OP.gate || OP.tap !== null || (!OP.still && t - OP.wait < OP_BADGE_AT)) return;
+  if(e){ e.stopPropagation(); e.preventDefault(); }
+  if(OP.el.querySelector('.op-pincard')) return;
+  const day = ms => { try{ return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }catch(err){ return ''; } };
+  const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const pins = openingPins().slice().reverse();
+  const card = document.createElement('div');
+  card.className = 'op-pincard';
+  card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-labelledby', 'opPinTitle');
+  card.innerHTML = `<div class="op-pc-box">
+      <h2 id="opPinTitle">Your pins</h2>
+      <p class="op-pc-sub">${pins.length} of ${OP_PINS.length} earned in CoreCHI Practice</p>
+      <ul>${pins.map(p => `<li><i class="op-pc-pin" style="--pc:${p.c}"><b>${p.icon}</b></i><span><b>${esc(p.name)}</b><small>${esc(p.note)}</small></span><time>${esc(day(p.at))}</time></li>`).join('')}</ul>
+      <button class="op-pc-close" type="button">Back to your badge</button>
+    </div>`;
+  const close = ev => { if(ev){ ev.stopPropagation(); ev.preventDefault(); } card.remove(); try{ OP.el && OP.el.focus({ preventScroll: true }); }catch(err){} };
+  card.addEventListener('click', ev => { ev.stopPropagation(); if(ev.target === card) close(ev); });
+  card.querySelector('.op-pc-close').addEventListener('click', close);
+  card.addEventListener('keydown', ev => { ev.stopPropagation(); if(ev.key === 'Escape') close(ev); });
+  OP.el.appendChild(card);
+  try{ card.querySelector('.op-pc-close').focus({ preventScroll: true }); }catch(err){}
 }
 // The new ones click on as the badge settles: from a little above and larger, down onto the strap,
 // one after another, then a ring of light. d: seconds since the badge started to drop.
@@ -206,7 +234,7 @@ function openingStart(replay){
     window.addEventListener('resize', opFit);
     el.addEventListener('click', openingTap);
     el.addEventListener('keydown', e => {
-      if(e.target && e.target.closest && e.target.closest('.op-acct')) return;   // its own Enter is a click
+      if(e.target && e.target.closest && e.target.closest('.op-acct, .op-pinhit')) return;   // their own Enter is a click
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openingTap(); }
       else if(e.key === 'Escape'){ e.preventDefault(); openingFinish(true); }
     });
@@ -470,6 +498,7 @@ function openingFinish(fade){
   window.removeEventListener('resize', opFit);
   opMusicStop(OP.tap === null ? .4 : OP_MUSIC_FADE);
   opPinsRemember();
+  const pc = el.querySelector('.op-pincard'); if(pc) pc.remove();
   const end = () => {
     opDrStop();
     el.remove();

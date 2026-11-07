@@ -349,7 +349,17 @@ lanyard"), then "Build it" on the plan below.
 - **Others looked at:** Duolingo and Apple Fitness keep awards in a gallery
   inside your profile; Disney's pin-trading lanyards wear them where they're
   seen. Here they show at the moment you see every day, the badge-in.
-- **Not in this version:** new kinds of badge, tapping a pin to read it,
-  teammates seeing your pins, choosing which pins show, a sound for the click.
+- **Tap the lanyard, see your pins** (2026-11-07, Jose's pick over tapping
+  each pin: 24 px pins that overlap are too small a target, and a near miss
+  would scan the badge). An invisible strip 58 px wide over the pins
+  (`.op-pinhit`) opens a card (`opPinsOpen`): every pin, newest first, its
+  name, what earned it and the day. The opening waits; Back to your badge, a
+  tap around the card or Escape closes only the card. Before the badge has
+  arrived, at Tap to enter, or after the badge tap, the strip passes the tap
+  on as before. `OP_PINS` carries each badge's note too (the suite checks
+  names and notes against `BADGES`).
+- **Not in this version:** new kinds of badge, pins not yet earned shown as
+  outlines, teammates seeing your pins, choosing which pins show, a sound
+  for the click.
 - **Not proven from here:** the emoji are Apple's on an iPhone (the checks
   run with Chromium's), so the faces look a little different there.
