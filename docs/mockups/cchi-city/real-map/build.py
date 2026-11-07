@@ -105,12 +105,9 @@ rep("box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.
 rep("box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);","box(BW - 0.4, 0.1, 1.2, walk, BCX, 0.22, 12.7, 0.03, false); box(BW - 0.4, 0.1, 1.0, walk, BCX, 0.22, 17.3, 0.03, false);")
 rep("for (let x = -18; x <= 18; x += 6) if (x) lamp(x, 13.4);","for (let x = -42; x <= 40; x += 6) if (x && !blockedXZ(x, 13.4, 0.2)) lamp(x, 13.4);")
 # the front's trees, beds, benches and people stay off the map's buildings and streets
-# the Meshy models come first (meshy.js): the benches are drawn from them (README, "The Meshy bench")
-rep("function tree(x, z, s=1, kind='round'){\n", open(os.path.join(HERE, 'meshy.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n")
-# the trees: today's trunks and branches, the crown now leaf sprays (cardCrown in meshy.js) instead of puffs (README, "The trees")
-rep("mats = blossom ? BLOSM : LEAFM, bark", "mats = (blossom ? BLOSM : LEAFM).map(leafy), bark")
-_a = out.index("  for (let k = 0; k < n; k++){ const u = r(), v = r(), th = u*Math.PI*2"); _b = "// the core, so no gaps show through\n"
-out = out[:_a] + "  cardCrown(cx, cy, cz, RX*1.12, RY*1.25, mats, s, r, blossom ? 76 : 68);\n" + out[out.index(_b, _a) + len(_b):]
+# the Meshy models come first (meshy.js): the benches and every tree but the evergreens are drawn from them (README, "The Meshy bench",
+# "The trees")
+rep("function tree(x, z, s=1, kind='round'){\n", open(os.path.join(HERE, 'meshy.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n  if (kind !== 'cone'){ if (kind === 'blossom') BLOSSOMS.push([x, z, s*1.22]); return pictureTree(x, z, s*1.22, kind === 'blossom' ? 'pink' : 'green', TREE_FRONT); }   // (README, \"The trees\")\n")
 rep("function bed(pts, y=0.3, o={}){\n","function bed(pts, y=0.3, o={}){\n  if (pts.some(([px, pz]) => blockedXZ(px, pz, 0.1))) return;\n")
 rep("function bench(x, z, ry=0, y=0.3){ ","function bench(x, z, ry=0, y=0.3){ if (blockedXZ(x, z, 0.2)) return; ")
 rep("g.rotation.y = ry; G.add(g);\n  const put = (geo, mat, px, py, pz, rx=0)", "g.rotation.y = ry; G.add(g);\n  { const m = new THREE.Mesh(meshyGeo('bench'), meshyMat('bench')); m.castShadow = true; m.receiveShadow = true; g.add(m); return; }\n  const put = (geo, mat, px, py, pz, rx=0)")

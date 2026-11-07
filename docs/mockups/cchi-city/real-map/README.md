@@ -196,22 +196,31 @@ old bench.
 
 ## The trees (2026-11-07)
 
-Jose: "I want them to look more like real trees", "I dont like the bundle of balls as leafs". Every leafy tree (green, red, cherry)
-keeps its trunk and branches; its crown is now cut-out leaf sprays, as game trees are made. The evergreens are unchanged.
+Jose, in order: "more like real trees"; "I dont like the bundle of balls as leafs"; "more details and more branches and cuter
+leafs", the sakura by Don Imus most of all; then two reference pictures ("more like these"), and the one to follow: a stylised tree
+with a thick twisting trunk, flared roots, curved limbs and great dense masses of small leaves, bright on top and dark inside.
+Last: "in that style but ... with their respective colors": every cherry pink (Don Imus's too), the others green; "the leafs to
+have better graphics and more details". The evergreens are unchanged.
 
-- `leaf_card.cjs` draws one 512 px spray of individual leaves on twigs, gray so a tree's colours tint it, each leaf filled from
-  Meshy's painted leaves (`../assets/meshy-tree/leaf-source.png`, a render of its 7.7 million triangle tree; 22 KB as WebP).
-  `meshy_bake.cjs` puts it in `cars.json` as `leaf`.
-- `cardCrown` (`meshy.js`) places 68 sprays (76 on a cherry, 42 on the back's trees) in five to seven uneven boughs, each four
-  triangles, so a crown costs under 300 triangles. Its normals point out from the crown, so the tree shades as one soft
-  shape. Sprays mostly face out: edge-on they are streaks. `leafy()` turns a leaf material into a tinted, cut-out one.
-- Triangles per frame -12% (413,555 to about 366,000, wide view). **The cost moved**: see-through cards are overdraw and no longer
-  triangles, so a phone's graphics chip works differently. Watch the frame rate; `cardCrown`'s counts are the first thing to lower.
+- **One tree**, `pictureTree(x, z, s, kind, build)` in `meshy.js`: a twisting tapered trunk (`tube`, a TubeGeometry along a
+  curve with its radius reshaped), roots flaring into the ground, a ring of leaf masses with one or two high in the middle, and a
+  curved limb up into each. Kinds: `green`, `red` (the back's red trees, autumn), `pink` (every cherry). Builds: `TREE_FRONT`
+  (`tree()`, the street trees: 7 masses, 3 roots), `TREE_BACK` (`backTree()`, the back's 47: 5 masses, no roots, a plain core),
+  `TREE_IMUS` (`cherry()`, the sakura by Don Imus: 10 masses, 5 roots, 84 cards a mass).
+- **A mass** (`lobe`): a dark core so no sky shows through its middle (none on a cherry: blossom stays a little airy; a bright
+  core shows as a ball, too dark a one as a hole) under a coat of leaf cards, two triangles a side, lit from the mass's own middle.
+- **The leaves** (`leaf_card.cjs`, 768 px, seeded): `leaf-green.webp` (pointed leaves filled from Meshy's painted leaves,
+  `../assets/meshy-tree/leaf-source.png`, each with its own hue, a midrib, side veins and a rim of light), `leaf-red.webp` (the
+  same, autumn), `petal-pink.webp` (notched sakura petals, deep pink at the base to pale at the tip, with little five-petal flowers
+  and buds). In colour: the four materials of a kind only lighten or darken them (`foliage()`). 80-96 KB each; `meshy_bake.cjs`
+  puts them in `cars.json` as `foliage`.
+- Triangles per frame +5% (413,555 to 432,859, wide view); the 3D page about 1.42 MB (the leaf pictures). The cost is overdraw too:
+  watch the frame rate, and lower `cards` in the builds first.
 - **The card is not re-rendered** (a full re-render of `city/`, about 130 files), so it keeps the old trees.
 
-Tried first, all rejected by Jose or by us: Meshy's whole tree (7.7 million triangles); slimmed onto a smooth egg (a balloon) and
-onto four lumps, 356 triangles (his: a straight red trunk, and only green trees would change); today's puffs with Meshy's leaves
-as a texture and soft light ("the bundle of balls"). Don't go back to round shapes for leaves.
+Tried on the way, all dropped: Meshy's whole tree (7.7 million triangles); slimmed onto a smooth egg (a balloon) and onto four
+lumps (a straight red trunk); today's puffs wearing Meshy's leaves ("the bundle of balls"); leaf sprays on the old trunks (liked,
+then "more like these"); the sakura in pink-to-blue like his picture (he wants it pink). Don't go back to round shapes for leaves.
 
 ## Free people and trees, tested and dropped (2026-11-03)
 
