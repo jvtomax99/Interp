@@ -402,6 +402,11 @@ come from this alone.
 
 ## Done
 
+- 2026-11-07 The tab bar test steadied on WebKit (`tests/suites/dock-tuck.cjs`, the harness): Dr. Smiley measured with his
+  scroll sway taken off (a 0.17 degree lean read him 0.3% big, #248's red run; the same numbers reproduced in Chromium),
+  "still moving after 3 s" logged with what was moving, a page crash logged, and the first page opened again once if it
+  died while loading (#245's red run). The old test did not fail in 24 WebKit runs on GitHub, the new one passed 24 of 24.
+  Test only; no User Guide change.
 - 2026-11-07 The campus's helicopter from Meshy, slimmed in Blender (Jose's pick after the ambulance): `real-map/README.md`,
   "The Meshy helicopter". 3D view and the card (its two frames only). Meshy's blades cut off, the app's rotor kept. Triangles
   +1.3-1.5%, 3D page 820 KB to 1.05 MB. `ambulance_bake.cjs` is now `meshy_bake.cjs`, for every Meshy model.

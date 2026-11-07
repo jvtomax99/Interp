@@ -62,7 +62,8 @@ const settle = page => page.evaluate(() => new Promise(r => {
   const moving = () => swaying() || growing() || document.getAnimations().some(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; });
   // Gives up after 3 s and says what was still moving (logged, so a slow CI
   // run shows it instead of a puzzling number further on).
-  const what = () => [swaying() && 'sway', growing() && 'scale'].filter(Boolean).join(' ') || 'an animation';
+  const what = () => [swaying() && 'sway', growing() && 'scale'].concat(document.getAnimations().filter(a => { const n = a.effect && a.effect.target; return n && n.closest && (n.closest('.tabbar') || n.closest('.dock-smiley')) && a.playState === 'running' && a.effect.getComputedTiming().iterations !== Infinity; })
+    .map(a => (a.transitionProperty || a.animationName || 'waapi') + ' on ' + String(a.effect.target.className.baseVal === undefined ? a.effect.target.className : a.effect.target.className.baseVal).split(' ')[0])).filter(Boolean).join(', ');
   const check = () => !moving() ? r('') : performance.now() - t0 > 3000 ? r(what()) : setTimeout(check, 50);
   check();
 })).then(late => { if (late) console.log('  info: still moving after 3 s (' + late + '); measured anyway'); });
