@@ -139,6 +139,30 @@ Each colour of a parked car is its own material: `runtime.js`'s merge keeps only
 colours would turn white there. `build.py` now puts `cars.js` in with `back.js`'s first part (after `let wr = 41;`),
 since the parked cars are built before the movers.
 
+## The Meshy ambulance (2026-11-06)
+
+Jose's ask: use Blender and the Meshy API to make the campus better; his pick, one ambulance first as a test (a private
+Artifact on his iPhone, https://claude.ai/artifact/U8RLK3VtaASmbBion8668G), then "Yes, add it". It replaces the kit's
+ambulance in the 3D view and the card; the cars stay the kit's.
+
+Made from a desktop session, Blender 5.2 open with the MCP for Blender add-on (Meshy key in its settings):
+
+1. Meshy text to 3D: American box-style hospital ambulance, white with one red stripe, red and blue roof light bar, clean
+   simple toy style, no text, no logos. 773,656 triangles, three 2K textures, nose along -X.
+2. On a copy in Blender: the mirrors tucked in to the 0.64 width limit (`traffic_check.cjs`); the red cross Meshy added
+   painted out of the colour texture (a protected emblem, and US ambulances use the Star of Life); seams welded
+   (`remove_doubles` 0.0006: Meshy's mesh is split along its texture seams, which otherwise eats the triangle budget);
+   Decimate to 5,196 triangles; Smart UV; the colour baked from the full mesh as EMIT through an emission shader (a
+   Diffuse bake comes out black where the model is metallic), 1024 px, saved at 512 as WebP (68 KB; with the view transform set to Standard, or Blender writes its AgX display look into the file and the whites drop to 77%).
+3. Exported in campus units, facing +z, wheels at y 0.1, the kit's length (1.64) and centre (z 0.17):
+   `../assets/meshy-ambulance/ambulance.glb` and `.webp`.
+4. `node ambulance_bake.cjs` packs it into `cars.json` as `ambulance.mesh`. **Run it after `cars_bake.py`**, which writes the
+   kit's ambulance back; `cars.js` needs `mesh`. The light bar's lamp positions are set in that file.
+5. `python3 build.py --app`. On Windows, set `PYTHONUTF8=1` first (the sources are UTF-8).
+
+The full-detail source is not in the repository (88 MB .blend). At full zoom the back is soft and a few panels crease: a
+1024 px texture would cost about 100 KB more.
+
 ## Free people and trees, tested and dropped (2026-11-03)
 
 Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front
