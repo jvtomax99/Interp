@@ -334,5 +334,39 @@ const gate = page => page.evaluate(() => ({ gate: OP.gate, cta: document.querySe
       await ctx.close();
     }
   }
+
+  console.log('== log in or link your account');
+  {
+    const ME = JSON.stringify({ member: true, uid: 'u1', code: 'TEAMCODE', role: 'member', kind: 'team', joinedAt: 1 });
+    const pill = page => page.evaluate(() => { const b = document.querySelector('.op-acct'); if (!b) return null;
+      const r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, h = document.elementFromPoint(x, y);
+      return { x, y, top: r.top, bottom: r.bottom, op: +getComputedStyle(b).opacity, hit: h === b,
+        badge: document.querySelector('.op-purp').getBoundingClientRect().bottom, reader: document.querySelector('.op-reader').getBoundingClientRect().top }; });
+    for (const c of [{ n: 'a phone in the team', me: true }, { n: 'a phone not in the team', me: false }]) {
+      const init = c.me ? `localStorage.setItem('ih_access_me_v1', ${JSON.stringify(ME)});` : undefined;
+      const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700,
+        access: c.me ? { mode: 'locked', member: true, signedIn: true, uid: 'u1' } : { mode: 'practice' }, init });
+      const p0 = await pill(page);
+      ok(p0 && p0.op < .1 && !p0.hit, c.n + ': the pill is there but unseen and untappable before the badge arrives', p0);
+      await page.touchscreen.tap(195, 420);
+      await page.waitForFunction(() => +getComputedStyle(document.querySelector('.op-acct')).opacity > .95, null, { timeout: 5000 }).catch(() => {});
+      const p1 = await pill(page);
+      ok(p1 && p1.op > .95 && p1.hit && p1.top > p1.badge + 20 && p1.bottom < p1.reader - 20, c.n + ': once the badge has arrived it shows, on top, clear of the badge and the reader', p1);
+      if (c.me) await page.screenshot({ path: O + 'account-pill.png' });
+      await page.touchscreen.tap(p1.x, p1.y);
+      await page.waitForFunction(() => !document.querySelector('.op'), null, { timeout: 3000 }).catch(() => {});
+      await wait(600);
+      const r = await page.evaluate(() => ({ op: !!document.querySelector('.op'), sub: document.getElementById('moreSubOverlay').classList.contains('show') && document.getElementById('moreSubBody').dataset.kind,
+        email: !!document.getElementById('acctEmail'), lock: !document.getElementById('accessLock').hidden, lockEmail: !!document.getElementById('acctLockEmail') }));
+      ok(!r.op && (c.me ? r.sub === 'account' && r.email && !r.lock : r.lock && r.lockEmail),
+        c.n + ': its tap closes the opening onto ' + (c.me ? 'More, Your account (email, then the code)' : 'the team-code screen\'s Sign in with email'), r);
+      ok(!page.__errors.length, 'no page errors', page.__errors);
+      await ctx.close();
+    }
+    const { ctx, page } = await L.boot(b, { device: 'iphone', opening: true, name: 'Jose Vazquez', settle: 700, access: { mode: 'locked', member: true, signedIn: true, uid: 'u1' },
+      init: `localStorage.setItem('ih_access_me_v1', ${JSON.stringify(ME)}); localStorage.setItem('ih_account', JSON.stringify({ uid: 'u1', email: 'jose@example.com' }));` });
+    ok(await page.evaluate(() => !!document.querySelector('.op') && !document.querySelector('.op-acct')), 'signed in to an account: no pill');
+    await ctx.close();
+  }
   await b.close();
 })();

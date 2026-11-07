@@ -226,6 +226,27 @@ set it says "Welcome in" and the card shows "Interpreter" where the name goes.
   Interpreter), Replay the opening (goes Home first; not during a timed
   exam).
 
+## Log in or link your account (Jose, 2026-11-06)
+
+A glass pill, **Log in or link your account**, in the open space between
+the badge and the reader (stage y 522, 40 tall; on a 393 x 759 phone it
+sits 469-505, the badge ends at 382 and the reader starts at 575). Only on
+a phone not signed in to an account (`ih_account` has no uid,
+`openingAcctShow`); signed in, it isn't drawn at all. It fades in and out
+with "Tap your badge to begin" (and with Tap to enter), and leaves on the
+badge's tap (`opAcctFade`); while faded it takes no taps (pointer-events
+none), so a tap there is still the opening's own.
+
+Tapping it (`openingAccount`) closes the opening with the skip's fade,
+then opens the sign-in that fits: a phone already in the team
+(`isHubMember`) gets More with **Your account** open over it (email, then
+the 6 numbers: this phone becomes the account, "link"); a phone not in the
+team gets the team-code screen switched to **Sign in with email** (an
+account already in the team, "log in"). Enter or Space on the focused
+pill is the pill's, not the badge's.
+
+Not in this version: signing in on the opening itself.
+
 ## Your photo on the badge (Jose, 2026-11-06)
 
 Asked for: "the option to replace the picture on the badge with Dr.
@@ -291,6 +312,12 @@ out (solid in the middle, see-through at the corner), the grin on green,
 his clips let go after; a still in Still, grinning on the tap; Dr. Smiley when the switch is off, when the photo is
 another name's, and when it can't load; More's switch off by default,
 refusing with no photo, on and off on this phone.
+
+"log in or link your account": the pill between the badge and the reader,
+clear of both, unseen and untappable before the badge arrives, on top
+(`elementFromPoint`) once it has; its tap closes the opening onto Your
+account (a phone in the team) or the team-code screen's email sign-in (a
+phone not in it); not drawn on a phone signed in to an account.
 
 
 A new suite, `tests/suites/opening.cjs`: it plays on a fresh start and not on a resume; not with `?open=`; a tap before the badge skips

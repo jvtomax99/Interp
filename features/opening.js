@@ -100,6 +100,7 @@ function openingHtml(look){
           </div>
         </div>
         ${photo ? opDrHtml() : ''}
+        ${openingAcctShow() ? `<button class="op-acct" type="button" onclick="openingAccount(event)">Log in or link your account</button>` : ''}
         <div class="op-cta">Tap your badge to begin</div>
         <div class="op-wel">${n.first ? 'Welcome in, ' + esc(n.first) : 'Welcome in'}</div>
       </div>
@@ -140,6 +141,7 @@ function openingStart(replay){
     window.addEventListener('resize', opFit);
     el.addEventListener('click', openingTap);
     el.addEventListener('keydown', e => {
+      if(e.target && e.target.closest && e.target.closest('.op-acct')) return;   // its own Enter is a click
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openingTap(); }
       else if(e.key === 'Escape'){ e.preventDefault(); openingFinish(true); }
     });
@@ -279,7 +281,7 @@ function opFrame(t){
   if(still){
     // Everything already in place; the tap's green is a class (openingTap).
     $('.op-ttl b').style.setProperty('--r', '100%');
-    o($('.op-ttl small'), 1); o($('.op-rig'), 1); o($('.op-reader'), 1); o($('.op-cta'), tap === null ? 1 : 0); o($('.op-wel'), tap === null ? 0 : 1);
+    o($('.op-ttl small'), 1); o($('.op-rig'), 1); o($('.op-reader'), 1); o($('.op-cta'), tap === null ? 1 : 0); o($('.op-wel'), tap === null ? 0 : 1); opAcctFade(tap === null ? 1 : 0);
     $('.op-lr').style.setProperty('--lc', tap === null ? '#ff8fa3' : '#5de3a0');
     if(tap !== null) opFace('wink');
     opDrStill(tap === null ? 'wave' : 'grin');
@@ -331,6 +333,7 @@ function opFrame(t){
   o($('.op-ring'), green ? .9 * (1 - r) : 0); $('.op-ring').style.transform = `scale(${(1 + r * 1.9).toFixed(3)},${(1 + r * 3.2).toFixed(3)})`;
   o($('.op-cta'), OP.gate ? opSpan(t, .9, 1.4) * (.65 + .35 * Math.cos((t - 1.4) * 2.6))
     : opSpan(d, 1.6, 2) * (tap === null ? .65 + .35 * Math.cos((bt - 3.3) * 2.6) : 1 - opSpan(a, 0, .2)));
+  opAcctFade(OP.gate ? opSpan(t, .9, 1.4) : opSpan(d, 1.6, 2) * (tap === null ? 1 : 1 - opSpan(a, 0, .2)));
   o($('.op-wel'), tap === null ? 0 : opSpan(a, 1.05, 1.3) * (1 - opSpan(a, 1.75, 2.05)));
   $('.op-wel').style.transform = `translate3d(0,${(tap === null ? 10 : (1 - opOut(opSpan(a, 1.05, 1.5))) * 10).toFixed(1)}px,0)`;
   if(tap === null) return;
@@ -354,6 +357,42 @@ function opFrame(t){
     o(rg, 1 - opSpan(a, 2.15, 2.5));
   }
   if(a >= 2.5) openingFinish(false);
+}
+
+/* ---------- Log in or link your account, on the opening ----------
+   Jose, 2026-11-06. Only on a phone not signed in to an account (ih_account,
+   features/account.js). It shows with "Tap your badge to begin" and leaves
+   with it on the tap. Tapping it closes the opening (the fade, as a skip) and
+   opens the sign-in that fits this phone: already in the team, More's Your
+   account card (email, then the 6 numbers: this phone becomes the account);
+   not in the team yet, the team-code screen's Sign in with email (an account
+   already in the team, on a new phone). */
+function openingAcctShow(){
+  try{ const a = JSON.parse(opGet('ih_account') || 'null'); return !(a && a.uid); }catch(e){ return true; }
+}
+// Seen, and tappable, only while it is showing; under it, a tap is the opening's own.
+function opAcctFade(v){
+  const b = OP.el && OP.el.querySelector('.op-acct');
+  if(!b) return;
+  b.style.opacity = opClamp(v).toFixed(3);
+  const on = v > .5;
+  if(b.dataset.on !== String(on)){ b.dataset.on = String(on); b.style.pointerEvents = on ? 'auto' : 'none'; b.tabIndex = on ? 0 : -1; }
+}
+function openingAccount(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  if(!OP.el || OP.leaving) return;
+  openingFinish(true);
+  setTimeout(() => {
+    const member = typeof isHubMember === 'function' && isHubMember();
+    if(!member && typeof showAccessLock === 'function'){
+      showAccessLock('join');
+      try{ accountLockToggle(true); }catch(err){}
+      return;
+    }
+    try{ openMoreSheet(); moreSubOpen('account'); }catch(err){ return; }
+    const f = document.getElementById('acctCode') || document.getElementById('acctEmail');
+    if(f && (typeof prefersAutoFocus !== 'function' || prefersAutoFocus())) setTimeout(() => { try{ f.focus({ preventScroll: true }); }catch(err){} }, 400);
+  }, 300);
 }
 
 /* Take it down and hand over to Home. fade: a 260 ms fade (a skip, Escape, Still). */
