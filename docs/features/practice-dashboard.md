@@ -163,6 +163,12 @@ reflections and a few warm rooms, roof parapets. Daylight is the default
 (`?dusk` for the golden hour); the card's colours in `app.css` and
 `sky.webp` (`window.__sky`) match it. `LITE` (the live 3D test) uses plainer
 stones and simpler spheres: ~440k triangles instead of ~940k.
+**The ambulance: Meshy, slimmed in Blender** (Jose, 2026-11-06, replacing the kit's ambulance below; the cars stay the
+kit's). One textured mesh, 5,196 triangles, a 512 px WebP, drawn smooth instead of flat (`ambGeo`, `ambMat` in
+`real-map/cars.js`), same place in `vehicle('amb')`, so traffic, lamps and doors are untouched. Measured against the old
+page, same cameras: triangles per frame +1.2% to +1.7% (353-371k), the 3D page 553 to 820 KB. How it was made:
+`real-map/README.md`, "The Meshy ambulance".
+
 **Cars in 3D: Kenney's Car Kit** (Jose, 2026-11-03: free online models to "upscale" the campus; his pick, cars on
 the road only). Every moving car and ambulance (`vehicle('car'|'amb')`) is a model from Kenney's Car Kit (CC0,
 `docs/mockups/cchi-city/assets/kenney-car-kit/`): sedan, SUV, hatchback and van in turn, the yellow cars taxis,

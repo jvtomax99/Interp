@@ -15,14 +15,35 @@ function kitPart(e, withCol){
     for (let i = 0; i < n; i++){ k.setRGB(c[i*3]/255, c[i*3 + 1]/255, c[i*3 + 2]/255, THREE.SRGBColorSpace); f[i*3] = k.r; f[i*3 + 1] = k.g; f[i*3 + 2] = k.b; }
     g.setAttribute('color', new THREE.BufferAttribute(f, 3)); }
   g = g.toNonIndexed(); g.computeVertexNormals(); return g; }   // flat faces, as the kit is drawn
+// The ambulance is Meshy's (Jose, 2026-11-06), slimmed in Blender and packed by ambulance_bake.cjs: smooth where the
+// model is round, with its own 512 px picture, so unlike the kit it needs no colours per vertex or repainting.
+let ambG, ambM;
+function ambGeo(){
+  if (ambG) return ambG;
+  const e = KIT.ambulance.mesh, bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
+  const q = new Uint16Array(bytes(e.pos)), p = new Float32Array(q.length), uq = new Uint16Array(bytes(e.uv)), u = new Float32Array(uq.length);
+  for (let i = 0; i < q.length; i++) p[i] = e.min[i%3] + q[i]/65535*e.size[i%3];
+  for (let i = 0; i < uq.length; i++) u[i] = uq[i]/65535;
+  ambG = new THREE.BufferGeometry();
+  ambG.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  ambG.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(bytes(e.nrm)), 3, true));
+  ambG.setAttribute('uv', new THREE.BufferAttribute(u, 2));
+  ambG.setIndex(new THREE.BufferAttribute(new Uint16Array(bytes(e.idx)), 1));
+  return ambG; }
+function ambMat(){
+  if (ambM) return ambM;
+  const t = new THREE.TextureLoader().load(KIT.ambulance.mesh.tex); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4;   // glTF's uv: v runs down
+  return ambM = new THREE.MeshStandardMaterial({ map:t, roughness:0.42, metalness:0.1, envMapIntensity:0.55 }); }
 const vehicleHandMade = vehicle;
 vehicle = (kind, col) => { const g = vehicleHandMade(kind, col);
   if (kind !== 'car' && kind !== 'amb') return g;
   const name = kind === 'amb' ? 'ambulance' : col === 0xf2c94c ? 'taxi' : KIT_CARS[kitN++ % KIT_CARS.length];
-  const geo = KIT_GEO[name] || (KIT_GEO[name] = { paint: kitPart(KIT[name].paint, false), rest: kitPart(KIT[name].rest, true) });
   g.children.filter(c => c.isMesh && c.geometry.type !== 'SphereGeometry').forEach(c => g.remove(c));   // the body; the lights stay
-  const paint = new THREE.Mesh(geo.paint, new THREE.MeshStandardMaterial({ color:col, roughness:0.3, metalness:0.45, envMapIntensity:0.6 })), rest = new THREE.Mesh(geo.rest, KIT_REST);
-  for (const m of [paint, rest]){ m.castShadow = true; m.receiveShadow = true; g.add(m); }
+  let body;
+  if (name === 'ambulance') body = [new THREE.Mesh(ambGeo(), ambMat())];   // Meshy's, one textured mesh
+  else { const geo = KIT_GEO[name] || (KIT_GEO[name] = { paint: kitPart(KIT[name].paint, false), rest: kitPart(KIT[name].rest, true) });
+    body = [new THREE.Mesh(geo.paint, new THREE.MeshStandardMaterial({ color:col, roughness:0.3, metalness:0.45, envMapIntensity:0.6 })), new THREE.Mesh(geo.rest, KIT_REST)]; }
+  for (const m of body){ m.castShadow = true; m.receiveShadow = true; g.add(m); }
   if (name === 'ambulance'){   // its flashing lamps and their glow go up onto the kit's light bar
     const y = KIT.ambulance.top - 0.05, lamps = KIT.ambulance.lamps.map(([x, , z]) => [x, y, z]); g.userData.lamps = g.userData.lights = lamps;
     let i = 0; g.children.forEach(c => { if ((c.isMesh && c.geometry.type === 'SphereGeometry') || c.isSprite){ const [x, y2, z] = lamps[Math.min(1, (i++ >> 1))]; c.position.set(x, y2, z + (c.isSprite ? 0.05 : 0)); } }); }
