@@ -105,6 +105,10 @@ async function boot(browser, opts = {}) {
   const page = await ctx.newPage();
   page.__errors = []; page.__console = [];
   page.on('pageerror', e => page.__errors.push(e.message));
+  // The browser's page process dying (CI's WebKit did once while loading,
+  // #245, 2026-11-07) shows up later only as "Target page ... has been
+  // closed"; say it here, so a crash reads as a crash.
+  page.__crashed = false; page.on('crash', () => { page.__crashed = true; console.log('  info: the page crashed (the browser\'s page process died)'); });
   page.__failed = []; page.on('response', r => { if (r.status() >= 400) page.__failed.push(r.status() + ' ' + r.url().slice(0, 90)); }); page.on('requestfailed', q => page.__failed.push('FAIL ' + q.url().slice(0, 90)));
   page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') page.__console.push(m.type() + ': ' + m.text()); });
   await route(page, opts);
