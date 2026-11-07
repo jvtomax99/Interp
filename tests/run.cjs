@@ -33,6 +33,7 @@ const SUITES = [
   ['home-rest.cjs',       'Home decor: petals and heartline loop, badge settles'],
   ['humc-brain.cjs',      'Two brains: his head opens the code brain, the Practice tile your knowledge brain (lit by your record; Practise, Open the card), never linked; one tap still opens Ask; Back and X close it'],
   ['chat-titles.cjs',     'Team Chat titles: Admin by phone, Supervisor by name'],
+  ['chat-faces.cjs',      'Team Chat faces follow the account, never a typed name'],
   ['chat-keyboard.cjs',   'Team Chat while typing: the box sits on the keyboard'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],

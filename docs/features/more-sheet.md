@@ -1,6 +1,6 @@
 # The More sheet, grouped (2026-11-06)
 
-Status: **built** on branch `claude/more-sheet-groups`, waiting for Jose's push.
+Status: **live** since b1106.2156 (2026-11-06, PR #236).
 Code: `MORE_GROUPS`, `moreRowsFor`, `openMoreSheet`, `moreSubOpen` in
 `index.html` (section "Tab bar and the More sheet"); styles in `app.css`
 ("More, grouped"); checks in `tests/suites/more-sheet.cjs`.

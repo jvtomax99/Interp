@@ -8178,6 +8178,29 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .acct-link:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; border-radius:4px; }
 .acct-link[disabled], .acct-card .btn[disabled]{ opacity:.55; pointer-events:none; }
 
+/* Which one is you? (features/account.js, accountPickSelf): a phone signing in under
+   another name than the account's. Above the team-code screen (.access-lock is 2000). */
+.acct-pick{ position:fixed; inset:0; z-index:2100; display:flex; align-items:center; justify-content:center; padding:17px;
+  background:rgba(15,23,40,0.55); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); animation:overlayIn .15s var(--ease); }
+.acct-pick-sheet{ width:100%; max-width:380px; max-height:100%; overflow:auto; background:var(--paper); border-radius:var(--r-lg); padding:17px;
+  box-shadow:var(--sh-3); animation:modalIn .22s var(--ease); }
+.acct-pick-sheet h3{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
+.acct-pick-sub{ margin:6px 0 13px; font-size:var(--fs-foot); letter-spacing:var(--tr-sm); line-height:1.45; color:var(--ink-soft); }
+.acct-pick-sub b{ color:var(--ink); font-weight:650; }
+.acct-pick-list{ display:flex; flex-direction:column; gap:9px; }
+.acct-pick-opt{ display:flex; align-items:center; gap:13px; width:100%; min-height:64px; padding:9px 13px; text-align:left; cursor:pointer;
+  font-family:inherit; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:var(--r-md);
+  box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82),0 1px 2px rgba(20,43,67,0.06),0 8px 20px -12px rgba(22,55,90,0.22);
+  transition:transform .368s var(--spring0, var(--ease)); }
+.acct-pick-opt:active, .acct-pick-opt.is-pressed{ transform:scale(.97); }
+.acct-pick-opt:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+.acct-pick-av{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:var(--fs-sub); font-weight:650; color:#fff; background-repeat:no-repeat; }
+.acct-pick-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.acct-pick-txt b{ font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); overflow-wrap:anywhere; }
+.acct-pick-txt small{ font-size:var(--fs-foot); letter-spacing:var(--tr-sm); color:var(--ink-soft); }
+@media (prefers-reduced-motion: reduce){ .acct-pick, .acct-pick-sheet{ animation:none; } .acct-pick-opt{ transition:none; } }
+
 /* Sign in with email on the team-code screen (features/account.js, #accessEmail):
    the same glass box as the team code, at reading size for an address. */
 .access-email{ gap:9px; }
