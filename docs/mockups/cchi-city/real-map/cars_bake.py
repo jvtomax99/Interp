@@ -8,7 +8,7 @@
 # car), and each wheel a 10-sided drum with its hub on the outside instead of the kit's 284 triangles (a wheel is a
 # few pixels at the board's scale). About 1,790 triangles down to about 600 each; ~160 of them stand on the board.
 #   python3 cars_bake.py            (numpy only)
-#   then: node ambulance_bake.cjs   (the ambulance is Meshy's since 2026-11-06; this script writes the kit's back)
+#   then: node meshy_bake.cjs       (the ambulance and helicopter are Meshy's; this script writes the kit's ambulance back)
 import base64, json, os, struct
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); KIT = os.path.join(HERE, '..', 'assets', 'kenney-car-kit')

@@ -156,12 +156,29 @@ Made from a desktop session, Blender 5.2 open with the MCP for Blender add-on (M
    Diffuse bake comes out black where the model is metallic), 1024 px, saved at 512 as WebP (68 KB; with the view transform set to Standard, or Blender writes its AgX display look into the file and the whites drop to 77%).
 3. Exported in campus units, facing +z, wheels at y 0.1, the kit's length (1.64) and centre (z 0.17):
    `../assets/meshy-ambulance/ambulance.glb` and `.webp`.
-4. `node ambulance_bake.cjs` packs it into `cars.json` as `ambulance.mesh`. **Run it after `cars_bake.py`**, which writes the
+4. `node meshy_bake.cjs` packs it into `cars.json` as `ambulance.mesh`. **Run it after `cars_bake.py`**, which writes the
    kit's ambulance back; `cars.js` needs `mesh`. The light bar's lamp positions are set in that file.
 5. `python3 build.py --app`. On Windows, set `PYTHONUTF8=1` first (the sources are UTF-8).
 
 The full-detail source is not in the repository (88 MB .blend). At full zoom the back is soft and a few panels crease: a
 1024 px texture would cost about 100 KB more.
+
+## The Meshy helicopter (2026-11-07)
+
+Jose's pick after the ambulance: the helicopter next (it was a sphere and a tube). Same steps as the ambulance, with these
+differences:
+
+1. Meshy text to 3D: medical air ambulance helicopter, dark blue and white, skids, enclosed tail rotor, clean simple toy
+   style, no text, no lettering, no logos, no crosses. 371,322 triangles, nose along -X. **Meshy ignored "no text": it added
+   a white cross badge on both sides and the numbers 41 and 1, on the two sides of the tail boom.** All painted out, first in
+   the colour texture, then a last pass on the baked one, where its seams can't leave specks.
+2. **Meshy's blades are cut off** (faces above z 2.93 and more than 0.36 from the hub), because a generated model is one
+   solid piece and a rotor has to spin. The app's hand-built rotor stays (`g.userData.rotor`), moved to the model's hub, so
+   `rotor.rotation.y` and the card's two rotor frames work as before.
+3. Decimated to 5,599 triangles, 512 px WebP (53 KB). In campus units it keeps the old helicopter's length (2.72, nose at
+   z 0.67) and skids (y -0.42), so it lands on the pad as before. Hub and nose light: `meshy_bake.cjs`.
+
+The full-detail source is not in the repository (134 MB .blend, the helicopter and the ambulance together).
 
 ## Free people and trees, tested and dropped (2026-11-03)
 
