@@ -2,7 +2,7 @@
 // ../assets/kenney-car-kit/), baked by cars_bake.py into cars.json. vehicle() still builds the hand-made car with its
 // lights; its body is swapped for the model's two meshes: its paint, in the car's own colour, and the rest (windows,
 // tyres, lights, trim) in the kit's colours. The yellow cars are taxis; the rest take turns as sedan, SUV, hatchback, van.
-// The parked cars (kitParked, below) are the kit's too; the bus and the helicopter stay hand-made.
+// The parked cars (kitParked, below) are the kit's too; the bus stays hand-made.
 const KIT = __CARS__, KIT_GEO = {}, KIT_CARS = ['sedan', 'suv', 'hatchbackSports', 'van'];
 const KIT_REST = new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.5, metalness:0.15, envMapIntensity:0.5 });
 let kitN = 0;
@@ -15,32 +15,38 @@ function kitPart(e, withCol){
     for (let i = 0; i < n; i++){ k.setRGB(c[i*3]/255, c[i*3 + 1]/255, c[i*3 + 2]/255, THREE.SRGBColorSpace); f[i*3] = k.r; f[i*3 + 1] = k.g; f[i*3 + 2] = k.b; }
     g.setAttribute('color', new THREE.BufferAttribute(f, 3)); }
   g = g.toNonIndexed(); g.computeVertexNormals(); return g; }   // flat faces, as the kit is drawn
-// The ambulance is Meshy's (Jose, 2026-11-06), slimmed in Blender and packed by ambulance_bake.cjs: smooth where the
-// model is round, with its own 512 px picture, so unlike the kit it needs no colours per vertex or repainting.
-let ambG, ambM;
-function ambGeo(){
-  if (ambG) return ambG;
-  const e = KIT.ambulance.mesh, bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
+// The ambulance and the helicopter are Meshy's (Jose, 2026-11-06/07), slimmed in Blender and packed by meshy_bake.cjs: smooth
+// where the model is round, with its own 512 px picture, so unlike the kit they need no colours per vertex or repainting.
+const MESHY_GEO = {}, MESHY_MAT = {};
+function meshyGeo(name){
+  if (MESHY_GEO[name]) return MESHY_GEO[name];
+  const e = KIT[name].mesh, bytes = s => Uint8Array.from(atob(s), c => c.charCodeAt(0)).buffer;
   const q = new Uint16Array(bytes(e.pos)), p = new Float32Array(q.length), uq = new Uint16Array(bytes(e.uv)), u = new Float32Array(uq.length);
   for (let i = 0; i < q.length; i++) p[i] = e.min[i%3] + q[i]/65535*e.size[i%3];
   for (let i = 0; i < uq.length; i++) u[i] = uq[i]/65535;
-  ambG = new THREE.BufferGeometry();
-  ambG.setAttribute('position', new THREE.BufferAttribute(p, 3));
-  ambG.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(bytes(e.nrm)), 3, true));
-  ambG.setAttribute('uv', new THREE.BufferAttribute(u, 2));
-  ambG.setIndex(new THREE.BufferAttribute(new Uint16Array(bytes(e.idx)), 1));
-  return ambG; }
-function ambMat(){
-  if (ambM) return ambM;
-  const t = new THREE.TextureLoader().load(KIT.ambulance.mesh.tex); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4;   // glTF's uv: v runs down
-  return ambM = new THREE.MeshStandardMaterial({ map:t, roughness:0.42, metalness:0.1, envMapIntensity:0.55 }); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(bytes(e.nrm)), 3, true));
+  g.setAttribute('uv', new THREE.BufferAttribute(u, 2));
+  g.setIndex(new THREE.BufferAttribute(new Uint16Array(bytes(e.idx)), 1));
+  return MESHY_GEO[name] = g; }
+function meshyMat(name){
+  if (MESHY_MAT[name]) return MESHY_MAT[name];
+  const t = new THREE.TextureLoader().load(KIT[name].mesh.tex); t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = 4;   // glTF's uv: v runs down
+  return MESHY_MAT[name] = new THREE.MeshStandardMaterial({ map:t, roughness:0.42, metalness:0.1, envMapIntensity:0.55 }); }
 const vehicleHandMade = vehicle;
 vehicle = (kind, col) => { const g = vehicleHandMade(kind, col);
+  if (kind === 'heli'){   // Meshy's body; the app's rotor stays, moved up to the model's hub, so it can keep spinning (rotor.rotation.y)
+    g.children.filter(c => c.isMesh && c.geometry.parameters?.radius !== 0.045).forEach(c => g.remove(c));   // the nose light stays
+    const m = new THREE.Mesh(meshyGeo('heli'), meshyMat('heli')); m.castShadow = true; m.receiveShadow = true;
+    g.userData.rotor.position.set(...KIT.heli.rotor); g.userData.lights = [KIT.heli.light];
+    g.children.forEach(c => { if (c.isMesh || c.isSprite){ const [x, y, z] = KIT.heli.light; c.position.set(x, y, z + (c.isSprite ? 0.05 : 0)); } });
+    g.add(m); return g; }
   if (kind !== 'car' && kind !== 'amb') return g;
   const name = kind === 'amb' ? 'ambulance' : col === 0xf2c94c ? 'taxi' : KIT_CARS[kitN++ % KIT_CARS.length];
   g.children.filter(c => c.isMesh && c.geometry.type !== 'SphereGeometry').forEach(c => g.remove(c));   // the body; the lights stay
   let body;
-  if (name === 'ambulance') body = [new THREE.Mesh(ambGeo(), ambMat())];   // Meshy's, one textured mesh
+  if (name === 'ambulance') body = [new THREE.Mesh(meshyGeo('ambulance'), meshyMat('ambulance'))];   // Meshy's, one textured mesh
   else { const geo = KIT_GEO[name] || (KIT_GEO[name] = { paint: kitPart(KIT[name].paint, false), rest: kitPart(KIT[name].rest, true) });
     body = [new THREE.Mesh(geo.paint, new THREE.MeshStandardMaterial({ color:col, roughness:0.3, metalness:0.45, envMapIntensity:0.6 })), new THREE.Mesh(geo.rest, KIT_REST)]; }
   for (const m of body){ m.castShadow = true; m.receiveShadow = true; g.add(m); }

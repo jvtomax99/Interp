@@ -169,6 +169,11 @@ kit's). One textured mesh, 5,196 triangles, a 512 px WebP, drawn smooth instead 
 page, same cameras: triangles per frame +1.2% to +1.7% (353-371k), the 3D page 553 to 820 KB. How it was made:
 `real-map/README.md`, "The Meshy ambulance".
 
+**The helicopter: Meshy, slimmed in Blender** (Jose, 2026-11-07, after the ambulance). The same way (`meshyGeo`, `meshyMat`):
+5,599 triangles, a 512 px WebP, the old one's length and skids. The app's hand-built rotor stays and spins, moved to the
+model's hub. The 3D page goes from 820 KB to 1.05 MB; triangles per frame +1.3% to +1.5%. `real-map/README.md`, "The Meshy
+helicopter".
+
 **Cars in 3D: Kenney's Car Kit** (Jose, 2026-11-03: free online models to "upscale" the campus; his pick, cars on
 the road only). Every moving car and ambulance (`vehicle('car'|'amb')`) is a model from Kenney's Car Kit (CC0,
 `docs/mockups/cchi-city/assets/kenney-car-kit/`): sedan, SUV, hatchback and van in turn, the yellow cars taxis,
