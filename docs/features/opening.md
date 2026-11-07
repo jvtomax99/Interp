@@ -325,3 +325,31 @@ it; after it, nothing is left over Home (`elementFromPoint` reaches Home's
 search); Still takes the short path; it never adds a wait to Home's first
 draw. The other suites start with the opening switched off
 (`ih_opening` = off), so they never see it.
+
+## Pins on your lanyard (2026-11-07)
+
+Jose picked it from the ideas offered 2026-11-05 ("pins you earn on your
+lanyard"), then "Build it" on the plan below.
+
+- **What:** each CoreCHI practice badge you have earned (the eight in
+  `BADGES`, `index.html`, kept in `ih_practice_badges_v1`, which follows
+  your account since E2) is an enamel pin on the lanyard: the badge's emoji
+  on its own colour, a gold rim, a glare. The first earned sits lowest, by
+  the clasp; each newer one 17 px above, a little to either side, tipped its
+  own way. All eight fit on a phone above the clasp (measured).
+- **New ones click on:** a badge earned since this phone's last opening
+  (`ih_pinsSeen`, per phone, not synced, so each phone has its moment)
+  drops onto the strap as the badge settles, one after another, with a ring
+  of light (`opPinsFrame`). Remembered when the opening closes, only if it
+  had its moment (a skip before the badge arrives keeps it for next time).
+  Still: simply there, and remembered.
+- **The list** is `OP_PINS` in `features/opening.js` (ids, icons, colours),
+  because the opening runs before `index.html` defines `BADGES`;
+  `tests/suites/lanyard-pins.cjs` holds the two lists together.
+- **Others looked at:** Duolingo and Apple Fitness keep awards in a gallery
+  inside your profile; Disney's pin-trading lanyards wear them where they're
+  seen. Here they show at the moment you see every day, the badge-in.
+- **Not in this version:** new kinds of badge, tapping a pin to read it,
+  teammates seeing your pins, choosing which pins show, a sound for the click.
+- **Not proven from here:** the emoji are Apple's on an iPhone (the checks
+  run with Chromium's), so the faces look a little different there.
