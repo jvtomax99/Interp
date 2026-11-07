@@ -55,6 +55,70 @@ function openingNames(){
   const first = parts[0].slice(0, 16), last = parts.length > 1 ? parts[parts.length - 1] : '';
   return { card: last ? `${first} ${last[0].toUpperCase()}.` : first, first };
 }
+/* ---------- Pins on your lanyard ----------
+   Jose, 2026-11-07 (docs/features/opening.md, "Pins on your lanyard"): each
+   CoreCHI practice badge you have earned (index.html's BADGES, kept in
+   ih_practice_badges_v1, which follows your account) is an enamel pin on the
+   lanyard, the first one earned lowest, by the clasp. One earned since this
+   phone's last opening (ih_pinsSeen) clicks on as the badge settles, with a
+   sparkle; in Still it is simply there. The list is here, not read from
+   BADGES, because the opening runs before index.html has defined it; the ids
+   match it (tests/suites/opening.cjs holds them together). */
+const OP_PINS_SEEN_KEY = 'ih_pinsSeen';
+const OP_PINS = [
+  { id: 'first10',  icon: '\ud83c\udf31', c: '#2E9E6A', name: 'First steps' },
+  { id: 'century',  icon: '\ud83d\udcda', c: '#2E6FD0', name: 'Century' },
+  { id: 'week',     icon: '\ud83d\udd25', c: '#E0662E', name: 'Week strong' },
+  { id: 'sharp',    icon: '\ud83c\udfaf', c: '#C2485C', name: 'Sharpshooter' },
+  { id: 'sweep',    icon: '\ud83e\udde0', c: '#8A6CD1', name: 'Full sweep' },
+  { id: 'domain90', icon: '\ud83c\udfc5', c: '#C99212', name: 'Domain master' },
+  { id: 'exam',     icon: '\u23f1\ufe0f', c: '#0F7C8C', name: 'Exam conditions' },
+  { id: 'perfect',  icon: '\ud83d\udcaf', c: '#3A2E8F', name: 'Perfect paper' }
+];
+// Earned pins in the order earned, each marked new if this phone hasn't shown it yet.
+function openingPins(){
+  let have = {}, seen = [];
+  try{ have = JSON.parse(opGet('ih_practice_badges_v1') || '{}') || {}; }catch(e){}
+  try{ seen = JSON.parse(opGet(OP_PINS_SEEN_KEY) || '[]'); }catch(e){}
+  if(!Array.isArray(seen)) seen = [];
+  return OP_PINS.filter(p => have[p.id]).sort((a, b) => (Number(have[a.id]) || 0) - (Number(have[b.id]) || 0))
+    .map(p => Object.assign({ fresh: !seen.includes(p.id) }, p));
+}
+function opPinsHtml(){
+  const pins = openingPins();
+  if(!pins.length) return '';
+  // From the clasp up, 17 px apart (all eight fit above the clasp on a phone), a little to either side of the strap, each tipped its own way.
+  return `<div class="op-pins" aria-hidden="true">${pins.map((p, i) => {
+    const y = 124 - i * 17, x = i % 2 ? 6 : -6, r = [-12, 9, -5, 14, -9, 6, -14, 11][i % 8];
+    return `<i class="op-pin${p.fresh ? ' is-new' : ''}" data-pin="${p.id}" style="--pc:${p.c};--px:${x}px;--py:${y}px;--pr:${r}deg"><b>${p.icon}</b><s></s></i>`;
+  }).join('')}</div>`;
+}
+// The new ones click on as the badge settles: from a little above and larger, down onto the strap,
+// one after another, then a ring of light. d: seconds since the badge started to drop.
+function opPinsFrame(d){
+  const fresh = OP.el ? OP.el.querySelectorAll('.op-pin.is-new') : [];
+  fresh.forEach((p, i) => {
+    const k = opSpan(d, 1.0 + i * .28, 1.32 + i * .28), land = opOut(k);
+    const bump = k >= 1 ? 0 : Math.sin(Math.PI * opSpan(k, .7, 1)) * .08;
+    p.style.opacity = k > 0 ? Math.min(1, k * 3).toFixed(2) : '0';
+    p.style.transform = `translate3d(var(--px),${((1 - land) * -14).toFixed(1)}px,0) rotate(var(--pr)) scale(${(1.7 - .7 * land - bump).toFixed(3)})`;
+    const sp = p.querySelector('s'), g = opSpan(d, 1.32 + i * .28, 1.9 + i * .28);
+    if(sp){ sp.style.opacity = g > 0 && g < 1 ? (1 - g).toFixed(2) : '0'; sp.style.transform = `scale(${(.6 + g * 1.4).toFixed(3)})`; }
+    if(k >= 1) OP.pinsShown = true;
+  });
+  if(!fresh.length && d > 0) OP.pinsShown = true;
+}
+// Shown once: remembered when the opening closes, if they had their moment (or in Still).
+function opPinsRemember(){
+  if(!OP.pinsShown) return;
+  const ids = openingPins().map(p => p.id);
+  let seen = [];
+  try{ seen = JSON.parse(opGet(OP_PINS_SEEN_KEY) || '[]'); }catch(e){}
+  if(!Array.isArray(seen)) seen = [];
+  const all = seen.concat(ids.filter(id => !seen.includes(id)));
+  if(all.length !== seen.length) opSet(OP_PINS_SEEN_KEY, JSON.stringify(all));
+}
+
 // The pavilion's light follows the phone's clock: morning 5-11, midday 11-4 pm,
 // evening and night from 4 pm to 5 am. Each look is its own loop in opening/;
 // index.html's first script makes the same choice for the cover (data-op-look).
@@ -84,6 +148,7 @@ function openingHtml(look){
           <div class="op-lan"><span>INTERPRETER · INTERPRETER · INTERPRETER</span><i class="op-acc"></i></div>
           <svg class="op-clasp" viewBox="0 0 32 44" aria-hidden="true"><defs><linearGradient id="opSv" x1="0" x2="1"><stop offset="0" stop-color="#8d96a8"/><stop offset=".45" stop-color="#f4f6fa"/><stop offset=".6" stop-color="#c2c9d6"/><stop offset="1" stop-color="#7d8699"/></linearGradient></defs>
             <rect x="9" y="0" width="14" height="9" rx="2" fill="url(#opSv)"/><circle cx="16" cy="13" r="4" fill="none" stroke="url(#opSv)" stroke-width="2.5"/><path d="M16 17c-6 0-8 5-8 10 0 6 4 10 8 10s8-4 8-10c0-3-1-5-3-7" fill="none" stroke="url(#opSv)" stroke-width="3" stroke-linecap="round"/><rect x="13" y="35" width="6" height="9" rx="2" fill="url(#opSv)"/></svg>
+          ${opPinsHtml()}
           <div class="op-conn"></div><div class="op-strap"><i></i></div>
           <div class="op-purp"><b>INTERPRETER</b></div>
           <div class="op-holder"><div class="op-slot"></div>
@@ -126,7 +191,7 @@ function openingStart(replay){
     el.tabIndex = -1;
     el.innerHTML = openingHtml(look);
     document.body.appendChild(el);
-    OP.el = el; OP.tap = null; OP.cues = {}; OP.leaving = false;
+    OP.el = el; OP.tap = null; OP.cues = {}; OP.leaving = false; OP.pinsShown = false;
     OP.still = (typeof drStill === 'function' && drStill()) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
     el.classList.toggle('is-still', OP.still);
     opMusicLoad();
@@ -285,6 +350,7 @@ function opFrame(t){
     $('.op-lr').style.setProperty('--lc', tap === null ? '#ff8fa3' : '#5de3a0');
     if(tap !== null) opFace('wink');
     opDrStill(tap === null ? 'wave' : 'grin');
+    OP.pinsShown = true;
     cancelAnimationFrame(OP.raf);
     return;
   }
@@ -319,6 +385,7 @@ function opFrame(t){
     if(f !== OP.face){ OP.face = f; opFace(f); }
   }
   o($('.op-rig'), d > 0 ? 1 - opSpan(a, 1.75, 2.05) : 0);
+  opPinsFrame(d);
   const gw = green ? Math.sin(Math.PI * opSpan(a, .95, 1.4) * .5 + (a > 1.2 ? Math.PI * .5 * opSpan(a, 1.2, 1.8) : 0)) : 0;
   $('.op-rig').style.filter = gw > .01 ? `drop-shadow(0 0 ${(gw * 10).toFixed(1)}px rgba(93,227,160,.95)) drop-shadow(0 0 ${(gw * 24).toFixed(1)}px rgba(93,227,160,.7))` : '';
   // Access granted: a pulse of green light runs up the lanyard.
@@ -402,6 +469,7 @@ function openingFinish(fade){
   cancelAnimationFrame(OP.raf);
   window.removeEventListener('resize', opFit);
   opMusicStop(OP.tap === null ? .4 : OP_MUSIC_FADE);
+  opPinsRemember();
   const end = () => {
     opDrStop();
     el.remove();

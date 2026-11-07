@@ -317,6 +317,9 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    saved, the name sheet (#232, live b1106.1641;
    `docs/features/photo-adjust.md`). Not checked yet: how smoothly he
    plays on a real phone (no graphics chip in the cloud machine).
+   **2026-11-07:** pins on your lanyard, each practice badge an enamel
+   pin, a new one clicking on (`docs/features/opening.md`, "Pins on your
+   lanyard").
 6. **Tool banners (Jose, 2026-11-06, "Plan it for real", then "Build it"): built,** waiting for his OK. Translate, Term
    Review's start, Ask the Hub and Doctor Directory get the domains'
    colour banner with their pin, and the Home pin you tap flies into it.
