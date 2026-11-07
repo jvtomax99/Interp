@@ -55,6 +55,7 @@ const SUITES = [
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['account.cjs',         'Your account (email sign-in, the phone): email, then the code, a wrong code, the code box after a restart, signed in as the account, the name follows, sign out back to the team, not joined yet'],
+  ['account-identity.cjs','Your account, phase E3: Term Review follows the account (the name\'s record joins once, later answer wins, sign out goes back), titles given to an account (typing the name no longer earns it, no run under someone else\'s title), the owner\'s Title picker'],
   ['account-sync.cjs',    'Your account, what follows you (phase E2): the joins rule by rule, two phones merging through the account, syncing again changes nothing, a local setting kept, signed out stops syncing'],
   ['photo-adjust.cjs',    'Adjust your photo: opens after you pick one, drag and zoom with the photo always covering the frame, the two previews, Save keeps exactly the square, Cancel and Escape keep the old one'],
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],

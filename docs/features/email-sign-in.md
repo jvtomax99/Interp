@@ -8,7 +8,8 @@ request each. **E1 is built** (2026-11-06): `api/sign-in.js`, `api/_mail.js`,
 `tests/suites/account.cjs` (phone). It works once Jose's setup below is
 done; until then More says "Email sign-in isn't switched on yet". **E2 is
 built** (2026-11-06): `features/account-sync.js`, the `account-sync` rule,
-checks `tests/suites/account-sync.cjs`; "As built (E2)" below. E3: not yet.
+checks `tests/suites/account-sync.cjs`; "As built (E2)" below. **E3 is built**
+(2026-11-07): "As built (E3)" below.
 
 ## What it does
 
@@ -136,8 +137,44 @@ change; there is no live link between two phones open at once.
   goes to the background (if it doesn't, the next open sends it: the
   fingerprints only move once the write succeeds).
 
-Phase E3: Term Review records (`term-reviews`, today keyed by typed name,
-`ownReview` in the rules) and titles in Team Chat move to the account.
+### As built (E3, 2026-11-07)
+
+Jose's picks: build both parts; once a title is given to an account,
+typing the name stops earning it.
+
+- **Term Review by account.** Signed in, the record's `who` is the account
+  id (`acct_…`, the same on every phone), the document `{account}__{termId}`,
+  with `name` beside it for reading (`reviewWho`, `reviewDocId` in
+  `index.html`). Not signed in: the typed name, as before. A typed name
+  that looks like an account id owns nothing.
+- **The name's record joins once** (`reviewMoveToAccount`, per account per
+  phone, `ih_reviewsMoved`): per term the later answer's box and due date,
+  the counts kept high. The name's documents stay, so signing out goes back
+  to them. Marked done only once it went through.
+- **Signing in or out reloads the record** (`accountReloadReviews` in
+  `features/account.js`).
+- **The rule** (`ownReview`): `who` is your own sign-in id, or (not looking
+  like `acct_…`) your name in `hub-members`. Queries stay provable because
+  both sides test the one field the query fixes.
+- **Titles given to an account** (`hub-titles/{account}` = `{ title, kind,
+  rule, name, at }`, owner only, accounts only). Team access shows a
+  **Title** button on each row signed in by email: Supervisor of Language
+  Services, Administrator, Developer, No title (`teamGiveTitle`,
+  `setGivenTitle`). Everyone listens (`startHubTitles`). A given title wins
+  on that account's messages and in Home's hello; giving a name rule's
+  title (`rule`: Liz's, Jose's, Fabiola's when given to her) stops the name
+  match for everyone else (`openNameTitle`). Rules not published: no given
+  titles, the name titles keep working.
+- **Chat runs** now need the same name *and* the same `uid`: before, an
+  impostor's message right after Liz's joined her run and sat under her
+  title (found by the new suite).
+- **Checks:** `tests/suites/account-identity.cjs` (in `run.cjs`) and the
+  rules in Firebase's own emulator, `tests/tools/rules-e3.mjs` (17 cases,
+  passed; run by hand).
+- **Jose publishes** the new `firestore.rules` (the `ownReview` change and
+  `hub-titles`). Then he gives Liz her title once she has signed in.
+- **What it costs:** messages someone sent before signing in (or from a
+  plain phone) lose a title once it's given to their account.
 
 ## Not in this version
 

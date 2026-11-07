@@ -36,6 +36,10 @@ anyone whose first name is Fabiola, with or without a last name (Jose,
 tested in the emulator (38 cases: owner/member/stranger, locked and practice).
 Without the published rules the collection is refused and there are simply
 no Admin tags.
+*By account* (2026-11-07, email sign-in E3): the owner gives a title to an
+email account on this screen (`hub-titles`); once given, the name rule it
+came from stops matching anyone else. `docs/features/email-sign-in.md`,
+"As built (E3)".
 *On Home*: your own title shows in the hello, a smaller copy of the Chat ribbon
 centred under the heart line (Jose: "in alignment with the heart"), never into
 Dr. Smiley or past the banner's edge; one line when it fits, else two even

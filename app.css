@@ -5939,6 +5939,13 @@ body.access-locked{ overflow:hidden; }
 .ta-who{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
 .ta-who b{ font-size:var(--fs-sub); font-weight:650; color:var(--ink); overflow-wrap:anywhere; }
 .ta-who span{ font-size:var(--fs-foot); color:var(--ink-soft); }
+.ta-who .ta-given{ align-self:flex-start; margin-top:3px; padding:1px 6px; border:1px solid rgba(37,46,109,.35); border-radius:6px;
+  font-size:var(--fs-cap2); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; line-height:1.4; color:var(--navy); }
+html[data-theme="dark"] .ta-who .ta-given{ color:#B9C6FF; border-color:rgba(185,198,255,.4); }
+.ta-title-btn{ flex:none; min-height:44px; }
+.ta-titles{ display:flex; flex-direction:column; gap:9px; padding:0 0 13px 53px; }
+.ta-titles p{ font-size:var(--fs-foot); color:var(--ink-soft); line-height:1.45; }
+.ta-titles .btn{ justify-content:flex-start; min-height:44px; }
 .ta-bigcode{ font:650 var(--fs-t1)/1.2 var(--mono); letter-spacing:.12em; color:var(--ink); text-align:center; padding:9px 0; font-variant-numeric:tabular-nums; }
 .ta-owncode{ font-family:var(--mono); letter-spacing:.06em; color:var(--ink-soft); }
 .ta-switchrow{ display:flex; align-items:center; gap:13px; font-size:var(--fs-sub); line-height:1.4; color:var(--ink); }
