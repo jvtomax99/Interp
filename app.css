@@ -8076,6 +8076,16 @@ html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-
 .op-lr{ position:absolute; inset:-3px; border-radius:31px; border:2px solid var(--lc,#ff8fa3); box-shadow:0 0 14px var(--lc,#ff8fa3); }
 .op-ring{ left:135px; top:640px; width:120px; height:56px; border-radius:28px; border:2px solid #5de3a0; opacity:0; }
 .op-cta{ left:0; right:0; top:708px; text-align:center; font-size:var(--fs-foot); font-weight:550; letter-spacing:var(--tr-caps); color:#fff; text-shadow:0 1px 10px rgba(16,20,46,.7); opacity:0; }
+/* Log in or link your account (opening.js openingAccount): a small glass pill in the open space between the badge
+   and the reader, only on a phone not signed in; its opacity and taps follow "Tap your badge" (opAcctFade). */
+.op-acct{ left:50%; top:522px; transform:translateX(-50%); height:40px; padding:0 17px; border-radius:20px; opacity:0; pointer-events:none;
+  font:inherit; font-size:var(--fs-foot); font-weight:550; letter-spacing:var(--tr-sm); color:#fff; white-space:nowrap; cursor:pointer;
+  background:rgba(255,255,255,.16); -webkit-backdrop-filter:blur(18px) saturate(170%); backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid rgba(255,255,255,.5); box-shadow:0 12px 24px -14px rgba(10,14,40,.7),inset 0 1px 0 rgba(255,255,255,.6); text-shadow:0 1px 6px rgba(16,20,46,.5);
+  transition:background-color .368s var(--spring0); }
+.op-acct::before{ content:""; position:absolute; inset:-6px -4px; }
+.op-acct:active{ background-color:rgba(255,255,255,.3); }
+.op-acct:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
 .op-wel{ left:0; right:0; top:700px; text-align:center; font-size:var(--fs-t2); font-weight:650; letter-spacing:var(--tr-title); color:#fff; text-shadow:0 2px 14px rgba(20,24,52,.7); opacity:0; }
 .op-ring2{ position:absolute; left:0; top:0; width:0; height:0; border-radius:50%; opacity:0; pointer-events:none;
   border:3px solid rgba(140,255,200,.95); box-shadow:0 0 26px rgba(93,227,160,.85),inset 0 0 26px rgba(93,227,160,.6); }
