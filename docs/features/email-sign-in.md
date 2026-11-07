@@ -202,6 +202,37 @@ Live, 2026-11-06: Gmail sends the codes (Jose got one). Gmail first refused
 the app password (535): 2-Step Verification on the new Gmail had gone back
 to Off, which cancels every app password; turned on again, a new one works.
 
+## Which one is you? (2026-11-06)
+
+Jose asked that his "Jose V" phone keep its name, photo and settings when it
+joins his account (which goes by Jose Vazquez). Before this, the account's
+name and settings always won over the phone signing in second; only
+practice was joined.
+
+Now a phone signing in under another name than the account's (compared
+without capitals or extra spaces) gets a sheet, `accountPickSelf` in
+`features/account.js`: both names, the photo filed under each
+(`memberPhotoFor`), this phone first. Only its two buttons close it (no safe
+default), above the team-code screen too (z-index 2100 over 2000).
+
+- **This phone:** its name goes to the account (`accountSaveName`), so every
+  phone takes it on its next open (`accountBoot`), and the photo follows the
+  name. `ih_syncKeepMine` (the account id) makes this phone's settings win
+  the next sync over the account's, then is cleared; it stays until a sync
+  writes, so a failed write doesn't lose the pick.
+- **Your account:** as before, this phone takes the account's name and
+  settings.
+- Practice is joined either way (`ACCT_SYNC_MERGE`). Dr. Smiley's memory
+  stays on each phone (`AGENTS.md`).
+
+Seen elsewhere (from memory, not re-checked): Chrome's "link your data to
+this account?" and iPhone's "Merge with iCloud?" ask about data in the
+abstract. This shows the two names and faces, and no choice drops practice.
+
+Not in this version: merging two accounts (two emails), choosing setting by
+setting. Tested in `tests/suites/account.cjs` (both picks, same name in
+other capitals, over the team-code screen).
+
 ## As built (E1), and what is not proven yet
 
 - The code box survives the Hub restarting while you read Mail

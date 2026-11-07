@@ -195,11 +195,14 @@ async function accountSync(why){
     try{ const snap = await ref.get(); remote = snap.exists ? (snap.data() || {}) : {}; }
     catch(e){ return syncNote({ ok: false, why, error: 'read', code: (e && e.code) || String(e && e.message || e).slice(0, 60) }); }   // offline, or the rule isn't published yet
     const base = syncReadBase(a.uid), nextBase = {}, push = {}, took = [];
+    const keepMine = acctRead('ih_syncKeepMine') === a.uid;
     SYNC_KEYS.forEach(k => {
       const f = syncField(k), local = syncLocalGet(k);
       const rv = remote[f];
       const r = typeof rv === 'string' ? rv : null;
-      const v = syncDecide(k, local, r, base[k]);
+      let v = syncDecide(k, local, r, base[k]);
+      // You kept this phone's name at sign-in: its settings win this once (features/account.js, accountPickSelf).
+      if(keepMine && local != null && SYNC_SETTINGS.includes(k)) v = local;
       if(v !== local){ syncLocalSet(k, v); took.push(k); }
       if(v !== r) push[f] = v;
       nextBase[k] = syncHash(v);
@@ -216,6 +219,7 @@ async function accountSync(why){
       }
     }
     acctWrite(SYNC_BASE_KEY, { uid: a.uid, h: nextBase });
+    if(keepMine) acctWrite('ih_syncKeepMine', null);
     SYNC.lastLocal = syncLocalPrint(); SYNC.last = Date.now(); SYNC.took += took.length;
     if(took.length) syncRefresh(took);
     return syncNote({ ok: true, why, took, sent: Object.keys(push).filter(f => f !== 'at') });

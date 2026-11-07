@@ -395,6 +395,16 @@ come from this alone.
 
 ## Done
 
+- 2026-11-06 More, grouped (`docs/features/more-sheet.md`, PR #236, live
+  b1106.2156): Ask the Hub, then Study, Doctors, Reference and You; the
+  domains behind one row; Translate and Team Chat out (tabs); counts only
+  when they need you (`reviewedDueCount`, `eventsNewCount`); Your account,
+  Opening and the smoothness meter in their own sheet over More (‹ More).
+  54 rows and 3,837 px became 25 rows and 1,615 px. Home's sections renamed
+  Study and Reference. `tests/suites/more-sheet.cjs` fails when a tool in
+  `getToolTiles()` has no place in `MORE_GROUPS` or `MORE_ELSEWHERE`. Next if
+  they drift: Home's sections and the sidebar read `MORE_GROUPS` too.
+
 - 2026-11-05 The opening's light by time of day (Jose's pick of four ways
   to raise it): morning gold, midday, evening blue, by the phone's clock;
   the badge in the same light. `docs/features/opening.md`. Facts: a hue

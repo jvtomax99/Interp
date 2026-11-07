@@ -123,17 +123,60 @@ const tapsItself = (page, sel) => page.evaluate(sel => { const el = document.que
     await page.close();
   }
 
-  console.log('== second phone: the account\'s name wins');
-  {
+  // A second phone under another name: it asks which one is you (accountPickSelf).
+  for (const keep of ['account', 'phone']) {
+    console.log('== second phone, another name: keep ' + (keep === 'phone' ? 'this phone\'s' : 'the account\'s'));
     const { page } = await L.boot(b, { device: 'iphone', name: 'Maria L', settle: 4500, access: { mode: 'locked', member: true, signedIn: true, uid: 'u1' },
+      init: `try{ localStorage.setItem('ih_access_me_v1', ${JSON.stringify(ME)}); localStorage.setItem('ih_region', 'south'); }catch(e){}` });
+    await fakeServer(page, { accountName: 'Maria Lopez' });
+    await serverWrites(page, 'Maria Lopez');
+    await page.evaluate(async ACCT => {
+      await db.collection('team-members').doc('maria l').set({ name: 'Maria L', photo: 'drsmiley/base.webp', photoPath: null });
+      __DB['account-sync'] = __DB['account-sync'] || {};
+      __DB['account-sync'][ACCT] = { ih_region: 'north', at: 1 };
+    }, ACCT);
+    await openMore(page);
+    await page.fill('#acctEmail', 'maria@gmail.com'); await page.click('#acctSendBtn'); await wait(500);
+    await page.fill('#acctCode', '482913'); await page.click('#acctCheckBtn'); await wait(700);
+    const sheet = await page.evaluate(() => {
+      const ov = document.querySelector('.acct-pick'); if (!ov) return null;
+      const o = [...ov.querySelectorAll('.acct-pick-opt')];
+      return { text: ov.innerText.replace(/\s+/g, ' '), opts: o.map(x => x.dataset.keep), photo: o.map(x => x.querySelector('.acct-pick-av').classList.contains('has-photo')),
+        z: +getComputedStyle(ov).zIndex, fs: o.map(x => parseFloat(getComputedStyle(x.querySelector('b')).fontSize)), h: o.map(x => x.getBoundingClientRect().height), focus: document.activeElement === o[0] };
+    });
+    ok(sheet && /Which one is you\?/.test(sheet.text) && /Maria L\b/.test(sheet.text) && /Maria Lopez/.test(sheet.text) && /practice from both is kept/.test(sheet.text),
+      'signing in under another name asks which one is you, both names, practice kept', sheet);
+    ok(sheet && sheet.opts.join() === 'phone,account' && sheet.photo[0] === true && sheet.photo[1] === false, 'this phone first, each with the photo filed under its name', sheet);
+    ok(sheet && sheet.z > 2000 && sheet.h.every(h => h >= 44) && sheet.focus, 'above the team-code screen, big buttons, the first one focused', sheet);
+    ok(await tapsItself(page, `.acct-pick-opt[data-keep="${keep}"]`) === true, 'the button takes its own tap');
+    if (keep === 'phone') await page.screenshot({ path: O + 'iphone-4-which-one.png' });
+    await page.click(`.acct-pick-opt[data-keep="${keep}"]`); await wait(1200);
+    const s = await page.evaluate(ACCT => ({ who: whoAmI(), stored: localStorage.getItem('ih_myName'), acctName: __DB.accounts[ACCT].name, gone: !document.querySelector('.acct-pick'),
+      region: localStorage.getItem('ih_region'), acctRegion: (__DB['account-sync'][ACCT] || {}).ih_region, flag: localStorage.getItem('ih_syncKeepMine'),
+      signed: /Signed in as/.test((document.getElementById('acctCard') || {}).innerText || '') }), ACCT);
+    if (keep === 'account') {
+      ok(s.gone && s.who === 'Maria Lopez' && s.stored === 'Maria Lopez' && s.acctName === 'Maria Lopez', 'keep the account\'s: this phone takes its name (and the photo filed under it)', s);
+      ok(s.region === 'north' && s.acctRegion === 'north', 'and the account\'s settings', s);
+    } else {
+      ok(s.gone && s.who === 'Maria L' && s.acctName === 'Maria L', 'keep this phone\'s: the account takes its name, so every phone does', s);
+      ok(s.region === 'south' && s.acctRegion === 'south' && !s.flag, 'and its settings, sent to the account, once', s);
+    }
+    ok(s.signed, 'signed in either way', s);
+    ok(!page.__errors.length, 'no page errors', page.__errors);
+    await page.close();
+  }
+
+  console.log('== second phone, the same name in other capitals: no question');
+  {
+    const { page } = await L.boot(b, { device: 'iphone', name: 'maria lopez', settle: 4500, access: { mode: 'locked', member: true, signedIn: true, uid: 'u1' },
       init: `try{ localStorage.setItem('ih_access_me_v1', ${JSON.stringify(ME)}); }catch(e){}` });
     await fakeServer(page, { accountName: 'Maria Lopez' });
     await serverWrites(page, 'Maria Lopez');
     await openMore(page);
     await page.fill('#acctEmail', 'maria@gmail.com'); await page.click('#acctSendBtn'); await wait(500);
     await page.fill('#acctCode', '482913'); await page.click('#acctCheckBtn'); await wait(900);
-    const s = await page.evaluate(() => ({ who: whoAmI(), stored: localStorage.getItem('ih_myName') }));
-    ok(s.who === 'Maria Lopez' && s.stored === 'Maria Lopez', 'this phone takes the account\'s name (and the photo filed under it)', s);
+    const s = await page.evaluate(() => ({ who: whoAmI(), sheet: !!document.querySelector('.acct-pick') }));
+    ok(!s.sheet && s.who === 'Maria Lopez', 'no sheet, the account\'s spelling', s);
     ok(!page.__errors.length, 'no page errors', page.__errors);
     await page.close();
   }
@@ -176,6 +219,11 @@ const tapsItself = (page, sel) => page.evaluate(sel => { const el = document.que
     ok(/4 tries left/.test(await page.evaluate(() => document.getElementById('acctLockMsg').textContent)), 'a wrong code says so');
     await page.evaluate(ACCT => { __DB['hub-members'][ACCT] = { invite: 'TEAMCODE', name: 'Team code', role: 'member', joinedAt: 1, lastSeen: 1 }; __DB.accounts = { [ACCT]: { email: 'maria@gmail.com', name: 'Maria Lopez', nameAt: Date.now() + 1000 } }; }, ACCT);
     await page.fill('#acctLockCode', '482913'); await page.tap('#acctLockCheckBtn'); await wait(700);
+    // This phone already goes by "Jose" (the harness's name): it asks which one is you, over the team-code screen.
+    const pick = await page.evaluate(() => { const o = document.querySelector('.acct-pick .acct-pick-opt[data-keep="account"]'); if (!o) return null;
+      const r = o.getBoundingClientRect(), at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { onTop: o === at || o.contains(at) }; });
+    ok(pick && pick.onTop, 'another name on this phone: "Which one is you?" shows above the team-code screen and takes its taps', pick);
+    if (pick) { await page.tap('.acct-pick-opt[data-keep="account"]'); await wait(900); }
     s = await page.evaluate(() => ({ title: document.getElementById('accessTitle').textContent, happy: document.getElementById('accessLock').classList.contains('is-happy'),
       uid: hubAuth.currentUser.uid, me: readAccessMe(), who: whoAmI() }));
     ok(s.happy && /You're in, Maria!/.test(s.title) && s.uid === ACCT && s.me.member && s.me.uid === ACCT && s.who === 'Maria Lopez', 'the right code: "You\'re in, Maria!", this phone is her account, in the team, her name', s);

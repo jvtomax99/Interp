@@ -1252,6 +1252,36 @@ function memberPhotoFor(name){
 }
 function myPhoto(){ return memberPhotoFor(whoAmI()); }
 
+/* Faces by account (Jose, 2026-11-06: "Jose V" is the same person as Jose
+   Vazquez). A chat message sent from an email account (`uid` "acct_...",
+   held to that account by the rules) shows the photo and colour of the name
+   that account goes by now, whatever name the message carried. Accounts
+   only: a plain team phone can pass between people, so its messages keep
+   matching by their exact name, as do messages older than the account.
+   The account's name, the first that has a photo: this phone's own (when
+   it is the sender), its owner line in hub-admins, then its newest message
+   here. CHAT_FACE_NAMES is rebuilt once per chat render
+   (refreshChatFaceNames), not per row. */
+let CHAT_FACE_NAMES = new Map();      // account uid -> the name its photo is under
+function isAccountUid(uid){ return typeof uid === 'string' && uid.startsWith('acct_'); }
+function refreshChatFaceNames(){
+  const names = new Map();
+  CHAT_MESSAGES.forEach(m => {
+    if(m && isAccountUid(m.uid) && m.author && memberPhotoFor(m.author)) names.set(m.uid, m.author);
+  });
+  try{
+    HUB_ADMINS.byUid.forEach((name, uid) => { if(isAccountUid(uid) && memberPhotoFor(name)) names.set(uid, name); });
+  }catch(e){}     // HUB_ADMINS is declared further down this script
+  const user = hubAuth && hubAuth.currentUser, me = whoAmI();
+  if(user && isAccountUid(user.uid) && me && memberPhotoFor(me)) names.set(user.uid, me);
+  CHAT_FACE_NAMES = names;
+}
+function chatFaceName(m){
+  const own = (m && m.author) || 'Teammate';
+  if(!m || !isAccountUid(m.uid) || memberPhotoFor(own)) return own;
+  return CHAT_FACE_NAMES.get(m.uid) || own;
+}
+
 /* Avatars are square and small on purpose. compressImageToBlob() is built for
    attachments -- it keeps the aspect ratio and allows 1400px -- which for a
    face that renders at 28px means every chat message pulls down a photo
@@ -10706,7 +10736,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.more-sub-back, .tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
+  const LIFTS = '.more-sub-back, .acct-pick-opt, .tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
     '.cp-play, .cp-3d, .cp-exam, .cp-key, .cp-folk, .cp-folk-no, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .doc-card, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini, .credit-tag, .credit-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
@@ -10737,8 +10767,8 @@ const MOTIVATIONAL_QUOTES = [
 // problems and "did that upload actually land?" are otherwise guesswork.
 // Both lines are set by .github/workflows/bump-version.yml after each push
 // to main; never edit them by hand (every open PR conflicted when we did).
-const BUILD_ID = 'b1106.2156';
-const BUILD_TIME = '2026-11-06 21:56 UTC';
+const BUILD_ID = 'b1106.2305';
+const BUILD_TIME = '2026-11-06 23:05 UTC';
 console.log('Interpreter Hub build', BUILD_ID, BUILD_TIME);
 /* Installed on an iPhone, the app is sometimes handed a viewport shorter than
    the screen: everything fixed to the bottom (the tab bar) then floats high
@@ -13803,7 +13833,7 @@ function chatAttachmentsOf(m){
 }
 
 function chatRowSignature(m, mine, face, mentionsMe, first, last, open, status){
-  return [m.id, m.text || '', m.author || '', m.timestamp || '', mine ? 1 : 0,
+  return [m.id, m.text || '', m.author || '', chatFaceName(m), m.timestamp || '', mine ? 1 : 0,
           face || '', chatAttachmentsOf(m).map(a => a.dataUrl || '').join('|'),
           m._pending ? 1 : 0, m._local ? 1 : 0, mentionsMe ? 1 : 0, first ? 1 : 0, last ? 1 : 0,
           open ? 1 : 0, JSON.stringify(m.reactions || {}), status || '',
@@ -13903,7 +13933,7 @@ function hubOwnerUid(){ try{ return ACCESS.ownerUid || ''; }catch(e){ return '';
 function nameTitle(key){
   return key ? NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first) || (t.test && t.test(key))) || null : null;
 }
-const HUB_ADMINS = { uids: new Set(), names: new Set(), started: false };
+const HUB_ADMINS = { uids: new Set(), names: new Set(), byUid: new Map(), started: false };
 const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
 // Capitals, extra spaces and accents ignored ("José" = "jose").
 function titleKey(name){ return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
@@ -13928,6 +13958,7 @@ function startHubAdmins(){
   db.collection('hub-admins').onSnapshot(snap => {
     HUB_ADMINS.uids = new Set(snap.docs.map(d => d.id));
     HUB_ADMINS.names = new Set(snap.docs.map(d => titleKey((d.data() || {}).name)).filter(Boolean));
+    HUB_ADMINS.byUid = new Map(snap.docs.map(d => [d.id, String((d.data() || {}).name || '').trim()]).filter(e => e[1]));
     if(activeCategory === 'chat') renderChatMessages();
     document.dispatchEvent(new Event('ih:titles'));
   }, () => {
@@ -13965,7 +13996,7 @@ function publishHubAdmin(){
 /* ---------- Team Chat: messages, channels, scrolling ---------- */
 function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
   const who = m.author || 'Teammate';
-  const avatarColor = nameToColor(who);
+  const avatarColor = nameToColor(chatFaceName(m));
   // NOT the `background:` shorthand when there is a photo. The shorthand
   // resets background-size to auto, and an inline style outranks the
   // .has-photo class that sets `cover` -- so the photo rendered at its full
@@ -14108,6 +14139,7 @@ function renderChatMessages(){
   if(!container) return;
   const tc = !!document.getElementById('tcPanel');
 
+  refreshChatFaceNames();
   renderChatHeader();
   renderChatChannels();
   const msgs = chatInChannel(chatChannel);
@@ -14203,7 +14235,7 @@ function renderChatMessages(){
     const first = !runWithPrev, last = !runWithNext;
 
     const mine = !!myName && (m.author||'').trim().toLowerCase() === myName;
-    const face = memberPhotoFor(m.author || 'Teammate');
+    const face = memberPhotoFor(chatFaceName(m));
     const mentionsMe = !!myName && messageMentions(m.text).includes(myName);
     const open = !tc && openChatActions === m.id;
     // "Sent" under your newest message, when it is the newest in the thread.
@@ -14324,17 +14356,18 @@ function renderChatHeader(){
   const sub = document.getElementById('chatCount');
   if(!faces && !sub) return;
   const me = whoAmI().trim().toLowerCase();
-  const seen = [], keys = new Set();
+  const seen = [], keys = new Set(), faceOf = new Map();
   const msgs = chatInChannel(chatChannel);
   for(let i = msgs.length - 1; i >= 0 && seen.length < 12; i--){
     const a = (msgs[i].author || '').trim();
     const k = a.toLowerCase();
     if(!a || k === me || keys.has(k)) continue;
-    keys.add(k); seen.push(a);
+    keys.add(k); seen.push(a); faceOf.set(a, chatFaceName(msgs[i]));
   }
   if(faces){
     faces.innerHTML = seen.slice(0, 3).map(name => {
-      const c = nameToColor(name), face = memberPhotoFor(name);
+      const fn = faceOf.get(name) || name;
+      const c = nameToColor(fn), face = memberPhotoFor(fn);
       const st = face
         ? `background-color:${c};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
         : `background:linear-gradient(140deg, ${c}, ${darkenHex(c, 30)});`;
