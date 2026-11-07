@@ -402,8 +402,11 @@ come from this alone.
 
 ## Done
 
+- 2026-11-07 The campus's trees look like real trees (Jose: "more like real trees"): cut-out leaf sprays from Meshy's leaves on the
+  existing trunks and branches, `real-map/README.md`, "The trees". 3D view only; the card keeps the old trees. Triangles -12%; see-through
+  cards cost overdraw instead, not measured on his iPhone when this was written.
 - 2026-11-07 The campus's benches from Meshy, rebuilt on boxes (Jose asked for trees and benches, then picked the bench only):
-  `real-map/README.md`, "The Meshy bench", with why the Meshy tree was dropped. 3D view only; the card keeps the old bench.
+  `real-map/README.md`, "The Meshy bench". 3D view only; the card keeps the old bench.
   Jose on 2026-11-07: the 3D campus is smooth on his iPhone with the Meshy ambulance and helicopter (by feel, no fps number).
 - 2026-11-07 The campus's helicopter from Meshy, slimmed in Blender (Jose's pick after the ambulance): `real-map/README.md`,
   "The Meshy helicopter". 3D view and the card (its two frames only). Meshy's blades cut off, the app's rotor kept. Triangles

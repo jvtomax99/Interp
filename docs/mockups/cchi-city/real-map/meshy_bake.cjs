@@ -38,4 +38,5 @@ function pack({ dir, file }){
 }
 const cars = JSON.parse(fs.readFileSync(OUT, 'utf8'));
 for (const [name, m] of Object.entries(MODELS)){ cars[name] = { ...m.extra, mesh: pack(m) }; console.log(name, 'page bytes:', JSON.stringify(cars[name]).length); }
+cars.leaf = { tex: 'data:image/webp;base64,' + fs.readFileSync(path.join(HERE, '..', 'assets', 'meshy-tree', 'leaf-card.webp')).toString('base64') };   // the trees' leaf spray (leaf_card.cjs)
 fs.writeFileSync(OUT, JSON.stringify(cars));

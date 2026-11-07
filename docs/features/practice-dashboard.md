@@ -176,7 +176,12 @@ helicopter".
 
 **The benches: Meshy's look on simple boxes** (Jose, 2026-11-07). 160 triangles each (about 585 before), Meshy's colour baked
 on, matte and tinted a little darker (`meshyGeo`, `meshyMat`, `real-map/meshy.js`). 3D view only: the card's picture keeps the
-old bench. A Meshy tree was tested and dropped: `real-map/README.md`, "The Meshy bench".
+old bench.
+
+**The trees: leaf sprays on real branches** (Jose, 2026-11-07, "more like real trees"). Every leafy tree keeps its trunk and branches;
+its crown is cut-out sprays of leaves made from a Meshy tree (`cardCrown`, `leafy`, `real-map/meshy.js`; `leaf_card.cjs`), not
+round puffs. 3D view only; the card keeps the old trees. Triangles -12%; the cost is overdraw now, so watch the frame rate.
+`real-map/README.md`, "The trees".
 
 **Cars in 3D: Kenney's Car Kit** (Jose, 2026-11-03: free online models to "upscale" the campus; his pick, cars on
 the road only). Every moving car and ambulance (`vehicle('car'|'amb')`) is a model from Kenney's Car Kit (CC0,

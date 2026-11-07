@@ -107,6 +107,10 @@ rep("for (let x = -18; x <= 18; x += 6) if (x) lamp(x, 13.4);","for (let x = -42
 # the front's trees, beds, benches and people stay off the map's buildings and streets
 # the Meshy models come first (meshy.js): the benches are drawn from them (README, "The Meshy bench")
 rep("function tree(x, z, s=1, kind='round'){\n", open(os.path.join(HERE, 'meshy.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n")
+# the trees: today's trunks and branches, the crown now leaf sprays (cardCrown in meshy.js) instead of puffs (README, "The trees")
+rep("mats = blossom ? BLOSM : LEAFM, bark", "mats = (blossom ? BLOSM : LEAFM).map(leafy), bark")
+_a = out.index("  for (let k = 0; k < n; k++){ const u = r(), v = r(), th = u*Math.PI*2"); _b = "// the core, so no gaps show through\n"
+out = out[:_a] + "  cardCrown(cx, cy, cz, RX*1.12, RY*1.25, mats, s, r, blossom ? 76 : 68);\n" + out[out.index(_b, _a) + len(_b):]
 rep("function bed(pts, y=0.3, o={}){\n","function bed(pts, y=0.3, o={}){\n  if (pts.some(([px, pz]) => blockedXZ(px, pz, 0.1))) return;\n")
 rep("function bench(x, z, ry=0, y=0.3){ ","function bench(x, z, ry=0, y=0.3){ if (blockedXZ(x, z, 0.2)) return; ")
 rep("g.rotation.y = ry; G.add(g);\n  const put = (geo, mat, px, py, pz, rx=0)", "g.rotation.y = ry; G.add(g);\n  { const m = new THREE.Mesh(meshyGeo('bench'), meshyMat('bench')); m.castShadow = true; m.receiveShadow = true; g.add(m); return; }\n  const put = (geo, mat, px, py, pz, rx=0)")

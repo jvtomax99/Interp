@@ -384,9 +384,10 @@ pend.push(() => { CUR = 'n'; const d = DOORW.n, e = BLD.n.E[d.i], wlen = Math.mi
 // a lighter tree for the back lawns and streets (a trunk and a clustered crown), so the bigger board stays fast
 const BACK_LEAF = [M(0x3f7a3a, { r:0.85 }), M(0x4f8c44, { r:0.85 }), M(0x5f9e4c, { r:0.85 }), M(0x86bf5f, { r:0.85 })], BACK_RED = [M(0xb8452e, { r:0.85 }), M(0xd0633a, { r:0.85 }), M(0xe08a4a, { r:0.85 })];
 function backTree(x, z, s, kind){ if (kind === 'cone' || kind === 'blossom') return tree(x, z, s*0.8, kind);
-  const r = rngAt(x, z), mats = kind === 'red' ? BACK_RED : BACK_LEAF, h = 1.1*s;
+  const r = rngAt(x, z), mats = (kind === 'red' ? BACK_RED : BACK_LEAF).map(leafy), h = 1.1*s;
   limb(x, 0.28, z, x + (r() - 0.5)*0.2, 0.3 + h, z + (r() - 0.5)*0.2, 0.13*s, 0.08*s, BARK);
-  for (let k = 0; k < 6; k++){ const a = r()*Math.PI*2, d = (k ? 0.45 + r()*0.25 : 0)*s; add(new THREE.IcosahedronGeometry((k ? 0.42 + r()*0.18 : 0.7)*s, 1), mats[(k + Math.floor(r()*2)) % mats.length], x + Math.cos(a)*d, 0.3 + h + 0.35*s + (k ? r()*0.35*s : 0), z + Math.sin(a)*d); } }
+  for (let k = 0; k < 3; k++){ const a = k/3*Math.PI*2 + r(), L = (0.34 + r()*0.16)*s; limb(x, 0.3 + h*0.72, z, x + Math.cos(a)*L, 0.3 + h + (0.2 + r()*0.2)*s, z + Math.sin(a)*L, 0.06*s, 0.03*s, BARK); }
+  cardCrown(x, 0.3 + h + 0.32*s, z, 1.0*s, 0.82*s, mats, s*0.92, r, 42); }
 for (const [x, z, s, k] of SCN.trees) if (!(x > -24.6 && x < -16.9 && z > -31.8 && z < -24.4) && !(x > -4 && x < 5 && z > -54.5 && z < -45.5) && !(x > 11.6 && x < 16.0 && z > -36.6 && z < -30.9) && !(x > -6.5 && x < 12.8 && z > -47 && z < -29) && !(x > 12.6 && x < 19.9 && z > -47.4 && z < -36.4)) backTree(x, z, s*0.75, k);   // none under the pavilion's bridge
 // ==================== the corner of Atlantic and 2nd Street (Jose's photos, 2026-10-27) ====================
 // Seen from his window at John Theurer: Don Imus - WFAN Pediatric Center on the corner, tan brick with ribbon windows

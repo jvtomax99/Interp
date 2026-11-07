@@ -194,12 +194,24 @@ before `cars.js` runs.
 **The card is not re-rendered:** its benches sit in the board's picture, a full re-render, for a few pixels. It still shows the
 old bench.
 
-**The Meshy tree, tested and dropped (2026-11-07).** Meshy gave 7.7 million triangles of lovely painted leaves. Baked onto
-four lumps (356 triangles, the crown widened 1.5 times, matte, brightened) it looked good and made the campus 5-6% lighter,
-because today's round tree is much heavier than it looks. Jose kept today's: the new trunk was straight and reddish where
-ours is curved and natural, only the leafy green trees would have changed (red, cherry and evergreen stay), and it would
-have needed a full card re-render. A smooth egg (162 triangles) looked like a balloon. If it comes back: keep the lumps, give
-it today's trunk, and do the red and cherry trees too. Its files are not in the repository.
+## The trees (2026-11-07)
+
+Jose: "I want them to look more like real trees", "I dont like the bundle of balls as leafs". Every leafy tree (green, red, cherry)
+keeps its trunk and branches; its crown is now cut-out leaf sprays, as game trees are made. The evergreens are unchanged.
+
+- `leaf_card.cjs` draws one 512 px spray of individual leaves on twigs, gray so a tree's colours tint it, each leaf filled from
+  Meshy's painted leaves (`../assets/meshy-tree/leaf-source.png`, a render of its 7.7 million triangle tree; 22 KB as WebP).
+  `meshy_bake.cjs` puts it in `cars.json` as `leaf`.
+- `cardCrown` (`meshy.js`) places 68 sprays (76 on a cherry, 42 on the back's trees) in five to seven uneven boughs, each four
+  triangles, so a crown costs under 300 triangles. Its normals point out from the crown, so the tree shades as one soft
+  shape. Sprays mostly face out: edge-on they are streaks. `leafy()` turns a leaf material into a tinted, cut-out one.
+- Triangles per frame -12% (413,555 to about 366,000, wide view). **The cost moved**: see-through cards are overdraw and no longer
+  triangles, so a phone's graphics chip works differently. Watch the frame rate; `cardCrown`'s counts are the first thing to lower.
+- **The card is not re-rendered** (a full re-render of `city/`, about 130 files), so it keeps the old trees.
+
+Tried first, all rejected by Jose or by us: Meshy's whole tree (7.7 million triangles); slimmed onto a smooth egg (a balloon) and
+onto four lumps, 356 triangles (his: a straight red trunk, and only green trees would change); today's puffs with Meshy's leaves
+as a texture and soft light ("the bundle of balls"). Don't go back to round shapes for leaves.
 
 ## Free people and trees, tested and dropped (2026-11-03)
 
