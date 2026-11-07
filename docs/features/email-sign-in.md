@@ -171,8 +171,8 @@ typing the name stops earning it.
 - **Checks:** `tests/suites/account-identity.cjs` (in `run.cjs`) and the
   rules in Firebase's own emulator, `tests/tools/rules-e3.mjs` (17 cases,
   passed; run by hand).
-- **Jose publishes** the new `firestore.rules` (the `ownReview` change and
-  `hub-titles`). Then he gives Liz her title once she has signed in.
+- **Rules published** by Jose 2026-11-07 (the whole file, so `accounts` and
+  `account-sync` too). Next: he gives Liz her title once she has signed in.
 - **What it costs:** messages someone sent before signing in (or from a
   plain phone) lose a title once it's given to their account.
 

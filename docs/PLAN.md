@@ -342,10 +342,11 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    (`features/account-sync.js`: practice, streak, badges, memory trainer,
    Daily Drill, campus, knowledge count and settings joined between phones;
    Dr. Smiley's memory of you stays on the phone, `AGENTS.md`, Jose's
-   call); needs the `account-sync` rule published. E3 built 2026-11-07
-   (Term Review by account, titles given to an account on Team access;
-   Jose: typing the name stops earning a given title); needs the new
-   `firestore.rules` published (`ownReview`, `hub-titles`).
+   call). E3 built 2026-11-07 (Term Review by account, titles given to an
+   account on Team access; Jose: typing the name stops earning a given
+   title), live b1107.1257. All rules published 2026-11-07. **Email sign-in
+   is done.** The Hub locked the same day (41 phones in; `CLAUDE.md`, Open
+   items).
 R4. **Regions, later, if Jose asks:** region tags on announcements and on
    Training & Events. The top bar still says "Hackensack University Medical
    Center" under the title for South users too (Jose's call whether to change).

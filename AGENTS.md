@@ -240,7 +240,8 @@ and hover still fire — measure them, do not assume.
 Teammates get in with one shared team code, which the owner shares and can
 change on the Team access screen. The real lock is `firestore.rules` / `storage.rules`; once the owner
 turns practice mode off, anything that isn't a joined phone is refused, with
-no error on screen. So when you add something:
+no error on screen. **The Hub has been locked since 2026-11-07**, so this
+applies now. So when you add something:
 
 - **A new Firestore collection** needs a line in `firestore.rules` using
   `if team()`, and Jose has to paste the rules into the Firebase console.

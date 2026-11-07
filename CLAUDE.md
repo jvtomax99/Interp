@@ -590,16 +590,22 @@ design and anything touching data or rules stay with the main model.
 
 ## Open items
 
-- **Team access is built but only enforced once Jose locks it.** Until
-  practice mode is off, the rules behave as they used to (open).
+- **The Hub is locked** (Jose, 2026-11-07, 41 phones in): practice mode
+  is off, so the rules are enforced and anything that isn't a joined phone
+  (or a signed-in account in the team) is refused, with no error on screen.
+  A new collection without its rule line simply fails. Checked first: every
+  collection the app uses has a rule, every AI call sends the sign-in, the
+  events watcher logged in with its key ("login = service account",
+  14:42 UTC), the Storage rules published, everyone had joined. Undo:
+  Team access, Turn practice mode back on.
 - **The events watcher (`api/check-events.js`) has its own login, once the
   key is set.** `api/_service-login.js` signs a JWT with the service account
   in `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
   Cloud Datastore User), trades it for a one-hour token and sends that with
   every Firestore call, which the lock doesn't apply to. Without the key it
   goes in unsigned, as before (practice mode only); each run's report says
-  which ("login"), and a refused key stops the run with the reason. Lock the
-  Hub only after a run reports "service account". Putting a shared secret
+  which ("login"), and a refused key stops the run with the reason. A run
+  reported "service account" on 2026-11-07, before the lock. Putting a shared secret
   inside the documents it writes was rejected as a credential leak.
 - `index.html` is one 1.4 MB file. The CSS is out (`app.css`, 2026-10-21);
   the data and the JS by feature are next (`docs/split-index.md`).
