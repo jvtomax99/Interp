@@ -180,6 +180,27 @@ differences:
 
 The full-detail source is not in the repository (134 MB .blend, the helicopter and the ambulance together).
 
+## The Meshy bench (2026-11-07)
+
+Jose asked for Meshy trees and benches; one of each was made and tested, and he picked the bench only. Generated once (208,624
+triangles). **Decimate breaks thin parts**: at 480 triangles the slats collapsed and dark smears appeared. So the bench is
+rebuilt from boxes measured off Meshy's mesh (the seat, four back slats, the legs and rails), and Meshy's colour is baked onto
+them: 160 triangles against about 585 before (measured: 7,000 triangles for six benches, shadow pass included), 512 px baked,
+saved at 256 (5 KB). In campus units it is 1.2 wide with its seat at the old height, so the people still sit on it; x scaled
+0.822, y and z 0.62. In the app the wood is matte and tinted darker (`meshyMat`, 0xc2a286): straight from Meshy it was too
+orange beside the campus. `meshy.js` holds `KIT` and the Meshy helpers ahead of `tree()`, because the benches are built long
+before `cars.js` runs.
+
+**The card is not re-rendered:** its benches sit in the board's picture, a full re-render, for a few pixels. It still shows the
+old bench.
+
+**The Meshy tree, tested and dropped (2026-11-07).** Meshy gave 7.7 million triangles of lovely painted leaves. Baked onto
+four lumps (356 triangles, the crown widened 1.5 times, matte, brightened) it looked good and made the campus 5-6% lighter,
+because today's round tree is much heavier than it looks. Jose kept today's: the new trunk was straight and reddish where
+ours is curved and natural, only the leafy green trees would have changed (red, cherry and evergreen stay), and it would
+have needed a full card re-render. A smooth egg (162 triangles) looked like a balloon. If it comes back: keep the lumps, give
+it today's trunk, and do the red and cherry trees too. Its files are not in the repository.
+
 ## Free people and trees, tested and dropped (2026-11-03)
 
 Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front

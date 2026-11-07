@@ -402,6 +402,9 @@ come from this alone.
 
 ## Done
 
+- 2026-11-07 The campus's benches from Meshy, rebuilt on boxes (Jose asked for trees and benches, then picked the bench only):
+  `real-map/README.md`, "The Meshy bench", with why the Meshy tree was dropped. 3D view only; the card keeps the old bench.
+  Jose on 2026-11-07: the 3D campus is smooth on his iPhone with the Meshy ambulance and helicopter (by feel, no fps number).
 - 2026-11-07 The campus's helicopter from Meshy, slimmed in Blender (Jose's pick after the ambulance): `real-map/README.md`,
   "The Meshy helicopter". 3D view and the card (its two frames only). Meshy's blades cut off, the app's rotor kept. Triangles
   +1.3-1.5%, 3D page 820 KB to 1.05 MB. `ambulance_bake.cjs` is now `meshy_bake.cjs`, for every Meshy model.
