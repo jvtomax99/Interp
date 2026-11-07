@@ -395,6 +395,18 @@ come from this alone.
 
 ## Done
 
+- 2026-11-07 The tab bar, slim when you scroll (`docs/features/tab-bar.md`,
+  PR #240, live b1107.0125; Jose's pick B of four mockups). Scrolling down
+  makes it 46 px with icons only, every tab still one tap (was a 142 px
+  capsule, two taps). Only on a real scroll (60 px down, 30 up); the 4 s
+  idle timer is gone; full at the top and bottom of a page, no flicker
+  from the bounce. Facts: mobile WebKit has no mouse wheel and CI's WebKit
+  delivers scroll events late, so `dock-tuck.cjs` scrolls with
+  `scrollBy` and waits for each event. Team Chat measured its box during
+  the screen's slide-in (6 px short of the bar), hidden until now by the
+  timer's refit; `fitChatPanel` fits again when that ends. The full test
+  run takes 37-41 min on GitHub, so its cap is 55 min (was 40).
+
 - 2026-11-06 More, grouped (`docs/features/more-sheet.md`, PR #236, live
   b1106.2156): Ask the Hub, then Study, Doctors, Reference and You; the
   domains behind one row; Translate and Team Chat out (tabs); counts only

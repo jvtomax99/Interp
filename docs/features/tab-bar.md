@@ -1,6 +1,6 @@
 # The tab bar, slim when you scroll (2026-11-06)
 
-Status: built on branch `claude/tab-bar-slim`, waiting for Jose's push.
+Status: **live** since b1107.0125 (2026-11-07, PR #240).
 Code: `wireDock`, `dockTuck`, `dockOpen`, `dockMorph` in `index.html`
 (section "Split dock (phones)"); looks in `home-polish.css` ("Split dock",
 "Slim while you scroll"); checks in `tests/suites/dock-tuck.cjs`.
