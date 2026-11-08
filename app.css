@@ -4364,6 +4364,14 @@
     padding:4px 9px; border-radius:20px; min-width:0;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;
   }
+  /* A team-added event's region (regions.md): a tag, never a filter. */
+  .ce-region{
+    font-family:var(--sans); font-size:var(--fs-cap2); font-weight:650;
+    letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--navy); background:var(--accent-soft);
+    padding:4px 9px; border-radius:20px; white-space:nowrap;
+  }
+  /* Where a pin will show (its chat channel), under the sheet's title. */
+  .modal .rg-where{ margin:-9px 0 13px; font-size:var(--fs-foot); color:var(--ink-soft); }
   .ce-time{
     font-family:var(--mono); font-size:var(--fs-cap2); color:var(--ink-faint);
     font-variant-numeric:tabular-nums; white-space:nowrap;

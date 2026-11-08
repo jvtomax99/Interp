@@ -416,9 +416,10 @@ const GUIDE_TOPICS = [
     <p><b>New domain:</b> tap <b>+ New</b> next to Medical Terminology on Home. Or, inside any domain, tap <b>⋯</b> in its colored banner, then <b>New domain</b>.</p>
     <p><b>Rename it, or change its color or pin:</b> open the domain, tap <b>⋯</b> in its banner, then <b>Edit</b> and the domain's name.</p>` },
 
-  { id:'regions', section:'team', k:'region regions north south shore humc channel channels everyone separate group team doctors directory my region', q:'What are North and South?', a:`
+  { id:'regions', section:'team', k:'region regions north south shore humc channel channels everyone separate group team doctors directory my region pins pinned events top bar hackensack meridian health', q:'What are North and South?', a:`
     <p>The Hub is shared by two interpreter teams: the <b>North</b> region (the HUMC side) and the <b>South</b> region (the Shore side). Nobody is walled off: everyone can read everything.</p>
-    <p>Your region decides two things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All</b> to see every doctor, and a search always looks through all of them.</p>
+    <p>Your region decides a few things. <b>Team Chat</b> has three channels, <b>Everyone</b>, <b>North</b> and <b>South</b>; Everyone and your region notify you, and the other region's channel only shows a count on its tab. A pin belongs to the channel it was pinned in: Everyone's pins show in every channel, a region's only in its own. The <b>Doctor Directory</b> opens on your region's doctors; tap <b>All</b> to see every doctor, and a search always looks through all of them.</p>
+    <p>Under the Hub's name at the top, North reads <b>Hackensack University Medical Center</b> and South reads <b>Hackensack Meridian Health</b>. An event someone adds to <b>Training &amp; Events</b> can carry a North or South tag; everyone still sees it.</p>
     <p>Pick your region under your initial in the top-right corner, or when Chat or the Doctor Directory asks.</p>` },
 
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
@@ -439,9 +440,10 @@ const GUIDE_TOPICS = [
     </ol>
     <p>Their name shows up highlighted, and the message stands out for them when they open Chat.</p>` },
 
-  { id:'pin', section:'team', k:'pin pinned announcement important update top of chat keep notice', q:'How do I pin something important for everyone?', a:`
+  { id:'pin', section:'team', k:'pin pinned announcement important update top of chat keep notice region north south channel', q:'How do I pin something important for everyone?', a:`
     <p>In Team Chat, tap the <b>pin</b> at the top and write the update, like a new CE requirement or a changed protocol.</p>
-    <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>` },
+    <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>
+    <p>A pin goes where you are. Pinned in <b>Everyone</b>, it shows in every channel; pinned in <b>North</b> or <b>South</b>, only in that channel, marked "North only" or "South only". The sheet says which before you pin.</p>` },
 
   { id:'notifications', section:'team', k:'notifications push notify alert alerts closed lock screen badge phone banner sound iphone home screen send owner administrator message team broadcast test not arriving not working', q:'How do I get notifications on my phone?', a:`
     <ol>
@@ -518,8 +520,8 @@ const GUIDE_TOPICS = [
     <p><b>More</b> → <b>Code of Ethics</b>. It has the key principles and the conduct that's not allowed, in plain words, most with an example of what it looks like in practice.</p>
     <p>These are short summaries based on the NCIHC and CCHI codes, not the official text.</p>` },
 
-  { id:'events', section:'study', k:'training events ce continuing education credits webinar conference hours', q:'Where do I find CE and training opportunities?', a:`
-    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. CHIA, CCHI and NCIHC are checked once a day and new items appear on their own. Cross-Cultural Communications blocks automated checks, so their trainings show up only when someone adds them with <b>+ Add</b>. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
+  { id:'events', section:'study', k:'training events ce continuing education credits webinar conference hours region north south tag', q:'Where do I find CE and training opportunities?', a:`
+    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. CHIA, CCHI and NCIHC are checked once a day and new items appear on their own. Cross-Cultural Communications blocks automated checks, so their trainings show up only when someone adds them with <b>+ Add</b>. When you add one, <b>For</b> can mark it North or South (a local in-service, say); it gets a small tag and everyone still sees it. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
 
   { id:'body', section:'study', k:'3d body anatomy model organ muscle bone heart rotate zoom human atlas', q:'What is 3D Body?', a:`
     <p>A model of the human body you can turn and zoom. Tap any part to see its card. It's handy when a doctor points to something you can't picture.</p>
