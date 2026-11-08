@@ -152,6 +152,7 @@
 <div class="overlay" id="announcementOverlay">
   <div class="modal">
     <h3>Pin an announcement</h3>
+    <p class="rg-where" id="fAnnouncementWhere"></p>
     <div class="field"><label>Announcement</label><textarea id="fAnnouncementText" placeholder="e.g. New CE requirement this quarter — see Training &amp; Events for the link" style="min-height:90px;"></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeAnnouncementModal()">Cancel</button>
@@ -552,6 +553,7 @@
     <div class="field"><label>Source (optional)</label><input id="fEvSource" type="text" placeholder="e.g. CHIA, NCIHC, HUMC in-service"></div>
     <div class="field"><label>Link (optional)</label><input id="fEvLink" type="text" placeholder="Registration or info link"></div>
     <div class="field"><label>Notes (optional)</label><textarea id="fEvNotes" placeholder="Date, cost, CE hours…"></textarea></div>
+    <div class="field"><label for="fEvRegion">For (optional)</label><select id="fEvRegion"><option value="">Everyone</option><option value="north">North (HUMC side)</option><option value="south">South (Shore side)</option></select></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeEventModal()">Cancel</button>
       <button class="btn btn-primary" onclick="saveEvent()">Save event</button>
@@ -869,8 +871,9 @@ function canonicalLocation(raw){
 /* ---------- Regions ----------
    Interpreters from the North region (the HUMC side) and the South region
    share one Hub. A region is a view, not a wall: everyone reads everything.
-   It only decides what the Doctor Directory opens on and which Team Chat
-   channel notifies you. Each phone picks its own (ih_region): asked once in
+   It decides what the Doctor Directory opens on, which Team Chat channel
+   notifies you, which pins a channel shows and the hospital line under the
+   title (R4). Each phone picks its own (ih_region): asked once in
    chat or the directory, changed any time in the name sheet. Nothing about
    it is stored in the database except on doctors and chat messages.
    docs/features/regions.md. */
@@ -928,7 +931,21 @@ function regionAskHtml(why){
 function syncRegionControls(){
   const mine = myRegion();
   document.querySelectorAll('.rg-seg [data-region]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.region === mine)));
+  applyRegionBrand();
 }
+// The hospital line under the title (and the exam seal): South's sites are
+// many, so South reads the network's name (Jose, 2026-11-08). North and no
+// region keep HUMC's.
+function regionOrgName(short){
+  return myRegion() === 'south' ? (short ? 'Hackensack Meridian' : 'Hackensack Meridian Health')
+                                : (short ? 'Hackensack UMC' : 'Hackensack University Medical Center');
+}
+function applyRegionBrand(){
+  const full = document.querySelector('.tg-sub-full'), short = document.querySelector('.tg-sub-short');
+  if(full) full.textContent = regionOrgName(false);
+  if(short) short.textContent = regionOrgName(true);
+}
+applyRegionBrand();
 
 // The wording on file, shown on the card only when it adds something the
 // group heading doesn't already say.
@@ -3046,7 +3063,10 @@ async function addAnnouncement(){
   if(!text){ showToast('Write something to pin first.'); return; }
   if(!db){ showToast('Not connected — check your connection and retry.'); return; }
   try{
-    await db.collection('announcements').add({ text, author: whoAmI(), createdAt: Date.now() });
+    // Pinned in a region's channel: that channel's pin (no channel = Everyone's).
+    const rec = { text, author: whoAmI(), createdAt: Date.now() };
+    if(isRegion(chatChannel)) rec.channel = chatChannel;
+    await db.collection('announcements').add(rec);
     input.value = '';
     closeAnnouncementModal();
     logActivity('pinned an announcement');
@@ -3071,6 +3091,8 @@ function openAnnouncementModal(){
 }
 function _openAnnouncementModal(){
   document.getElementById('fAnnouncementText').value = '';
+  const where = document.getElementById('fAnnouncementWhere');
+  if(where) where.textContent = isRegion(chatChannel) ? `Shows in the ${regionName(chatChannel)} channel.` : 'Shows in every channel.';
   document.getElementById('announcementOverlay').classList.add('show');
   document.getElementById('fAnnouncementText').focus();
 }
@@ -3082,18 +3104,24 @@ function closeAnnouncementModal(){
 /* Team Chat's pinned strip: one line with the newest pin until it is opened.
    Two pins used to take 300px, the whole phone screen above the thread. */
 let tcPinnedOpen = false;
+// The pins a channel shows: Everyone's (no channel, every pin from before
+// regions) in every channel, a region's only in its own (Jose, 2026-11-08).
+function pinsForChannel(){
+  return ANNOUNCEMENTS.filter(a => !isRegion(a.channel) || a.channel === chatChannel);
+}
 function renderPinnedStrip(){
   const host = document.getElementById('tcPinned');
   if(!host) return;
+  const pins = pinsForChannel();
   // Nothing pinned: no strip at all. The pin button in the header pins.
-  if(!ANNOUNCEMENTS.length){ host.innerHTML = ''; return; }
-  const top = ANNOUNCEMENTS[0];
-  const rows = ANNOUNCEMENTS.map(a => `<div class="tc-pin-row"><p>${escapeHtml(a.text)}<small>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}</small></p>
+  if(!pins.length){ host.innerHTML = ''; return; }
+  const top = pins[0];
+  const rows = pins.map(a => `<div class="tc-pin-row"><p>${escapeHtml(a.text)}<small>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}${isRegion(a.channel) ? ` · ${regionName(a.channel)} only` : ''}</small></p>
       <button type="button" class="tc-text-btn" onclick="deleteAnnouncement('${a.id}')" aria-label="Unpin: ${escapeAttr(a.text.slice(0, 60))}">Unpin</button></div>`).join('');
   host.innerHTML = `<div class="tc-pinned${tcPinnedOpen ? ' is-open' : ''}">
     <button type="button" class="tc-pinned-bar" onclick="toggleTcPinned()" aria-expanded="${tcPinnedOpen}" aria-controls="tcPinnedList">
       ${ICON_PIN}<span class="tc-pinned-text">${escapeHtml(top.text)}</span>
-      ${ANNOUNCEMENTS.length > 1 ? `<span class="tc-pinned-count">${ANNOUNCEMENTS.length} pinned</span>` : ''}
+      ${pins.length > 1 ? `<span class="tc-pinned-count">${pins.length} pinned</span>` : ''}
       <span class="tc-pinned-chev">${ICON_CHEVRON_DOWN}</span>
     </button>
     <div class="tc-pinned-list" id="tcPinnedList">${rows}
@@ -5222,7 +5250,7 @@ function renderEvents(){
     html += `
       <div class="ce-row">
         <div class="ce-head">
-          <span class="ce-src">${escapeHtml(src)}</span>
+          <span class="ce-src">${escapeHtml(src)}</span>${isRegion(ev.region) ? `<span class="ce-region">${regionName(ev.region)}</span>` : ''}
           <span class="ce-time" data-ts="${ev.timestamp||''}">${when}</span>
           <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
         </div>
@@ -5243,6 +5271,7 @@ function openAddEventModal(){
   document.getElementById('fEvSource').value = '';
   document.getElementById('fEvLink').value = '';
   document.getElementById('fEvNotes').value = '';
+  document.getElementById('fEvRegion').value = '';
   document.getElementById('eventOverlay').classList.add('show');
   if(prefersAutoFocus()) document.getElementById('fEvTitle').focus();
 }
@@ -5264,6 +5293,9 @@ async function saveEvent(){
     addedBy: whoAmI() || '',
     timestamp: Date.now()
   };
+  // A tag, not a filter: everyone still sees it (regions.md).
+  const evRegion = document.getElementById('fEvRegion').value;
+  if(isRegion(evRegion)) record.region = evRegion;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('ce-events').add(record);
@@ -5978,9 +6010,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'opening',     tone:'gd-n1', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
-  { id:'account',     tone:'gd-n2', pin:'pins/chat.webp',              eyebrow:'Your account, more of you', title:'Signed in with your email, your Term Review record follows you to every phone too, and your title in Team Chat belongs to you alone' },
-  { id:'tabbar',      tone:'gd-n3', pin:'pins/home.webp',              eyebrow:'A steadier tab bar',    title:'Scroll down and the bar at the bottom gets thinner, every button still one tap. No more shrinking on its own or flickering' },
+  { id:'regions',     tone:'gd-n1', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
+  { id:'opening',     tone:'gd-n2', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
+  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account, more of you', title:'Signed in with your email, your Term Review record follows you to every phone too, and your title in Team Chat belongs to you alone' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -10436,7 +10468,7 @@ function renderQuizResults(){
       <span class="seal-score">${pct}%</span>
       <h4>Exam simulation completed</h4>
       <p>${escapeHtml(whoAmI() || 'Interpreter')} \u00b7 ${total} questions \u00b7 ${when}<br>
-         Hackensack University Medical Center \u2014 Interpreter Services</p>
+         ${regionOrgName(false)} \u2014 Interpreter Services</p>
     </div>`;
   }
   // The seal already carries the score, in brand colours, at the top of the
@@ -14376,6 +14408,7 @@ function setChatChannel(ch){
   setChatUnreadAnchor();
   markChatSeen();
   renderChatMessages();
+  renderPinnedStrip(); fitChatPanel();
   updateChatBadge();
 }
 function chatPlaceholder(){

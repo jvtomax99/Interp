@@ -347,10 +347,9 @@ D1c. **Needs Jose** (`docs/mockups/doctors/d1-review.md`): the real-data
    title), live b1107.1257. All rules published 2026-11-07. **Email sign-in
    is done.** The Hub locked the same day (41 phones in; `CLAUDE.md`, Open
    items).
-R4. **Regions, later, if Jose asks:** region tags on announcements and on
-   Training & Events. The top bar still says "Hackensack University Medical
-   Center" under the title for South users too (Jose's call whether to change).
-   Doctor Prep's default location is "Hackensack Meridian Health" for both.
+R4. **Regions: pins, events, the top bar** (Jose, 2026-11-08, all three;
+   South reads Hackensack Meridian Health): built, `docs/features/regions.md`
+   (R4). Doctor Prep's default location stays "Hackensack Meridian Health".
 
 Watch after South joins: Firestore reads (Usage page) a week later. More
 people = more reads at every launch; the 50K/day trigger under Later may
