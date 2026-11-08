@@ -1253,7 +1253,10 @@ come from this alone.
   second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
   pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
   that shows the name whatever the frames do, and the test waits up to 40 s
-  and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+  and prints how long it took. 2026-11-08 (#253's red run, 36.7 s): each hand-over
+  (`adopt`, Home building a new greeting mid-writing) started that wall clock afresh;
+  one deadline now carries over (`end` in `write`), checked with Home rebuilt every 3 s
+  at 2 fps (34.3 s before, 12.1 s after). A WebKit red on an unrelated PR: re-run once,
   then read the log; it names the suite and the check. A WebKit job
   "cancelled" at its 20-minute limit while installing the browser (#129,
   and #131 twice, 2026-10-23) was still in `playwright install --with-deps
