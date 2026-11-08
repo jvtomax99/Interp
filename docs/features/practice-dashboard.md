@@ -174,6 +174,15 @@ page, same cameras: triangles per frame +1.2% to +1.7% (353-371k), the 3D page 5
 model's hub. The 3D page goes from 820 KB to 1.05 MB; triangles per frame +1.3% to +1.5%. `real-map/README.md`, "The Meshy
 helicopter".
 
+**The benches: Meshy's look on simple boxes** (Jose, 2026-11-07). 160 triangles each (about 585 before), Meshy's colour baked
+on, matte and tinted a little darker (`meshyGeo`, `meshyMat`, `real-map/meshy.js`). 3D view only: the card's picture keeps the
+old bench.
+
+**The trees: after Jose's picture** (2026-11-07). Every tree but the evergreens is one kind (`pictureTree`, `real-map/meshy.js`): a
+twisting trunk with flared roots, curved limbs, and great dense masses of detailed leaves in its own colours (green, autumn red, and
+sakura pink for every cherry, the one by Don Imus included; `leaf_card.cjs`). 3D view only; the card keeps the old trees.
+Triangles +5%; the 3D page about 1.42 MB; the cost is overdraw too, so watch the frame rate. `real-map/README.md`, "The trees".
+
 **Cars in 3D: Kenney's Car Kit** (Jose, 2026-11-03: free online models to "upscale" the campus; his pick, cars on
 the road only). Every moving car and ambulance (`vehicle('car'|'amb')`) is a model from Kenney's Car Kit (CC0,
 `docs/mockups/cchi-city/assets/kenney-car-kit/`): sedan, SUV, hatchback and van in turn, the yellow cars taxis,

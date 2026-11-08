@@ -1,14 +1,15 @@
 // The campus's Meshy models (Jose, 2026-11-06/07): each Blender-slimmed model in ../assets/meshy-*/ packed into cars.json
 // as its entry's `mesh`, which cars.js draws with its texture. Run it after cars_bake.py, which writes the kit's ambulance
 // back and drops the helicopter:   node meshy_bake.cjs
-// Each GLB is already in campus units, facing +z (the Blender export; README, "The Meshy ambulance", "The Meshy helicopter").
+// Each GLB is already in campus units, facing +z (the Blender export; README, "The Meshy ambulance", "The Meshy helicopter", "The Meshy bench").
 const fs = require('fs'), path = require('path');
 const HERE = __dirname, OUT = path.join(HERE, 'cars.json');
 const MODELS = {
   ambulance: { dir: 'meshy-ambulance', file: 'ambulance', extra: {
     lamps: [[-0.171, 0.805, 0.515], [0.171, 0.805, 0.515]], top: 0.83 } },   // the light bar's two blue ends (measured in Blender)
   heli: { dir: 'meshy-helicopter', file: 'helicopter', extra: {
-    rotor: [0, 0.628, -0.307], light: [0, -0.092, 0.637] } } };              // its hub, for the app's spinning rotor; the nose light
+    rotor: [0, 0.628, -0.307], light: [0, -0.092, 0.637] } },                // its hub, for the app's spinning rotor; the nose light
+  bench: { dir: 'meshy-bench', file: 'bench', extra: {} } };
 
 function pack({ dir, file }){
   const D = path.join(HERE, '..', 'assets', dir), b = fs.readFileSync(path.join(D, file + '.glb'));
@@ -37,4 +38,7 @@ function pack({ dir, file }){
 }
 const cars = JSON.parse(fs.readFileSync(OUT, 'utf8'));
 for (const [name, m] of Object.entries(MODELS)){ cars[name] = { ...m.extra, mesh: pack(m) }; console.log(name, 'page bytes:', JSON.stringify(cars[name]).length); }
+const card = f => 'data:image/webp;base64,' + fs.readFileSync(path.join(HERE, '..', 'assets', 'meshy-tree', f)).toString('base64');
+delete cars.leaf; delete cars.blossom; delete cars.petal;
+cars.foliage = { green: card('leaf-green.webp'), red: card('leaf-red.webp'), pink: card('petal-pink.webp') };   // the trees' leaves (leaf_card.cjs)
 fs.writeFileSync(OUT, JSON.stringify(cars));

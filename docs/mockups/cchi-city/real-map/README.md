@@ -180,6 +180,48 @@ differences:
 
 The full-detail source is not in the repository (134 MB .blend, the helicopter and the ambulance together).
 
+## The Meshy bench (2026-11-07)
+
+Jose asked for Meshy trees and benches; one of each was made and tested, and he picked the bench only. Generated once (208,624
+triangles). **Decimate breaks thin parts**: at 480 triangles the slats collapsed and dark smears appeared. So the bench is
+rebuilt from boxes measured off Meshy's mesh (the seat, four back slats, the legs and rails), and Meshy's colour is baked onto
+them: 160 triangles against about 585 before (measured: 7,000 triangles for six benches, shadow pass included), 512 px baked,
+saved at 256 (5 KB). In campus units it is 1.2 wide with its seat at the old height, so the people still sit on it; x scaled
+0.822, y and z 0.62. In the app the wood is matte and tinted darker (`meshyMat`, 0xc2a286): straight from Meshy it was too
+orange beside the campus. `meshy.js` holds `KIT` and the Meshy helpers ahead of `tree()`, because the benches are built long
+before `cars.js` runs.
+
+**The card is not re-rendered:** its benches sit in the board's picture, a full re-render, for a few pixels. It still shows the
+old bench.
+
+## The trees (2026-11-07)
+
+Jose, in order: "more like real trees"; "I dont like the bundle of balls as leafs"; "more details and more branches and cuter
+leafs", the sakura by Don Imus most of all; then two reference pictures ("more like these"), and the one to follow: a stylised tree
+with a thick twisting trunk, flared roots, curved limbs and great dense masses of small leaves, bright on top and dark inside.
+Last: "in that style but ... with their respective colors": every cherry pink (Don Imus's too), the others green; "the leafs to
+have better graphics and more details". The evergreens are unchanged.
+
+- **One tree**, `pictureTree(x, z, s, kind, build)` in `meshy.js`: a twisting tapered trunk (`tube`, a TubeGeometry along a
+  curve with its radius reshaped), roots flaring into the ground, a ring of leaf masses with one or two high in the middle, and a
+  curved limb up into each. Kinds: `green`, `red` (the back's red trees, autumn), `pink` (every cherry). Builds: `TREE_FRONT`
+  (`tree()`, the street trees: 7 masses, 3 roots), `TREE_BACK` (`backTree()`, the back's 47: 5 masses, no roots, a plain core),
+  `TREE_IMUS` (`cherry()`, the sakura by Don Imus: 10 masses, 5 roots, 84 cards a mass).
+- **A mass** (`lobe`): a dark core so no sky shows through its middle (none on a cherry: blossom stays a little airy; a bright
+  core shows as a ball, too dark a one as a hole) under a coat of leaf cards, two triangles a side, lit from the mass's own middle.
+- **The leaves** (`leaf_card.cjs`, 768 px, seeded): `leaf-green.webp` (pointed leaves filled from Meshy's painted leaves,
+  `../assets/meshy-tree/leaf-source.png`, each with its own hue, a midrib, side veins and a rim of light), `leaf-red.webp` (the
+  same, autumn), `petal-pink.webp` (notched sakura petals, deep pink at the base to pale at the tip, with little five-petal flowers
+  and buds). In colour: the four materials of a kind only lighten or darken them (`foliage()`). 80-96 KB each; `meshy_bake.cjs`
+  puts them in `cars.json` as `foliage`.
+- Triangles per frame +5% (413,555 to 432,859, wide view); the 3D page about 1.42 MB (the leaf pictures). The cost is overdraw too:
+  watch the frame rate, and lower `cards` in the builds first.
+- **The card is not re-rendered** (a full re-render of `city/`, about 130 files), so it keeps the old trees.
+
+Tried on the way, all dropped: Meshy's whole tree (7.7 million triangles); slimmed onto a smooth egg (a balloon) and onto four
+lumps (a straight red trunk); today's puffs wearing Meshy's leaves ("the bundle of balls"); leaf sprays on the old trunks (liked,
+then "more like these"); the sakura in pink-to-blue like his picture (he wants it pink). Don't go back to round shapes for leaves.
+
 ## Free people and trees, tested and dropped (2026-11-03)
 
 Jose's ask: detailed free assets for the people and trees. Tested in this scene beside ours (lineup at the front
