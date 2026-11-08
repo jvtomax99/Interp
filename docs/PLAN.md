@@ -406,6 +406,15 @@ come from this alone.
 
 ## Done
 
+- 2026-11-08 No white screen on slow Wi-Fi (Jose's screen recording: 3 s of plain white on every open; his pick "1 s wait,
+  update next time"). `sw.js`: the app's page has 1 s to arrive whole (`PAGE_WAIT`), else the saved copy opens with its saved
+  code (`fromSaved`) and nothing late is written back; `index.html`'s update check reloads an older page only once the app is in
+  the background, never in use. Measured with `tests/tools/slow-open.cjs` (0.8 s to first byte, 1.5 Mbps, CPU 4x): slow, nothing
+  new, the opening at 5.2 s -> 2.4 s, Home under it 4.6 s -> 1.8 s; slow after an update 4.9 s -> 2.1 s (the old version once);
+  fast unchanged (Home 0.8 s). Guarded by the `slow-open` suite; `deploy-open`'s older page now reloads in the background.
+  User Guide: "The app looks out of date" rewritten. Not measured on his iPhone yet. Also found in the recording, not fixed
+  here: an apparent restart on CoreCHI Practice while the campus loads (likely memory), the tab bar over the opening for ~1 s,
+  Team Chat's messages vanishing ~1.2 s when the box is tapped.
 - 2026-11-07 The campus's trees after Jose's picture: a twisting trunk with roots, curved limbs, dense masses of detailed leaves, each
   tree in its own colours (every cherry pink, the Don Imus sakura too; the rest green; the back's red ones red), `real-map/README.md`,
   "The trees". 3D view only; the card keeps the old trees. Triangles +5%, the 3D page about 1.42 MB; not measured on his iPhone when

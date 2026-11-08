@@ -62,7 +62,8 @@ const SUITES = [
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],
   ['tool-banners.cjs',   'Tool banners: Translate, Term Review, Ask and Doctor Directory under a colour banner with their pin (one-line title, no spill, the count above the search, + Add and Ask\'s links on it, his face in a conversation, a credit\'s tag), the pin flying from Home and nothing left behind, none under reduced motion or from the tab bar, Back'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
-  ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once'],
+  ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once, in the background'],
+  ['slow-open.cjs',       'Slow Wi-Fi: the saved copy opens past a second, with its own code; a new version waits for the background'],
   ['feel.cjs',            'The feel guard: no empty flash or jump on data, press feedback, contrast, a scroll that searches nothing, his face on its clock, Home at rest'],
 ];
 const only = process.argv.slice(2);
