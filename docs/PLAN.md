@@ -130,7 +130,7 @@ under way, then what waits on Jose, then small leftovers.
    The 1-minute promo: made (#151, #156), in the app as Home's Watch video
    with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
 2. **Campus: alive and interactive (Jose, 2026-10-26; previews in the
-   third campus chat; he picked all seven).** Waits on #157, then
+   third campus chat; he picked all seven). Done 2026-11-08 (b skipped, see b).** Waits on #157, then
    `claude/campus-alive`. Order, one PR each:
    a. **Live 3D test on his iPhone first** (an Artifact page: the campus
       drawn live with three.js; spin, pinch, tap to lift, an hour slider,
@@ -190,7 +190,12 @@ under way, then what waits on Jose, then small leftovers.
       card's pictures were re-rendered at 1200 wide under it: the same scene changes, the pictures rendered again
       with Blender 5.2 as `bpy` on Python 3.13, `campus3d/` rebuilt). Live behaviour (giving way) is 3D only;
       the card's movers follow fixed paths.
-   b. Campus drawn live in the app (`features/campus.js`), pictures kept
+   b. **Skipped (Jose, 2026-11-08), so the campus is done.** It would add ~1.8 MB per open
+      of CoreCHI Practice (`campus3d/index.html` 1 MB + three.js) and GPU work while the
+      card scrolls, and mostly repeat what the card's 3D button already gives (spin, tap,
+      the sun by the clock, 60 fps on his iPhone). Forest and Duolingo keep the dashboard
+      picture light and put the heavy view behind a tap, as the card does. Open again only
+      if he asks. The original plan: Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
       clock: sun moved live, no extra pictures) and 3 (floors rise,
