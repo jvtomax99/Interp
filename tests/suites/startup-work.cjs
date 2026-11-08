@@ -78,10 +78,19 @@ const init = () => {
     });
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
     const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
+    // And Home building a new greeting every 3 s meanwhile (data arriving as
+    // the app opens), each one a hand-over (adopt) of the writing: each used
+    // to start the wall clock afresh, keeping the name back 34-37 s (CI's
+    // WebKit, 2026-11-08). The deadline now carries over.
+    await page.evaluate(() => { window.__handovers = 0;
+      new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.classList && n.classList.contains('home-name-pen')) window.__handovers++; }))).observe(document.body, { childList: true, subtree: true });
+      window.__repaint = setInterval(() => { if (activeCategory === 'home' && document.querySelector('.home-name-pen')) { keptGreetingSig = 'changed'; lastHomeHtml = ''; renderContent(); } }, 3000); });
     const t0 = Date.now();
     const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 30000 }).then(() => true, () => false);
     const took = (Date.now() - t0) / 1000;
+    const handovers = await page.evaluate(() => { clearInterval(window.__repaint); return window.__handovers; });
     ok(wrote && shown && took < 22, 'starved of frames, the wall clock still shows the name within the cap (' + Math.round(took * 10) / 10 + ' s)');
+    ok(handovers >= 2, 'with Home rebuilt mid-writing, the deadline carries over (' + handovers + ' hand-overs, name in ' + Math.round(took * 10) / 10 + ' s)');
     await ctx.close();
   }
 
