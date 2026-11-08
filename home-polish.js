@@ -1034,9 +1034,9 @@
       const r=run;r.stop(true);
       if(r.txt!==txt||still()||document.hidden)return;
       name.classList.add('is-penning');
-      write(name,txt,r.family,parseFloat(getComputedStyle(name).fontSize)||r.size,r.strokes,r.elapsed());
+      write(name,txt,r.family,parseFloat(getComputedStyle(name).fontSize)||r.size,r.strokes,r.elapsed(),r.end);
     }
-    function write(name,txt,family,size,strokes,from){
+    function write(name,txt,family,size,strokes,from,end){
       const row=name.parentElement;
       // where the name's baseline starts, in the row's own coordinates
       const mk=document.createElement('span');mk.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
@@ -1120,7 +1120,11 @@
       // all but stopped painting) can take many times `total`. A wall clock
       // ends it: the name is never kept back longer than this, whatever the
       // frames do. Generous enough never to cut a pen that is visibly moving.
-      const cap=setTimeout(()=>stop(),Math.max(12000,total*4));
+      // One deadline for the whole writing: a hand-over (adopt) carries it on,
+      // it used to start a fresh one, so a Home repainting every few seconds
+      // while the app opened kept the name back 34 s (CI's WebKit, 2026-11-08).
+      end=end||performance.now()+Math.max(12000,total*4);
+      const cap=setTimeout(()=>stop(),Math.max(0,end-performance.now()));
       let dx=0, dy=0;
       function tick(now){
         if(!svg.isConnected||document.hidden||!name.isConnected)return stop();
@@ -1155,7 +1159,7 @@
         }
         raf=requestAnimationFrame(tick);
       }
-      run={stop,txt,family,size,strokes,elapsed:()=>clock};
+      run={stop,txt,family,size,strokes,end,elapsed:()=>clock};
       // a breath after Dr. Smiley starts to appear (none when carrying on)
       if(from)raf=requestAnimationFrame(tick);else setTimeout(()=>{if(!done)raf=requestAnimationFrame(tick);},350);
     }

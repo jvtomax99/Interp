@@ -130,7 +130,7 @@ under way, then what waits on Jose, then small leftovers.
    The 1-minute promo: made (#151, #156), in the app as Home's Watch video
    with a voice fix and 10% faster (#158); `promo/hub-blend/BRIEF-60s.md`.
 2. **Campus: alive and interactive (Jose, 2026-10-26; previews in the
-   third campus chat; he picked all seven).** Waits on #157, then
+   third campus chat; he picked all seven). Done 2026-11-08 (b skipped, see b).** Waits on #157, then
    `claude/campus-alive`. Order, one PR each:
    a. **Live 3D test on his iPhone first** (an Artifact page: the campus
       drawn live with three.js; spin, pinch, tap to lift, an hour slider,
@@ -190,7 +190,12 @@ under way, then what waits on Jose, then small leftovers.
       card's pictures were re-rendered at 1200 wide under it: the same scene changes, the pictures rendered again
       with Blender 5.2 as `bpy` on Python 3.13, `campus3d/` rebuilt). Live behaviour (giving way) is 3D only;
       the card's movers follow fixed paths.
-   b. Campus drawn live in the app (`features/campus.js`), pictures kept
+   b. **Skipped (Jose, 2026-11-08), so the campus is done.** It would add ~1.8 MB per open
+      of CoreCHI Practice (`campus3d/index.html` 1 MB + three.js) and GPU work while the
+      card scrolls, and mostly repeat what the card's 3D button already gives (spin, tap,
+      the sun by the clock, 60 fps on his iPhone). Forest and Duolingo keep the dashboard
+      picture light and put the heavy view behind a tap, as the card does. Open again only
+      if he asks. The original plan: Campus drawn live in the app (`features/campus.js`), pictures kept
       as the fallback (no WebGL, reduced motion, slow phone), windows on
       all sides. Brings 7 (spin), 2 (tap lifts it), 1 (sky follows the
       clock: sun moved live, no extra pictures) and 3 (floors rise,
@@ -404,6 +409,15 @@ come from this alone.
 - 2026-11-08 The campus's leaves after Jose's iPhone screenshots (speckle, black specks, flat patches, square petals): readable leaves,
   no black fringes, light across each card, edge-on cards hidden, lumpy masses, real petal shapes. `real-map/README.md`, "The trees". Not
   measured on his iPhone when this was written.
+- 2026-11-08 No white screen on slow Wi-Fi (Jose's screen recording: 3 s of plain white on every open; his pick "1 s wait,
+  update next time"). `sw.js`: the app's page has 1 s to arrive whole (`PAGE_WAIT`), else the saved copy opens with its saved
+  code (`fromSaved`) and nothing late is written back; `index.html`'s update check reloads an older page only once the app is in
+  the background, never in use. Measured with `tests/tools/slow-open.cjs` (0.8 s to first byte, 1.5 Mbps, CPU 4x): slow, nothing
+  new, the opening at 5.2 s -> 2.4 s, Home under it 4.6 s -> 1.8 s; slow after an update 4.9 s -> 2.1 s (the old version once);
+  fast unchanged (Home 0.8 s). Guarded by the `slow-open` suite; `deploy-open`'s older page now reloads in the background.
+  User Guide: "The app looks out of date" rewritten. Not measured on his iPhone yet. Also found in the recording, not fixed
+  here: an apparent restart on CoreCHI Practice while the campus loads (likely memory), the tab bar over the opening for ~1 s,
+  Team Chat's messages vanishing ~1.2 s when the box is tapped.
 - 2026-11-07 The campus's trees after Jose's picture: a twisting trunk with roots, curved limbs, dense masses of detailed leaves, each
   tree in its own colours (every cherry pink, the Don Imus sakura too; the rest green; the back's red ones red), `real-map/README.md`,
   "The trees". 3D view only; the card keeps the old trees. Triangles +5%, the 3D page about 1.42 MB; not measured on his iPhone when
@@ -1256,7 +1270,10 @@ come from this alone.
   second stretched a 4 s pen past the test's 20 s. Fixed the same day: the
   pen has a wall clock (`cap` in home-polish.js, max(12 s, 4 x its length))
   that shows the name whatever the frames do, and the test waits up to 40 s
-  and prints how long it took. A WebKit red on an unrelated PR: re-run once,
+  and prints how long it took. 2026-11-08 (#253's red run, 36.7 s): each hand-over
+  (`adopt`, Home building a new greeting mid-writing) started that wall clock afresh;
+  one deadline now carries over (`end` in `write`), checked with Home rebuilt every 3 s
+  at 2 fps (34.3 s before, 12.1 s after). A WebKit red on an unrelated PR: re-run once,
   then read the log; it names the suite and the check. A WebKit job
   "cancelled" at its 20-minute limit while installing the browser (#129,
   and #131 twice, 2026-10-23) was still in `playwright install --with-deps

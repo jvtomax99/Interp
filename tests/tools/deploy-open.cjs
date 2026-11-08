@@ -7,7 +7,8 @@
         page reload itself, when, and what does the new worker fetch?
      3. an open with nothing deployed (B again): the control.
      4. a page served from the saved copy: the worker's build (C) is not the
-        page's, so this one open must reload once and only once.
+        page's, so it reloads once and only once, and only once the app is
+        in the background (the page is made hidden halfway through).
 
    For each open: load, first paint, Home's paints, the hello's starts,
    the worker taking control (controllerchange), the page leaving
@@ -77,17 +78,27 @@ async function measure(say = console.log) {
   page.on('framenavigated', f => { if (f === page.mainFrame()) events.push({ k: 'navigated', at: Date.now() }); });
   ctx.on('serviceworker', w => events.push({ k: 'worker created', at: Date.now() }));
 
-  const open = async (label) => {
+  // The app going into the background, as an iPhone reports it (the tab
+  // stays in front in a headless browser, so the page is told directly).
+  const hide = () => page.evaluate(() => {
+    try { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); a.push({ k: 'hidden', at: Date.now() }); sessionStorage.setItem('__openEvents', JSON.stringify(a)); } catch (e) {}
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  const open = async (label, hideAt = 0) => {
     events = []; sw = []; served = [];
     const t0 = Date.now();
     await page.goto(ORIGIN + '/', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(e => console.log('  goto: ' + e.message.split('\n')[0]));
-    await page.waitForTimeout(WAIT);
+    if (hideAt) { await page.waitForTimeout(hideAt); await hide(); await page.waitForTimeout(Math.max(0, WAIT - hideAt)); }
+    else await page.waitForTimeout(WAIT);
     events.push(...await page.evaluate(() => { const a = JSON.parse(sessionStorage.getItem('__openEvents') || '[]'); sessionStorage.removeItem('__openEvents'); return a; }));
     const rel = e => ((e.at - t0) / 1000).toFixed(2) + ' s';
     const seq = events.filter(e => e.at >= t0).sort((a, b) => a.at - b.at);
     say(`\n== ${label} (worker version ${version}) ==`);
     const count = k => seq.filter(e => e.k === k).length;
-    results.push({ label, documents: count('document'), helloStarts: count('hello-start'), reloads: seq.filter(e => e.k === 'document' && /reload/.test(e.v)).length });
+    const hid = seq.find(e => e.k === 'hidden');
+    results.push({ label, documents: count('document'), helloStarts: count('hello-start'), reloads: seq.filter(e => e.k === 'document' && /reload/.test(e.v)).length,
+      documentsBeforeHidden: hid ? seq.filter(e => e.k === 'document' && e.at < hid.at).length : null });
     say(`documents ${count('document')}, Home paints ${count('home-paint')}, hello starts ${count('hello-start')}, pen starts ${count('pen-start')}, controllerchange ${count('controllerchange')}, pagehide ${count('pagehide')}`);
     for (const e of seq) if (e.k !== 'navigated') say(`  ${rel(e).padStart(8)}  ${e.k}${e.v !== undefined ? ' (' + e.v + ')' : ''}`);
     const pre = served.filter(r => r.f.startsWith('city/'));
@@ -99,7 +110,7 @@ async function measure(say = console.log) {
   await open('open 2, after a deploy');
   await open('open 3, nothing deployed');
   version = 'interpreter-hub-vC-b0000.0001';
-  await open('open 4, a page from the saved copy (older than the worker)');
+  await open('open 4, a page from the saved copy (older than the worker)', Math.round(WAIT / 2));
   await ctx.close(); await browser.close(); server.close();
   return results;
 }

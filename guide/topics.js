@@ -595,9 +595,9 @@ const GUIDE_TOPICS = [
       <li>Tap <b>Copy results</b> and paste them into a chat.</li>
     </ol>
     <p>The Hub saves nothing and sends nothing: the recording is dropped when you close the sheet. The speech-to-text step may send what you say to Apple, so do it away from patients.</p>` },
-  { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number', q:'The app looks out of date', a:`
-    <p>Close it completely and open it again.</p>
-    <p>The first time you open it after an update, it takes a few seconds longer than usual while it catches up. That's normal and it only happens once.</p>
+  { id:'stale', section:'trouble', k:'old outdated stale refresh reload update stuck not updating version build number slow wifi white blank open opening start', q:'The app looks out of date', a:`
+    <p>Leave the app (go to your Home Screen), then come back to it. If it still looks old, close it completely and open it again.</p>
+    <p>On slow Wi-Fi the app doesn't wait: after a second it opens the copy saved on your phone. So right after an update you may see the previous version once. The new one downloads in the background and is there the next time you leave the app and come back. It never reloads while you're using it.</p>
     <p>To see which version you have, open <b>More</b> and scroll to the very bottom. The build number is there.</p>` },
 
   { id:'noname', section:'trouble', k:'name missing anonymous someone unknown attribution blank', q:'My name is not showing on my edits', a:`

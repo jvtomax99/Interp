@@ -8,8 +8,9 @@
  * The app page itself uses NETWORK-FIRST. A naive cache-first service worker
  * would mean that every time a new index.html is pushed to GitHub, the team
  * keeps seeing the old version indefinitely. Network-first means the newest
- * version always wins when online, and the cached copy is only used when the
- * network genuinely fails.
+ * version always wins when online. But never at the cost of a white screen:
+ * when the whole page hasn't arrived within PAGE_WAIT, the saved copy opens
+ * instead, with its own code from the cache (see the fetch handler).
  *
  * Icons and other static files use CACHE-FIRST, since they rarely change and
  * are re-fetched whenever the cache version below is bumped.
@@ -28,7 +29,14 @@
  * the scenario this cache exists for in the first place).
  */
 
-const CACHE_VERSION = 'interpreter-hub-v375-b1108.1039';
+/* How long the app's page may take to arrive whole before the saved copy
+ * opens instead (Jose, 2026-11-08: 3 s of white on every open on hospital
+ * Wi-Fi, from his screen recording). Measured with tests/tools/slow-open.cjs. */
+const PAGE_WAIT = 1000;
+// Pages that opened from the saved copy (their client ids), so their code
+// comes from the same saved version, never newer code under an older page.
+const fromSaved = new Set();
+const CACHE_VERSION = 'interpreter-hub-v377-b1108.1322';
 const PRECACHE = [
   './',
   './index.html',
@@ -294,6 +302,37 @@ self.addEventListener('fetch', event => {
   const isDocument = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
 
+  /* The app's page: network-first, but never a long white screen. The whole
+   * page has PAGE_WAIT to arrive (not just its first bytes: a slow network
+   * often answers at once, then trickles the body). Past that, with a saved
+   * copy, the saved copy opens, its code comes from the cache too
+   * (fromSaved), and the late page is not written back, so the cache keeps a
+   * page and code of one version until the next worker replaces them both.
+   * A newer version then shows the next time the app is left and reopened
+   * (index.html, "Install / offline support": it never reloads in use). */
+  if (isDocument && (url.pathname === '/' || url.pathname === '/index.html')) {
+    event.respondWith((async () => {
+      let late = false;
+      const fresh = fetch(req).then(async res => {
+        if (!res || res.status !== 200 || res.type !== 'basic') return res;
+        const page = new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
+        if (!late) { const copy = page.clone(); caches.open(CACHE_VERSION).then(c => c.put(req, copy)).catch(() => {}); }
+        return page;
+      });
+      fresh.catch(() => {});
+      const saved = (await caches.match(req, { ignoreSearch: true })) || (await caches.match('./index.html'));
+      if (!saved) return fresh;   // a first visit: nothing saved to open instead
+      try {
+        return await Promise.race([fresh, new Promise((_, no) => setTimeout(() => no(new Error('slow')), PAGE_WAIT))]);
+      } catch (e) {
+        late = true;
+        if (event.resultingClientId) fromSaved.add(event.resultingClientId);
+        return saved;
+      }
+    })());
+    return;
+  }
+
   if (isDocument) {
     // Network-first: always prefer the freshest deployed version.
     event.respondWith(
@@ -321,7 +360,13 @@ self.addEventListener('fetch', event => {
    * page, so a deploy's page and its code always arrive together. As stale-while-revalidate these were
    * one open behind: the first open after a deploy ran the new page with the
    * old Home code. Offline, or the network taking over 3 s: the saved copy. */
-  if (/\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|soundalikes\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname)) {
+  const appCode = /\/(?:app\.css|guide\/topics\.js|practice\/questions\.js|falsefriends\/list\.js|soundalikes\/list\.js|features\/[\w-]+\.js|home-polish\.(?:js|css)|pin-icons\.js)$/.test(url.pathname);
+  // A page that opened from the saved copy runs the saved code beside it.
+  if (appCode && fromSaved.has(event.clientId)) {
+    event.respondWith(caches.match(req).then(hit => hit || fetch(req)));
+    return;
+  }
+  if (appCode) {
     event.respondWith((async () => {
       const network = fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
