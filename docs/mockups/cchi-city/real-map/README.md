@@ -209,12 +209,20 @@ have better graphics and more details". The evergreens are unchanged.
   `TREE_IMUS` (`cherry()`, the sakura by Don Imus: 10 masses, 5 roots, 84 cards a mass).
 - **A mass** (`lobe`): a dark core so no sky shows through its middle (none on a cherry: blossom stays a little airy; a bright
   core shows as a ball, too dark a one as a hole) under a coat of leaf cards, two triangles a side, lit from the mass's own middle.
-- **The leaves** (`leaf_card.cjs`, 768 px, seeded): `leaf-green.webp` (pointed leaves filled from Meshy's painted leaves,
+- **On his iPhone** (2026-11-08) the first version read as speckle, with black specks, flat patches and square petals. What each was,
+  and the fix, all below: 300 leaves on a card are 2-4 px each on a phone, so noise: now 60-70 per spray. Canvas stores see-through
+  pixels as black and shrinking a picture bleeds that into the edges: the colour is carried out under the cut-out, at alpha 12 (at 0 the
+  WebP encoder drops it). One flat brightness per card made flat patches: each corner now has its own normal. One picture on every
+  card repeated: four sprays in a 2 x 2 picture. Edge-on cards are streaks: `FOLIAGE_PREP` fades them by the triangle's own facing
+  (screen-space derivatives, since the merged scene keeps only position, normal and uv; `clipped()` in the runtime carries it over).
+  A perfect sphere of cards reads as a ball: `lobe` is lumpy, one card in seven a sprig past the edge. Cards facing away from every
+  light went black: the leaves glow a fifth of their own colour and take no shadows. Check on a real phone: the test browser hid most of this.
+- **The leaves** (`leaf_card.cjs`, 768 px, four sprays each, seeded): `leaf-green.webp` (pointed leaves filled from Meshy's painted leaves,
   `../assets/meshy-tree/leaf-source.png`, each with its own hue, a midrib, side veins and a rim of light), `leaf-red.webp` (the
   same, autumn), `petal-pink.webp` (notched sakura petals, deep pink at the base to pale at the tip, with little five-petal flowers
-  and buds). In colour: the four materials of a kind only lighten or darken them (`foliage()`). 80-96 KB each; `meshy_bake.cjs`
+  and buds). In colour: the four materials of a kind only lighten or darken them (`foliage()`). 73-86 KB each; `meshy_bake.cjs`
   puts them in `cars.json` as `foliage`.
-- Triangles per frame +5% (413,555 to 432,859, wide view); the 3D page about 1.42 MB (the leaf pictures). The cost is overdraw too:
+- Triangles per frame about 434,000, wide view (413,555 before these trees); the 3D page about 1.39 MB (the leaf pictures). The cost is overdraw too:
   watch the frame rate, and lower `cards` in the builds first.
 - **The card is not re-rendered** (a full re-render of `city/`, about 130 files), so it keeps the old trees.
 

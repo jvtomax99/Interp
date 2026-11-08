@@ -401,6 +401,9 @@ come from this alone.
 
 ## Done
 
+- 2026-11-08 The campus's leaves after Jose's iPhone screenshots (speckle, black specks, flat patches, square petals): readable leaves,
+  no black fringes, light across each card, edge-on cards hidden, lumpy masses, real petal shapes. `real-map/README.md`, "The trees". Not
+  measured on his iPhone when this was written.
 - 2026-11-07 The campus's trees after Jose's picture: a twisting trunk with roots, curved limbs, dense masses of detailed leaves, each
   tree in its own colours (every cherry pink, the Don Imus sakura too; the rest green; the back's red ones red), `real-map/README.md`,
   "The trees". 3D view only; the card keeps the old trees. Triangles +5%, the 3D page about 1.42 MB; not measured on his iPhone when

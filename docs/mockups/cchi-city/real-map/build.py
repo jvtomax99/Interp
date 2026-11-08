@@ -105,6 +105,14 @@ rep("box(39.5, 0.02, 0.06, curb, 0, 0.24, 14.9, 0.01, false); box(39.5, 0.02, 0.
 rep("box(39.5, 0.1, 1.2, walk, 0, 0.22, 12.7, 0.03, false);","box(BW - 0.4, 0.1, 1.2, walk, BCX, 0.22, 12.7, 0.03, false); box(BW - 0.4, 0.1, 1.0, walk, BCX, 0.22, 17.3, 0.03, false);")
 rep("for (let x = -18; x <= 18; x += 6) if (x) lamp(x, 13.4);","for (let x = -42; x <= 40; x += 6) if (x && !blockedXZ(x, 13.4, 0.2)) lamp(x, 13.4);")
 # the front's trees, beds, benches and people stay off the map's buildings and streets
+# the trees' leaves hide a card seen edge-on with a shader step (FOLIAGE_PREP, meshy.js); clipped() clones materials, so it carries
+# that step over, and the drifting petals take the petal picture (README, "The trees")
+rep("const clipped = (mat, k) => { const m = mat.clone(); if (mat.map) m.map = mat.map; if (mat.bumpMap) m.bumpMap = mat.bumpMap;",
+    "const clipped = (mat, k) => { const m = mat.clone(); if (mat.map) m.map = mat.map; if (mat.bumpMap) m.bumpMap = mat.bumpMap;\n  const prep = mat.userData.prep; if (prep){ m.onBeforeCompile = prep; m.customProgramCacheKey = () => 'foliage'; }")
+rep("  if (k !== '_') { m.onBeforeCompile = sh => { sh.uniforms.uCut = CUT[k];", "  if (k !== '_') { m.onBeforeCompile = sh => { if (prep) prep(sh); sh.uniforms.uCut = CUT[k];")
+rep("    m.customProgramCacheKey = () => 'clip' + k; }", "    m.customProgramCacheKey = () => 'clip' + k + (prep ? 'f' : ''); }")
+rep("const mesh = new THREE.Mesh(geo, clipped(g.mat, g.k)); mesh.castShadow = g.cast; mesh.receiveShadow = true;", "const mesh = new THREE.Mesh(geo, clipped(g.mat, g.k)); mesh.castShadow = g.cast; mesh.receiveShadow = !g.mat.userData.prep;")   # leaves take no shadows: their light is the shape of each mass (self-shadowed cards went black in clumps)
+rep("new THREE.PointsMaterial({ color:0xffc6d8, size:0.16, transparent:true, opacity:0.95, depthWrite:false })", "new THREE.PointsMaterial({ map:PETAL_SPRITE, size:0.2, alphaTest:0.35, transparent:true, depthWrite:false })")
 # the Meshy models come first (meshy.js): the benches and every tree but the evergreens are drawn from them (README, "The Meshy bench",
 # "The trees")
 rep("function tree(x, z, s=1, kind='round'){\n", open(os.path.join(HERE, 'meshy.js')).read().replace('__CARS__', open(os.path.join(HERE, 'cars.json')).read()) + "function tree(x, z, s=1, kind='round'){\n  if (blockedXZ(x, z, 0.5)) return;\n  if (kind !== 'cone'){ if (kind === 'blossom') BLOSSOMS.push([x, z, s*1.22]); return pictureTree(x, z, s*1.22, kind === 'blossom' ? 'pink' : 'green', TREE_FRONT); }   // (README, \"The trees\")\n")
