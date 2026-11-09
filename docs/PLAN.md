@@ -406,6 +406,9 @@ come from this alone.
 
 ## Done
 
+- 2026-11-08 The campus's leaves after Jose's iPhone screenshots (speckle, black specks, flat patches, square petals): readable leaves,
+  no black fringes, light across each card, edge-on cards hidden, lumpy masses, real petal shapes. `real-map/README.md`, "The trees". Not
+  measured on his iPhone when this was written.
 - 2026-11-08 No white screen on slow Wi-Fi (Jose's screen recording: 3 s of plain white on every open; his pick "1 s wait,
   update next time"). `sw.js`: the app's page has 1 s to arrive whole (`PAGE_WAIT`), else the saved copy opens with its saved
   code (`fromSaved`) and nothing late is written back; `index.html`'s update check reloads an older page only once the app is in

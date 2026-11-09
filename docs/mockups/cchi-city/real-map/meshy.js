@@ -26,27 +26,40 @@ function meshyMat(name){
 // as it rises and flares into roots, curved limbs, one up into each of several great dense masses of leaves, each mass bright
 // on top, dark under it and where it meets the next. The leaves are pictures in colour (leaf_card.cjs): green, autumn red, pink.
 const FOLIAGE = {}, BARK_T = new THREE.MeshStandardMaterial({ color:0x74452f, roughness:0.85, metalness:0 });
+// A card seen edge-on is a streak: the fragment shader fades it by how squarely its triangle faces the eye (the triangle's own
+// facing, from screen-space derivatives: the merged scene keeps only position, normal and uv), and alphaTest cuts what fades.
+// The runtime's clipped() keeps this step (userData.prep) when it clones the material. The leaves also glow a fifth of their own
+// colour (emissiveMap), so a side turned from every light stays dim and never goes black.
+const FOLIAGE_PREP = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <alphatest_fragment>',
+  'vec3 fdx = dFdx(vViewPosition), fdy = dFdy(vViewPosition);\n  float facing = abs(dot(normalize(cross(fdx, fdy)), normalize(vViewPosition)));\n  diffuseColor.a *= smoothstep(0.14, 0.4, facing);\n#include <alphatest_fragment>'); };
 function foliage(kind){
   if (FOLIAGE[kind]) return FOLIAGE[kind];
   const t = new THREE.TextureLoader().load(KIT.foliage[kind]); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-  const mats = [0.64, 0.82, 0.97, 1.1].map(v => new THREE.MeshStandardMaterial({ map:t, alphaTest:0.45, color:new THREE.Color(v, v, v), roughness:0.85, metalness:0, envMapIntensity:0.3 }));
-  mats.core = new THREE.MeshStandardMaterial({ color:{ green:0x30502a, red:0x7a3218, pink:0x86385e }[kind], roughness:1, metalness:0, envMapIntensity:0.08 });   // inside each mass, so no sky shows through
+  const mats = [0.8, 0.92, 1.02, 1.12].map(v => { const m = new THREE.MeshStandardMaterial({ map:t, alphaTest:0.45, color:new THREE.Color(v, v, v), roughness:0.85, metalness:0, envMapIntensity:0.3, emissiveMap:t, emissive:new THREE.Color(0.2, 0.2, 0.2) });
+    m.userData.prep = FOLIAGE_PREP; m.onBeforeCompile = FOLIAGE_PREP; m.customProgramCacheKey = () => 'foliage'; return m; });
+  mats.core = new THREE.MeshStandardMaterial({ color:{ green:0x3d6530, red:0x8a3c1e, pink:0x86385e }[kind], roughness:1, metalness:0, envMapIntensity:0.08 });   // inside each mass, so no sky shows through
   return FOLIAGE[kind] = mats; }
-// One mass: a dark low core under a coat of n leaf cards, two triangles a side, lit from the mass's own middle, mostly facing out
-// (a card seen edge-on is a streak). mats run dark (below) to light (above). core: the core's detail, -1 for none.
+// One mass: a dark low core under a coat of n leaf cards, two triangles a side, mostly facing out. Its surface is lumpy (three
+// slow waves over the directions), and about one card in seven is a smaller sprig standing past the edge, so its outline is never a
+// ball. Each card shows one of the picture's four sprays. Its light bends across it: each corner's normal leans out from the mass's
+// middle through that corner, so no card is one flat brightness and neighbouring cards never merge into a flat patch.
+// mats run dark (below) to light (above). core: the core's detail, -1 for none.
 function lobe(lx, ly, lz, R, mats, s, r, n, sz=1, core=1, out=null){
   const own = !out; out = out || mats.map(() => ({ p:[], n:[], u:[] }));
-  if (core >= 0){ const k = add(new THREE.IcosahedronGeometry(R*0.58, core), mats.core, lx, ly - R*0.08, lz); k.scale.y = 0.86; }
-  const V = (x, y, z) => new THREE.Vector3(x, y, z), rnd = () => V(r() - 0.5, r() - 0.5, r() - 0.5);
+  if (core >= 0){ const k = add(new THREE.IcosahedronGeometry(R*0.52, core), mats.core, lx, ly - R*0.14, lz); k.scale.y = 0.86; }
+  const V = (x, y, z) => new THREE.Vector3(x, y, z), rnd = () => V(r() - 0.5, r() - 0.5, r() - 0.5), mid = V(lx, ly, lz);
+  const w1 = r()*6.3, w2 = r()*6.3, w3 = r()*6.3, bump = d => 1 + 0.2*Math.sin(d.x*3.1 + w1)*Math.sin(d.y*2.7 + w2) + 0.14*Math.sin(d.z*4.3 + w3);
   for (let k = 0; k < n; k++){
     const d = rnd().normalize(); d.y = d.y*0.9 + 0.12; d.normalize();
-    const rr = 0.68 + r()*0.44, p = V(lx + d.x*R*rr, ly + d.y*R*rr*0.86, lz + d.z*R*rr), N = d.clone();
+    const sprig = r() < 0.14, rr = (sprig ? 1.1 + r()*0.22 : 0.68 + r()*0.44)*bump(d), p = V(lx + d.x*R*rr, ly + d.y*R*rr*0.86, lz + d.z*R*rr), N = d.clone();
     const T = N.clone().add(rnd().multiplyScalar(0.7)).normalize();
     const U = V(0, 1, 0).cross(T); if (U.lengthSq() < 0.01) U.set(1, 0, 0); U.normalize(); const W = T.clone().cross(U).normalize();
-    const a = r()*Math.PI*2, c = Math.cos(a), sn = Math.sin(a), h = (0.3 + r()*0.2)*s*sz, A = U.clone().multiplyScalar(c*h).addScaledVector(W, sn*h), E = U.clone().multiplyScalar(-sn*h).addScaledVector(W, c*h);
-    const P = [p.clone().sub(A).sub(E), p.clone().add(A).sub(E), p.clone().add(A).add(E), p.clone().sub(A).add(E)], UV = [[0, 0], [1, 0], [1, 1], [0, 1]];
+    const a = r()*Math.PI*2, c = Math.cos(a), sn = Math.sin(a), h = (0.3 + r()*0.2)*s*sz*(sprig ? 0.7 : 1), A = U.clone().multiplyScalar(c*h).addScaledVector(W, sn*h), E = U.clone().multiplyScalar(-sn*h).addScaledVector(W, c*h);
+    const P = [p.clone().sub(A).sub(E), p.clone().add(A).sub(E), p.clone().add(A).add(E), p.clone().sub(A).add(E)];
+    const vi = Math.floor(r()*4), u0 = (vi % 2)*0.5, v0 = Math.floor(vi/2)*0.5, UV = [[u0, v0], [u0 + 0.5, v0], [u0 + 0.5, v0 + 0.5], [u0, v0 + 0.5]];
+    const NN = P.map(q => { const v = q.clone().sub(mid).normalize().multiplyScalar(0.65).addScaledVector(N, 0.35); v.y = Math.max(v.y, -0.25); return v.normalize(); });   // never straight down: an underside facing down gets no light and goes black
     const up = N.y*0.75 + (r() - 0.5)*0.45, level = Math.max(0, Math.min(mats.length - 1, Math.floor((up + 0.75)/1.55*mats.length))), o = out[level];
-    for (const i of [0, 1, 2, 0, 2, 3, 2, 1, 0, 3, 2, 0]){ o.p.push(P[i].x, P[i].y, P[i].z); o.n.push(N.x, N.y, N.z); o.u.push(UV[i][0], UV[i][1]); } }
+    for (const i of [0, 1, 2, 0, 2, 3, 2, 1, 0, 3, 2, 0]){ o.p.push(P[i].x, P[i].y, P[i].z); o.n.push(NN[i].x, NN[i].y, NN[i].z); o.u.push(UV[i][0], UV[i][1]); } }
   if (own) flush(out, mats);
   return out; }
 function flush(out, mats){ out.forEach((o, i) => { if (!o.p.length) return; const g = new THREE.BufferGeometry();
@@ -82,5 +95,10 @@ function pictureTree(x, z, s, kind, c){
     lobe(lx, ly, lz, R, mats, s, r, Math.round(n0*R/(c.R*s)), c.sz, kind === 'pink' ? -1 : c.core, out); }
   flush(out, mats);
   if (kind === 'pink') for (let q = 0; q < 10 + c.roots*4; q++){ const a = r()*Math.PI*2, d = (0.2 + r()*1.1)*s*c.spread;   // petals on the ground
-    add(new THREE.CircleGeometry(0.035 + r()*0.03, 5), PETAL_GROUND, x + Math.cos(a)*d, 0.37, z + Math.sin(a)*d, false).rotation.x = -Math.PI/2; } }
-const PETAL_GROUND = new THREE.MeshStandardMaterial({ color:0xf7b8cf, roughness:0.8 });
+    { const m = add(PETAL_PLANE, PETAL_GROUND, x + Math.cos(a)*d, 0.37, z + Math.sin(a)*d, false); m.rotation.set(-Math.PI/2, 0, r()*Math.PI*2); m.scale.setScalar(0.8 + r()*0.6); } } }
+// A sakura petal, notched, deep pink at its base to pale at its tip: drawn once on a small canvas.
+const PETAL_SPRITE = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+  g.translate(32, 6); g.beginPath(); g.moveTo(0, 0); g.bezierCurveTo(16, 8, 18, 42, 6, 52); g.lineTo(0, 46); g.lineTo(-6, 52); g.bezierCurveTo(-18, 42, -16, 8, 0, 0); g.closePath();
+  const gr = g.createLinearGradient(0, 0, 0, 52); gr.addColorStop(0, '#e2709a'); gr.addColorStop(0.55, '#f8b7cd'); gr.addColorStop(1, '#fde3ec'); g.fillStyle = gr; g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+const PETAL_GROUND = new THREE.MeshStandardMaterial({ map:PETAL_SPRITE, alphaTest:0.4, roughness:0.8, side:THREE.DoubleSide }), PETAL_PLANE = new THREE.PlaneGeometry(0.075, 0.075);
