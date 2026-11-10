@@ -348,7 +348,9 @@ It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
 install && node run.cjs`. GitHub runs the same suites on every pull
 request and every push to `main` (`.github/workflows/tests.yml`), whoever
 made the change; a red X on a commit
-means something broke. Add or update a check with any change to what a suite
+means something broke. The one exception (2026-11-10): a change that
+touches nothing but `docs/`, `.claude/` and `*.md` files skips the suites
+(none reads those files), and "App checks result" still goes green. Add or update a check with any change to what a suite
 covers, and never weaken one to get green.
 
 1. Syntax-check the inline scripts.

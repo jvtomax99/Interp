@@ -414,7 +414,7 @@ come from this alone.
   (`tests/run.cjs --shard=K/N`, split by each suite's seconds in `tests/shard-times.json`; `tests/suites/shards.mjs` fails
   if a suite is in no share), a change to nothing but `docs/`, `.claude/` and `*.md` skips them (no suite reads those;
   any doubt runs them), and "App checks result" says in one line how the run went (the job to name if `main` ever gets a
-  "checks must pass" rule). Expected about 8 min a share (414 s of suites each); the measured time is in the pull request.
+  "checks must pass" rule). Measured: 41 min 58 s before (#261), 7 min 58 s on #262 and 8 min 43 s on `main` after the merge (ac3671d), all green.
   Also: the WebKit job failed once on `main` (a0d66e0) on the same code that passed in #261, in `startup-work`'s "the name
   itself is shown", at 32 s, before the wait's own 40 s limit; the cause is not known (its saved output could not be
   downloaded from a cloud session), so that check now prints why its wait ended and what the page showed.
