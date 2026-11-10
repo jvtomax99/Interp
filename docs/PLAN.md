@@ -1238,7 +1238,7 @@ come from this alone.
 
 **Old rules settled (Jose, 2026-11-10)**, when his general rules were added to CLAUDE.md:
 
-- New session: the token triggers in "When to start a new session"; a chat
+- New session: the token triggers ("New session triggers" in CLAUDE.md); a chat
   runs phases in a row until one hits.
 - Handoff: root `HANDOFF.md`, deleted once its work is done.
 - Spec: `SPEC.md` for what, `docs/PLAN.md` for order and Facts,
