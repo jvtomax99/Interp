@@ -3,31 +3,24 @@
 Read this before changing anything. It is the source of truth for how this
 project is built and shipped.
 
-**How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
-do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
-and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
-ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
-(`AskUserQuestion`), "I start it for you" first as the pick, never only
-as text to paste (Jose, 2026-10-25). **Offer a new chat only when the chat is extremely
-heavy** (Jose, 2026-10-28: not so constantly,
-only when the chat feels extremely heavy; replaces the buttons after every
-finished job, 2026-10-25): then, and only then, the same clickable buttons,
-"Start a new chat for me" first and "Keep going here" second, over a short
-summary of what is being worked on; a new chat is made only when he picks
-it, with the handoff written first. Whenever a chat starts a new
-chat for Jose, it gives him a fresh summary in plain words, in two parts:
-**what is being worked on now** (and its goal) and **what was worked on
-before** (the last chat's changes and where each stands). It says it in
-the reply that gives the new chat's link, and the new chat opens with the
-same two parts (Jose, 2026-10-24). Keep both short: a few lines each,
-simple words, no big blocks of text (Jose, 2026-10-24). The new chat's title names its focus
-in plain words, the work it is for ("Campus code to its own file"), never
-a generic "New session" or "Handoff" (Jose, 2026-10-24). A new chat reads the docs and the
-handoff, not the old chat. Details: `docs/PLAN.md`.
-When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
-in `docs/PLAN.md`).
+**How work is run** (Jose, 2026-11-10): one pull request = one phase from
+`docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
+chat runs phase after phase until a new-session trigger hits: about 150k
+tokens or half the context, finish the current step, then hand off; over
+300k or 75%, hand off now (general rules below, "When to start a new
+session"). Then
+it writes `HANDOFF.md` at the repo root and asks once with buttons, "Start
+a new session" first as the pick and "Keep going" second, over a short
+summary; a new chat is made only when he picks it. Whenever a chat starts
+a new chat for Jose, it gives him a fresh summary in plain words, in two
+parts, a few lines each: **what is being worked on now** (and its goal)
+and **what was worked on before** (the last chat's changes and where each
+stands). The new chat opens with the same two parts, its title names its
+focus in plain words ("Campus code to its own file"), and it reads
+`HANDOFF.md` first and confirms the next step. `HANDOFF.md` is deleted
+once its work is done; `docs/handoff.md` is older notes. Details:
+`docs/PLAN.md`. When a chat is done, say "Archive this chat" (Jose,
+2026-10-18; when, in `docs/PLAN.md`).
 
 ## What this is
 
@@ -59,13 +52,16 @@ this section says so.
   by 2026-11-07, see Open items), not only Jose. Jose is one of them and
   directs the product. For a big feature, remind him to check the plan with
   the team.
-- **Plan and phases.** `docs/PLAN.md` (Next, Done, Facts, Later): one pull
-  request = one phase. `SPEC.md` and `docs/ARCHITECTURE.md` are first drafts
-  (2026-11-10, gaps marked TO FILL for Jose). `docs/PLAN.md` still holds the
-  phases, `docs/features/*.md` each feature's detail, and the File map below
-  every file's full role.
-- **Handoffs.** New handoffs go in root `HANDOFF.md`. `docs/handoff.md` is
-  older notes (the last one written 2026-11-07); leave it as it is.
+- **Plan, spec and phases** (Jose, 2026-11-10). `SPEC.md` says *what*: who
+  it's for, one "Done when" line per feature, Not in v1, Later (gaps marked
+  TO FILL for Jose). `docs/PLAN.md` says *in what order*: the phases
+  (Next, Done), and Facts, where a chat's decisions go. A new feature
+  gets its "Done when" line in `SPEC.md` and its detail, with "not in this
+  version", in its `docs/features/` note.
+- **Architecture.** `docs/ARCHITECTURE.md`: the short map, then the full
+  file map and the list of feature notes. Read it at the start of a session.
+- **Handoffs.** Root `HANDOFF.md` (see "How work is run"). `docs/handoff.md`
+  is older notes (the last one written 2026-11-07); leave it as it is.
 - **Branches.** A cloud session is handed a `claude/...` branch; use it.
   Since 2026-11-10 `AGENTS.md` tells every tool, ChatGPT included, never to
   commit straight to `main` (Jose's pick). `main` still moves between
@@ -74,124 +70,32 @@ this section says so.
 - **Packages.** No root package list. `tests/package.json` (the checks) and
   `promo/package.json` (the video) each have their own `npm install`.
 - **`AGENTS.md`** is the shared contract with ChatGPT and wins over this file
-  where they overlap. Its process rules still say the older things below.
-  Do not edit it without Jose's OK.
-
-### Older rules kept until Jose decides
-
-Jose has not picked yet. When one of these comes up, name the conflict and
-ask him with buttons.
-
-- New chat "only when the chat is extremely heavy" (top of this file,
-  `AGENTS.md`, `docs/PLAN.md`): conflicts with the token triggers in "When
-  to start a new session".
-- Handoff in `docs/handoff.md`, overwritten, never deleted (top of this
-  file, `AGENTS.md`, `docs/PLAN.md`): conflicts with root `HANDOFF.md`,
-  deleted once its work is done.
-- Decisions from a chat go into `docs/PLAN.md` (Facts): conflicts with "add
-  them to SPEC.md".
-- Spec before code as a note in `docs/features/` with "not in this version"
-  (`AGENTS.md`, "How Jose works with AI tools"): conflicts with one root
-  `SPEC.md` with Done when, Not in v1, Later and Phases.
-- Phases listed in `docs/PLAN.md`: conflicts with a "Phases" section with
-  checkboxes in `SPEC.md`.
-- "A chat runs phase after phase in a row" (top) and "Scope each session to
-  one feature or one bug" (Working agreement): the two older lines disagree;
-  the general rules allow phases in a row until a token trigger hits.
-- "Reporting to Jose: extremely concise. Sacrifice grammar" for every report
-  (Working agreement, `AGENTS.md`): the general rules keep that for status
-  updates only; explanations stay in full plain sentences ("Help me learn").
-- "Ask, then install what helps", never install unasked (Working agreement,
-  `AGENTS.md`): conflicts with "Project packages: install without asking and
-  mention them".
-- "Environment settings come ready to paste", one box per field (Working
-  agreement, `AGENTS.md`): the general rules say one copy-and-paste block,
-  with YOUR_VALUE_HERE for a secret.
-- The `builder` subagent (Sonnet) makes mechanical edits (Subagents):
-  conflicts with "keep code changes on the main model".
-- This file is long (all the project knowledge, kept on purpose): conflicts
-  with "Keep CLAUDE.md lean".
-- Stricter, no conflict: a phone notification after every finished job and
-  when something goes live; "Push" as a button that merges with the head SHA
-  pinned; one clarifying question for an ambiguous request; "Archive this
-  chat" (Working agreement, `AGENTS.md`).
+  where they overlap. Do not edit it without Jose's OK.
 - **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
 - **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
 - **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
 
+### Old rules settled (Jose, 2026-11-10)
+
+- New session: the token triggers in "When to start a new session"; a chat
+  runs phases in a row until one hits.
+- Handoff: root `HANDOFF.md`, deleted once its work is done.
+- Spec: `SPEC.md` for what, `docs/PLAN.md` for order and Facts,
+  `docs/features/` for each feature's detail.
+- Reports: status updates short, explanations in full plain sentences.
+- Installs: normal project packages without asking (mention them);
+  programs, plugins, connectors and anything paid still ask first.
+- Settings to paste: one box per field, YOUR_VALUE_HERE where a secret goes.
+- `builder` (Sonnet): text edits only; code changes stay on the main model.
+- Kept as is: a phone notification after every finished job and when
+  something goes live; "Push" as a button that merges with the head SHA
+  pinned; one clarifying question for an ambiguous request.
+
 ## File map
 
-| File | Lines | What |
-|---|---|---|
-| `index.html` | 22,252 | The whole app's markup and JS (1.3 MB), all inline |
-| `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
-| `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
-| `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |
-| `pin-icons.js` | 987 | Pin/icon wiring: which pin each domain and tool gets |
-| `pins/*.webp` | 41 files | One pre-cut 192 px pin each, named by key (`pins/oncology.webp`) |
-| `pin-icons-sheet.webp` | — | The 8 × 8 sprite sheet behind `.pin-sprite` (1024², 381 KB) |
-| `drsmiley/*.webp` | 7 files | Dr. Smiley: `base` (his calm head and shoulders, forehead without brows), `face` (a strip of 30 frames of his eyes and mouth, cut from Jose's drawn expression sheets and fitted onto that same face; the last four, surprised, sad, worried and doubt, from `docs/art/dr-smiley-faces/`), `brow-l`/`brow-r` (his brows, moving on their own: `DR_BROWS`), `hat-cap`/`hat-mirror`/`hat-grad` (rank outfits). See `drSmileyArt()`, the animation engine (`DrAnim`, `drAnim()`, and the older names `drFacePlay()`/`drFaceIdle()`/`drFaceTalk()` now built on it) and `smileyAccessory()` in `features/smiley-engine.js` (moved out of `index.html` 2026-10-25). On Home, `home-polish.js` draws his lanyard as live cords over him |
-| `city/*.webp` | ~130 files | Your HUMC campus on CoreCHI Practice: the real campus (every building from the OpenStreetMap export) as a toy model in daylight, rendered in Blender from the card's camera: `sky` backdrop, `far` the board's shadow, `near` the board with the five domain buildings in white clay, each one's paint and lit windows in tenths, every moving thing's frames (`renderCampus` in `features/campus.js`; made by `docs/mockups/cchi-city/real-map/card_*.{cjs,py}`, its README) |
-| `campus3d/` | — | Your campus in 3D, full screen (the **3D** button on the CoreCHI Practice card; `openCampus3d` in `features/campus.js`): `index.html` is built by `python3 docs/mockups/cchi-city/real-map/build.py --app` (the real-map campus, the same scene as `city/` since 2026-10-29; it runs `live/gen.py --app` first; never edit it by hand), `three/` is three.js 0.160 (MIT, its `LICENSE` beside it). Loaded only when opened; your progress arrives by message |
-| `media/` | — | The 1-minute video (`hub-promo.mp4`, 720p, 54.5 s; the 60 s cut from `promo/hub-blend/` played 10% faster, since 2026-10-26) and its still; shown in the User Guide (`promo`) and by Home's Watch button. Never cached by `sw.js` |
-| `promo/` | — | Remotion (videos written as React code): `npm install`, then `npm run studio` to preview or `npm run render`. Own `package.json`, kept out of the deploy (`.vercelignore`). Only a starter title card so far; the current `media/hub-promo.mp4` was not made here. `promo/README.md` |
-| `promo/hub-blend/` | — | Source of the 3D promo remake (HyperFrames + Three.js); plan in its `BRIEF.md`. Not deployed (`.vercelignore`); only a rendered MP4 goes into `media/` |
-| `promo/whats-new/` | — | A 15-second "What's new" video (HyperFrames, the starter kit's Liquid Glass look): the User Guide's three New lately cards, for Team Chat. Not deployed; `promo/whats-new/README.md` |
-| `guide/topics.js` | 503 | The User Guide's answers, `GUIDE_SECTIONS` and `GUIDE_TOPICS` (plain data; was in `index.html` until 2026-10-21). Loaded by a `<script src>` just before `index.html`'s script; precached, network-first |
-| `practice/questions.js` | 348 | The CoreCHI practice bank, `CCHI_DOMAINS` and `SEED_QUESTIONS` (100 questions; plain data, was in `index.html` until 2026-10-21). Loaded like `guide/topics.js` |
-| `falsefriends/list.js` | 846 | The False Friends list, `FALSE_FRIENDS` (101 entries; plain data, was in `index.html` until 2026-10-22). Loaded like `guide/topics.js` |
-| `features/translate.js` | 276 | The Translate tool's code, moved verbatim out of `index.html` (2026-10-22, phase 3 of the split). Declarations only; loaded just before `index.html`'s script |
-| `features/3d-body.js` | 191 | The 3D Body's Hub side: `anatomySync`, the `ATLAS` frame bridge (`atlasOnMessage`, `atlasAction`), the cards. Moved verbatim (2026-10-22); `docs/features/3d-body.md` |
-| `features/term-lookup.js` | 263 | Looking a term up: `openTermLookup`, the trusted-source search (`/api/term-lookup`) and its memory + Firestore caches. Moved verbatim (2026-10-23) |
-| `features/voice-check.js` | 251 | The Voice and mic check at the bottom of More (`voiceCheckOpen`, and `audioMode`, which the memory trainer calls too). Moved verbatim (2026-10-23) |
-| `features/smiley-performances.js` | 288 | Dr. Smiley's five performances (`DR_PERF`, `drPerfBuild`, `drPerfSeed`), his squash (`drSquashKeys`), mood (`drSetMood`) and the effects off his head (`drFaceFx`). Moved verbatim (2026-10-24); the line putting them into `DR_FACE_SEQ` is in `features/smiley-engine.js`, which loads after it |
-| `features/smiley-engine.js` | 1,135 | Dr. Smiley's engine: his art (`drSmileyArt`, `DR_FACE_SEQ`, `smileyAccessory`), the animation engine (`DrAnim`, `drAnim`, `drFacePlay`/`drFaceIdle`/`drFaceTalk`), how lively (`drMode`, `drStill`, `setSmileyMode`) and his task states (`drTask`, `drMind`, `drPerform`). Moved verbatim (2026-10-25), 4 sections; loads after `features/smiley-performances.js` (it reads `DR_PERF` at load). Three listeners stay in `index.html` (`drReduce`'s change, `offline`, `online`): they reach `index.html`'s names. `docs/features/dr-smiley.md` |
-| `features/campus.js` | 157 | Your HUMC campus on CoreCHI Practice: `CAMPUS_MAP`, `CAMPUS`, `renderCampus`, the building pick (`campusPick`, `campusGo`) and its Escape key, tap a person for a word (`campusFolkGroups`, `campusFolkTap`, `campusFolkAnswer`; `docs/features/campus-tap-person.md`, 2026-11-05) and the streak's weather (`CAMPUS_SKY`; `docs/features/campus-weather.md`). Moved verbatim (2026-10-24). Its motion (`campusLife`, `campusDepth`) stays in `index.html`, section "Practice dashboard motion" |
-| `features/false-friends.js` | 227 | The False Friends screen: `renderFalseFriends`, Study and Drill (`buildFFDrill`, `answerFF`), search and the risk filter (`FF_RISKS`). Moved verbatim (2026-10-24); the list is `falsefriends/list.js`. The Practice code that followed it in the same section (`renderPractice`, `startStudy`, the exam timer) stays in `index.html`, now under its own banner |
-| `soundalikes/list.js` | 540 | The Sound-Alikes list, `SOUND_ALIKES` (45 sets: words that sound the same or close; plain data, 2026-10-29). Loaded like `falsefriends/list.js`. The Spanish is marked unchecked per set (`esChecked`) until Jose checks it |
-| `features/sound-alikes.js` | 302 | The Sound-Alikes screen: Study (a speaker on every word and sentence), Drill (the phone says a sentence, you pick the rendering), `saSpeak` (es-US, a Latin American voice for seseo). `docs/features/sound-alikes.md` |
-| `features/knowledge-brain.js` | 223 | Your knowledge brain, the Hub's side: `knowledgeBrainData` (what `brain/you.html` draws), your record and the daily count (`kbLogNote`, `ih_knowledgeLog`), the small live brain atop Term Review (`kbMiniHtml`, `kbMiniStart`, `kbMiniFrame`). Moved verbatim (2026-10-24); `docs/features/knowledge-brain.md` |
-| `features/guide-front.js` | 232 | The User Guide's front page: `renderUserGuide`, the home of answers (`guideHomeHtml`, New lately), its sections, search (`setupGuideSearch`, `guideMarkWords`) and the install steps (`GUIDE_INSTALL_STEPS`). Moved verbatim (2026-10-24); the answers are `guide/topics.js`, the sheets and Show me stay in `index.html` |
-| `features/doctor-sheets.js` | 317 | The doctor and provider sheets' "Where" (the place picker: `openPlacePicker`, `pickPlace`, adding a place) and the doctor directory's add and edit sheet (`openAddDoctorDirModal`, `openEditDoctorDirModal`, the photo, `saveDoctorDirEntry`, delete). Moved verbatim (2026-10-25); `docs/features/places.md`. Places' data and `savePlace` stay in `index.html` ("Places (shared)") |
-| `features/csv.js` | 166 | The glossary's CSV export and import (More's Export / Import): `exportTermsCsv`, `parseCsv`, the staged import (`handleCsvImportSelected`, `showImportPreview`, `confirmCsvImport`). Moved verbatim (2026-10-25) |
-| `features/duplicate-doctors.js` | 161 | Duplicate doctors: the likely pairs (`nameParts`, `looksLikeSamePerson`, `duplicateDoctorGroups`), the merge (`mergeDoctorRecords`, `mergeDuplicateDoctors`) and its card in the doctor list's tidy sheet (`duplicateBannerHtml`). Moved verbatim (2026-10-25) |
-| `features/backfill.js` | 154 | The terminology backfill: doctors whose research is still the old flat list (`doctorsNeedingTiers`) re-researched one at a time (`runTierBackfill`, `cancelTierBackfill`, `tierBackfill`) and its card in the doctor list's tidy sheet (`backfillBannerHtml`). Moved verbatim (2026-10-25) |
-| `features/ask-hub.js` | 2,040 | Ask the Hub with Dr. Smiley's side of it: retrieval and the answer (`askRetrieve`, `submitAsk`, `askTurnHtml`, `askLayout`), following a conversation (`ASK.convo`), context and actions (`askContext`, `ASK_ACTION_TYPES`, `ASK_RUN`), what he remembers (`drMemGet`, `ih_smileyMemory`), the memory screen (`openMemory`), your practice and the next step, corrections, feedback, sources and the owner's team notes review (`renderAskReview`). Moved verbatim (2026-10-25), 7 sections at once; a few lines stay in `index.html` where the group began (`ASK_STOP`, the waiting questions brought back, the `online`/`resize` listeners, `window.openAskHub`): they run at load and need `index.html`'s names. `docs/features/ask-the-hub.md` |
-| `features/credits.js` | 300 | Idea credits: whose idea a screen or glossary domain was. The small purple tag under a credited screen's title (on a domain's banner, keyed by its id), the card it opens (tap, or double-tap the title), the owner's Give credit sheet, `hub-credits/{key}` keyed by the title (`creditDecorate`, `creditOpen`, `creditEdit`, `startCredits`, `creditWatch`). 2026-11-05; `docs/features/credits.md` |
-| `features/tool-banners.js` | 117 | Tool banners: Translate, Term Review's start, Ask the Hub and Doctor Directory under the domains' colour banner with their pin (`TOOL_BANNERS`, `toolBannerHtml`; Doctor Directory's sits above its search, outside `#content`, its count set by `toolBannerMeta`), and the pin tapped on a Home tile or rail card flying into it (`tbFly`; none under reduced motion or Still). 2026-11-06; `docs/features/tool-banners.md` |
-| `features/opening.js` | 291 | The opening, Badge in: every start on a phone, your badge over the pavilion, tap, scan, green, the ring opens into Home (`openingStart`, `opFrame`, `openingFinish`, `hubOpeningUp`, the `hub-opening-done` event Home's hello waits for) and More's Opening card (`openingMoreHtml`: on/off, Sound, My photo on the badge, Badge title, Replay; `ih_opening`, `ih_openingSound`, `ih_badgePhoto`, `ih_badgeTitle`). Pins on your lanyard, one per practice badge (`OP_PINS`, `opPinsHtml`, `ih_pinsSeen`; 2026-11-07). Decided and covered before the first paint by index.html's first script. 2026-11-05; `docs/features/opening.md` |
-| `features/account.js` | 249 | Your account, email sign-in on the phone: More's "Your account" card (`accountMoreHtml`), the email then the 6-digit code (`accountSend`, `accountCheck`), signing in with the server's ticket (`signInWithCustomToken`, `accountAdopt`), the name following the account (`accountSaveName`, `accountBoot`), sign out back to a plain team phone (`accountSignOut`). The team-code screen's "Sign in with email" for an account already in the team (`accountLockToggle`, `accountLockSend`, `accountLockCheck`; `#accessEmail`). `ih_account`, `ih_accountPending`, `ih_accountNameAt`. 2026-11-06, phase E1; `docs/features/email-sign-in.md` |
-| `features/account-sync.js` | 257 | What follows your account (phase E2): practice, streak, badges, memory trainer, Daily Drill, campus, knowledge count and settings (never Dr. Smiley's memory of you, `AGENTS.md`), kept in `account-sync/{uid}` and joined between phones (`accountSync`, `syncDecide`, `ACCT_SYNC_MERGE`, fingerprints in `ih_syncBase`). When the app opens, at sign-in, when you leave it, every 2 min while changed. 2026-11-06; `docs/features/email-sign-in.md` |
-| `features/photo-adjust.js` | 190 | Adjust your photo: after you pick one in the name sheet, drag and zoom it in a square frame with Team Chat's ring, live previews round (chat) and tall (the badge), Save draws the 320 px square for `uploadAvatar` (`photoAdjust`, `paSave`, `paClamp`). 2026-11-06; `docs/features/photo-adjust.md` |
-| `opening/` | — | The opening's pavilion in three lights by the clock (`openingLook`): `pavilion-1` midday, `pavilion-morning-1`, `pavilion-evening-1`, each an 8 s seamless loop (`.mp4` ~0.7 MB, `.webm`) and its still (`.webp`); rendered once from `docs/mockups/opening/`. `music-1.m4a` (0.34 MB), the opening's music, an original 28 s loop from `docs/mockups/opening/music/compose.py`. A new clip gets a new name (`sw.js` carries this one over between versions) |
-| `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
-| `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
-| `sw.js` | 220 | Service worker. Shows pushes from the server (`push`, the icon badge). Network-first for HTML and for the app code beside it (`app.css`, `home-polish.js`/`.css`, `pin-icons.js`; the saved copy offline or after 3 s, so a deploy's page and Home code arrive together). The app's page has 1 s to arrive whole (`PAGE_WAIT`, 2026-11-08: 3 s of white on hospital Wi-Fi), else the saved copy opens with its saved code (`fromSaved`), and a newer version reloads only once the app is in the background (`tests/tools/slow-open.cjs`). Stale-while-revalidate for the rest |
-| `manifest.webmanifest` | — | PWA manifest |
-| `DESIGN.md` | — | The design reference: colors with roles, type scale, letter spacing by size (`--tr-*`), weights, shadows, motion, do's and don'ts. Any tool reads it before a visual change |
-| `vercel.json` | — | Cron: `/api/check-events` daily at 13:00 UTC; the walled-off headers for `atlas/`; only "Bump version" commits deploy (`ignoreCommand`, storage); no deployments for `claude/` branches (storage) |
-| `atlas/` | 34 MB | 3D Body: a built copy of Human Atlas (MIT; anatomy data BodyParts3D, CC BY 4.0). Outside code, run in a sandboxed frame by `anatomySync()` in `index.html`. Origin, licences, the wall and how to rebuild: `atlas/README.md`. `atlas/hub-catalogue.json`: the bilingual card text (30 structures, sourced) |
-| `brain/` | — | Two separate brains, sharing vendored Three.js r128. `index.html`: HUMC Brain, the app's code drawn as a 3D brain (data `data.json` from `tests/tools/brain-data.cjs`), opened by a double-tap on Dr. Smiley's head. `you.html`: your knowledge brain, glossary terms lit by your own Term Review record (data from `knowledgeBrainData` in `features/knowledge-brain.js` by message), opened from the small live brain atop Term Review or the CoreCHI Practice tile. Both through `openHumcBrain` in `home-polish.js`. `docs/features/humc-brain.md`, `knowledge-brain.md` |
-| `api/translate.js` | 145 | Translate tool — Claude API |
-| `api/doctor-research.js` | 403 | Doctor Prep — Claude API + web search |
-| `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
-| `api/term-lookup.js` | 307 | Term reference lookup — Claude API + web search |
-| `api/term-check.js` | 185 | Checks a glossary entry before it is saved — Haiku 5.5 first (`_routine.js`), then its backup model |
-| `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
-| `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
-| `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
-| `api/_routine.js` | — | The one Claude helper: every request to the Messages API (`callClaude`: the retries, the refusal check, `parseAnswer`, `clip`), and Haiku 5.5 first then the backup model for Translate and the term check (`callRoutine`). Not an endpoint itself |
-| `api/ask.js` | 508 | Ask the Hub — answers from the entries the app sends, plus approved team notes |
-| `api/sign-in.js` | — | Email sign-in: emails a 6-digit code (`send`), checks it and returns a Firebase sign-in ticket (`check`), moves the phone's place in the team (and the owner's line) to the account. Codes in `sign-in-codes/`, server only. `_mail.js` beside it sends through the Hub's Gmail (SMTP over Node's TLS, no package; `GMAIL_USER`, `GMAIL_APP_PASSWORD`); the ticket is `customToken` in `_service-login.js`. `docs/features/email-sign-in.md` |
-| `api/push.js` | — | Notifications that reach a closed phone (Web Push): Team Chat, owners' sends, a test; the key phones sign up with. `_push-team.js` (who gets what, gone phones) and `_webpush.js` (encryption + VAPID signing, Node crypto) beside it. `docs/features/notifications.md` |
-| `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
-| `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
-| `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
-
-Line counts are `wc -l` on 2026-10-20. They drift with every PR; the names
-and roles don't. Re-measure before quoting one.
-
-Inside `index.html`, sections are marked with banner comments
+Every file's role, with line counts, is in `docs/ARCHITECTURE.md` ("Full
+file map"), moved there 2026-11-10 to keep this file lean. Inside
+`index.html`, sections are marked with banner comments
 (`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
 the whole file when you only need one section.
 
@@ -348,38 +252,8 @@ accounts/{uid}  sign-in-codes/{id}  account-sync/{uid}               <-- Email s
 ```
 
 **Feature notes live in `docs/features/`.** Read the one for the feature you
-touch before changing it; update it in the same commit when the behaviour changes.
-
-- Ask the Hub, retrieval, `context`, his actions (`ACTION_TYPES`; new action types go in both lists): `ask-the-hub.md`
-- What he remembers on the phone (`ih_smileyMemory`) and follow-ups (`ASK.convo`): `ask-memory-followups.md`
-- The companion panel from the dock (`drPanel`): `companion-panel.md`
-- How an answer is drawn (`askTurnHtml`, `askLayout`): `ask-answer-layout.md`
-- Term Review sessions (`reviewBuild`, `reviewCheck`, `saveTermReview`): `term-review.md`
-- The Daily Drill, Home's warm-up (`openWarmupSheet`, `ih_warmup`): `daily-drill.md`
-- Integration rules from the journey audit (each has a check in the journey test): `journey-rules.md`
-- 3D Body cards and the frame bridge (`ATLAS`, `atlasOnMessage`): `3d-body.md`
-- The User Guide screen (`GUIDE_TOPICS`, `guideShowMe`): `user-guide.md`
-- Team access, team code, practice mode (`hub-invites`, `hub-members`, `team()`): `team-access.md`
-- Regions, North and South: chat channels, directory by region, `ih_region`, `HMH_LOCATIONS` regions: `regions.md`
-- The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
-- Places and their shared icons, the doctor sheet's "Where" (`PLACES`, `savePlace`, `openPlacePicker`, `terminology-meta/places`): `places.md`
-- Dr. Smiley's movement: controller, entrance, size, performances, task states (`DrAnim`, `DR_PERF`, `drTask`): `dr-smiley.md`
-- Notifications that reach a closed phone, the Notifications screen, owners' Send to the team (`pushTurnOn`, `pushSync`, `api/push.js`, `sw.js` push): `notifications.md`
-- The smoothness meter at the bottom of More (`frameMeterStart`, `ih_frameMeter`): `frame-meter.md`
-- Sound-Alikes, words that sound the same (`SOUND_ALIKES`, `renderSoundAlikes`, `saSpeak`): `sound-alikes.md`
-- The memory trainer (consecutive practice) and its Voice and mic check in More (`voiceCheckOpen`): `memory-trainer.md`
-- Practice scenes, the speakers beside the trainer's ring (`memSceneHtml`, `figures/`): `practice-scenes.md`
-- CoreCHI Practice dashboard: score trend, Focus next, its motion (`renderScoreTrend`, `playPracticeMotion`): `practice-dashboard.md`
-- HUMC Brain, the double-tap on Dr. Smiley's head, its data and what's real in it (`openHumcBrain`, `brain/`): `humc-brain.md`
-- The campus celebration (a building finished), tap a person for a word (`campusFolkTap`, `ih_campusWord`) and the friendly weather for a streak (`CAMPUS_SKY`, `ih_campusSky`): `campus-celebration.md`, `campus-tap-person.md`, `campus-weather.md`
-- Idea credits, whose idea a screen was: the tag, the card, the owner's sheet (`creditDecorate`, `hub-credits`): `credits.md`
-- Tool banners on Translate, Term Review, Ask and Doctor Directory, and the pin's fly from Home (`toolBannerHtml`, `toolBannerMeta`, `tbFly`): `tool-banners.md`
-- The opening, Badge in: when it plays, the loop, More's card (`openingStart`, `ih_opening`, `opening/`): `opening.md`
-- Adjust your photo, the frame before it's saved (`photoAdjust`, `uploadAvatar`'s `ready`): `photo-adjust.md`
-- Email sign-in, one account on every phone: the code, the ticket, the owner carried over, what syncs and what doesn't yet (`api/sign-in.js`, `features/account.js`, `accounts/`): `email-sign-in.md`
-- Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
-- The tab bar, slim when you scroll: when it changes (no timer, a real scroll, full at the top and bottom), the slim look, the move (`wireDock`, `dockSettle`, `dockMorph`): `tab-bar.md`
-- The More sheet, grouped: Study, Doctors, Reference, You; the settings rows' own sheet; numbers that need you (`MORE_GROUPS`, `moreSubOpen`, `reviewedDueCount`, `eventsNewCount`, `ih_eventsSeenAt`): `more-sheet.md`
+touch before changing it; update it in the same commit when the behaviour
+changes. The list of notes, by feature, is in `docs/ARCHITECTURE.md`.
 
 **Every visible change updates the User Guide in the same commit** (Jose's
 standing rule, written out in `AGENTS.md`): a new answer in `GUIDE_TOPICS`
@@ -582,7 +456,7 @@ reviews. Repetitive work goes to the agents in `.claude/agents/`:
 |---|---|---|
 | `scout` | Haiku 5.5 | Finding code and usages, reading a long file or log for the few lines that matter |
 | `test-runner` | Haiku 5.5 | Running suites and syntax checks, reporting only failures |
-| `builder` | Sonnet 5.5 | Exactly specified mechanical edits: guide copy, renames, expected counts |
+| `builder` | Sonnet 5.5 | Exactly specified text edits only: guide copy, renames, expected counts. Never code logic (Jose, 2026-11-10) |
 
 Delegate when the job would pour a lot of text into the main conversation
 (a full test run, sweeping `index.html` for every use of a name). Don't
@@ -593,8 +467,9 @@ design and anything touching data or rules stay with the main model.
 
 ## Working agreement
 
-- **Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-  (His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
+- **Reporting to Jose: status updates extremely concise, fragments fine;
+  explanations in full plain sentences** (Jose, 2026-11-10; was "sacrifice
+  grammar" for everything). And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 - **A question with options gets buttons** (Jose, 2026-10-18): ask it
   with `AskUserQuestion`, one button per option (recommended first), not
   as a numbered list in text. Where that tool is missing (a scheduled
@@ -639,17 +514,20 @@ design and anything touching data or rules stay with the main model.
   (no `https://`, no `www` unless the address has it, no quotes); several
   domains one per line in one box. Never only describe it. A secret's
   value (an API key) is the exception: say where to get it and which
-  field, never ask for it in the chat. Example, for Network access then
+  field, never ask for it in the chat; where a block shows it, write
+  YOUR_VALUE_HERE (2026-11-10). Example, for Network access then
   Allowed domains:
   ```
   tripo-data.rg1.data.tripo3d.com
   developers.tripo3d.com
   ```
-- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): when
-  another program, package, plug-in or tool would make the work better,
+- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): normal
+  project packages (in `tests/package.json` and the like) install without
+  asking, mentioned in the report (2026-11-10). When another program,
+  plug-in, connector or anything paid would make the work better,
   ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
   what it buys) then "Not now"; on Install, install it and use it. Never
-  install unasked, never quietly work around a missing tool. Installs last
+  install those unasked, never quietly work around a missing tool. Installs last
   only for this chat's machine; to keep one, give the setup-script line to
   paste (rule above). Example: Blender's site is blocked here, but it
   installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):
@@ -660,8 +538,7 @@ design and anything touching data or rules stay with the main model.
   one step at a time; screenshots beat abstract description.
 - Every change someone can see ships with its User Guide update (see the
   User Guide paragraph above). Jose asked for this on every change.
-- Scope each session to one feature or one bug. Commit with a real message
-  saying what changed — the first 200 commits were all "Add files via upload"
+- Commit with a real message saying what changed — the first 200 commits were all "Add files via upload"
   and none of them can be read back.
 - When a bug survives a fix, ask for a concrete reproduction path
   ("Radiation → Back → Home"). That specificity is what has surfaced root

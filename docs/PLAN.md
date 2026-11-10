@@ -22,17 +22,20 @@ written here.
    He says "push" (or "merge") when a green PR should go live: that means
    merge it into `main`, which deploys. Nothing merges without him. Never delete anything he
    hasn't approved.
-7. Next phase: in the same chat while it's still light (see below).
+7. Next phase: in the same chat until a new-session trigger hits (see below).
 
-**A heavy chat hands over with `docs/handoff.md`** (Jose, 2026-10-20:
+**A chat hands over with `HANDOFF.md` at the repo root** (Jose, 2026-11-10,
+replacing `docs/handoff.md`, now older notes, and "only when extremely
+heavy"; first rule Jose, 2026-10-20:
 "Whenever a chat gets extremely heavy and expensive, hand me a handoff.md
 to start in a new chat. It's to be able to use you for long period of
-time"; this replaces "don't ask to start a new chat"). Carry on phase
-after phase while the chat is light. When it gets extremely heavy (it has
-been compacted, or holds many big file reads, long test runs or fix
-rounds, and the next phase would add a lot more):
+time"). Carry on phase after phase until a trigger hits: about 150k
+tokens or half the context, finish the current step, then hand off; over
+300k or 75%, hand off now; an unrelated next task or Jose back after an
+hour away, with the chat over 100k, hand off too (CLAUDE.md, "When to
+start a new session"):
 1. Write everything worth keeping into this file as usual.
-2. Overwrite `docs/handoff.md`: where things stand (merged, open PRs and
+2. Overwrite `HANDOFF.md` at the repo root (short, pointing to what exists): where things stand (merged, open PRs and
    what each waits on, pending check-ins), what's next with the pick, open
    questions for Jose, what this chat learned that isn't in the docs yet,
    and at the top the exact message to paste into the new chat.
@@ -42,7 +45,7 @@ rounds, and the next phase would add a lot more):
    2026-10-23 and 2026-10-25): **"I start it for you" (the pick)**, a new session
    (`create_session`, same repository, titled with the chat's focus in
    plain words, Jose 2026-10-24) whose first message is the whole
-   of `docs/handoff.md` plus a short summary of this chat (what was done,
+   of `HANDOFF.md` plus a short summary of this chat (what was done,
    what is open, why), with its link given to Jose; or **"I'll paste it
    myself"**, the exact message to paste. Where the buttons or
    `create_session` are missing, give the message to paste. Either way,
@@ -52,23 +55,23 @@ rounds, and the next phase would add a lot more):
 4. Leave nothing half-done: an open PR is fine (the handoff names it), an
    uncommitted change is not. Cancel this chat's check-ins; the new chat
    re-arms what it needs. Then "Archive this chat" (below).
-The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and the handoff,
+The new chat reads `AGENTS.md`, `CLAUDE.md`, this file and `HANDOFF.md`
+(confirming the next step with Jose; `HANDOFF.md` is deleted once its work
+is done, the phase checked off or its pull request opened),
 then opens with a short summary for Jose in two parts: what is being
 worked on now and its goal (Jose, 2026-10-23), and what was worked on
 before (Jose, 2026-10-24), each a few lines in simple words, never a
 big block of text (Jose, 2026-10-24); then in 2-3 lines what it will do, and waits
 for his go.
 
-**Offer a new chat only when the chat is extremely heavy** (Jose, 2026-10-28:
-not so constantly, only when the chat feels extremely heavy; this replaces the buttons after every finished job of
-2026-10-25). Heavy means what the handover above says: compacted, or many
-big file reads, long test output or fix rounds. Then, once, end the reply
-with `AskUserQuestion`: **"Start a new chat for me"** first, **"Keep going
-here"** second, the question carrying the summary (what is being worked on
-now and its goal, a few plain words). A finished job alone is no reason to
-ask. If he picks the new chat, do steps 1 to 4 above (the handoff first,
-then `create_session` with it and the two-part summary). Where the buttons
-are missing, one plain line instead.
+**Offer a new chat only when a trigger hits** (Jose, 2026-11-10; the
+triggers above). Then, once, ask with `AskUserQuestion`: **"Start a new
+session"** first as the pick, **"Keep going"** second, the question
+carrying the summary (what is being worked on now and its goal, a few
+plain words). If he says keep going, don't ask again until the next
+trigger; past 75%, warn him once and write `HANDOFF.md` anyway. A finished
+job alone is no reason to ask. If he picks the new chat, do steps 1 to 4
+above. Where the buttons are missing, one plain line instead.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
