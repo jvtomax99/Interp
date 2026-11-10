@@ -116,7 +116,7 @@ ask him with buttons.
   pinned; one clarifying question for an ambiguous request; "Archive this
   chat" (Working agreement, `AGENTS.md`).
 - **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
-- **Taste skill.** docs/design-rules.md asks for Senlin's taste skill from a link Jose hasn't given yet (PASTE_LINK_HERE). Until he does, use the `taste` skill this environment already has, and ask him for the link.
+- **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
 - **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
 
 ## File map
