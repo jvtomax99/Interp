@@ -7,6 +7,20 @@ audit is on record; Jose picked "Next session" when it was offered.
 produces `docs/CLEANUP.md` (with "Last audit" at the top). Confirm with Jose
 before starting.
 
+**After the audit (Jose's pick, 2026-11-10): trim the notes files** so a
+chat loads less. Ask him with buttons before each part.
+1. Split `docs/PLAN.md` (about 1,690 lines): keep "How a session runs" and
+   "Next" in it, move "Done" and the older "Facts" to an archive file opened
+   only when needed. First check whether chats really read the whole file at
+   the start; if they read only the top, the gain is smaller.
+2. In `CLAUDE.md`: fold the "Working agreement" bullets that repeat the
+   general rules block (buttons, notifications, installs, paste boxes) into
+   one place, and move the design history into `DESIGN.md`.
+Not doing: `CLAUDE.md` pointing into `AGENTS.md` for shared rules (a mistake
+there changes how ChatGPT behaves, for a small saving). Notes opened only
+when needed (`docs/assets.md`, `design-rules.md`, `docs/features/*`) need
+no trimming.
+
 **Done in the last chat (all merged, tooling and notes only, app still on
 build b1110.1829):**
 - #262 (ac3671d): the app checks run as six shares side by side, 41 min
