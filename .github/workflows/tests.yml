@@ -23,7 +23,11 @@ concurrency:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: GitHub moved "latest" to Ubuntu 26.04, where
+    # Playwright 1.56.1 refuses to install its browser, so every run failed
+    # at install from 2026-11-10 (last pass 2026-11-09). Move to latest
+    # together with a Playwright that supports it (tests/package.json).
+    runs-on: ubuntu-24.04
     # The full run takes 37-40 min on a free runner (2026-11-07); at 40 it
     # was cut off inside the last suite, so the cap has room again.
     timeout-minutes: 55
