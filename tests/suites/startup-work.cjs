@@ -59,7 +59,7 @@ const init = () => {
     // (a crashed page?) and nothing said what.
     let why = ''; page.on('crash', () => { why += ' [the page crashed]'; });
     const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, e => { why = String(e && e.message).split('\n')[0] + why; return false; });
-    const state = shown || page.isClosed() ? null : await page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0]);
+    const state = shown || page.isClosed() ? null : await Promise.race([new Promise(r => setTimeout(() => r('page not answering after 5 s'), 5000)), page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0])]);
     ok(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)', { why, state });
     ok(!errors.length, 'no page errors', errors);
     await ctx.close();

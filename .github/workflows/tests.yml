@@ -28,7 +28,7 @@ jobs:
   # browser jobs below are skipped for it (2026-11-10: such a change used to
   # wait 40 minutes like any other). Anything else, tests/ and .github/
   # included, gets the full run, and so does any doubt: a list of files that
-  # can't be read, is empty or is cut off (GitHub stops at 300 files for a
+  # can't be read, is empty, follows a forced push or is cut off (GitHub stops at 300 files for a
   # push and 3000 for a pull request).
   changes:
     runs-on: ubuntu-24.04
@@ -47,6 +47,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           BEFORE: ${{ github.event.before }}
           SHA: ${{ github.sha }}
+          FORCED: ${{ github.event.forced }}
         run: |
           run=true
           files=''
@@ -54,7 +55,7 @@ jobs:
           if [ "$EVENT" = pull_request ]; then
             files=$(gh api "repos/$REPO/pulls/$PR/files" --paginate --jq "$names") || files=''
             [ "$(printf '%s\n' "$files" | grep -c .)" -ge 3000 ] && files=''
-          elif [ "$EVENT" = push ]; then
+          elif [ "$EVENT" = push ] && [ "$FORCED" != true ]; then
             files=$(gh api "repos/$REPO/compare/$BEFORE...$SHA" --jq ".files | $names") || files=''
             [ "$(printf '%s\n' "$files" | grep -c .)" -ge 300 ] && files=''
           fi
@@ -161,7 +162,12 @@ jobs:
     steps:
       - name: Did everything pass?
         env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
+          RUN: ${{ needs.changes.outputs.run }}
+          CHANGES: ${{ needs.changes.result }}
+          CHECKS: ${{ needs.checks.result }}
+          WEBKIT: ${{ needs.webkit.result }}
         run: |
-          echo "changes, checks, webkit: $RESULTS"
-          case " $RESULTS " in *" failure "*|*" cancelled "*) exit 1;; esac
+          echo "run the suites: $RUN; changes: $CHANGES, checks: $CHECKS, webkit: $WEBKIT"
+          [ "$CHANGES" = success ] || exit 1
+          if [ "$RUN" = false ]; then exit 0; fi
+          [ "$CHECKS" = success ] && [ "$WEBKIT" = success ]
