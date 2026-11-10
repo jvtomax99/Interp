@@ -10,7 +10,7 @@ If DESIGN.md doesn't exist yet:
 5. Show me a short summary and one sample page before using it everywhere.
 
 ### Getting the taste skill
-If the taste skill (by Senlin, the one that analyzes a website from a URL) isn't in .claude/skills/taste/, get it from PASTE_LINK_HERE and save it there so it stays with the project. If you can't download it, ask me for the skill file. If it can't open a browser, ask me to install a browser tool (like Playwright) with buttons, recommended option first.
+If the taste skill (by Senlin, the one that analyzes a website from a URL) isn't in .claude/skills/taste/, get it from https://github.com/senlindesign/taste-skill and save it there so it stays with the project. If you can't download it, ask me for the skill file. If it can't open a browser, ask me to install a browser tool (like Playwright) with buttons, recommended option first.
 
 ## 2. Using DESIGN.md
 - The analyzed sites are inspiration, not something to copy. Keep the feel, layout ideas, and spacing.
