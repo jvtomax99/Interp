@@ -1236,6 +1236,22 @@ come from this alone.
 
 ## Facts (so nobody re-checks)
 
+**Old rules settled (Jose, 2026-11-10)**, when his general rules were added to CLAUDE.md:
+
+- New session: the token triggers in "When to start a new session"; a chat
+  runs phases in a row until one hits.
+- Handoff: root `HANDOFF.md`, deleted once its work is done.
+- Spec: `SPEC.md` for what, `docs/PLAN.md` for order and Facts,
+  `docs/features/` for each feature's detail.
+- Reports: status updates short, explanations in full plain sentences.
+- Installs: normal project packages without asking (mention them);
+  programs, plugins, connectors and anything paid still ask first.
+- Settings to paste: one box per field, YOUR_VALUE_HERE where a secret goes.
+- `builder` (Sonnet): text edits only; code changes stay on the main model.
+- Kept as is: a phone notification after every finished job and when
+  something goes live; "Push" as a button that merges with the head SHA
+  pinned; one clarifying question for an ambiguous request.
+
 - **Type (measured 2026-11-03).** Body text is weight 500 (`body` in
   `app.css`), about 2,000 visible pieces; moving it is not a tidy. Google
   Fonts serves Inter 100-700 only (no opsz axis asked), so 750/800 render

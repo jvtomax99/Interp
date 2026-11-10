@@ -58,8 +58,13 @@ this section says so.
   (Next, Done), and Facts, where a chat's decisions go. A new feature
   gets its "Done when" line in `SPEC.md` and its detail, with "not in this
   version", in its `docs/features/` note.
-- **Architecture.** `docs/ARCHITECTURE.md`: the short map, then the full
-  file map and the list of feature notes. Read it at the start of a session.
+- **Architecture.** `docs/ARCHITECTURE.md`: at the start of a session read
+  only its short map (down to "Full file map"); the full file map and the
+  list of feature notes below it are for looking things up.
+- **"Checked off" here** means moved to "Done" in `docs/PLAN.md` (it has no
+  checkboxes). That is what the cleanup check and `HANDOFF.md` deletion in
+  the general rules go by. Decisions settled on 2026-11-10 (handoff, spec,
+  reports, installs, paste boxes, `builder`) are in `docs/PLAN.md`, Facts.
 - **Handoffs.** Root `HANDOFF.md` (see "How work is run"). `docs/handoff.md`
   is older notes (the last one written 2026-11-07); leave it as it is.
 - **Branches.** A cloud session is handed a `claude/...` branch; use it.
@@ -74,22 +79,6 @@ this section says so.
 - **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
 - **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
 - **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
-
-### Old rules settled (Jose, 2026-11-10)
-
-- New session: the token triggers in "When to start a new session"; a chat
-  runs phases in a row until one hits.
-- Handoff: root `HANDOFF.md`, deleted once its work is done.
-- Spec: `SPEC.md` for what, `docs/PLAN.md` for order and Facts,
-  `docs/features/` for each feature's detail.
-- Reports: status updates short, explanations in full plain sentences.
-- Installs: normal project packages without asking (mention them);
-  programs, plugins, connectors and anything paid still ask first.
-- Settings to paste: one box per field, YOUR_VALUE_HERE where a secret goes.
-- `builder` (Sonnet): text edits only; code changes stay on the main model.
-- Kept as is: a phone notification after every finished job and when
-  something goes live; "Push" as a button that merges with the head SHA
-  pinned; one clarifying question for an ambiguous request.
 
 ## File map
 
