@@ -1,8 +1,8 @@
 # Architecture: HUMC Interpreter Hub
 
 Short map, written 2026-11-10. For every file's full role, see "Full file map"
-below; feature detail is in `docs/features/`. Read this first
-instead of exploring the code.
+below; feature detail is in `docs/features/`. At the start of a session,
+read down to "Full file map" and stop; the rest is for looking things up.
 
 ## Shape
 

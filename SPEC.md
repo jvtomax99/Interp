@@ -143,17 +143,7 @@ From `docs/PLAN.md` "Later" (each waits on its trigger) and open ideas:
 
 ## Phases
 
-Build order and phase checkboxes live in docs/PLAN.md. (It has no checkbox
-lines today; "Next (in order)" marks items done in words.) Next 3 open:
-- [ ] **Waiting on Jose.** K2: publish `firestore.rules` so Term Review's
-  "only your own record" rule works (may be covered by the 2026-11-07
-  rules publish; TO FILL: Jose confirms). M5: one memory-trainer round with
-  Auto-mark on, one with Record me on too.
-- [ ] **Doctor list, next ideas.** Compact rows instead of two-column cards
-  (mock up first), and search that finds a doctor's terms and short forms.
-  Jose picks.
-- [ ] **Doctors redesign D1c.** Needs Jose: the real-data replay (he sends
-  `doctors.json`) and the 5-minute interpreter test on iPhones.
+The build order lives in `docs/PLAN.md` ("Next (in order)", then "Done"),
+not here, so it can't go stale in two places (Jose, 2026-11-10). A phase
+counts as checked off when it moves to "Done".
 
-Also built and waiting for Jose's OK in that list: the opening (Badge in)
-and the tool banners.
