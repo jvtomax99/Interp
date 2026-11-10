@@ -1,7 +1,8 @@
 # Runs the app's checks (tests/) in a headless browser on every push to main
 # and every pull request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
 # A red X next to a commit on GitHub means a check failed; the screenshots
-# and logs are attached to the run as "test-output".
+# and logs are attached to the run as "test-output-1" to "-6" (one per share
+# of the suites) and "test-output-webkit".
 name: App checks
 
 on:
@@ -22,15 +23,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Notes only? A change that touches nothing but docs/, .claude/ and *.md
+  # files cannot change what a suite sees (no suite reads them), so the
+  # browser jobs below are skipped for it (2026-11-10: such a change used to
+  # wait 40 minutes like any other). Anything else, tests/ and .github/
+  # included, gets the full run, and so does any doubt: a list of files that
+  # can't be read, is empty or is cut off (GitHub stops at 300 files for a
+  # push and 3000 for a pull request).
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run: ${{ steps.what.outputs.run }}
+    steps:
+      - id: what
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          run=true
+          files=''
+          names='.[] | .filename, (.previous_filename // empty)'
+          if [ "$EVENT" = pull_request ]; then
+            files=$(gh api "repos/$REPO/pulls/$PR/files" --paginate --jq "$names") || files=''
+            [ "$(printf '%s\n' "$files" | grep -c .)" -ge 3000 ] && files=''
+          elif [ "$EVENT" = push ]; then
+            files=$(gh api "repos/$REPO/compare/$BEFORE...$SHA" --jq ".files | $names") || files=''
+            [ "$(printf '%s\n' "$files" | grep -c .)" -ge 300 ] && files=''
+          fi
+          if [ -n "$files" ] && ! printf '%s\n' "$files" | grep -qvE '^(docs/|\.claude/)|\.md$'; then run=false; fi
+          printf '%s\n' "$files" | head -50
+          echo "Run the suites: $run"
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+
+  # The suites, in six even shares side by side, one machine each (2026-11-10;
+  # one machine took 37-42 min, the shares about 7 min of suites each).
+  # tests/run.cjs works out who gets what; tests/suites/shards.mjs fails if a
+  # suite is in no share. More machines: add a number to `shard`, nothing else.
   checks:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     # Pinned, not ubuntu-latest: GitHub moved "latest" to Ubuntu 26.04, where
     # Playwright 1.56.1 refuses to install its browser, so every run failed
     # at install from 2026-11-10 (last pass 2026-11-09). Move to latest
     # together with a Playwright that supports it (tests/package.json).
     runs-on: ubuntu-24.04
-    # The full run takes 37-40 min on a free runner (2026-11-07); at 40 it
-    # was cut off inside the last suite, so the cap has room again.
-    timeout-minutes: 55
+    # A share is about 8 min; the cap leaves room for a slow machine.
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: tests
@@ -56,13 +106,13 @@ jobs:
           node --check pin-icons.js
           node --check sw.js
           for f in api/*.js; do node --check "$f"; done
-      - name: Run every suite
-        run: node run.cjs
+      - name: Run this machine's share of the suites
+        run: node run.cjs --shard=${{ matrix.shard }}/${{ strategy.job-total }}
       - name: Keep the screenshots and logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-output
+          name: test-output-${{ matrix.shard }}
           path: tests/out
           retention-days: 7
 
@@ -74,6 +124,8 @@ jobs:
   # the job ran out of time before any check ran (#158, #160). The tag must
   # match the playwright version in tests/package.json.
   webkit:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     container:
@@ -95,3 +147,21 @@ jobs:
           name: test-output-webkit
           path: tests/out
           retention-days: 7
+
+  # One line that says how it all went, whatever ran: green when every share
+  # and WebKit passed, green when they were skipped for a notes-only change,
+  # red otherwise. If main ever gets a "checks must pass" rule, this is the
+  # one job to name in it (a skipped job would leave such a rule waiting).
+  result:
+    name: App checks result
+    needs: [changes, checks, webkit]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Did everything pass?
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "changes, checks, webkit: $RESULTS"
+          case " $RESULTS " in *" failure "*|*" cancelled "*) exit 1;; esac

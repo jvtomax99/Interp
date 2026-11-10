@@ -10,6 +10,7 @@ replaced by an in-memory stand-in seeded with the built-in glossary
 | Suite | What it covers |
 |---|---|
 | `events-login.mjs` | The events watcher's own login (`api/_service-login.js`), with a throwaway key; no browser |
+| `shards.mjs` | GitHub's shares of the suites (`run.cjs --shard=K/N`, `.github/workflows/tests.yml`): every file in `suites/` is in `run.cjs`'s list, and the shares the workflow asks for run each suite exactly once; no browser |
 | `deploy-rule.mjs` | The deploy rule in `vercel.json`, run in a throwaway git repository: a bump commit deploys, anything else is skipped; the bump workflow's commit title matches; everything the bump skips stays out of the deployment; no browser |
 | `push.mjs` | Notifications (`api/push.js`, `_push-team.js`, `_webpush.js`), Firestore and the push services faked: the sealed message opens on a receiver written from RFC 8291, the VAPID signature verifies, who hears about a chat message (channels, @mentions, never the sender), once per message, owner-only sends, gone phones removed; no browser |
 | `notifications-screen.cjs` | More → Notifications: iPhone in Safari told to add the Hub to the Home Screen, off / blocked / on, the switches, owners' Send to the team (the request, the phones reached), members never see it, From the team, `?open=chat` from a tapped notification |
@@ -56,6 +57,17 @@ Screenshots and logs go to `tests/out/` (not kept in git).
 GitHub runs the same thing on every pull request and every push to `main`
 (`.github/workflows/tests.yml`), so a change from any tool gets a green
 check or a red X once its pull request is open.
+
+There the suites run as six even shares side by side, one machine each
+(`node run.cjs --shard=2/6` is the second share; add `--list` to only name
+its suites). `run.cjs` splits them by how long each took on GitHub
+(`shard-times.json`; a suite not in it counts as a middling one, so a new
+suite needs nothing but its line in `run.cjs`). One machine took about 40
+minutes; refresh the seconds from a run's log if the shares drift apart. A
+change that touches only `docs/`, `.claude/` and `*.md` files skips the
+suites (none reads those files). "App checks result" is the one line that
+says how the whole run went. Screenshots and logs are attached to the run
+as `test-output-1` to `-6` and `test-output-webkit`.
 
 `ROOT=/other/checkout node run.cjs` tests another copy of the app;
 `INDEX=/path/to/index.html` serves a different `index.html` (before/after).

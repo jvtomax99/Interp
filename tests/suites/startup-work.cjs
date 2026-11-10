@@ -54,8 +54,13 @@ const init = () => {
     // 3 fps under load) stretches a 4 s pen past 20 s; the app's own wall clock
     // (home-polish.js, `cap`) ends it by 16 s in any case. Wait for that.
     const t0 = Date.now();
-    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, () => false);
-    ok(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)');
+    // Why the wait ended is kept: on 2026-11-10 it failed in CI's WebKit at 32 s,
+    // before its own 40 s limit, so something other than the limit ended it
+    // (a crashed page?) and nothing said what.
+    let why = ''; page.on('crash', () => { why += ' [the page crashed]'; });
+    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, e => { why = String(e && e.message).split('\n')[0] + why; return false; });
+    const state = shown || page.isClosed() ? null : await page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0]);
+    ok(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)', { why, state });
     ok(!errors.length, 'no page errors', errors);
     await ctx.close();
   }
