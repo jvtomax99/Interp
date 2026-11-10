@@ -11,7 +11,7 @@ live at https://interp-six.vercel.app.
 
 **Real users: the interpreter team at Hackensack University Medical Center
 (Hackensack Meridian Health)**, about 41 phones in the team (`CLAUDE.md`,
-Open items, 2026-11-07), split into North and South regions. Jose Vazquez,
+Standing facts, 2026-11-07), split into North and South regions. Jose Vazquez,
 staff medical interpreter, owns and directs it. Owners and admins run team
 access and titles.
 

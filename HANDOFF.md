@@ -1,5 +1,13 @@
 # Handoff (2026-11-10): the cleanup audit
 
+**Paste this into the new chat:**
+
+> Read `HANDOFF.md` first, then `AGENTS.md`, `docs/PLAN.md` and the short
+> map in `docs/ARCHITECTURE.md`. Tell me in a few short lines what is being
+> worked on now and what was worked on before, then confirm the next step
+> with me before starting. Plain words, say "working on it" and "done".
+> "Push" is always a button.
+
 **Goal:** run the cleanup audit. `docs/CLEANUP.md` does not exist, so no
 audit is on record; Jose picked "Next session" when it was offered.
 

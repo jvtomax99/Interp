@@ -12,10 +12,10 @@ Read this before changing anything. Two files rank above the rest:
 **How work is run** (Jose, 2026-11-10): one pull request = one phase from
 `docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
 chat runs phase after phase until a new-session trigger hits (general rules
-below, "New session triggers"). Then it asks once with buttons, "Start a
-new session" first as the pick and "Keep going" second, over a short
-summary; a new chat is made only when he picks it, with `HANDOFF.md`
-written at the repo root. Whenever a chat starts a new chat for Jose, it
+below, "New session triggers"). Then it writes `HANDOFF.md` at the repo
+root and asks once with buttons, "Start a new session" first as the pick
+and "Keep going" second, over a short summary; a new chat is made only
+when he picks it. Whenever a chat starts a new chat for Jose, it
 gives him a fresh summary in plain words, in two parts, a few lines each:
 **what is being worked on now** (and its goal) and **what was worked on
 before** (the last chat's changes and where each stands). The new chat
@@ -122,8 +122,10 @@ Drill), `guide-front` (the guide's front page and search),
 `knowledge-brain` (the Hub's side), `opening` (Badge in, More's Opening
 card), `photo-adjust`, `smiley-engine` (art, animation, how lively, task
 states), `smiley-performances`, `term-lookup`, `tool-banners` (and the
-pin's fly from Home), `translate`, `voice-check`. A new feature file gets
-its row in `AGENTS.md` and its line in `docs/ARCHITECTURE.md`.
+pin's fly from Home), `translate`, `voice-check`. A new feature file joins the three
+lists in `docs/split-index.md` ("Three lists to update with every new
+file": `sw.js`, `.github/bump-version.cjs`, `tests/support/harness.cjs`),
+this list, `docs/ARCHITECTURE.md` and, with Jose's OK, `AGENTS.md`'s table.
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
 terms, chat, Doctor Prep, study, quizzes, profile, settings or the guide —
@@ -337,16 +339,16 @@ one. Two rules worth repeating here because they are broken most:
   it onto `--fs-*`, `--sp-*` and `--tr-*` rather than adding a one-off
   value.
 
-## Subagents: the main model thinks, cheaper models fetch (Jose, 2026-10-14)
+## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
 
-The main conversation plans, decides, writes the real code and reviews.
+The main conversation (Opus 5.5) plans, decides, writes the real code and reviews.
 Repetitive work goes to the agents in `.claude/agents/`:
 
 | Agent | Model | Use for |
 |---|---|---|
-| `scout` | Haiku | Finding code and usages, reading a long file or log for the few lines that matter |
-| `test-runner` | Haiku | Running suites and syntax checks, reporting only failures |
-| `builder` | Sonnet | Exactly specified text edits only: guide copy, renames, expected counts. Never code logic (Jose, 2026-11-10) |
+| `scout` | Haiku 5.5 | Finding code and usages, reading a long file or log for the few lines that matter |
+| `test-runner` | Haiku 5.5 | Running suites and syntax checks, reporting only failures |
+| `builder` | Sonnet 5.5 | Exactly specified text edits only: guide copy, renames, expected counts. Never code logic (Jose, 2026-11-10) |
 
 Delegate when the job would pour a lot of text into the main conversation
 (a full test run, sweeping `index.html` for every use of a name). Don't
@@ -358,8 +360,8 @@ design and anything touching data or rules stay with the main model.
 ## Working with Jose
 
 The general rules at the end cover challenging him, reports, proof, asking
-first, installs and pushing. These are the rules this project adds, each
-also in `AGENTS.md`:
+first, installs and pushing. These are the rules this project adds, most
+of them also in `AGENTS.md`:
 
 - **Plain words, as to someone new to this** (Jose, 2026-10-20): no git or
   CI jargon ("a change waiting for your OK", not "a PR with green checks");
@@ -369,7 +371,8 @@ also in `AGENTS.md`:
 - **He works from a phone much of the time.** Concrete instructions, one
   step at a time; screenshots beat abstract description.
 - **A question with options gets buttons** (Jose, 2026-10-18):
-  `AskUserQuestion`, one button per option, the recommended one first.
+  `AskUserQuestion`, one button per option, the recommended one first,
+  not a numbered list in text.
   **Always say your recommendation and why**, unasked (Jose, 2026-10-19).
   Where the buttons are missing or refused, list the options plainly with
   the pick marked.
@@ -377,6 +380,9 @@ also in `AGENTS.md`:
   confidence** (Jose, 2026-10-17): nothing stated as true without a
   measurement, test, primary source or the code behind it; say what is
   unproven.
+- **How Jose works with AI tools** (Jose, 2026-10-29; `AGENTS.md`, its
+  section of that name): the spec, with "not in this version", before a
+  new feature's code; research similar tools first; challenge his ideas.
 - **Not building, ever** (`AGENTS.md`, "Not building"): no patient
   information of any kind; not a replacement for the hospital's systems; no
   app-store app. Flag a request that crosses one before any work.
@@ -395,12 +401,14 @@ also in `AGENTS.md`:
   deploy as in Deploying. Never only a link to GitHub's merge button.
 - **A phone notification when something goes live** (Jose, 2026-11-03):
   once Vercel reports the bump commit's deploy completed, send
-  `PushNotification` with the change and its `BUILD_ID`.
+  `PushNotification` with the change and its `BUILD_ID`, even if he seems
+  to be in the chat.
 - **Settings to paste** (Jose, 2026-11-04), on top of the general rule:
   one code block per field, under the field's name and where it goes;
   exactly what to paste (no `https://`, no `www` unless the address has it,
-  no quotes); several domains one per line in one block. Never ask for a
-  secret's value in the chat.
+  no quotes); several domains one per line in one block. Never only
+  describe it. A secret's value (an API key) is the exception: say where
+  to get it and which field, never ask for it in the chat.
 - **Installs** (Jose, 2026-11-04), on top of the general rule: the buttons
   are "Install (Recommended)" (what it is, its size, what it buys) and "Not
   now". Never quietly work around a missing tool. Known here: Blender's
@@ -423,9 +431,10 @@ also in `AGENTS.md`:
   `api/_service-login.js` signs a JWT with the service account in
   `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
   Cloud Datastore User), trades it for a one-hour token and sends that with
-  every Firestore call, which the lock doesn't apply to. Each run's report
-  says which login it used, and a refused key stops the run with the
-  reason (first "service account" run: 2026-11-07, 14:42 UTC). Putting a
+  every Firestore call, which the lock doesn't apply to. Without the key it
+  goes in unsigned, as before (practice mode only). Each run's report says
+  which ("login"), and a refused key stops the run with the reason; a run
+  reported "service account" on 2026-11-07, 14:42 UTC, before the lock. Putting a
   shared secret inside the documents it writes was rejected as a
   credential leak.
 - **`index.html` is 1.0 MB and about 18,400 lines** (measured 2026-11-10).

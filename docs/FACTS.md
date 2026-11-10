@@ -6,12 +6,22 @@ search it for the screen, file or word you are about to touch
 (`grep -n -i "tab bar" docs/FACTS.md`), before measuring or retrying
 anything. Add what you learn here, newest near the top, with the date.
 
+**The notes trim (2026-11-10).** `docs/PLAN.md` was split into the working
+list, `docs/PLAN-done.md` and this file; `CLAUDE.md` lost its repeats and
+its copy of the design values (now only in `DESIGN.md`). Decided the same
+day and still standing: `CLAUDE.md` does not hand its shared rules over to
+`AGENTS.md` (a mistake there changes how ChatGPT behaves, for a small
+saving); every rule for working with Jose stays written in `CLAUDE.md`,
+and only the per-feature function names are left to `AGENTS.md`'s table.
+Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
+`docs/features/*`) were not trimmed.
+
 **Old rules settled (Jose, 2026-11-10)**, when his general rules were added to CLAUDE.md:
 
 - New session: the token triggers ("New session triggers" in CLAUDE.md); a chat
   runs phases in a row until one hits.
 - Handoff: root `HANDOFF.md`, deleted once its work is done.
-- Spec: `SPEC.md` for what, `docs/PLAN.md` for order and Facts,
+- Spec: `SPEC.md` for what, `docs/PLAN.md` for order, this file for facts,
   `docs/features/` for each feature's detail.
 - Reports: status updates short, explanations in full plain sentences.
 - Installs: normal project packages without asking (mention them);

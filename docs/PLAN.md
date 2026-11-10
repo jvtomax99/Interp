@@ -1,7 +1,8 @@
 # PLAN — what's next
 
 The working list. At the start a session reads `CLAUDE.md`, `AGENTS.md`,
-`HANDOFF.md` (if there is one) and this file, and nothing else. Two files
+`HANDOFF.md` (if there is one), the short map at the top of
+`docs/ARCHITECTURE.md` and this file, and nothing else. Two files
 hold the rest, for looking things up, never for reading whole:
 
 - `docs/PLAN-done.md`: every finished phase, newest first. "Checked off"
@@ -12,10 +13,13 @@ hold the rest, for looking things up, never for reading whole:
   anything.
 
 Don't reread old chats: anything worth keeping is written in these three.
+Code comments and older notes that cite a finished phase "in
+`docs/PLAN.md`" (S1 to S9, F1, F2, M0, K1, item 2c, "Facts") mean
+`docs/PLAN-done.md` and `docs/FACTS.md`.
 
 ## How a session runs
 
-1. Fetch `main`. Read the four files above, then only the code the phase
+1. Fetch `main`. Read the files above, then only the code the phase
    touches (banner comments in `index.html` to navigate), its note in
    `docs/features/` if it has one, and what `docs/FACTS.md` says about it.
 2. Take the top phase under **Next**. One phase, or one group of related
@@ -25,7 +29,7 @@ Don't reread old chats: anything worth keeping is written in these three.
 4. Do it. Check it: `node --check`, the four checks in `CLAUDE.md` for
    `index.html`, `cd tests && node run.cjs`.
 5. In the same branch: take the phase out of **Next** and put it at the top
-   of `docs/PLAN-done.md` (the date, a few lines, the PR number); add what
+   of `docs/PLAN-done.md` (one line, PR link); add what
    you learned to `docs/FACTS.md`; add new work you found under **Next**,
    **Waiting on Jose** or **Later**. A bug you found and did not fix goes
    under **Later**, never only inside a finished phase's entry.
@@ -44,25 +48,28 @@ then hand off; over 300k or 75%, hand off now; over 100k with an unrelated
 next task, or with Jose back after an hour away, hand off too. A finished
 job alone is no reason.
 
-When a trigger hits, ask once with `AskUserQuestion`: **"Start a new
-session"** first as the pick, **"Keep going"** second, the question
-carrying a short summary (what is being worked on now and its goal). On
-"Keep going", don't ask again until the next trigger; past 75%, warn him
-once and write `HANDOFF.md` anyway. Where the buttons are missing, one
-plain line instead. On "Start a new session":
+When a trigger hits:
 
 1. Write everything worth keeping into the notes, as in step 5.
-2. Overwrite `HANDOFF.md` (short, pointing to what exists): the goal and
-   the exact next step, with the pick; what is merged, which PRs are open
-   and what each waits on, pending check-ins; open questions for Jose;
-   what this chat learned that isn't in the notes yet; the files to look
-   at first.
-3. Commit and push it, and send it to Jose with `SendUserFile`. Start the
-   new session yourself (`create_session`, same repository, titled with
-   its focus in plain words, "Campus code to its own file"; Jose,
-   2026-10-24). Its first message is the whole of `HANDOFF.md` plus a
-   short summary of this chat; give Jose its link. Where `create_session`
-   is missing, give him the exact message to paste.
+2. Overwrite `HANDOFF.md` (short, pointing to what exists): at the top the
+   exact message to paste into a new chat; the goal and the exact next
+   step, with the pick; what is merged, which PRs are open and what each
+   waits on, pending check-ins; open questions for Jose; what this chat
+   learned that isn't in the notes yet; the files to look at first.
+   Commit and push it, and send it to Jose with `SendUserFile`.
+3. Ask once with `AskUserQuestion` (buttons, never only text to paste;
+   Jose, 2026-10-23 and 2026-10-25): **"Start a new session"** first as
+   the pick, **"Keep going"** second, the question carrying a short
+   summary (what is being worked on now and its goal). On "Keep going",
+   don't ask again until the next trigger; past 75%, warn him once. Where
+   the buttons are missing, one plain line instead. On "Start a new
+   session", start it yourself (`create_session`, same repository, titled
+   with its focus in plain words, "Campus code to its own file"; Jose,
+   2026-10-24): its first message is the whole of `HANDOFF.md` plus a
+   short summary of this chat, and Jose gets its link. Where
+   `create_session` is missing, give him the exact message to paste.
+   (These two buttons, Jose's of 2026-11-10, replace the older pair "I
+   start it for you" / "I'll paste it myself": one question, not two.)
 4. The same reply gives Jose a fresh summary in two parts, a few plain
    lines each, never a big block of text (Jose, 2026-10-24): what is being
    worked on now and its goal, and what was worked on before (this chat's
@@ -101,6 +108,8 @@ with buttons.
 - **Feel audit:** five phone screenshots (Ask and Team access with the
   keyboard up; a doctor's page, the doctor list's A-Z strip, a toast) and
   his frame-meter numbers.
+- **The hello's canvas draw** is the opening's floor now: his call (the
+  options are in `docs/feel-audit.md`).
 - **The opening, Badge in:** his OK (live since b1105.2126). Ideas offered
   2026-11-05, not picked: a quick second open later the same day; drag the
   badge onto the reader with better sounds. Later, if he asks: tilting the
@@ -127,6 +136,8 @@ with buttons.
   meant, no answer on record.
 - **Liz's title:** give it on Team access once she signs in by email.
 - **`SPEC.md`:** the lines marked TO FILL.
+- **The rules block in `CLAUDE.md`:** whether to remove from it what his
+  claude.ai preferences already say (his call, left open 2026-11-10).
 - **Branch protection on `main`** (his call): the job to name is "App
   checks result"; it needs an exception for the bump-version Action.
 - **Doctor list, next ideas** (the 2026-11-03 review; he picks): compact
@@ -201,7 +212,7 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
   the new Home ~half, both over 200 ms. Draw what's on the first screen
   first, the rails more than 1.5 screens down (284 of Home's 669 elements)
   a frame later; projected ~1/3 off, not under 200 ms. Don't retry moving
-  the layout reads to the frame (Facts, "S3b measurements"). Other leads,
+  the layout reads to the frame (`docs/FACTS.md`, "S3b measurements"). Other leads,
   unmeasured as fixes: `watchDomainDock` writes `--dock-top` on `<html>`
   every render (a new value restyles the page); the name pen's `tick`
   reads two rects per frame (20-45 ms frames at 4x during the opening).
@@ -212,6 +223,6 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
 - **Reduced motion, softer.** With Reduce Motion / Still, the name has no
   pen. Option: a short fade instead. Jose's call.
 - **Dr. Smiley's three frames with a white edge** (lookU, halfL, lookUR;
-  see Facts). Trim the eye patch's edge in `face.webp`. When Jose wants it.
+  see `docs/FACTS.md`). Trim the eye patch's edge in `face.webp`. When Jose wants it.
 - **Training & Events listener has no limit.** Fine while small; a cap
   breaks the unread badge (it counts events), so it needs a new badge rule.

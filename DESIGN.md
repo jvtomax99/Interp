@@ -166,7 +166,7 @@ box-shadow:
 
 ## Motion
 
-- **A plain tap settles on `--spring0`,** Apple's spring with no bounce (`linear()`, falling back to `--ease`): press .368s, screen .588s, sheet .662s.
+- **A plain tap settles on `--spring0`,** Apple's spring with no bounce (`linear()`, falling back to `--ease`, `cubic-bezier(.2,.8,.2,1)`): press .368s, screen .588s, sheet .662s.
 - **Overshoot only where it is the point:** the Practice buttons' `--spring-settle`, Dr. Smiley's acting. No new overshooting `cubic-bezier`; `tests/suites/springs.cjs` holds the kept list.
 - **Touch press feedback:** `:hover` never fires on a phone. Presses use `:active` plus a JS `.is-pressed` class held about 260ms (the `LIFTS` list in `index.html`).
 - **Every animation has a `prefers-reduced-motion` guard;** every control keeps `:focus-visible`.
