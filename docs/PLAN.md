@@ -409,6 +409,15 @@ come from this alone.
 
 ## Done
 
+- 2026-11-10 Faster app checks on GitHub (Jose's pick; tooling only, no app change). One machine ran all the suites in
+  37-42 min, for every change, a notes-only one included. Now: the suites run as six even shares side by side
+  (`tests/run.cjs --shard=K/N`, split by each suite's seconds in `tests/shard-times.json`; `tests/suites/shards.mjs` fails
+  if a suite is in no share), a change to nothing but `docs/`, `.claude/` and `*.md` skips them (no suite reads those;
+  any doubt runs them), and "App checks result" says in one line how the run went (the job to name if `main` ever gets a
+  "checks must pass" rule). Expected about 8 min a share (414 s of suites each); the measured time is in the pull request.
+  Also: the WebKit job failed once on `main` (a0d66e0) on the same code that passed in #261, in `startup-work`'s "the name
+  itself is shown", at 32 s, before the wait's own 40 s limit; the cause is not known (its saved output could not be
+  downloaded from a cloud session), so that check now prints why its wait ended and what the page showed.
 - 2026-11-08 The campus's leaves after Jose's iPhone screenshots (speckle, black specks, flat patches, square petals): readable leaves,
   no black fringes, light across each card, edge-on cards hidden, lumpy masses, real petal shapes. `real-map/README.md`, "The trees". Not
   measured on his iPhone when this was written.

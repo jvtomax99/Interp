@@ -208,7 +208,9 @@ the end-to-end journey, Dr. Smiley's gaze and his five performances, Home at res
 against this checkout in headless Chromium with Firebase and the AI
 endpoints stood in for (`tests/support/`). GitHub runs them on every pull request and every push
 to `main` (`.github/workflows/tests.yml`), so every tool's changes get
-checked; a branch is checked once its pull request is open. `.vercelignore` keeps `tests/` and `.github/` out of the deployed site.
+checked; a branch is checked once its pull request is open. There they run as six shares side by side
+(`node run.cjs --shard=K/6`; a new suite needs only its line in `run.cjs`), and a change to nothing but
+`docs/`, `.claude/` and `*.md` files skips them; "App checks result" is the one line that says how it went (2026-11-10). `.vercelignore` keeps `tests/` and `.github/` out of the deployed site.
 
 Never push `index.html` without running all four:
 

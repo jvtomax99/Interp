@@ -2,6 +2,9 @@
 
      cd tests && node run.cjs            all suites
      node run.cjs daily-drill guide      just these
+     node run.cjs --shard=2/6            the 2nd of 6 even shares (GitHub runs
+                                         the shares side by side, one machine each)
+     node run.cjs --shard=2/6 --list     only name that share's suites
 
    A suite fails when it prints a FAIL line, exits with an error, or prints
    no PASS line at all (it didn't get far enough to check anything).
@@ -12,6 +15,7 @@ const path = require('path');
 
 const SUITES = [
   ['events-login.mjs',    'Events watcher login (no browser)'],
+  ['shards.mjs',          'Shares (no browser): every file in suites/ is listed here, and GitHub\'s shares together run each suite exactly once'],
   ['deploy-rule.mjs',     'Deploy rule (no browser): only the bump commit deploys, its title matches, nothing the bump skips is deployed'],
   ['sign-in.mjs',         'Email sign-in (no browser): who may ask, the code and its limits, the ticket, the owner keeps the Hub, the mail conversation'],
   ['push.mjs',            'Notifications (no browser): sealed and signed pushes, who hears about a chat message, owner sends, gone phones'],
@@ -66,8 +70,30 @@ const SUITES = [
   ['slow-open.cjs',       'Slow Wi-Fi: the saved copy opens past a second, with its own code; a new version waits for the background'],
   ['feel.cjs',            'The feel guard: no empty flash or jump on data, press feedback, contrast, a scroll that searches nothing, his face on its clock, Home at rest'],
 ];
-const only = process.argv.slice(2);
-const pick = only.length ? SUITES.filter(([f]) => only.some(o => f.startsWith(o))) : SUITES;
+/* Shares for GitHub: suite i goes to one of n shares, the same answer on
+   every machine. Longest suites first, each to the share with the least
+   time so far; the seconds come from shard-times.json (a full run on
+   GitHub, 2026-11-10), a suite not in it counts as the median. */
+function shares(n) {
+  let secs = {};
+  try { secs = JSON.parse(fs.readFileSync(path.join(__dirname, 'shard-times.json'), 'utf8')); } catch (e) {}
+  const known = Object.values(secs).sort((a, b) => a - b), mid = known.length ? known[known.length >> 1] : 30;
+  const w = f => (f in secs ? secs[f] : mid);
+  const bins = Array.from({ length: n }, () => ({ t: 0, files: [] }));
+  const order = SUITES.map(([f]) => f).sort((a, b) => w(b) - w(a) || (a < b ? -1 : 1));
+  for (const f of order) { const b = bins.reduce((m, x) => (x.t < m.t ? x : m), bins[0]); b.t += w(f); b.files.push(f); }
+  return bins.map(b => b.files);
+}
+module.exports = { SUITES, shares };
+if (require.main !== module) return;
+
+const args = process.argv.slice(2);
+const only = args.filter(a => !a.startsWith('--'));
+let pick = only.length ? SUITES.filter(([f]) => only.some(o => f.startsWith(o))) : SUITES;
+const shard = (args.find(a => a.startsWith('--shard=')) || '').match(/^--shard=(\d+)\/(\d+)$/);
+if (args.some(a => a.startsWith('--shard')) && !(shard && +shard[2] >= 1 && +shard[1] >= 1 && +shard[1] <= +shard[2])) { console.error('--shard=K/N, with K from 1 to N'); process.exit(2); }
+if (shard) { const mine = shares(+shard[2])[+shard[1] - 1]; pick = pick.filter(([f]) => mine.includes(f)); console.log(`Share ${shard[1]} of ${shard[2]}: ${pick.length} of ${SUITES.length} suites`); }
+if (args.includes('--list')) { pick.forEach(([f]) => console.log(f)); return; }
 fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });
 
 const summary = [];
