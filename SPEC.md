@@ -143,7 +143,7 @@ From `docs/PLAN.md` "Later" (each waits on its trigger) and open ideas:
 
 ## Phases
 
-The build order lives in `docs/PLAN.md` ("Next (in order)", then "Done"),
-not here, so it can't go stale in two places (Jose, 2026-11-10). A phase
-counts as checked off when it moves to "Done".
+The build order lives in `docs/PLAN.md` ("Next (in order)"), not here, so
+it can't go stale in two places (Jose, 2026-11-10). A phase counts as
+checked off when it moves to `docs/PLAN-done.md`.
 

@@ -48,7 +48,7 @@ phase 0 measures them.
    his outfit and the activity feed after the first paint), the pin
    observer re-applying pins after every insert (the greeting word swap
    every 2.8 s included), and, after a deploy, the new worker precaching
-   96 files (3.3 MB) over hospital Wi-Fi. Facts in `docs/PLAN.md`: a page
+   96 files (3.3 MB) over hospital Wi-Fi. Facts in `docs/FACTS.md`: a page
    frame loop makes Chrome produce a whole Home frame every vsync.
 3. **Dr. Smiley's face frames are timer chains, not clock-driven.**
    `DrAnim.play` steps frames with `setTimeout` at 38 ms
@@ -66,7 +66,7 @@ phase 0 measures them.
    "feels fine"); a new complaint after new paint is a regression until
    measured otherwise.
 5. **Known, left to Jose:** his rank outfit and the feed arrive after the
-   first paint on every open (`docs/PLAN.md`, Facts, "Startup repaints").
+   first paint on every open (`docs/FACTS.md`, "Startup repaints").
    A premium open shows the right thing the first time; caching both is
    the fix, and it changes the first frame, so it is his call.
 
