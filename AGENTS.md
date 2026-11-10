@@ -5,31 +5,23 @@ Claude, or anything else. Claude also reads `CLAUDE.md`, which has the long
 version. This file is the short shared contract. If the two ever disagree,
 this file wins.
 
-**How work is run:** one pull request = one phase from `docs/PLAN.md` (plan,
-do, test, update the plan, open a pull request). A chat runs phase after
-phase in a row; when it gets extremely heavy, it writes `docs/handoff.md`
-and hands it to Jose to start a new chat (Jose, 2026-10-20, replacing "never
-ask"). It offers to start that chat itself, with the handoff and a summary
-of this chat pasted in (Jose, 2026-10-23), offered as clickable buttons
-(`AskUserQuestion`), "I start it for you" first as the pick, never only
-as text to paste (Jose, 2026-10-25). **Offer a new chat only when the chat is extremely
-heavy** (Jose, 2026-10-28: not so constantly,
-only when the chat feels extremely heavy; replaces the buttons after every
-finished job, 2026-10-25): then, and only then, the same clickable buttons,
-"Start a new chat for me" first and "Keep going here" second, over a short
-summary of what is being worked on; a new chat is made only when he picks
-it, with the handoff written first. Whenever a chat starts a new
-chat for Jose, it gives him a fresh summary in plain words, in two parts:
-**what is being worked on now** (and its goal) and **what was worked on
-before** (the last chat's changes and where each stands). It says it in
-the reply that gives the new chat's link, and the new chat opens with the
-same two parts (Jose, 2026-10-24). Keep both short: a few lines each,
-simple words, no big blocks of text (Jose, 2026-10-24). The new chat's title names its focus
-in plain words, the work it is for ("Campus code to its own file"), never
-a generic "New session" or "Handoff" (Jose, 2026-10-24). A new chat reads the docs and the
-handoff, not the old chat. Details: `docs/PLAN.md`.
-When a chat is done, say "Archive this chat" (Jose, 2026-10-18; when,
-in `docs/PLAN.md`).
+**How work is run** (Jose, 2026-11-10): one pull request = one phase from
+`docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
+chat runs phase after phase until a new-session trigger hits: about 150k
+tokens or half the context, finish the current step, then hand off; over
+300k or 75%, hand off now (CLAUDE.md, "When to start a new session"; tools without a token count use their best estimate). Then
+it writes `HANDOFF.md` at the repo root and asks once with buttons, "Start
+a new session" first as the pick and "Keep going" second, over a short
+summary; a new chat is made only when he picks it. Whenever a chat starts
+a new chat for Jose, it gives him a fresh summary in plain words, in two
+parts, a few lines each: **what is being worked on now** (and its goal)
+and **what was worked on before** (the last chat's changes and where each
+stands). The new chat opens with the same two parts, its title names its
+focus in plain words ("Campus code to its own file"), and it reads
+`HANDOFF.md` first and confirms the next step. `HANDOFF.md` is deleted
+once its work is done; `docs/handoff.md` is older notes. Details:
+`docs/PLAN.md`. When a chat is done, say "Archive this chat" (Jose,
+2026-10-18; when, in `docs/PLAN.md`).
 
 **Feature notes** (Ask the Hub, Dr. Smiley's memory and movement, Term Review,
 the Daily Drill, 3D Body, the User Guide, Team access, …) are in
@@ -372,8 +364,9 @@ Center, and his interpreter team. Spanish/English, installable PWA, used
 one-handed between hospital assignments. He directs the product and reviews
 from a phone: one step at a time, screenshots over description.
 
-**Reporting to Jose: extremely concise. Sacrifice grammar for concision.**
-(His standing rule.) And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
+**Reporting to Jose: status updates extremely concise, fragments fine;
+explanations in full plain sentences** (Jose, 2026-11-10; was "sacrifice
+grammar" for everything). And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
 
 **Always say your recommendation** (Jose, 2026-10-19). Whenever there are
 options, a next step or a trade-off, name the one you would pick and why,
@@ -415,13 +408,16 @@ Exactly what he should paste: no `https://`, no `www` unless the address
 has it, no quotes, no explanation inside the box. Several domains: one box
 with one per line. Never only describe the value. The one exception is a
 secret's value (an API key): say where to get it and which field it goes
-in, and never ask him to paste a key into the chat.
+in, write YOUR_VALUE_HERE where a block shows it (2026-11-10), and never
+ask him to paste a key into the chat.
 
-**Ask, then install what helps** (Jose, 2026-11-04). When another program,
-package, plug-in or tool would let the agent do the work better (Blender for
+**Ask, then install what helps** (Jose, 2026-11-04). Normal project
+packages (in `tests/package.json` and the like) install without asking,
+mentioned in the report (2026-11-10). When another program, plug-in,
+connector or anything paid would let the agent do the work better (Blender for
 3D, a converter, a test tool), ask him with a clickable choice: "Install"
 first, with what it is, its size and what it buys, then "Not now". On
-"Install", install it and use it. Never install without asking, and never
+"Install", install it and use it. Never install those without asking, and never
 work around a missing tool in silence when one would do the job better.
 Installs last only for this chat's machine: to keep one for every chat,
 give him the setup-script line to paste (the rule above).
@@ -433,7 +429,9 @@ every tool:
 
 **Spec before code for a new feature.** Write its note in
 `docs/features/` first: what it does, who it is for, and what it does
-**not** do in this first version. Code follows the note, not the other way
+**not** do in this first version; and its one-line "Done when" in
+`SPEC.md` (Jose, 2026-11-10: `SPEC.md` says what, `docs/PLAN.md` the
+order). Code follows the note, not the other way
 round.
 
 **Research before a new feature.** Look at how two or three similar tools
