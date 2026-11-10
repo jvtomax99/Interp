@@ -7,7 +7,8 @@ project is built and shipped.
 `docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
 chat runs phase after phase until a new-session trigger hits: about 150k
 tokens or half the context, finish the current step, then hand off; over
-300k or 75%, hand off now (CLAUDE.md, "When to start a new session"). Then
+300k or 75%, hand off now (general rules below, "When to start a new
+session"). Then
 it writes `HANDOFF.md` at the repo root and asks once with buttons, "Start
 a new session" first as the pick and "Keep going" second, over a short
 summary; a new chat is made only when he picks it. Whenever a chat starts
@@ -53,8 +54,8 @@ this section says so.
   the team.
 - **Plan, spec and phases** (Jose, 2026-11-10). `SPEC.md` says *what*: who
   it's for, one "Done when" line per feature, Not in v1, Later (gaps marked
-  TO FILL for Jose). `docs/PLAN.md` says *in what order*: the phases with
-  their checkboxes, and Facts, where a chat's decisions go. A new feature
+  TO FILL for Jose). `docs/PLAN.md` says *in what order*: the phases
+  (Next, Done), and Facts, where a chat's decisions go. A new feature
   gets its "Done when" line in `SPEC.md` and its detail, with "not in this
   version", in its `docs/features/` note.
 - **Architecture.** `docs/ARCHITECTURE.md`: the short map, then the full
@@ -70,6 +71,9 @@ this section says so.
   `promo/package.json` (the video) each have their own `npm install`.
 - **`AGENTS.md`** is the shared contract with ChatGPT and wins over this file
   where they overlap. Do not edit it without Jose's OK.
+- **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
+- **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
+- **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
 
 ### Old rules settled (Jose, 2026-11-10)
 
@@ -86,10 +90,6 @@ this section says so.
 - Kept as is: a phone notification after every finished job and when
   something goes live; "Push" as a button that merges with the head SHA
   pinned; one clarifying question for an ambiguous request.
-
-- **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
-- **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
-- **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
 
 ## File map
 
@@ -527,7 +527,7 @@ design and anything touching data or rules stay with the main model.
   plug-in, connector or anything paid would make the work better,
   ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
   what it buys) then "Not now"; on Install, install it and use it. Never
-  install unasked, never quietly work around a missing tool. Installs last
+  install those unasked, never quietly work around a missing tool. Installs last
   only for this chat's machine; to keep one, give the setup-script line to
   paste (rule above). Example: Blender's site is blocked here, but it
   installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):

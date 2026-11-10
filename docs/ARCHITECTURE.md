@@ -1,7 +1,7 @@
 # Architecture: HUMC Interpreter Hub
 
-Short map, written 2026-11-10. For every file's full role, see the File map
-in `CLAUDE.md`; feature detail is in `docs/features/`. Read this first
+Short map, written 2026-11-10. For every file's full role, see "Full file map"
+below; feature detail is in `docs/features/`. Read this first
 instead of exploring the code.
 
 ## Shape
@@ -81,7 +81,7 @@ Moved here from CLAUDE.md on 2026-11-10. `index.html` measured 18,407 lines that
 
 | File | Lines | What |
 |---|---|---|
-| `index.html` | 22,252 | The whole app's markup and JS (1.3 MB), all inline |
+| `index.html` | 18,407 | The whole app's markup and JS (1.3 MB), all inline |
 | `app.css` | 7,325 | The app's stylesheet (467 KB), linked from `<head>`; was the inline `<style>` until 2026-10-21 (`docs/split-index.md`, phase 1) |
 | `home-polish.css` | 1,456 | Overlay layer. Linked right after `app.css`, so it wins |
 | `home-polish.js` | 1,972 | Home behaviour: hello wave, rail dots, section overlay, Dr. Smiley |

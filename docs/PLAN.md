@@ -22,7 +22,7 @@ written here.
    He says "push" (or "merge") when a green PR should go live: that means
    merge it into `main`, which deploys. Nothing merges without him. Never delete anything he
    hasn't approved.
-7. Next phase: in the same chat while it's still light (see below).
+7. Next phase: in the same chat until a new-session trigger hits (see below).
 
 **A chat hands over with `HANDOFF.md` at the repo root** (Jose, 2026-11-10,
 replacing `docs/handoff.md`, now older notes, and "only when extremely
