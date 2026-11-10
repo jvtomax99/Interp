@@ -38,7 +38,7 @@ in the same commit when the behaviour changes.
 
 ## The one thing that keeps going wrong
 
-**More than one tool writes to this repo, and both push straight to `main`.**
+**More than one tool writes to this repo, and both used to push straight to `main`.**
 Recent history, by who pushed it:
 
 ```
@@ -58,6 +58,16 @@ Neither tool is told when the other pushes. Two real failures came from that:
 
 So:
 
+- **Never commit straight to `main` (Jose, 2026-11-10; this replaces
+  pushing to `main`).** Every tool works on its own branch with a plain
+  name (`fix-login-button`), commits in small steps with plain messages,
+  and pushes that branch freely. Getting it into `main` takes a pull
+  request with a short plain summary, then Jose's OK ("push") before the
+  merge. Never without asking him first: force push, deleting a branch
+  with work not yet in `main`, rewriting history (`git reset --hard`,
+  rebase on `main`), changing repo settings. Never commit secrets, keys
+  or `.env` files (`.gitignore` keeps them out). After a merge, say in
+  one line how to undo it if it breaks the live app.
 - **Fetch `main` before you write anything, and again before you push.**
   If it moved, read what changed before continuing. Do not assume the copy
   you were given is current.

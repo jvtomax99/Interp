@@ -67,9 +67,10 @@ this section says so.
 - **Handoffs.** New handoffs go in root `HANDOFF.md`. `docs/handoff.md` is
   older notes (the last one written 2026-11-07); leave it as it is.
 - **Branches.** A cloud session is handed a `claude/...` branch; use it.
-  ChatGPT pushes straight to `main` under Jose's name. That is `AGENTS.md`'s
-  business; the general rules bind Claude. It is why `main` must be fetched
-  before writing and again before pushing.
+  Since 2026-11-10 `AGENTS.md` tells every tool, ChatGPT included, never to
+  commit straight to `main` (Jose's pick). `main` still moves between
+  sessions as other branches merge, so fetch it before writing and again
+  before pushing.
 - **Packages.** No root package list. `tests/package.json` (the checks) and
   `promo/package.json` (the video) each have their own `npm install`.
 - **`AGENTS.md`** is the shared contract with ChatGPT and wins over this file
@@ -108,8 +109,6 @@ ask him with buttons.
   with YOUR_VALUE_HERE for a secret.
 - The `builder` subagent (Sonnet) makes mechanical edits (Subagents):
   conflicts with "keep code changes on the main model".
-- `AGENTS.md` says both tools "push straight to `main`", with a Claude push
-  in its example: conflicts with "Never commit directly to main".
 - This file is long (all the project knowledge, kept on purpose): conflicts
   with "Keep CLAUDE.md lean".
 - Stricter, no conflict: a phone notification after every finished job and
@@ -203,8 +202,9 @@ file where they overlap.** ChatGPT/Codex reads it automatically; this file is
 Claude's longer version. Change `AGENTS.md` first when a rule changes here,
 or the two tools drift apart again.
 
-**Fetch `main` before writing and again before pushing.** ChatGPT pushes
-directly to `main` under Jose's name, so `main` moves between sessions with
+**Fetch `main` before writing and again before pushing.** ChatGPT pushed
+directly to `main` under Jose's name until 2026-11-10 (now a branch and a
+pull request, `AGENTS.md`), and `main` still moves between sessions with
 no notice. That has already caused work to be reviewed against a stale copy
 for an entire session.
 
