@@ -53,8 +53,9 @@ node run.cjs daily-drill guide   # just these
 A suite fails when it prints a `FAIL` line, crashes, or checks nothing.
 Screenshots and logs go to `tests/out/` (not kept in git).
 
-GitHub runs the same thing on every push (`.github/workflows/tests.yml`), so
-a change from any tool gets a green check or a red X on its commit.
+GitHub runs the same thing on every pull request and every push to `main`
+(`.github/workflows/tests.yml`), so a change from any tool gets a green
+check or a red X once its pull request is open.
 
 `ROOT=/other/checkout node run.cjs` tests another copy of the app;
 `INDEX=/path/to/index.html` serves a different `index.html` (before/after).

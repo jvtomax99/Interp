@@ -345,8 +345,9 @@ It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
 `app.css`), used mostly on phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
-install && node run.cjs`. GitHub runs the same suites on every push
-(`.github/workflows/tests.yml`), whoever made the change; a red X on a commit
+install && node run.cjs`. GitHub runs the same suites on every pull
+request and every push to `main` (`.github/workflows/tests.yml`), whoever
+made the change; a red X on a commit
 means something broke. Add or update a check with any change to what a suite
 covers, and never weaken one to get green.
 

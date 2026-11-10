@@ -1,11 +1,16 @@
-# Runs the app's checks (tests/) in a headless browser on every push and pull
-# request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
+# Runs the app's checks (tests/) in a headless browser on every push to main
+# and every pull request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
 # A red X next to a commit on GitHub means a check failed; the screenshots
 # and logs are attached to the run as "test-output".
 name: App checks
 
 on:
+  # main on every push; any other branch through its pull request. A push
+  # to a branch with an open pull request used to start two identical runs
+  # (the push's and the pull request's), which the concurrency group could
+  # not cancel because their refs differ (2026-11-10).
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 

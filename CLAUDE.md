@@ -206,9 +206,9 @@ something you can check.
 minutes; `tests/README.md`): events-watcher login, Daily Drill, User Guide,
 the end-to-end journey, Dr. Smiley's gaze and his five performances, Home at rest, all
 against this checkout in headless Chromium with Firebase and the AI
-endpoints stood in for (`tests/support/`). GitHub runs them on every push
-(`.github/workflows/tests.yml`), so ChatGPT's pushes to `main` get checked
-too. `.vercelignore` keeps `tests/` and `.github/` out of the deployed site.
+endpoints stood in for (`tests/support/`). GitHub runs them on every pull request and every push
+to `main` (`.github/workflows/tests.yml`), so every tool's changes get
+checked; a branch is checked once its pull request is open. `.vercelignore` keeps `tests/` and `.github/` out of the deployed site.
 
 Never push `index.html` without running all four:
 
