@@ -9,7 +9,7 @@ this file wins.
 `docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
 chat runs phase after phase until a new-session trigger hits: about 150k
 tokens or half the context, finish the current step, then hand off; over
-300k or 75%, hand off now (CLAUDE.md, "When to start a new session"; tools without a token count use their best estimate). Then
+300k or 75%, hand off now (CLAUDE.md, "New session triggers"; tools without a token count use their best estimate). Then
 it writes `HANDOFF.md` at the repo root and asks once with buttons, "Start
 a new session" first as the pick and "Keep going" second, over a short
 summary; a new chat is made only when he picks it. Whenever a chat starts
@@ -345,8 +345,9 @@ It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
 `app.css`), used mostly on phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
-install && node run.cjs`. GitHub runs the same suites on every push
-(`.github/workflows/tests.yml`), whoever made the change; a red X on a commit
+install && node run.cjs`. GitHub runs the same suites on every pull
+request and every push to `main` (`.github/workflows/tests.yml`), whoever
+made the change; a red X on a commit
 means something broke. Add or update a check with any change to what a suite
 covers, and never weaken one to get green.
 

@@ -1,11 +1,16 @@
-# Runs the app's checks (tests/) in a headless browser on every push and pull
-# request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
+# Runs the app's checks (tests/) in a headless browser on every push to main
+# and every pull request, whichever tool made the change (Claude, ChatGPT/Codex, an upload).
 # A red X next to a commit on GitHub means a check failed; the screenshots
 # and logs are attached to the run as "test-output".
 name: App checks
 
 on:
+  # main on every push; any other branch through its pull request. A push
+  # to a branch with an open pull request used to start two identical runs
+  # (the push's and the pull request's), which the concurrency group could
+  # not cancel because their refs differ (2026-11-10).
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -18,7 +23,11 @@ concurrency:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: GitHub moved "latest" to Ubuntu 26.04, where
+    # Playwright 1.56.1 refuses to install its browser, so every run failed
+    # at install from 2026-11-10 (last pass 2026-11-09). Move to latest
+    # together with a Playwright that supports it (tests/package.json).
+    runs-on: ubuntu-24.04
     # The full run takes 37-40 min on a free runner (2026-11-07); at 40 it
     # was cut off inside the last suite, so the cap has room again.
     timeout-minutes: 55
