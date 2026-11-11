@@ -93,14 +93,13 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-1. **The cleanup audit** (`docs/cleanup-audit.md`). None is on record:
-   `docs/CLEANUP.md` doesn't exist. Jose picked "Next session" when it was
-   offered on 2026-11-10; confirm with him before starting.
+Nothing is queued. The cleanup audit ran on 2026-11-11: its list is
+`docs/CLEANUP.md` (20 items, a report; what gets cleaned is Jose's pick).
 
-Nothing else is queued. The feel audit, the `index.html` split, the campus
+The feel audit, the `index.html` split, the campus
 (2a to 2c), email sign-in (E1 to E3) and regions (R4) are finished
 (`docs/PLAN-done.md`; their old entries from this list are kept there under
-"Moved out of Next, 2026-11-10"). After the audit, ask Jose what's next,
+"Moved out of Next, 2026-11-10"). Ask Jose what's next,
 with buttons.
 
 ## Waiting on Jose (nothing to build until he does)
