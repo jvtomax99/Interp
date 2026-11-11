@@ -37,12 +37,15 @@ const init = () => {
   console.log('== the name pen, first open (iPhone user agent)');
   // GitHub's WebKit (the Linux build) freezes about 1 open in 10 while Home's
   // hello draws on its canvas, then kills the page some 27 s later: the
-  // browser's own fault, measured over 800 opens (docs/FACTS.md, "The WebKit
+  // browser's own fault, measured over 880 opens (docs/FACTS.md, "The WebKit
   // crash on Home is a freeze"; 0 freezes in 30 opens on a real iPhone,
   // 2026-11-11). So a page that stops answering or dies is said to have
   // frozen and the open is tried once more, with every check below as it
-  // was. A page that answers and shows the wrong thing still fails, and so
-  // does a second freeze.
+  // was. Only in the WebKit job (BROWSER=webkit): nowhere else has it
+  // frozen, so anywhere else a page that stops answering is a failure. A
+  // page that answers and shows the wrong thing still fails, and so does a
+  // second freeze. What the frozen open had checked is printed as info.
+  const RETRY = process.env.BROWSER === 'webkit';
   for (let attempt = 1; attempt <= 2; attempt++) {
     const checks = [], chk = (c, m, d) => checks.push([c, m, d]);
     let froze = '', ctx = null;
@@ -73,14 +76,19 @@ const init = () => {
       const state = shown || page.isClosed() ? null : await Promise.race([new Promise(r => setTimeout(() => r('page not answering after 5 s'), 5000)), page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0])]);
       chk(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)', { why, state });
       chk(!errors.length, 'no page errors', errors);
-      if (/crashed|has been closed/.test(why)) froze = 'its page died';
+      if (/\[the page crashed\]|Target page, context or browser has been closed/.test(why)) froze = 'its page died';
       else if (typeof state === 'string' && state.startsWith('page not answering')) froze = 'its page stopped answering';
     } catch (e) {
       const m = String(e && e.message).split('\n')[0];
-      if (/crash|has been closed|Target closed/i.test(m)) froze = 'its page died (' + m.slice(0, 80) + ')'; else throw e;
+      if (/Target crashed|Target page, context or browser has been closed/.test(m)) froze = 'its page died (' + m.slice(0, 80) + ')';
+      else { for (const [c, t, d] of checks) ok(c, t, d); throw e; }
     } finally { if (ctx) await ctx.close().catch(() => {}); }
-    if (froze && attempt === 1) { console.log('  info: the browser froze on this open (' + froze + '); opening once more'); continue; }
-    if (froze) ok(false, 'the page opens without the browser freezing (twice in a row: ' + froze + ')');
+    if (froze && RETRY && attempt === 1) {
+      console.log('  info: the browser froze on this open (' + froze + '); opening once more. What it had checked:');
+      for (const [c, t, d] of checks) console.log('  info:   ' + (c ? 'pass ' : 'fail ') + t + (c || d === undefined ? '' : ' ' + JSON.stringify(d)));
+      continue;
+    }
+    if (froze) ok(false, 'the page opens without the browser freezing (' + (RETRY ? 'twice in a row: ' : '') + froze + ')');
     for (const [c, m, d] of checks) ok(c, m, d);
     break;
   }
