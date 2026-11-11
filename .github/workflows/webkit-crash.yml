@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [base, dsf3, reduce, still, nooff, noworker]
+        variant: [base, reduce, nocss, nopetal, nosmiley, nocanvas, nofilter]
     container:
       # The tag must match the playwright version in tests/package.json.
       image: mcr.microsoft.com/playwright:v1.56.1-noble

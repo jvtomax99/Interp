@@ -8,13 +8,19 @@
      BROWSER=webkit RUNS=20 VARIANT=base node tools/webkit-crash.cjs
 
    VARIANT turns one thing off, to see what the freeze follows (all at 1x,
-   where it froze most often, 3 runs in 20 on 2026-11-11):
+   where it froze most often). Rounds one and two (docs/FACTS.md) ruled out
+   memory, the pen, workers and OffscreenCanvas, and found it follows
+   animation: 0 of 80 froze with Reduce Motion. Round three, by a style
+   added to the page:
      base       as the suite runs it, at 1x
-     dsf3       at 3x, as a phone draws it
      reduce     the phone's Reduce Motion on (no pen, no loops)
-     still      Dr. Smiley set to Still (ih_smileyMode)
-     nooff      no OffscreenCanvas: the petals fall back to animated elements
-     noworker   no Worker at all: the pen's path is traced on the page
+     nocss      every CSS animation off (what script moves still moves)
+     nopetal    the petals hidden
+     nosmiley   Dr. Smiley's and the wave pin's CSS animations off
+     nocanvas   every canvas hidden
+     nofilter   no filter and no backdrop blur anywhere
+   Older ones still work: dsf3 (3x), still, nooff, noworker.
+   Run 1 also prints which animations were running at 2 s, by name.
    A run that stops answering for 3 samples in a row is counted as frozen and
    ended there (WebKit kills such a page about 27 s later). The page also
    reports its rare, heavy calls as they happen (a worker made, a message to
@@ -40,6 +46,10 @@ function mem() {
 }
 const init = v => {
   window.__f = 0; const tick = () => { window.__f++; requestAnimationFrame(tick); }; requestAnimationFrame(tick);
+  const CSS = { nocss: '*,*::before,*::after{animation:none!important}', nopetal: '.home-petal{animation:none!important;display:none!important}',
+    nosmiley: '.dock-smiley,.dock-smiley *,.dock-smiley-bob,.home-wave-pin,.home-wave-pin *{animation:none!important}', nocanvas: 'canvas{display:none!important}',
+    nofilter: '*,*::before,*::after{filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}' }[v];
+  if (CSS) { const add = () => { const st = document.createElement('style'); st.textContent = CSS; (document.head || document.documentElement).appendChild(st); }; if (document.head) add(); else document.addEventListener('DOMContentLoaded', add); }
   if (v === 'nooff') { try { delete window.OffscreenCanvas; window.OffscreenCanvas = undefined; HTMLCanvasElement.prototype.transferControlToOffscreen = undefined; } catch (e) {} }
   if (v === 'noworker') { try { window.Worker = undefined; } catch (e) {} }
   // The trace: one console line per rare, heavy call, as it starts and as it returns.
@@ -83,6 +93,7 @@ const init = v => {
     const trace = []; page.on('console', m => { const t = m.text(); if (t.startsWith('TRACE ')) trace.push((Date.now() - t0) + 'ms ' + t.slice(6)); });
     const errors = []; page.on('pageerror', e => errors.push(e.message.slice(0, 120)));
     await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' }).catch(e => errors.push('goto: ' + e.message.split('\n')[0]));
+    let census = null; const censusAt = setTimeout(() => { page.evaluate(() => { const c = {}; for (const a of document.getAnimations()) { const t = a.effect && a.effect.target; const k = (a.animationName || a.transitionProperty && ('transition:' + a.transitionProperty) || 'script') + ' @' + (t ? (t.tagName + '.' + String(t.className && t.className.baseVal !== undefined ? t.className.baseVal : t.className).split(' ')[0]) : '?'); c[k] = (c[k] || 0) + 1; } return c; }).then(c => { census = c; }, () => {}); }, 2000);
     const rows = []; let silent = 0, lastF = 0, inRow = 0, frozenAt = 0;
     while (Date.now() - t0 < WATCH && !crashedAt && !frozenAt) {
       const at = Date.now() - t0;
@@ -105,6 +116,7 @@ const init = v => {
     console.log('RUN ' + JSON.stringify(res));
     // The second-by-second record: every run that crashed or went silent, and the first run as the normal case.
     if (crashedAt || silent || i === 1) { for (const r of rows) console.log('  ' + JSON.stringify(r)); console.log('  TRACE (' + trace.length + ' lines, the last 40): ' + JSON.stringify(trace.slice(-40))); }
+    clearTimeout(censusAt); if (i === 1 || frozenAt) console.log('  ANIMATIONS at 2 s: ' + JSON.stringify(census));
     if (frozenAt) await page.close({ runBeforeUnload: false }).catch(() => {});
     await ctx.close().catch(() => {});
   }
