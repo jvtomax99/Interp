@@ -490,3 +490,30 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   appeared, the same 32 s as on `main` (a0d66e0) the day before. The six
   Chromium jobs passed and the one re-run of `webkit` passed with no
   change. Not known: why WebKit's page dies about 32 s into the hello.
+- The WebKit "crash" on Home is a freeze, then WebKit's kill (2026-11-11,
+  `tests/tools/webkit-crash.cjs`, runs 42940783637 and 42943466243 of the
+  "WebKit crash probe" job). The page stops answering 1 to 6 s after it
+  opens, memory flat (about 600 MB at 1x), and is killed 18 to 28 s later.
+  In round two 27 of 300 opens froze with animations on; with Reduce
+  Motion 0 of 80 over rounds one and two.
+  Not the cause: the pen's worker, any worker, OffscreenCanvas, the pen
+  (Dr. Smiley Still froze 8 of 60 with no pen), memory, or a stuck call
+  (every traced call had returned). In that browser the page draws about
+  5 frames a second at 3x and holds about 1.3 GB.
+  Third round (run 42995104071): it follows the hello's canvas
+  (`.home-wave-canvas`, `home-polish.js`). With every canvas hidden 0 of
+  60 froze, though the script still drew into it; petals hidden 8 of 60,
+  all CSS animations off 8, no filters or blur 10, Dr. Smiley's CSS
+  animations off 1, unchanged 4 (each of 60). All three rounds, 880
+  opens: 0 of 200 froze with no canvas on screen (Reduce Motion 140,
+  canvases hidden 60), 62 of 680 with it (4 of 80, 27 of 300, 31 of 300). So the drawing code
+  does not hang; this WebKit build (Linux, WPE) freezes putting a canvas
+  that changes every frame on screen. That part of WebKit is different
+  code on an iPhone, and Jose's phone test says iPhones don't do it: 0
+  freezes in 30 full closes and opens (2026-11-11, Reduce Motion off). So
+  the hello was left as it is, and `startup-work.cjs`'s first open now
+  says when the browser froze and opens once more, in the WebKit job only
+  (two freezes in a row
+  still fail; a page that answers and shows the wrong thing still fails).
+  Its later opens have no such retry: neither red run was there. To
+  measure again: Actions, "WebKit crash probe", Run workflow.

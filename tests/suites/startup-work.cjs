@@ -35,34 +35,62 @@ const init = () => {
   const b = await L.chromium.launch();
 
   console.log('== the name pen, first open (iPhone user agent)');
-  {
-    const ctx = await b.newContext({ viewport: { width: 393, height: 759 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, userAgent: UA, serviceWorkers: 'block' });
-    const page = await ctx.newPage();
-    const errors = []; page.on('pageerror', e => errors.push(e.message));
-    await L.route(page, {});
-    await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
-      try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
-    await page.addInitScript(init);
-    await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
-    const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
-    ok(wrote, 'the pen writes the name');
-    const st = await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('ih_penPath') || '{}'); const v = c['Moisés']; return { workers: window.__pen.workers, strokes: v && v.s && v.s.length }; });
-    ok(st.workers === 1, 'its path is traced in a worker', st);
-    ok(st.strokes > 2, 'the path is kept on the phone (ih_penPath)', st);
-    if (!wrote) console.log('  info: ' + JSON.stringify(await page.evaluate(() => ({ log: window.__pen.log, fonts: document.fonts && document.fonts.check('400 56px Parisienne', 'Moisés'), still: document.documentElement.className }))));
-    // The pen moves 64 ms a frame at most, so a slow CI frame rate (WebKit here,
-    // 3 fps under load) stretches a 4 s pen past 20 s; the app's own wall clock
-    // (home-polish.js, `cap`) ends it by 16 s in any case. Wait for that.
-    const t0 = Date.now();
-    // Why the wait ended is kept: on 2026-11-10 it failed in CI's WebKit at 32 s,
-    // before its own 40 s limit, so something other than the limit ended it
-    // (a crashed page?) and nothing said what.
-    let why = ''; page.on('crash', () => { why += ' [the page crashed]'; });
-    const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, e => { why = String(e && e.message).split('\n')[0] + why; return false; });
-    const state = shown || page.isClosed() ? null : await Promise.race([new Promise(r => setTimeout(() => r('page not answering after 5 s'), 5000)), page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0])]);
-    ok(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)', { why, state });
-    ok(!errors.length, 'no page errors', errors);
-    await ctx.close();
+  // GitHub's WebKit (the Linux build) freezes about 1 open in 10 while Home's
+  // hello draws on its canvas, then kills the page some 27 s later: the
+  // browser's own fault, measured over 880 opens (docs/FACTS.md, "The WebKit
+  // crash on Home is a freeze"; 0 freezes in 30 opens on a real iPhone,
+  // 2026-11-11). So a page that stops answering or dies is said to have
+  // frozen and the open is tried once more, with every check below as it
+  // was. Only in the WebKit job (BROWSER=webkit): nowhere else has it
+  // frozen, so anywhere else a page that stops answering is a failure. A
+  // page that answers and shows the wrong thing still fails, and so does a
+  // second freeze. What the frozen open had checked is printed as info.
+  const RETRY = process.env.BROWSER === 'webkit';
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const checks = [], chk = (c, m, d) => checks.push([c, m, d]);
+    let froze = '', ctx = null;
+    try {
+      ctx = await b.newContext({ viewport: { width: 393, height: 759 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, userAgent: UA, serviceWorkers: 'block' });
+      const page = await ctx.newPage();
+      const errors = []; page.on('pageerror', e => errors.push(e.message));
+      await L.route(page, {});
+      await page.addInitScript(o => { window.__SEED_CATS = o.seed; window.__ACCESS = { mode: 'none' };
+        try { localStorage.setItem('ih_opening', 'off'); localStorage.setItem('ih_onboarded', '1'); localStorage.setItem('ih_myName', 'Moisés'); localStorage.removeItem('ih_penPath'); } catch (e) {} }, { seed: L.SEED });
+      await page.addInitScript(init);
+      await page.goto('https://interp.test/', { waitUntil: 'domcontentloaded' });
+      const wrote = await page.waitForFunction(() => document.querySelector('.home-name-pen'), null, { timeout: 20000 }).then(() => true, () => false);
+      chk(wrote, 'the pen writes the name');
+      const st = await page.evaluate(() => { const c = JSON.parse(localStorage.getItem('ih_penPath') || '{}'); const v = c['Moisés']; return { workers: window.__pen.workers, strokes: v && v.s && v.s.length }; });
+      chk(st.workers === 1, 'its path is traced in a worker', st);
+      chk(st.strokes > 2, 'the path is kept on the phone (ih_penPath)', st);
+      if (!wrote) console.log('  info: ' + JSON.stringify(await page.evaluate(() => ({ log: window.__pen.log, fonts: document.fonts && document.fonts.check('400 56px Parisienne', 'Moisés'), still: document.documentElement.className }))));
+      // The pen moves 64 ms a frame at most, so a slow CI frame rate (WebKit here,
+      // 3 fps under load) stretches a 4 s pen past 20 s; the app's own wall clock
+      // (home-polish.js, `cap`) ends it by 16 s in any case. Wait for that.
+      const t0 = Date.now();
+      // Why the wait ended is kept: on 2026-11-10 it failed in CI's WebKit at 32 s,
+      // before its own 40 s limit, so something other than the limit ended it
+      // (a crashed page?) and nothing said what.
+      let why = ''; page.on('crash', () => { why += ' [the page crashed]'; });
+      const shown = await page.waitForFunction(() => { const n = document.querySelector('.home-greeting-name'); return n && !n.classList.contains('is-penning') && !document.querySelector('.home-name-pen'); }, null, { timeout: 40000 }).then(() => true, e => { why = String(e && e.message).split('\n')[0] + why; return false; });
+      const state = shown || page.isClosed() ? null : await Promise.race([new Promise(r => setTimeout(() => r('page not answering after 5 s'), 5000)), page.evaluate(() => { const n = document.querySelector('.home-greeting-name'); return { name: !!n, penning: !!(n && n.classList.contains('is-penning')), pen: !!document.querySelector('.home-name-pen'), hidden: document.hidden }; }).catch(e => 'page not answering: ' + String(e && e.message).split('\n')[0])]);
+      chk(shown, 'afterwards the name itself is shown (' + Math.round((Date.now() - t0) / 100) / 10 + ' s after the pen appeared)', { why, state });
+      chk(!errors.length, 'no page errors', errors);
+      if (/\[the page crashed\]|Target page, context or browser has been closed/.test(why)) froze = 'its page died';
+      else if (typeof state === 'string' && state.startsWith('page not answering')) froze = 'its page stopped answering';
+    } catch (e) {
+      const m = String(e && e.message).split('\n')[0];
+      if (/Target crashed|Target page, context or browser has been closed/.test(m)) froze = 'its page died (' + m.slice(0, 80) + ')';
+      else { for (const [c, t, d] of checks) ok(c, t, d); throw e; }
+    } finally { if (ctx) await ctx.close().catch(() => {}); }
+    if (froze && RETRY && attempt === 1) {
+      console.log('  info: the browser froze on this open (' + froze + '); opening once more. What it had checked:');
+      for (const [c, t, d] of checks) console.log('  info:   ' + (c ? 'pass ' : 'fail ') + t + (c || d === undefined ? '' : ' ' + JSON.stringify(d)));
+      continue;
+    }
+    if (froze) ok(false, 'the page opens without the browser freezing (' + (RETRY ? 'twice in a row: ' : '') + froze + ')');
+    for (const [c, m, d] of checks) ok(c, m, d);
+    break;
   }
 
   console.log('== the name pen on a page drawing 2 frames a second');

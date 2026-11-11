@@ -5,6 +5,10 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-11 Why the WebKit check went red now and then (Jose's pick). Not a crash from memory: GitHub's WebKit (the Linux build) freezes
+  about 1 open in 10 while Home's hello draws on its canvas, then kills the page about 27 s later (880 opens measured by
+  `tests/tools/webkit-crash.cjs`, three rounds; `docs/FACTS.md`). Jose's iPhone: 0 freezes in 30 opens, so the hello is unchanged.
+  `startup-work.cjs` now names a browser freeze and opens once more. The probe stays as a hand-started job. No app change.
 - 2026-11-11 The cleanup audit, the first on record (`docs/cleanup-audit.md`; a report, nothing removed). `docs/CLEANUP.md` lists 20 items:
   unused script and styles, repeated code, one 520-line function, leftover files. `knip` and `depcheck` see nothing useful in an app with
   no import lines; the list comes from a script count of every name, checked by hand. Then, Jose's pick ("Clean up the low-risk ones"),
