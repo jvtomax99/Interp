@@ -3548,7 +3548,6 @@
     background:radial-gradient(circle at 50% 30%, #222B5E, #151C47 70%);
     box-shadow:inset 0 6px 10px rgba(4,8,30,.6), inset 0 -1px 0 rgba(255,255,255,.12);
   }
-  /* Stat icons as small glossy bubbles. */
   .sm-icon{
     background:radial-gradient(circle at 32% 24%, rgba(255,255,255,.95), color-mix(in srgb, var(--mode) 24%, var(--paper)) 66%);
     box-shadow:inset 0 -2px 0 color-mix(in srgb, var(--mode) 22%, transparent), 0 3px 6px -2px color-mix(in srgb, var(--mode) 40%, transparent);

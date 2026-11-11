@@ -4,7 +4,7 @@ Last audit: 2026-11-11, after phase "the notes trim" (#264, #265). The first aud
 
 The audit itself changed nothing; what was cleaned afterwards is under
 "Done" at the end. Line numbers are as measured at the audit: `index.html`'s
-are about 40 lower now, `app.css`'s up to 190 lower. Made by running
+are about 40 lower now, `app.css`'s up to 214 lower. Made by running
 `docs/cleanup-audit.md`. An item is taken off this list when it is done, and the numbers stay
 as they were, so a gap is a finished item.
 
@@ -128,8 +128,9 @@ as they were, so a gap is a finished item.
     instruction. Risk: **low**.
 
 15. **Two test tools nothing mentions**: `tests/tools/promo-shots.cjs` (16
-    lines) and `tests/tools/smiley-clip.cjs` (52 lines; its header gives a
-    path is right when run from inside `tests/`). Also `tests/support/fonts/urls.txt`. Sixteen more tools
+    lines) and `tests/tools/smiley-clip.cjs` (52
+    lines; its header's path is right when run from inside `tests/`, so
+    item 18's third point was dropped). Also `tests/support/fonts/urls.txt`. Sixteen more tools
     are named only in notes (`tests/README.md`, `docs/PLAN-done.md`):
     one-time measuring scripts, kept as the record of how a number was
     taken, so they stay. Risk: **low**.
@@ -170,8 +171,8 @@ as they were, so a gap is a finished item.
 
 - 2026-11-11: items 1, 2, 3, 18 and 19 (Jose's pick, "Clean up the
   low-risk ones"). Out: nine unused pieces of script, two settings read and
-  never used, about 190 lines of styles nothing draws (the old doctor
+  never used, 214 lines of styles nothing draws (the old doctor
   cards, the old study-goal and "ready" card, the heartbeat strip and its
-  three animations, six singles), a wrong line count and a wrong comment,
+  three animations, eight singles), a wrong line count and a wrong comment,
   ten `export`s nobody imported. Left in from item 3, to measure first:
   `.dl-floor.is-none` and `.prep-fc.is-b2`.
