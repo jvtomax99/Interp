@@ -35,17 +35,48 @@ opens per variation in GitHub's WebKit):**
 - In GitHub's WebKit the page draws about 5 frames a second at 3x and holds
   about 1.3 GB.
 
-**Exact next step:** read the second run of the probe (pushed with this
-file: 60 opens per variation at 1x, a freeze counted after 3 silent
-seconds, and a trace of the page's heavy calls so a frozen run prints what
-it was doing last). `tests/tools/webkit-crash.cjs` says what each variation
-turns off. If the freeze follows one call (a worker starting, a canvas
-handed to a worker, getImageData), look at that code in `home-polish.js`.
-If it follows nothing, say so: it may be GitHub's WebKit build alone, and
-then the suite's check should say "the page froze" and retry, with Jose's
-OK. This cloud machine has no WebKit and must not run `playwright
-install`; all measuring is on GitHub (a push to this branch that touches
-the tool or the workflow starts it).
+**Second round (run 42943466243, 60 opens per variation, all at 1x but
+dsf3; a freeze = 3 silent seconds in a row):** 27 of 360 froze, none
+crashed (the probe ends a frozen run itself).
+
+| variation | froze of 60 |
+|---|---|
+| as the suite runs it, 1x | 5 |
+| 3x | 2 |
+| Dr. Smiley Still (no pen) | 8 |
+| no OffscreenCanvas | 5 |
+| no Worker | 7 |
+| Reduce Motion | 0 (and 0 of 20 in round one) |
+
+- Ruled out: the pen's worker, any worker, OffscreenCanvas, the pen itself
+  (Still has no pen and froze most), memory.
+- The trace shows no call left open in any frozen run: every heavy call
+  had returned, the last one (`fonts.load`) 0.3 to 4.5 s before the page
+  went silent. So no single call of ours is stuck; the page stops while
+  the hello's animations run (64 to 91 animations alive, 15 to 30 frames a
+  second at 1x).
+- What it follows: animation. 0 of 80 with Reduce Motion against 27 of 300
+  without (about 9%).
+- Not known: which animation, and whether this is GitHub's Linux build of
+  WebKit alone. No teammate has reported the app freezing on open, which
+  at 9% they would see daily; that is a reason to doubt it happens on
+  iPhones, not proof.
+
+**Exact next step (ask Jose first, with buttons):**
+1. Recommended: one more round that turns off one group of animations at a
+   time by an injected style (`animation:none` on the petals, on the
+   heartline, on Dr. Smiley, on the hello banner, on everything), 60 opens
+   each. If one group carries it, look at how that animation is built
+   (a filter, a mask, `will-change`, an SVG animation) and make it cheaper
+   without changing the look.
+2. Or stop here: change `startup-work.cjs` so a frozen or crashed page is
+   reported as that ("the browser's page froze, opened again") and the
+   open is tried once more, the check itself unchanged. That needs Jose's
+   OK, because the rule is never to weaken a check.
+This cloud machine has no WebKit and must not run `playwright install`;
+all measuring is on GitHub (a push to this branch that touches the tool or
+the workflow starts it; `tests/tools/webkit-crash.cjs` lists the
+variations).
 
 **Done in the last chat (all merged):**
 - #266, live as build b1111.0136: the first cleanup audit

@@ -490,3 +490,13 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   appeared, the same 32 s as on `main` (a0d66e0) the day before. The six
   Chromium jobs passed and the one re-run of `webkit` passed with no
   change. Not known: why WebKit's page dies about 32 s into the hello.
+- The WebKit "crash" on Home is a freeze, then WebKit's kill (2026-11-11,
+  `tests/tools/webkit-crash.cjs`, runs 42940783637 and 42943466243 of the
+  "WebKit crash probe" job). The page stops answering 1 to 6 s after it
+  opens, memory flat (about 600 MB at 1x), and is killed 18 to 28 s later.
+  27 of 300 opens froze with animations on; 0 of 80 with Reduce Motion.
+  Not the cause: the pen's worker, any worker, OffscreenCanvas, the pen
+  (Dr. Smiley Still froze 8 of 60 with no pen), memory, or a stuck call
+  (every traced call had returned). In that browser the page draws about
+  5 frames a second at 3x and holds about 1.3 GB. Not known: which
+  animation, and whether iPhones do it.
