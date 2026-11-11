@@ -1,26 +1,30 @@
 # CLAUDE.md — HUMC Interpreter Hub
 
-Read this before changing anything. It is the source of truth for how this
-project is built and shipped.
+Read this before changing anything. Two files rank above the rest:
+
+- **`AGENTS.md`** (repo root) is the contract shared with ChatGPT, and it
+  wins over this file where they overlap. Read it at the start of a
+  session. When a shared rule changes, change it there first, or the two
+  tools drift apart. Never edit it without Jose's OK.
+- **`docs/PLAN.md`** is the working list: how a session runs, what's next,
+  what waits on Jose.
 
 **How work is run** (Jose, 2026-11-10): one pull request = one phase from
 `docs/PLAN.md` (plan, do, test, update the plan, open a pull request). A
-chat runs phase after phase until a new-session trigger hits: about 150k
-tokens or half the context, finish the current step, then hand off; over
-300k or 75%, hand off now (general rules below, "New session
-triggers"). Then
-it writes `HANDOFF.md` at the repo root and asks once with buttons, "Start
-a new session" first as the pick and "Keep going" second, over a short
-summary; a new chat is made only when he picks it. Whenever a chat starts
-a new chat for Jose, it gives him a fresh summary in plain words, in two
-parts, a few lines each: **what is being worked on now** (and its goal)
-and **what was worked on before** (the last chat's changes and where each
-stands). The new chat opens with the same two parts, its title names its
-focus in plain words ("Campus code to its own file"), and it reads
-`HANDOFF.md` first and confirms the next step. `HANDOFF.md` is deleted
-once its work is done; `docs/handoff.md` is older notes. Details:
-`docs/PLAN.md`. When a chat is done, say "Archive this chat" (Jose,
-2026-10-18; when, in `docs/PLAN.md`).
+chat runs phase after phase until a new-session trigger hits (general rules
+below, "New session triggers"). Then it writes `HANDOFF.md` at the repo
+root and asks once with buttons, "Start a new session" first as the pick
+and "Keep going" second, over a short summary; a new chat is made only
+when he picks it. Whenever a chat starts a new chat for Jose, it
+gives him a fresh summary in plain words, in two parts, a few lines each:
+**what is being worked on now** (and its goal) and **what was worked on
+before** (the last chat's changes and where each stands). The new chat
+opens with the same two parts, its title names its focus in plain words
+("Campus code to its own file"), and it reads `HANDOFF.md` first and
+confirms the next step. `HANDOFF.md` is deleted once its work is done;
+`docs/handoff.md` is older notes (last written 2026-11-07), left as it is.
+When a chat is done, say "Archive this chat" (Jose, 2026-10-18). The steps
+for all of this: `docs/PLAN.md`, "How a session runs".
 
 ## What this is
 
@@ -39,9 +43,7 @@ between assignments.
 The general rules are at the end of this file. Where this project differs,
 this section says so.
 
-- **Hosting.** Vercel, from `main`. It deploys only on the "Bump version to
-  bMMDD.HHMM" commit that a GitHub Action pushes after a change to the app
-  (see Deploying). So merging into `main` is going live.
+- **Going live.** Merging into `main` is going live (see Deploying).
 - **What a "preview" means here.** There are no preview links. `vercel.json`
   turns off deployments for `claude/**` branches (`git.deploymentEnabled`),
   to save the free 10 GB of deployment storage. The preview is Playwright
@@ -49,57 +51,43 @@ this section says so.
   `tests/` (`node run.cjs` run inside `tests/`), and a short "try this" list. In a
   pull request, the screenshots go where the general rules say "preview link".
 - **Who the real user is.** The interpreter team at HUMC (41 phones joined
-  by 2026-11-07, see Open items), not only Jose. Jose is one of them and
-  directs the product. For a big feature, remind him to check the plan with
-  the team.
+  by 2026-11-07), not only Jose. Jose is one of them and directs the
+  product. For a big feature, remind him to check the plan with the team.
 - **Plan, spec and phases** (Jose, 2026-11-10). `SPEC.md` says *what*: who
   it's for, one "Done when" line per feature, Not in v1, Later (gaps marked
-  TO FILL for Jose). `docs/PLAN.md` says *in what order*: the phases
-  (Next, Done), and Facts, where a chat's decisions go. A new feature
-  gets its "Done when" line in `SPEC.md` and its detail, with "not in this
-  version", in its `docs/features/` note.
+  TO FILL for Jose). `docs/PLAN.md` says *in what order* (Next, Waiting on
+  Jose, Later). A new feature gets its "Done when" line in `SPEC.md` and
+  its detail, with "not in this version", in its `docs/features/` note.
+- **"Checked off" here** means the phase is in `docs/PLAN-done.md` (the
+  plan has no checkboxes). That is what the cleanup check and `HANDOFF.md`
+  deletion in the general rules go by. A chat's decisions and measurements
+  go in `docs/FACTS.md`; search it for the area you touch before measuring
+  or retrying anything. Neither file is read whole.
 - **Architecture.** `docs/ARCHITECTURE.md`: at the start of a session read
-  only its short map (down to "Full file map"); the full file map and the
-  list of feature notes below it are for looking things up.
-- **"Checked off" here** means moved to "Done" in `docs/PLAN.md` (it has no
-  checkboxes). That is what the cleanup check and `HANDOFF.md` deletion in
-  the general rules go by. Decisions settled on 2026-11-10 (handoff, spec,
-  reports, installs, paste boxes, `builder`) are in `docs/PLAN.md`, Facts.
-- **Handoffs.** Root `HANDOFF.md` (see "How work is run"). `docs/handoff.md`
-  is older notes (the last one written 2026-11-07); leave it as it is.
+  only its short map (down to "Full file map"). The full file map (every
+  file's role and line count) and the list of feature notes below it are
+  for looking things up. Inside `index.html`, sections are marked with
+  banner comments (`/* ---------- Team Chat ---------- */`): use them to
+  navigate, never read the whole file for one section.
 - **Branches.** A cloud session is handed a `claude/...` branch; use it.
-  Since 2026-11-10 `AGENTS.md` tells every tool, ChatGPT included, never to
-  commit straight to `main` (Jose's pick). `main` still moves between
-  sessions as other branches merge, so fetch it before writing and again
-  before pushing.
+  No tool commits straight to `main` (`AGENTS.md`, Jose's pick,
+  2026-11-10). **Fetch `main` before writing and again before pushing:**
+  it moves between sessions as other branches merge, with no notice, and
+  that once had a whole session's work reviewed against a stale copy.
 - **Packages.** No root package list. `tests/package.json` (the checks) and
   `promo/package.json` (the video) each have their own `npm install`.
-- **`AGENTS.md`** is the shared contract with ChatGPT and wins over this file
-  where they overlap. Do not edit it without Jose's OK.
-- **Public repo, paid assets.** The repo is public (checked 2026-11-10), so paid raw files can't be committed (docs/assets.md, section 9). Vercel works with a private repo, but making it private is a repo setting: ask Jose first.
-- **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT; `SOURCE.md` there says where from). It asks for the Playwright MCP server; in a cloud session use the Playwright already installed instead (run its `references/extract.js` with `page.evaluate`).
-- **Refactor prompt.** docs/refactor.md, run when Jose asks for "Refactor: CLEANUP.md items ...".
-
-## File map
-
-Every file's role, with line counts, is in `docs/ARCHITECTURE.md` ("Full
-file map"), moved there 2026-11-10 to keep this file lean. Inside
-`index.html`, sections are marked with banner comments
-(`/* ---------- Team Chat ---------- */`). Use them to navigate — do not read
-the whole file when you only need one section.
+- **Public repo, paid assets.** The repo is public (checked 2026-11-10), so
+  paid raw files can't be committed (`docs/assets.md`, section 9). Vercel
+  works with a private repo, but making it private is a repo setting: ask
+  Jose first.
+- **Taste skill.** Saved in `.claude/skills/taste/` (Senlin's, MIT;
+  `SOURCE.md` there says where from). It asks for the Playwright MCP
+  server; in a cloud session use the Playwright already installed instead
+  (run its `references/extract.js` with `page.evaluate`).
+- **Refactor prompt.** `docs/refactor.md`, run when Jose asks for
+  "Refactor: CLEANUP.md items ...".
 
 ## Where to make a change
-
-**`AGENTS.md` at the repo root is the shared contract, and it wins over this
-file where they overlap.** ChatGPT/Codex reads it automatically; this file is
-Claude's longer version. Change `AGENTS.md` first when a rule changes here,
-or the two tools drift apart again.
-
-**Fetch `main` before writing and again before pushing.** ChatGPT pushed
-directly to `main` under Jose's name until 2026-11-10 (now a branch and a
-pull request, `AGENTS.md`), and `main` still moves between sessions with
-no notice. That has already caused work to be reviewed against a stale copy
-for an entire session.
 
 **Jose works on this app with other tools too, and their edits land in
 `home-polish.css`, `home-polish.js` and `pin-icons.js`. Put changes in those
@@ -114,40 +102,36 @@ different places is what silently killed the coloured press glow: a
 | Mobile topbar and tab bar | `home-polish.css` (the `max-width:900px` block) |
 | Domain folder / section overlay styling | `home-polish.css` |
 | Home behaviour — wave, rail dots, section overlay | `home-polish.js` |
-| Pin and icon artwork | `pin-icons.js` |
+| Pin and icon artwork | `pin-icons.js`; the pictures are `pins/<key>.webp` |
 | Styles for every other screen | `app.css` |
 | User Guide answers | `guide/topics.js` |
-| User Guide front page and search | `features/guide-front.js` |
-| Doctor and provider sheets: the place picker, the doctor's add and edit sheet | `features/doctor-sheets.js` |
-| Glossary CSV export and import | `features/csv.js` |
-| Duplicate doctors (finding and merging them) | `features/duplicate-doctors.js` |
-| The terminology backfill (old doctor terminology) | `features/backfill.js` |
-| Ask the Hub, Dr. Smiley's conversation, actions and memory | `features/ask-hub.js` |
-| CoreCHI practice questions | `practice/questions.js` |
-| False Friends list | `falsefriends/list.js` |
-| False Friends screen (Study, Drill) | `features/false-friends.js` |
-| Sound-Alikes list | `soundalikes/list.js` |
-| Sound-Alikes screen (Study, Drill) | `features/sound-alikes.js` |
-| Your knowledge brain, the Hub's side (its data, the small brain on Term Review) | `features/knowledge-brain.js` |
-| Translate tool code | `features/translate.js` |
-| 3D Body's Hub side (the frame bridge) | `features/3d-body.js` |
-| Looking a term up | `features/term-lookup.js` |
-| Voice and mic check | `features/voice-check.js` |
-| Dr. Smiley's performances | `features/smiley-performances.js` |
-| Dr. Smiley's engine: art, animation, how lively, task states | `features/smiley-engine.js` |
-| Your HUMC campus (the scene and the building pick) | `features/campus.js` |
-| Idea credits (whose idea a screen was) | `features/credits.js`; styles in `app.css` |
-| Tool banners (Translate, Term Review, Ask, Doctor Directory) and the pin's fly from Home | `features/tool-banners.js`; styles in `app.css` ("Tool banners") |
-| The opening (Badge in) and More's Opening card | `features/opening.js`; styles in `app.css` ("Opening") |
-| Your account, email sign-in (More's card; the server is `api/sign-in.js`) | `features/account.js`; styles in `app.css` ("Your account") |
-| What follows your account between phones (the sync and its joins) | `features/account-sync.js` |
-| Adjusting your photo before it's saved (the name sheet) | `features/photo-adjust.js`; styles in `app.css` ("Adjust your photo") |
+| The lists: CoreCHI questions, False Friends, Sound-Alikes | `practice/questions.js`, `falsefriends/list.js`, `soundalikes/list.js` |
+| A feature with its own file (list below) | `features/<name>.js`; its styles in `app.css` |
 | Everything else | `index.html` |
+
+**Features with their own file** in `features/` (22; each one's function
+names are in `AGENTS.md`, "Where a change goes"): `3d-body` (the Hub's side,
+the frame bridge), `account` (email sign-in, More's card; the server is
+`api/sign-in.js`), `account-sync` (what follows your account between
+phones), `ask-hub` (Ask the Hub, Dr. Smiley's conversation, actions and
+memory), `backfill` (old doctor terminology), `campus` (the scene and the
+building pick), `credits`, `csv` (glossary export and import),
+`doctor-sheets` (the place picker, the doctor's add and edit sheet),
+`duplicate-doctors`, `false-friends` and `sound-alikes` (the screens: Study,
+Drill), `guide-front` (the guide's front page and search),
+`knowledge-brain` (the Hub's side), `opening` (Badge in, More's Opening
+card), `photo-adjust`, `smiley-engine` (art, animation, how lively, task
+states), `smiley-performances`, `term-lookup`, `tool-banners` (and the
+pin's fly from Home), `translate`, `voice-check`. A new feature file joins the three
+lists in `docs/split-index.md` ("Three lists to update with every new
+file": `sw.js`, `.github/bump-version.cjs`, `tests/support/harness.cjs`),
+this list, `docs/ARCHITECTURE.md` and, with Jose's OK, `AGENTS.md`'s table.
 
 **The overlay files only cover Home.** They contain nothing for the glossary,
 terms, chat, Doctor Prep, study, quizzes, profile, settings or the guide —
-those screens' styles are in `app.css` and their code inside `index.html`,
-so that is where their changes have to go. Say so plainly rather than inventing a place to put them.
+those screens' styles are in `app.css` and their code in `index.html` or
+their `features/` file, so that is where their changes have to go. Say so
+plainly rather than inventing a place to put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with ID
 selectors (`#content.is-home .x`). Anything added there at the same or higher
@@ -333,115 +317,32 @@ lost concurrent edits. Do not reintroduce that.
   (`--dk-w`), a mirrored blur past its right edge. Change the band and the
   photo position together; both use the same fractions of the photo width.
 
-## Design system
+## Design
 
-**`DESIGN.md` at the repo root is the reference for every value** (colors with
-their roles, type scale, letter spacing by size, weights, shadows, motion,
-do's and don'ts), written 2026-11-03 so ChatGPT and Jose's other tools work
-from the same page. This section keeps the history behind the rules; when
-a value changes, change `DESIGN.md` too.
+**`DESIGN.md` (repo root) holds every value and rule of the look**: colors
+with their roles, the type scale, letter spacing by size, weights, the
+finish shadow, motion, icons, do's and don'ts, known gaps, and how the Home
+hello is built. `docs/design-rules.md` says how that file is made and used.
+Read both before any visual change, and change `DESIGN.md` in the same
+commit when a value changes. Take values from `DESIGN.md` or the code,
+never from memory: this file used to carry a copy of the tokens, and one
+went stale (`--ink-faint` kept its old, too-pale value here for a week).
 
 Jose's bar is "high end", "dynamic", "alive", and he will notice if a new
-feature does not match. Inherit the existing system rather than inventing:
-CSS custom properties, dark navy sidebar on desktop, floating capsule tab bar
-with pill indicator on mobile, liquid-glass backdrop blur, soft color-mesh
-background, layered card shadows, touch-press lift.
-
-**Icons are duotone:** a large flat color block spilling past the outline on
-one side — not a tint tracing the shape. Domain color and light/dark adapt
-through `--ic-fill` / `--ic-line`.
-
-### Measured tokens
-
-*Generated by /taste from the live site. These are the numbers behind the
-description above — use them rather than eyeballing a match.*
-
-```
---bg #F4F6FA          --paper #FFFFFF        --bg-hi #FAFBFD
---ink #151C2C         --ink-soft #5A6478     --ink-faint #98A1B3
---accent #0F5FA6      --accent-2 #2E8BD0     --accent-soft #E8F1FA
---navy #252E6D        --cyan #01B8E6         --danger #C2485C
---line #E2E7F0        --line-soft #EEF1F7    --danger-soft #FBECEF
---glass-bg rgba(255,255,255,0.72)   --glass-blur saturate(180%) blur(20px)
---r-sm 10px   --r-md 14px   --r-lg 20px   --ease cubic-bezier(.2,.8,.2,1)
-```
-
-**The finish.** Every raised surface gets exactly this, not a custom shadow.
-38 elements share the string:
-
-```css
-box-shadow:
-  0 1px 0 0 inset rgba(255,255,255,0.82),
-  0 1px 2px        rgba(20,43,67,0.06),
-  0 8px 20px -12px rgba(22,55,90,0.22);
-```
-
-**Type.** Inter (variable) for all interface text — headings included; the
-banner titles and section heads used to be serif. Scale, as tokens in the
-"Visual refinement" block of `app.css`: caption 12, footnote 13, subhead
-15, headline 17, title3 20, title2 22, title1 28 (`--fs-*`), and since
-2026-11-03 Apple's other three, caption2 11, callout 16, large title 34;
-every stylesheet size is one of the ten (36px and up excepted). Spacing
-6/9/13/17/26 (`--sp-*`). Icons: rows and tab bar 24, list rows 28, tiles and
-cards 32, banner 44 (`--ic-*`). Tracking tightens as size grows; prefer the
-weights 550 and 650 (2026-11-03, the type tidy: Inter uses only 400, 500
-for body text, 550 and 650, and letter spacing comes from the `--tr-*`
-token for the size; `tests/suites/type-tokens.cjs` holds it). IBM Plex Serif is reserved for quoted human speech (Ask
-answers, review lines). The Home hello banner is the one exception, Jose's
-pick ("style 8"): the name in Parisienne, the quote in Lora italic, the author
-in small Inter capitals behind a short rule, over two soft local shadings
-(never a card). Block "Hello banner lettering" at the end of
-`home-polish.css`; `keepQuoteEnd` (no lone last word) and `fitWave` (a name
-too wide for its line shrinks; Dr. Smiley never moves) in `home-polish.js`.
-Don't use those two faces anywhere else. The first hello after the app
-opens has the name written by a small navy ball of light (`namePen` in
-`home-polish.js`, Jose's pick "look A"): the pen path is worked out on the
-phone from the letters themselves (`penPathOf`: canvas on the page, then `penTrace` in
-a worker: thinning, a left-to-right walk, accent and i-dots last), kept per name in `ih_penPath`; the real name
-waits invisible (`.is-penning`, at most 6 s before the writing starts, and a wall-clock cap on the writing itself) under an SVG copy that is
-revealed behind the ball. Reduced motion, Still, a hidden page or any failure:
-the name is simply there.
-
-Rules that hold across the whole app:
+feature does not match. Inherit the existing system; never invent a second
+one. Two rules worth repeating here because they are broken most:
 
 - **Speed never costs the look** (Jose, 2026-10-15; `AGENTS.md`). Make a
   visual cheaper, never smaller, shorter or stopped. Ask him first if a gain
   needs a visible change.
-
-- Accent is an SVG fill, never a button or link color. `#0F5FA6` appears as
-  a background on exactly 1 element.
-- A rounded child inside a rounded parent always takes the smaller radius:
-  `.qa-tile` 17px to `.qa-tile-icon` 12px, `.qa-card` 19px to `.qa-icon` 12px.
-  There is currently no equal parent/child pair in the codebase.
-- Shadows and borders tint navy, never `rgba(0,0,0,x)`. No pure gray exists
-  in the palette; every neutral is blue-shifted.
-- Card rails are 4 columns at 13px gap, content left-aligned. Centering is
-  only for the four `.qa-tile` buttons.
-- Keep `:focus-visible` and the `prefers-reduced-motion` guard on anything new.
-- **Easing** (S5, 2026-10-20): a plain tap settles on `--spring0`, Apple's
-  bounce-0 spring (`linear()`, `--ease` where unsupported; press .368s,
-  screen .588s, sheet .662s). Overshoot only where it is the point: F2's
-  `--spring-settle` on the Practice buttons, Dr. Smiley's acting. No new
-  overshooting `cubic-bezier`; `tests/suites/springs.cjs` lists the kept ones.
-
-**Known gap.** The look is tokenized (69 `:root` vars); the rhythm mostly
-is not. (Type is done since 2026-11-03: sizes, spacing between letters and
-weights all come from tokens. The numbers below are spacing's, and type's
-as they were.) The type and spacing tokens above exist (`--fs-*`: 7, `--sp-*`: 5)
-but little uses them. Measured in `index.html`'s CSS (now `app.css`) on 2026-10-20:
-font-size is set with a token 65 times and with a plain px value about 900
-times, over 36 distinct sizes (12/12.5/13 and 14/14.5/15 all still there,
-distinctions the eye cannot resolve); padding, margin and gap use a token
-99 times against 1,737 px values, 12 of them crowding into 6-17px: 9px (251
-uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each),
-then 12/11/16/7/15. The scale **6 / 9 / 13 / 17 / 26** covers 42% of the
-px spacing uses as they stand. When adjusting spacing or type on a
-component, move it onto the tokens rather than extending the tail.
+- **Use the tokens.** When adjusting spacing or type on a component, move
+  it onto `--fs-*`, `--sp-*` and `--tr-*` rather than adding a one-off
+  value.
 
 ## Subagents: Opus thinks, cheaper models fetch (Jose, 2026-10-14)
 
-The main conversation (Opus 5.5) plans, decides, writes the real code and
-reviews. Repetitive work goes to the agents in `.claude/agents/`:
+The main conversation (Opus 5.5) plans, decides, writes the real code and reviews.
+Repetitive work goes to the agents in `.claude/agents/`:
 
 | Agent | Model | Use for |
 |---|---|---|
@@ -456,106 +357,90 @@ and re-reads context, so for small jobs it costs more than doing it
 directly. Check what a helper reports before relying on it; decisions,
 design and anything touching data or rules stay with the main model.
 
-## Working agreement
+## Working with Jose
 
-- **Reporting to Jose: status updates extremely concise, fragments fine;
-  explanations in full plain sentences** (Jose, 2026-11-10; was "sacrifice
-  grammar" for everything). And (Jose, 2026-10-20): **plain words, as to someone new to this** (no git or CI jargon: "a change waiting for your OK", not "a PR with green checks"; say what a word means the first time); **say "working on it" when something is still running**, and **always say "done" when it is finished**, every time, so he never has to ask "still working?".
-- **A question with options gets buttons** (Jose, 2026-10-18): ask it
-  with `AskUserQuestion`, one button per option (recommended first), not
-  as a numbered list in text. Where that tool is missing (a scheduled
-  run), list the options plainly.
-- **Always say your recommendation** (Jose, 2026-10-19; `AGENTS.md`):
-  with options, a next step or a trade-off, name your pick and why, in
-  plain words, unasked. If the buttons are refused, list the options in
-  plain language with the pick marked.
-- **How Jose works with AI tools** (Jose, 2026-10-29; `AGENTS.md`, its
-  section of that name): spec with "not in this version" before a new
-  feature's code; research similar tools first; challenge his ideas. And the `AGENTS.md` list
-  **Not building** (no patient information, ever; not a replacement for the
-  hospital's systems; no app-store app).
+The general rules at the end cover challenging him, reports, proof, asking
+first, installs and pushing. These are the rules this project adds, most
+of them also in `AGENTS.md`:
+
+- **Plain words, as to someone new to this** (Jose, 2026-10-20): no git or
+  CI jargon ("a change waiting for your OK", not "a PR with green checks");
+  say what a word means the first time. **Say "working on it" when
+  something is still running, and always say "done" when it is finished**,
+  every time, so he never has to ask "still working?".
+- **He works from a phone much of the time.** Concrete instructions, one
+  step at a time; screenshots beat abstract description.
+- **A question with options gets buttons** (Jose, 2026-10-18):
+  `AskUserQuestion`, one button per option, the recommended one first,
+  not a numbered list in text.
+  **Always say your recommendation and why**, unasked (Jose, 2026-10-19).
+  Where the buttons are missing or refused, list the options plainly with
+  the pick marked.
 - **Ambiguous request: one clarifying question first. Evidence before
-  confidence** (Jose, 2026-10-17; `AGENTS.md`): nothing stated as true
-  without a measurement, test, primary source or the code behind it; say
-  what is unproven.
+  confidence** (Jose, 2026-10-17): nothing stated as true without a
+  measurement, test, primary source or the code behind it; say what is
+  unproven.
+- **How Jose works with AI tools** (Jose, 2026-10-29; `AGENTS.md`, its
+  section of that name): the spec, with "not in this version", before a
+  new feature's code; research similar tools first; challenge his ideas.
+- **Not building, ever** (`AGENTS.md`, "Not building"): no patient
+  information of any kind; not a replacement for the hospital's systems; no
+  app-store app. Flag a request that crosses one before any work.
 - **Every finished job: a preview, then a phone notification** (Jose,
-  2026-10-17; `AGENTS.md`). Screenshots of what changed (before/after,
-  phone size first) sent as files with `SendUserFile` (status
-  `proactive`), then `PushNotification` with one line saying what's ready
-  and what he needs to do. Only when there is something to review or
-  decide, never for routine progress.
-- **Always a phone notification when it's time to push** (Jose,
-  2026-10-24; `AGENTS.md`; he wants this in every project): whenever a
-  change is ready for his "push" (GitHub's checks passed), send
-  `PushNotification` saying which change and that it needs "push", even
-  if he seems to be in the chat. **"Push" is always clickable** (Jose,
-  2026-11-03; `AGENTS.md`): ask with `AskUserQuestion`, "Push
-  (Recommended)" then "Not yet"; on "Push", merge the pull request
+  2026-10-17). Screenshots of what changed (before/after, phone size
+  first) sent as files with `SendUserFile` (status `proactive`), then
+  `PushNotification` with one line saying what's ready and what he needs to
+  do. Only when there is something to review or decide, never for routine
+  progress.
+- **"Push" is a notification and a button** (Jose, 2026-10-24 and
+  2026-11-03). When a change is ready for his "push" (GitHub's checks
+  passed), send `PushNotification` naming the change and saying it needs
+  "push", even if he seems to be in the chat. Ask with `AskUserQuestion`,
+  "Push (Recommended)" then "Not yet". On "Push", merge the pull request
   yourself (`merge_pull_request`, the head SHA pinned), then verify the
   deploy as in Deploying. Never only a link to GitHub's merge button.
-- **Always a phone notification when something goes live** (Jose,
-  2026-11-03; `AGENTS.md`): once Vercel reports the deploy of the bump
-  commit completed (see Deploying), send `PushNotification` naming the
-  change and its `BUILD_ID`, even if he seems to be in the chat.
-- **Environment settings come ready to paste** (Jose, 2026-11-04;
-  `AGENTS.md`): whenever the cloud environment needs something saved
-  (a Network access domain, a network secret, an environment variable, a
-  setup-script line), give the exact text in its own code block, one per
-  field, under the field's name and where it goes. Exactly what to paste
-  (no `https://`, no `www` unless the address has it, no quotes); several
-  domains one per line in one box. Never only describe it. A secret's
-  value (an API key) is the exception: say where to get it and which
-  field, never ask for it in the chat; where a block shows it, write
-  YOUR_VALUE_HERE (2026-11-10). Example, for Network access then
-  Allowed domains:
-  ```
-  tripo-data.rg1.data.tripo3d.com
-  developers.tripo3d.com
-  ```
-- **Ask, then install what helps** (Jose, 2026-11-04; `AGENTS.md`): normal
-  project packages (in `tests/package.json` and the like) install without
-  asking, mentioned in the report (2026-11-10). When another program,
-  plug-in, connector or anything paid would make the work better,
-  ask with `AskUserQuestion`: "Install (Recommended)" (what it is, size,
-  what it buys) then "Not now"; on Install, install it and use it. Never
-  install those unasked, never quietly work around a missing tool. Installs last
-  only for this chat's machine; to keep one, give the setup-script line to
-  paste (rule above). Example: Blender's site is blocked here, but it
-  installs from PyPI as `bpy` (Blender as a Python module, ~400 MB):
-  ```
-  pip install bpy
-  ```
-- Jose works from a phone much of the time. Keep instructions concrete and
-  one step at a time; screenshots beat abstract description.
-- Every change someone can see ships with its User Guide update (see the
-  User Guide paragraph above). Jose asked for this on every change.
-- Commit with a real message saying what changed — the first 200 commits were all "Add files via upload"
-  and none of them can be read back.
-- When a bug survives a fix, ask for a concrete reproduction path
+- **A phone notification when something goes live** (Jose, 2026-11-03):
+  once Vercel reports the bump commit's deploy completed, send
+  `PushNotification` with the change and its `BUILD_ID`, even if he seems
+  to be in the chat.
+- **Settings to paste** (Jose, 2026-11-04), on top of the general rule:
+  one code block per field, under the field's name and where it goes;
+  exactly what to paste (no `https://`, no `www` unless the address has it,
+  no quotes); several domains one per line in one block. Never only
+  describe it. A secret's value (an API key) is the exception: say where
+  to get it and which field, never ask for it in the chat.
+- **Installs** (Jose, 2026-11-04), on top of the general rule: the buttons
+  are "Install (Recommended)" (what it is, its size, what it buys) and "Not
+  now". Never quietly work around a missing tool. Known here: Blender's
+  site is blocked, but it installs from PyPI as `bpy` (about 400 MB,
+  `pip install bpy`).
+- **When a bug survives a fix, ask for a concrete reproduction path**
   ("Radiation → Back → Home"). That specificity is what has surfaced root
   causes; general fixes have repeatedly missed.
 
-## Open items
+## Standing facts
 
 - **The Hub is locked** (Jose, 2026-11-07, 41 phones in): practice mode
   is off, so the rules are enforced and anything that isn't a joined phone
   (or a signed-in account in the team) is refused, with no error on screen.
   A new collection without its rule line simply fails. Checked first: every
   collection the app uses has a rule, every AI call sends the sign-in, the
-  events watcher logged in with its key ("login = service account",
-  14:42 UTC), the Storage rules published, everyone had joined. Undo:
-  Team access, Turn practice mode back on.
-- **The events watcher (`api/check-events.js`) has its own login, once the
-  key is set.** `api/_service-login.js` signs a JWT with the service account
-  in `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
+  events watcher logged in with its key, the Storage rules published,
+  everyone had joined. Undo: Team access, Turn practice mode back on.
+- **The events watcher (`api/check-events.js`) has its own login.**
+  `api/_service-login.js` signs a JWT with the service account in
+  `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
   Cloud Datastore User), trades it for a one-hour token and sends that with
   every Firestore call, which the lock doesn't apply to. Without the key it
-  goes in unsigned, as before (practice mode only); each run's report says
-  which ("login"), and a refused key stops the run with the reason. A run
-  reported "service account" on 2026-11-07, before the lock. Putting a shared secret
-  inside the documents it writes was rejected as a credential leak.
-- `index.html` is one 1.4 MB file. The CSS is out (`app.css`, 2026-10-21);
-  the data and the JS by feature are next (`docs/split-index.md`).
+  goes in unsigned, as before (practice mode only). Each run's report says
+  which ("login"), and a refused key stops the run with the reason; a run
+  reported "service account" on 2026-11-07, 14:42 UTC, before the lock. Putting a
+  shared secret inside the documents it writes was rejected as a
+  credential leak.
+- **`index.html` is 1.0 MB and about 18,400 lines** (measured 2026-11-10).
+  Its split is finished (2026-10-25): the CSS is `app.css`, the data lists
+  and 22 features have their own files, and what is left stays inline by
+  design (`docs/split-index.md`, phase 4).
 
 # General rules (all of Jose's website projects)
 

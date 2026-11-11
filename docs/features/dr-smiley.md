@@ -5,7 +5,7 @@ Code is in `features/smiley-engine.js` (his art, the engine, how lively, task
 states; moved out of `index.html` 2026-10-25) unless a file is named. Keep
 this in step with the code.
 
-The art (`drsmiley/*.webp`) is described in `CLAUDE.md`'s file map. Rules:
+The art (`drsmiley/*.webp`) is described in `docs/ARCHITECTURE.md`'s full file map. Rules:
 
 - **Dr. Smiley moves only through his controller.** One `DrAnim` per
   character (`drAnim(svg, {head})`) owns his face frame, gaze, lean and

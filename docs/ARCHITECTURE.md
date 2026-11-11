@@ -26,7 +26,7 @@ API, called only from `api/`, never from the phone.
 | `atlas/`, `brain/`, `campus3d/` | Separate pages run in frames: 3D Body, the two brains, the 3D campus |
 | `city/`, `drsmiley/`, `opening/`, `figures/`, `media/` | Pictures, clips and the promo video |
 | `tests/` | The checks (`node run.cjs` inside `tests/`), run on GitHub on every push |
-| `docs/` | `PLAN.md` (phases), `features/` (one note per feature), mockups, art |
+| `docs/` | `PLAN.md` (what's next), `PLAN-done.md` (finished phases) and `FACTS.md` (what was measured or settled), both for looking up; `features/` (one note per feature), mockups, art |
 | `firestore.rules`, `storage.rules` | Firebase rules, published by hand in the console |
 | `vercel.json` | Deploy rule, the daily cron, the walled-off headers for `atlas/` |
 

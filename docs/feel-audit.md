@@ -48,7 +48,7 @@ phase 0 measures them.
    his outfit and the activity feed after the first paint), the pin
    observer re-applying pins after every insert (the greeting word swap
    every 2.8 s included), and, after a deploy, the new worker precaching
-   96 files (3.3 MB) over hospital Wi-Fi. Facts in `docs/PLAN.md`: a page
+   96 files (3.3 MB) over hospital Wi-Fi. Facts in `docs/FACTS.md`: a page
    frame loop makes Chrome produce a whole Home frame every vsync.
 3. **Dr. Smiley's face frames are timer chains, not clock-driven.**
    `DrAnim.play` steps frames with `setTimeout` at 38 ms
@@ -66,7 +66,7 @@ phase 0 measures them.
    "feels fine"); a new complaint after new paint is a regression until
    measured otherwise.
 5. **Known, left to Jose:** his rank outfit and the feed arrive after the
-   first paint on every open (`docs/PLAN.md`, Facts, "Startup repaints").
+   first paint on every open (`docs/FACTS.md`, "Startup repaints").
    A premium open shows the right thing the first time; caching both is
    the fix, and it changes the first frame, so it is his call.
 
@@ -285,7 +285,7 @@ the lab's limits are named with each finding.
 | Check | Finding | Whose call |
 |---|---|---|
 | Press feedback | Of 16-21 tappable things per screen, about a third change nothing under a held touch or a forced `:active`: the top bar's five buttons (back, the brand, dark mode, the bell, the avatar) on every screen, the tab bar's buttons (the lens glides after the tap, the button itself never dips), the term cards' Hear and Look up pills, filter pills (False Friends' modes and chips, Ethics', Practice's tags, the `<summary>` notes), list actions (Alert me / Notify me, the ✕ delete, ✎, + Prep terms), the guide's tour, face and Show me buttons, Ask's "What I remember", Home's View all and feed rows, and in Team Chat the pinned bar, reactions, the quote, links and Add photos. About 30 classes in all. A doctor's page, the Add term sheet and `.btn` buttons everywhere pass (`.btn:active` dips 1px; cards and tiles lift through `LIFTS`). | Claude, step 2: one shared press rule for the lot (the `.btn` dip or the card lift), shown to Jose first |
-| A flash of empty before the data | None. Term Review and the memory trainer show "Loading…" lines first (a loading state, right by Apple). Home's rank outfit and feed swap-in after the first paint stay as found in phase 0 (Jose's call, `docs/PLAN.md` Facts). | Jose (Home's two swaps) |
+| A flash of empty before the data | None. Term Review and the memory trainer show "Loading…" lines first (a loading state, right by Apple). Home's rank outfit and feed swap-in after the first paint stay as found in phase 0 (Jose's call, `docs/FACTS.md`). | Jose (Home's two swaps) |
 | Nothing jumps when data arrives | Layout shift 0 to 0.004 on every screen through its data arrival, except Team Chat: 0.059 (under the 0.1 limit), which is the chat screen replacing the app's top bar with its own, so `#app` moves 45 px, by design and after a tap (which the metric excludes on a phone). Training & Events reads the same 0.059 only when opened straight from chat (the bar coming back). | Nothing to do |
 | The keyboard (lab only: the lab shrinks the layout viewport, an iPhone shrinks the visual one) | With the viewport cut to 420 px and a field focused, the tab bar steps aside everywhere (`kb-open`). The field stays visible on Team Chat, the glossary, search, Translate, the guide; it is below the fold on Ask the Hub (its composer at the bottom) and Team access (its name field). Whether an iPhone scrolls them into view is the phone's to say. | Jose: two phone screenshots (Ask with the keyboard up, Team access with the keyboard up) |
 | Dark mode | Screenshots of all 26 in `tests/out/finish/`. Text contrast: the faint ink token (`--ink-faint`, #98A1B3 light, #707C93 dark) is used as a text colour 122 times (times, labels, eyebrows, counts, "yours", the build line) and reads 2.4-2.6:1 in the light theme and 3.78:1 in the dark one, against WCAG's 4.5:1 for text; the rest is single spots (Ethics' org tag 2.17:1, Doctor Directory's "+ Add" 2.92:1 dark, False Friends' "Changes care" badge 3.31:1 dark, Practice's "Dr. Smiley" label on his white bubble 2.6:1). Light surfaces left in dark mode: Practice's campus card and his speech bubble (daylight by design), one paragraph on Translate. | Jose: the token is his palette (`DESIGN.md`); #6B7489 would read 4.68:1 on paper and 4.33:1 on the page background. The spots are Claude's, step 2 |
@@ -464,7 +464,7 @@ What scrolling does pay, on both copies: Dr. Smiley's lean on scroll
 (`drSwayScroll`, `index.html`) is 3.1-3.4 s of the run's main-thread
 time, seven times the next scroll listener. It reads the scroll position
 on every scroll event, so it is billed the frame's layout (Facts in
-`docs/PLAN.md`: the first read in a frame pays it); a lead for phase 4,
+`docs/FACTS.md`: the first read in a frame pays it); a lead for phase 4,
 measured on the phone first.
 
 ### Still owed: Jose's phone

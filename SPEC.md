@@ -11,7 +11,7 @@ live at https://interp-six.vercel.app.
 
 **Real users: the interpreter team at Hackensack University Medical Center
 (Hackensack Meridian Health)**, about 41 phones in the team (`CLAUDE.md`,
-Open items, 2026-11-07), split into North and South regions. Jose Vazquez,
+Standing facts, 2026-11-07), split into North and South regions. Jose Vazquez,
 staff medical interpreter, owns and directs it. Owners and admins run team
 access and titles.
 
@@ -143,7 +143,7 @@ From `docs/PLAN.md` "Later" (each waits on its trigger) and open ideas:
 
 ## Phases
 
-The build order lives in `docs/PLAN.md` ("Next (in order)", then "Done"),
-not here, so it can't go stale in two places (Jose, 2026-11-10). A phase
-counts as checked off when it moves to "Done".
+The build order lives in `docs/PLAN.md` ("Next (in order)"), not here, so
+it can't go stale in two places (Jose, 2026-11-10). A phase counts as
+checked off when it moves to `docs/PLAN-done.md`.
 

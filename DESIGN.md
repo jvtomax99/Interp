@@ -6,8 +6,9 @@
 Read this before any visual change, whatever tool you are. It is the
 reference for values; `AGENTS.md` holds the rules for where a change goes
 (Home's look in `home-polish.css`, everything else in `app.css`), and
-`CLAUDE.md` the history behind each rule. The values here are measured
-from the code; when one changes, change it here in the same commit.
+the history behind a value is written beside it here (it used to be in
+`CLAUDE.md`, where a copy of the tokens went stale). The values here are
+measured from the code; when one changes, change it here in the same commit.
 
 The Hub is an installable web app used mostly on phones, in a hospital,
 often with one hand. Surfaces are cool and crisp, built on the Hackensack
@@ -39,7 +40,7 @@ same names.
 | `--cyan` | `#01B8E6` | `#4FD8F5` | The logo's cyan: small live marks |
 | `--danger` | `#C2485C` | `#E17B8C` | Errors, risk, delete |
 | `--danger-soft` | `#FBECEF` | `#3A2029` | Behind danger text |
-| `--good` | `#2B7354` | `#6FC79C` | Correct, done, saved | (was #2F7D5B, 4.4:1 on its soft tint; 5.0 since 2026-11-04)
+| `--good` | `#2B7354` | `#6FC79C` | Correct, done, saved (was #2F7D5B, 4.4:1 on its soft tint; 5.0 since 2026-11-04) |
 | `--good-soft` | `#E7F5EE` | `#16302A` | Behind good text |
 
 Domain colors (one per glossary domain) feed the icons through `--ic-fill`
@@ -81,6 +82,19 @@ Jose's pick, "style 8": the name in Parisienne, the quote in Lora italic,
 the author in small Inter capitals behind a short rule. Block "Hello banner
 lettering" at the end of `home-polish.css`. These two faces appear nowhere
 else, and the banner's own weights and spacing are outside the token rule.
+The words sit over two soft local shadings, never a card.
+
+How it is built (`home-polish.js`): `keepQuoteEnd` keeps the quote from
+ending on a lone last word; `fitWave` shrinks a name too wide for its line
+(Dr. Smiley never moves or resizes for a name). On the first hello after
+the app opens, the name is written by a small navy ball of light (`namePen`,
+Jose's pick "look A"). The pen path is worked out on the phone from the
+letters themselves (`penPathOf`: a canvas on the page, then `penTrace` in a
+worker: thinning, a left-to-right walk, accents and i-dots last) and kept
+per name in `ih_penPath`. The real name waits invisible (`.is-penning`, at
+most 6 s before the writing starts, and a wall-clock cap on the writing
+itself) under an SVG copy that is revealed behind the ball. Reduced motion,
+Still, a hidden page or any failure: the name is simply there.
 
 ### The opening's badge: the other exception
 The opening (`features/opening.js`, block "Opening (Badge in)" in
@@ -125,7 +139,7 @@ badge to begin", "Welcome in") are Inter on the tokens.
 
 ## Elevation
 
-**The finish.** Every raised surface gets exactly this, not a custom shadow:
+**The finish.** Every raised surface gets exactly this, not a custom shadow (38 elements shared the string when the live site was measured):
 
 ```css
 box-shadow:
@@ -152,7 +166,7 @@ box-shadow:
 
 ## Motion
 
-- **A plain tap settles on `--spring0`,** Apple's spring with no bounce (`linear()`, falling back to `--ease`): press .368s, screen .588s, sheet .662s.
+- **A plain tap settles on `--spring0`,** Apple's spring with no bounce (`linear()`, falling back to `--ease`, `cubic-bezier(.2,.8,.2,1)`): press .368s, screen .588s, sheet .662s.
 - **Overshoot only where it is the point:** the Practice buttons' `--spring-settle`, Dr. Smiley's acting. No new overshooting `cubic-bezier`; `tests/suites/springs.cjs` holds the kept list.
 - **Touch press feedback:** `:hover` never fires on a phone. Presses use `:active` plus a JS `.is-pressed` class held about 260ms (the `LIFTS` list in `index.html`).
 - **Every animation has a `prefers-reduced-motion` guard;** every control keeps `:focus-visible`.
@@ -181,5 +195,5 @@ box-shadow:
 ## Known gaps
 
 - **Sizes set from script:** 8 inline `font-size` values in `index.html`, `features/csv.js` and `features/translate.js` are still plain pixels; the stylesheets are all on the scale (2026-11-03).
-- **Spacing:** padding, margin and gap use a token about 99 times against about 1,737 pixel values. When you touch a component, move it onto the scale rather than adding to the tail.
+- **Spacing:** the look is tokenized (69 `:root` variables); the rhythm mostly is not. Padding, margin and gap use a token about 99 times against about 1,737 pixel values (measured 2026-10-20), 12 of them crowding into 6 to 17px: 9px (251 uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each), then 12, 11, 16, 7 and 15. The scale 6 / 9 / 13 / 17 / 26 covers 42% of those uses as they stand. When you touch a component, move it onto the scale rather than adding to the tail.
 - **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`, `.doc-card-name`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
