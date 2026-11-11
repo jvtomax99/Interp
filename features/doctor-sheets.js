@@ -201,9 +201,6 @@ function _openAddDoctorDirModal(){
   document.getElementById('fDDName').focus();
 }
 
-function openEditDoctorDirModal(id){
-  requireName(()=>_openEditDoctorDirModal(id));
-}
 function _openEditDoctorDirModal(id, focusId){
   const d = DOCTOR_DIRECTORY.find(x=>x.id===id);
   if(!d) return;

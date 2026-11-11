@@ -347,8 +347,6 @@ function allowedActions(parsed, ctx, entries) {
     .slice(0, MAX_ACTIONS);
 }
 
-export { cleanContext, cleanConversation, tidyVoice, allowedActions, fitLength, ACTION_TYPES };
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

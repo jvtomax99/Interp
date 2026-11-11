@@ -32,7 +32,7 @@ function headerText(s) {
   return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${Buffer.from(s, 'utf8').toString('base64')}?=`;
 }
 
-export function buildMessage({ from, fromName, to, subject, text, now = new Date(), id }) {
+function buildMessage({ from, fromName, to, subject, text, now = new Date(), id }) {
   const domain = String(from).split('@')[1] || 'localhost';
   const body = Buffer.from(String(text || ''), 'utf8').toString('base64').replace(/.{1,76}/g, '$&' + CRLF);
   return [

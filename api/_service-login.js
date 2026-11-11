@@ -42,7 +42,7 @@ export function serviceAccount(env = process.env) {
 const b64url = (v) => Buffer.from(typeof v === 'string' ? v : JSON.stringify(v)).toString('base64url');
 
 // The signed note Google trades for an access token.
-export function signedAssertion(sa, nowSec = Math.floor(Date.now() / 1000)) {
+function signedAssertion(sa, nowSec = Math.floor(Date.now() / 1000)) {
   const head = b64url({ alg: 'RS256', typ: 'JWT' });
   const body = b64url({ iss: sa.email, scope: SCOPE, aud: TOKEN_URL, iat: nowSec, exp: nowSec + 3600 });
   const signer = createSign('RSA-SHA256');

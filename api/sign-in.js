@@ -38,7 +38,7 @@ const MAX_TRIES = 5;
 const PER_EMAIL_HOUR = 3;
 const PER_PHONE_DAY = 10;
 
-export function tidyEmail(v) {
+function tidyEmail(v) {
   const e = String(v || '').trim().toLowerCase();
   return e.length <= 254 && /^[^\s@<>()",;:\\]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(e) ? e : '';
 }

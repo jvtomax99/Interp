@@ -245,7 +245,3 @@ function vcCopy(){
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(vcText()).then(done, () => showToast('Could not copy on this phone.'));
   else showToast('Could not copy on this phone.');
 }
-
-function voiceCheckMoreHtml(){
-  return `<div class="vc-more"><button class="btn btn-ghost" onclick="voiceCheckOpen()">Voice and mic check</button></div>`;
-}
