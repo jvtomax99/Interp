@@ -1,6 +1,6 @@
 # PLAN — what's next
 
-The working list. At the start a session reads `CLAUDE.md`, `AGENTS.md`,
+The working list. At the start a session reads `AGENTS.md` (Claude: `CLAUDE.md` too),
 `HANDOFF.md` (if there is one), the short map at the top of
 `docs/ARCHITECTURE.md` and this file, and nothing else. Two files
 hold the rest, for looking things up, never for reading whole:
@@ -26,27 +26,42 @@ Code comments and older notes that cite a finished phase "in
    changes. Nothing else.
 3. Plan it in a few lines; if it needs Jose (a decision, a console check),
    ask first and stop.
-4. Do it. Check it: `node --check`, the four checks in `CLAUDE.md` for
+4. Do it. Check it: `node --check`, the four checks in `AGENTS.md` for
    `index.html`, `cd tests && node run.cjs`.
 5. In the same branch: take the phase out of **Next** and put it at the top
    of `docs/PLAN-done.md` (one line, PR link); add what
    you learned to `docs/FACTS.md`; add new work you found under **Next**,
    **Waiting on Jose** or **Later**. A bug you found and did not fix goes
    under **Later**, never only inside a finished phase's entry.
-6. Push the branch, open a pull request, report to Jose in 2-4 lines.
+6. Cleanup check: read "Last audit" at the top of `docs/CLEANUP.md`. If 3
+   phases have been finished since then, or it's been over 30 days, or the
+   file is missing, offer `docs/cleanup-audit.md` with buttons: "Run it
+   now" (the pick), "Next session", "Skip this time". If
+   `cleanup-audit.md` is missing, ask Jose for the prompt and save it
+   there.
+7. Push the branch, open a pull request, report to Jose in 2-4 lines.
    He says "push" (or "merge") when a green PR should go live: that means
    merge it into `main`, which deploys. Nothing merges without him. Never
    delete anything he hasn't approved.
-7. Next phase: in the same chat until a new-session trigger hits.
+8. Next phase: in the same chat until a new-session trigger hits.
 
 **A chat hands over with `HANDOFF.md` at the repo root** (Jose, 2026-11-10;
 the first rule, 2026-10-20: "Whenever a chat gets extremely heavy and
 expensive, hand me a handoff.md to start in a new chat. It's to be able to
-use you for long period of time"). The triggers are in `CLAUDE.md`, "New
-session triggers": about 150k tokens or half the context, finish the step,
-then hand off; over 300k or 75%, hand off now; over 100k with an unrelated
-next task, or with Jose back after an hour away, hand off too. A finished
-job alone is no reason.
+use you for long period of time"). This is the only copy of the handoff rules; `AGENTS.md` and `CLAUDE.md`
+point here.
+
+**New-session triggers** (tokens or share of context, whichever comes
+first; a new session costs 20k to 40k to catch up; a tool without a token
+count uses its best estimate):
+
+- Under 150k or 50%: keep going.
+- 150k to 300k, or 50% to 75%: finish the step, then hand off.
+- Over 300k or 75%: hand off now, even mid-task.
+- Over 100k and the next task is unrelated: hand off.
+- Over 100k and Jose says he's been away over an hour: hand off.
+
+A finished job alone is no reason.
 
 When a trigger hits:
 
@@ -54,14 +69,17 @@ When a trigger hits:
 2. Overwrite `HANDOFF.md` (short, pointing to what exists): at the top the
    exact message to paste into a new chat; the goal and the exact next
    step, with the pick; what is merged, which PRs are open and what each
-   waits on, pending check-ins; open questions for Jose; what this chat
-   learned that isn't in the notes yet; the files to look at first.
+   waits on, pending check-ins; open questions for Jose; this chat's
+   decisions (also added to `SPEC.md`) and what it learned that isn't in
+   the notes yet; the files to look at first.
    Commit and push it, and send it to Jose with `SendUserFile`.
 3. Ask once with `AskUserQuestion` (buttons, never only text to paste;
    Jose, 2026-10-23 and 2026-10-25): **"Start a new session"** first as
    the pick, **"Keep going"** second, the question carrying a short
-   summary (what is being worked on now and its goal). On "Keep going",
-   don't ask again until the next trigger; past 75%, warn him once. Where
+   summary (what is being worked on now and its goal). A new chat is made
+   only when he picks it. On "Keep going", don't ask again until the next
+   trigger; past 75%, warn him once and write `HANDOFF.md` anyway
+   (auto-compact is off, so a full session just stops). Where
    the buttons are missing, one plain line instead. On "Start a new
    session", start it yourself (`create_session`, same repository, titled
    with its focus in plain words, "Campus code to its own file"; Jose,
@@ -82,6 +100,7 @@ The new chat reads `HANDOFF.md` first, opens with the same two-part
 summary, says in 2-3 lines what it will do, confirms the next step with
 Jose and waits for his go. `HANDOFF.md` is deleted once its work is done
 (the phase in `docs/PLAN-done.md`, or its pull request opened).
+`docs/handoff.md` is older notes (last written 2026-11-07), left as it is.
 
 **When a chat is done, say "Archive this chat"** (Jose, 2026-10-18: he
 wants to stay organized). A chat is done when nothing in it is still
@@ -136,8 +155,6 @@ with buttons.
   meant, no answer on record.
 - **Liz's title:** give it on Team access once she signs in by email.
 - **`SPEC.md`:** the lines marked TO FILL.
-- **The rules block in `CLAUDE.md`:** whether to remove from it what his
-  claude.ai preferences already say (his call, left open 2026-11-10).
 - **Branch protection on `main`** (his call): the job to name is "App
   checks result"; it needs an exception for the bump-version Action.
 - **Doctor list, next ideas** (the 2026-11-03 review; he picks): compact
@@ -184,9 +201,6 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
   of every note; a helper's report, the lines marked "checked" re-run by
   hand). Trigger: the next time a chat touches that note, or Jose asks for
   the notes pass.
-  - `AGENTS.md` (needs Jose's OK to edit): "Features are moving out of
-    `index.html`" still reads as under way; the split finished 2026-10-25.
-    (Its four other stale lines were fixed on 2026-11-11 with his OK.)
   - `docs/ARCHITECTURE.md`, Full file map: 11 line counts off by more than
     10% (checked three: `features/opening.js` 291 there, 655 now; `sw.js`
     220, 409; `features/campus.js` 157, 359); `pins/` given as 41 files

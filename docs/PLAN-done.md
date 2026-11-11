@@ -5,6 +5,10 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-11 The rule files shortened (Jose: "Start a new chat to shorten CLAUDE.md and AGENTS.md"). `AGENTS.md` holds every shared
+  rule once (30.6 KB before, 30.8 after: it took in what was only in `CLAUDE.md`); `CLAUDE.md` holds what is Claude's alone (34.5 KB to
+  3.4); the handoff rules live only in `docs/PLAN.md`. Detail moved word for word to its notes, the dates and stories to `docs/FACTS.md`.
+  A reviewer checked about 230 rules against the old files: 10 small clauses were missing and put back, 4 stale pointers fixed. Notes only.
 - 2026-11-11 Why the WebKit check went red now and then (Jose's pick). Not a crash from memory: GitHub's WebKit (the Linux build) freezes
   about 1 open in 10 while Home's hello draws on its canvas, then kills the page about 27 s later (880 opens measured by
   `tests/tools/webkit-crash.cjs`, three rounds; `docs/FACTS.md`). Jose's iPhone: 0 freezes in 30 opens, so the hello is unchanged.

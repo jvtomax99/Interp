@@ -71,3 +71,12 @@ phone can pass between people, so its messages keep the exact-name match,
 and so do messages sent before signing in. Matching any "Jose V..." name to
 his photo was turned down: anyone typing that name would get his face.
 
+## The lock, as `CLAUDE.md` recorded it (moved here 2026-11-11)
+
+- **The Hub is locked** (Jose, 2026-11-07, 41 phones in): practice mode
+  is off, so the rules are enforced and anything that isn't a joined phone
+  (or a signed-in account in the team) is refused, with no error on screen.
+  A new collection without its rule line simply fails. Checked first: every
+  collection the app uses has a rule, every AI call sends the sign-in, the
+  events watcher logged in with its key, the Storage rules published,
+  everyone had joined. Undo: Team access, Turn practice mode back on.

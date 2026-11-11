@@ -46,8 +46,8 @@ until it arrives.
    Firebase is ready. Settings and personal state are `ih_*` keys.
 2. **Firestore, the shared truth.** One document per term in `terms/`.
    Other collections: team chat, doctors, reviews, practice, events, team
-   access, accounts, push subscriptions. Full list: "Data model" in
-   `CLAUDE.md`. The Hub is locked: only joined phones or signed-in team
+   access, accounts, push subscriptions. Full list: "Data model"
+   below. The Hub is locked: only joined phones or signed-in team
    accounts pass the rules.
 3. **AI through `api/`.** The phone sends its team sign-in to an endpoint;
    `_hub-access.js` checks membership; `_routine.js` calls the Claude
@@ -64,6 +64,27 @@ until it arrives.
    version reloads only when the app is in the background.
    Stale-while-revalidate for everything else. `CACHE_VERSION` names the
    saved copy.
+
+## Data model (Firestore)
+
+Project `language-specialist`. Collections in use:
+
+```
+terms/{id}              one document per term  <-- never a single shared blob
+terminology-meta/       categories; migrations = finished one-time updates' flags; smiley = team points (Dr. Smiley's rank)
+terminology-hub/        legacy single-blob glossary; nothing reads or writes it any more
+team-chat/              chat-typing/  term-attachments/  term-reviews/
+healthcare-providers/   doctor-directory/  doctor-research-cache/
+ce-events/  announcements/  practice-questions/  quiz-history/
+activity-log/  deleted-items/  watcher-state/  team-members/  term-link-cache/
+hub-access/{owner,settings}  hub-invites/{CODE}  hub-members/{uid}   <-- Team access
+hub-lessons/{id}                                                     <-- Ask the Hub team notes
+hub-admins/{uid}                                                     <-- Admin titles in Team Chat (team-access.md)
+hub-titles/{account}                                                 <-- Titles the owner gives to an email account (email-sign-in.md, E3)
+hub-credits/{key}                                                    <-- Idea credits, one per credited screen (credits.md)
+push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
+accounts/{uid}  sign-in-codes/{id}  account-sync/{uid}               <-- Email sign-in (email-sign-in.md)
+```
 
 ## Deploy
 

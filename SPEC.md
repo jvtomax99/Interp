@@ -10,8 +10,8 @@ A Spanish/English medical-interpreting tool, an installable web app (PWA),
 live at https://interp-six.vercel.app.
 
 **Real users: the interpreter team at Hackensack University Medical Center
-(Hackensack Meridian Health)**, about 41 phones in the team (`CLAUDE.md`,
-Standing facts, 2026-11-07), split into North and South regions. Jose Vazquez,
+(Hackensack Meridian Health)**, about 41 phones in the team (`AGENTS.md`,
+"Who this is for", 2026-11-07), split into North and South regions. Jose Vazquez,
 staff medical interpreter, owns and directs it. Owners and admins run team
 access and titles.
 
@@ -116,8 +116,8 @@ copy.
 
 ## Not in v1
 
-From `AGENTS.md` "Not building" (proposed 2026-10-29, still waiting for
-Jose's OK there). A request that crosses one is flagged before any work.
+From `AGENTS.md` "Not building" (proposed 2026-10-29, Jose's OK
+2026-11-11). A request that crosses one is flagged before any work.
 - **No patient information, ever.** No names, record numbers, dates of
   birth, room numbers or anything that identifies a patient, anywhere
   (Firestore, the phone, Team Chat, AI requests).

@@ -2,7 +2,7 @@
 
 Jose picked this on 2026-11-05 as the last campus piece (item 2c in `docs/PLAN.md`: "weather, the friendly half only:
 sun and a rainbow for a streak, never snow for a missed day"). This is the spec, written before any code (his rule,
-`AGENTS.md`, "How Jose works with AI tools"). His go the same day: "Go, as written".
+`AGENTS.md`, "How work is run"). His go the same day: "Go, as written".
 
 ## As built (2026-11-05, branch `claude/campus-weather`)
 

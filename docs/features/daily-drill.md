@@ -19,3 +19,12 @@ away (never when the phone can't speak), Under pressure adds `DRILL_SECS`.
 Nothing plays by itself. State in `ih_warmup` (drill built once a day,
 `run` = your place, verdicts only, never what was typed; `seenFF`/`seenQ`
 avoid repeats; `last`, `best`, `lvl`, `streak`).
+
+## Rules moved here from `AGENTS.md` (2026-11-11)
+
+Word for word as they stood there; `AGENTS.md` keeps the short form.
+
+- **The Daily Drill (Home's warm-up card) uses only written, checked
+  material**: the False Friends' own lines (`heard`, `trap`, `truth`), the
+  glossary, and the CoreCHI seed questions. Never generate a line, a
+  rendering or a question for it, and never store what someone typed.

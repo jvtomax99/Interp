@@ -1,8 +1,8 @@
 # Campus celebration (a building finished)
 
 Jose picked this on 2026-11-05 as the next campus piece (item 2c in `docs/PLAN.md`: "fireworks, ribbon, gold badge
-when a building is finished"). This is the spec, written before any code (his rule, `AGENTS.md`, "How Jose works with
-AI tools"). Waiting for his go.
+when a building is finished"). This is the spec, written before any code (his rule, `AGENTS.md`, "How work
+is run"). Waiting for his go.
 
 ## As built (2026-11-05, branch `claude/campus-celebration`)
 

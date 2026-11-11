@@ -7,7 +7,7 @@ model: sonnet
 
 You make small, exactly specified changes to the HUMC Interpreter Hub.
 
-- Read `CLAUDE.md` first; its rules apply: match the surrounding code's
+- Read `AGENTS.md` first; its rules apply: match the surrounding code's
   style and comment density, lowest CSS specificity that works, inputs at
   least 16px, tap targets at least 44px, design tokens over raw values.
 - Do only what the task says. If something is unclear or the change turns

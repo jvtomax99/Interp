@@ -197,3 +197,16 @@ box-shadow:
 - **Sizes set from script:** 8 inline `font-size` values in `index.html`, `features/csv.js` and `features/translate.js` are still plain pixels; the stylesheets are all on the scale (2026-11-03).
 - **Spacing:** the look is tokenized (69 `:root` variables); the rhythm mostly is not. Padding, margin and gap use a token about 99 times against about 1,737 pixel values (measured 2026-10-20), 12 of them crowding into 6 to 17px: 9px (251 uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each), then 12, 11, 16, 7 and 15. The scale 6 / 9 / 13 / 17 / 26 covers 42% of those uses as they stand. When you touch a component, move it onto the scale rather than adding to the tail.
 - **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
+
+## The Home banner photo, per mode (moved here from `CLAUDE.md`, 2026-11-11)
+
+- **The Home banner photo is set per mode** (the block "Hello banner photo:
+  tuned per mode" at the end of `home-polish.css`). Jose's brief: tree
+  prominent, at least half the Hackensack sign readable and never behind
+  the fade, the words or Search, the pool where there's room. The sign is
+  at the photo's bottom-left, under where the words sit, so it gets its own
+  band: the banner's bottom padding, ending 8px above Search, with the photo
+  pinned to the banner's bottom (a longer quote grows the banner instead of
+  covering it). Phone: photo 545px wide (`--ph-w`). Computer: 873-1000px
+  (`--dk-w`), a mirrored blur past its right edge. Change the band and the
+  photo position together; both use the same fractions of the photo width.

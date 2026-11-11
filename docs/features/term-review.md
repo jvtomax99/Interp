@@ -25,3 +25,16 @@ moves straight on. Reactions: a nod, a smile when a previously missed term
 is right, encourage after a miss, `smileyStudy` at the end.
 
 **The small live brain** (2026-10-21) sits at the top of the start screen, under the intro: your terms on a turning brain, known count and %, tap to open the full knowledge brain. `kbMiniHtml`; `knowledge-brain.md`. The session summary has its own copy: the session's terms light up in it, and **See it in your brain** opens the full brain turned to them.
+
+## Rules moved here from `AGENTS.md` (2026-11-11)
+
+Word for word as they stood there; `AGENTS.md` keeps the short form.
+
+- **Term Review is the one practice record** (`term-reviews/{who__termId}`:
+  box, nextReviewAt, reviewCount, lastResult, misses, lastAt). Don't start a
+  second one. Answers are judged only against the team's glossary
+  (`reviewAccepted`); one that differs but might be valid goes to the
+  person to compare (self-review), never to a guessed "wrong". A result
+  counts only once `saveTermReview` says it was stored, and a failed save
+  shows on the card. No claims of mastery, and team points are never
+  someone's own progress.
