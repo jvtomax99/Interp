@@ -375,7 +375,8 @@ of them also in `AGENTS.md`:
   not a numbered list in text.
   **Always say your recommendation and why**, unasked (Jose, 2026-10-19).
   Where the buttons are missing or refused, list the options plainly with
-  the pick marked.
+  the pick marked. **Always clickable suggestions** (Jose, 2026-11-11):
+  every question or next step goes out as buttons, never only as text.
 - **Ambiguous request: one clarifying question first. Evidence before
   confidence** (Jose, 2026-10-17): nothing stated as true without a
   measurement, test, primary source or the code behind it; say what is
@@ -403,6 +404,8 @@ of them also in `AGENTS.md`:
   once Vercel reports the bump commit's deploy completed, send
   `PushNotification` with the change and its `BUILD_ID`, even if he seems
   to be in the chat.
+- **Links and domains to paste: all of them in one block** (Jose,
+  2026-11-11), one per line, never split into several blocks.
 - **Settings to paste** (Jose, 2026-11-04), on top of the general rule:
   one code block per field, under the field's name and where it goes;
   exactly what to paste (no `https://`, no `www` unless the address has it,
