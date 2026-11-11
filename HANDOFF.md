@@ -62,21 +62,53 @@ crashed (the probe ends a frozen run itself).
   at 9% they would see daily; that is a reason to doubt it happens on
   iPhones, not proof.
 
+**Third round (run 42995104071, 60 opens per variation at 1x, one thing
+turned off by an added style):**
+
+| variation | froze of 60 |
+|---|---|
+| as the suite runs it | 4 |
+| Reduce Motion | 0 |
+| every CSS animation off | 8 |
+| petals hidden | 8 |
+| Dr. Smiley's CSS animations off | 1 |
+| no filter, no backdrop blur | 10 |
+| **every canvas hidden** | **0** |
+
+- It follows the one canvas Home shows while it opens:
+  `.home-wave-canvas`, the hello's drawing (`home-polish.js`, about lines
+  350 to 565: the squares, the glows drawn with `lighter`, one draw per
+  frame). Reduce Motion never makes that canvas, which is why it never
+  froze. All rounds together: 0 of 200 with no canvas on screen (Reduce
+  Motion or hidden), 58 of 600 with it (about 10%).
+- The petals and CSS animations are not it (the first guess was wrong):
+  hiding or stopping them changed nothing.
+- With the canvas hidden the script still draws into it every frame and
+  the page never froze, so the drawing code itself does not hang. The
+  freeze is in how this WebKit build puts a canvas that changes every
+  frame on screen.
+- Not known: whether iPhones do it. GitHub's browser is WebKit's Linux
+  build (WPE); the part that puts a canvas on screen is different code on
+  an iPhone. No teammate has reported the app freezing on open.
+
 **Exact next step (ask Jose first, with buttons):**
-1. Recommended: one more round that turns off one group of animations at a
-   time by an injected style (`animation:none` on the petals, on the
-   heartline, on Dr. Smiley, on the hello banner, on everything), 60 opens
-   each. If one group carries it, look at how that animation is built
-   (a filter, a mask, `will-change`, an SVG animation) and make it cheaper
-   without changing the look.
-2. Or stop here: change `startup-work.cjs` so a frozen or crashed page is
-   reported as that ("the browser's page froze, opened again") and the
-   open is tried once more, the check itself unchanged. That needs Jose's
-   OK, because the rule is never to weaken a check.
-This cloud machine has no WebKit and must not run `playwright install`;
-all measuring is on GitHub (a push to this branch that touches the tool or
-the workflow starts it; `tests/tools/webkit-crash.cjs` lists the
-variations).
+1. A real-phone test settles the open question cheaply: Jose (or two
+   teammates) fully closes and opens the Hub 30 times on an iPhone and
+   counts opens where Home stops responding during the hello. At 10% a
+   freeze shows in 30 opens 96 times in 100.
+2. If iPhones never freeze: change `startup-work.cjs` so a frozen or
+   crashed page in WebKit is reported as that and opened once more, the
+   check itself unchanged (Jose's OK needed: it loosens a check), and
+   record in `docs/feel-audit.md` that the hello's canvas is the cost.
+3. If an iPhone does freeze: this joins "the hello's canvas draw" under
+   Waiting on Jose in `docs/PLAN.md` (his call, options in
+   `docs/feel-audit.md`); measure candidates with the probe first (a
+   smaller canvas, no `lighter`, drawing every other frame) and show him
+   before changing what he sees.
+The probe and its job are on this branch only (`tests/tools/webkit-crash.cjs`,
+`.github/workflows/webkit-crash.yml`); open a pull request for them and
+these notes when Jose says so. This cloud machine has no WebKit and must
+not run `playwright install`.
 
 **Done in the last chat (all merged):**
 - #266, live as build b1111.0136: the first cleanup audit

@@ -498,5 +498,12 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   Not the cause: the pen's worker, any worker, OffscreenCanvas, the pen
   (Dr. Smiley Still froze 8 of 60 with no pen), memory, or a stuck call
   (every traced call had returned). In that browser the page draws about
-  5 frames a second at 3x and holds about 1.3 GB. Not known: which
-  animation, and whether iPhones do it.
+  5 frames a second at 3x and holds about 1.3 GB.
+  Third round (run 42995104071): it follows the hello's canvas
+  (`.home-wave-canvas`, `home-polish.js`). With every canvas hidden 0 of
+  60 froze, though the script still drew into it; petals hidden 8 of 60,
+  all CSS animations off 8, no filters or blur 10, as is 4. All rounds: 0
+  of 200 with no canvas on screen, 58 of 600 with it. So the drawing code
+  does not hang; this WebKit build (Linux, WPE) freezes putting a canvas
+  that changes every frame on screen. Not known: whether iPhones do it
+  (that part of WebKit is different code there).
