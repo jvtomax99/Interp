@@ -1,10 +1,14 @@
 # CLAUDE.md: HUMC Interpreter Hub
 
-**Read `AGENTS.md` (repo root) first. It holds the rules, and it wins over
-this file.** This file adds only what is Claude's alone. When a shared rule
-changes, change it in `AGENTS.md` (never without Jose's OK), not here.
+`AGENTS.md` (repo root) holds the rules, and it wins over this file. The
+line below loads it into every session, so there is no need to open it:
 
-Then, as `AGENTS.md` says: `HANDOFF.md` if there is one, `docs/PLAN.md`
+@AGENTS.md
+
+This file adds only what is Claude's alone. When a shared rule changes,
+change it in `AGENTS.md` (never without Jose's OK), not here.
+
+At session start, as `AGENTS.md` says, read: `HANDOFF.md` if there is one, `docs/PLAN.md`
 (the working list, how a session runs, when to hand off to a new chat),
 and the short map at the top of `docs/ARCHITECTURE.md`.
 
@@ -25,7 +29,7 @@ and the short map at the top of `docs/ARCHITECTURE.md`.
 
 ## Helpers: the main model thinks, cheaper models fetch
 
-The main conversation (Opus 5.5) plans, decides, writes the real code and reviews.
+The main conversation plans, decides, writes the real code and reviews.
 Repetitive work goes to the agents in `.claude/agents/`:
 
 | Agent | Model | Use for |
