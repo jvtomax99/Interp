@@ -505,5 +505,11 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   all CSS animations off 8, no filters or blur 10, as is 4. All rounds: 0
   of 200 with no canvas on screen, 58 of 600 with it. So the drawing code
   does not hang; this WebKit build (Linux, WPE) freezes putting a canvas
-  that changes every frame on screen. Not known: whether iPhones do it
-  (that part of WebKit is different code there).
+  that changes every frame on screen. That part of WebKit is different
+  code on an iPhone, and Jose's phone test says iPhones don't do it: 0
+  freezes in 30 full closes and opens (2026-11-11, Reduce Motion off). So
+  the hello was left as it is, and `startup-work.cjs`'s first open now
+  says when the browser froze and opens once more (two freezes in a row
+  still fail; a page that answers and shows the wrong thing still fails).
+  Its later opens have no such retry: neither red run was there. To
+  measure again: Actions, "WebKit crash probe", Run workflow.

@@ -1,5 +1,5 @@
 # Measuring only, started by hand (Actions, "WebKit crash probe", Run
-# workflow) or by a push to the branch that is looking into it. Runs
+# workflow). Runs
 # tests/tools/webkit-crash.cjs in the same image as the tests' webkit job:
 # Home opened 60 times per variation, each printing whether the page died,
 # when, and its memory second by second. Nothing passes or fails; read each
@@ -8,9 +8,6 @@ name: WebKit crash probe
 
 on:
   workflow_dispatch:
-  push:
-    branches: ['claude/webkit-page-crash']
-    paths: ['tests/tools/webkit-crash.cjs', '.github/workflows/webkit-crash.yml']
 
 permissions:
   contents: read
