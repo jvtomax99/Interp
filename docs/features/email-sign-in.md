@@ -159,11 +159,13 @@ typing the name stops earning it.
 - **Titles given to an account** (`hub-titles/{account}` = `{ title, kind,
   rule, name, at }`, owner only, accounts only). Team access shows a
   **Title** button on each row signed in by email: Supervisor of Language
-  Services, Administrator, Developer, No title (`teamGiveTitle`,
+  Services, Administrator, Designer, No title (`teamGiveTitle`,
   `setGivenTitle`). Everyone listens (`startHubTitles`). A given title wins
-  on that account's messages and in Home's hello; giving a name rule's
-  title (`rule`: Liz's, Jose's, Fabiola's when given to her) stops the name
-  match for everyone else (`openNameTitle`). Rules not published: no given
+  on that account's messages and in Home's hello, except over the three
+  name titles. Changed 2026-11-11 (Jose: Fabiola always Administrator, Liz
+  always Supervisor, Jose always Designer): the name titles now come first,
+  and giving one (`rule`) no longer stops the name match for everyone else;
+  `rule` is still written but not read. Rules not published: no given
   titles, the name titles keep working.
 - **Chat runs** now need the same name *and* the same `uid`: before, an
   impostor's message right after Liz's joined her run and sat under her
@@ -278,7 +280,7 @@ other capitals, over the team-code screen).
   owner's Team access list may show that phone twice). Harmless; tidy later.
 - `hub-access/owner.uid` moves to the account when the server checks the
   code, before the phone has used its ticket. If that last step failed,
-  the owner's "Developer" title by phone would point at no phone until he
+  the owner's "Designer" title by phone would point at no phone until he
   signs in; the title also matches his name, and his owner powers come
   from `hub-members`, which the account has. Checked in `sign-in.mjs`.
 - **Not proven against the real services from here** (the cloud session

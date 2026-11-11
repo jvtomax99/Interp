@@ -13874,25 +13874,28 @@ function tcPhotoTap(btn, mid, index, ev){
    carries the sender's phone (`uid`, held to that phone by the rules), so
    the title follows the phone, not a typed name; older messages without
    one are matched by name.
-   Titles given by name (Jose, 2026-10-15), capitals and spaces ignored;
-   they win over the owner-code title. `names`: these full names only.
-   `first`: anyone whose first name is this, with or without a last name.
-   The tag reads "Administrator" (the owner-code one too).
+   Titles given by name (Jose, 2026-10-15), capitals and spaces ignored.
+   `names`: these full names only. `first`: anyone whose first name is
+   this, with or without a last name. The tag reads "Administrator" (the
+   owner-code one too).
+   Always theirs (Jose, 2026-11-11): Fabiola is always Administrator, Liz
+   always Supervisor, Jose always Designer, on any phone or account, over
+   every other title. Nothing on Team access takes them away.
    Given to an account (E3, 2026-11-07; docs/features/email-sign-in.md):
    the owner gives a title to a teammate's email account on Team access
    (hub-titles/{account}; setGivenTitle). It shows on that account's
-   messages on every phone, and once a name rule's title is given to an
-   account (`rule`), typing that name no longer earns it. */
+   messages on every phone, under the names above. */
 const NAME_TITLES = [
   { names: ['liz lind', 'elizabeth lind', 'liz lind-smith', 'elizabeth lind-smith'],
     title: 'Supervisor of Language Services', kind: 'supervisor', id: 'liz' },
   { first: 'fabiola', title: 'Administrator', kind: 'admin', id: 'fabiola' },
-  // Jose (2026-10-15): "Developer" for him, owner or not. "Jose V…" / "José
-  // V…" with any last name from V; plain "Jose" doesn't count (another Jose
-  // could join). His Hub-owner phone also gets it whatever its name says.
-  { test: key => /^jose v/.test(key), title: 'Developer', kind: 'admin', id: 'jose' }
+  // Jose: "Designer" for him (2026-11-11; it read "Developer" from
+  // 2026-10-15), owner or not. "Jose V…" / "José V…" with any last name
+  // from V; plain "Jose" doesn't count (another Jose could join). His
+  // Hub-owner phone also gets it whatever its name says.
+  { test: key => /^jose v/.test(key), title: 'Designer', kind: 'admin', id: 'jose' }
 ];
-const DEVELOPER_TITLE = NAME_TITLES[NAME_TITLES.length - 1];
+const DESIGNER_TITLE = NAME_TITLES[NAME_TITLES.length - 1];
 // The Hub owner's phone (hub-access/owner). ACCESS is declared further down
 // this script; a title asked for before that line has run reads nothing.
 function hubOwnerUid(){ try{ return ACCESS.ownerUid || ''; }catch(e){ return ''; } }
@@ -13900,27 +13903,25 @@ function nameTitle(key){
   return key ? NAME_TITLES.find(t => (t.names && t.names.includes(key)) || (t.first && key.split(' ')[0] === t.first) || (t.test && t.test(key))) || null : null;
 }
 const HUB_ADMINS = { uids: new Set(), names: new Set(), byUid: new Map(), started: false };
-// Titles given to accounts: uid -> { title, kind }; `claimed`, the name rules
-// (NAME_TITLES ids) whose title now belongs to an account.
-const HUB_TITLES = { byUid: new Map(), claimed: new Set(), started: false };
-// What the owner can give (Team access): each name rule's title claims that rule.
+// Titles given to accounts: uid -> { title, kind }.
+const HUB_TITLES = { byUid: new Map(), started: false };
+// What the owner can give (Team access). `rule` is still written (the
+// database rules allow it) but no longer read: the named titles are always on.
 const GIVEN_TITLES = [
   { key: 'supervisor', title: 'Supervisor of Language Services', kind: 'supervisor', rule: 'liz' },
   { key: 'admin', title: 'Administrator', kind: 'admin', rule: '' },
-  { key: 'developer', title: 'Developer', kind: 'admin', rule: 'jose' }
+  { key: 'designer', title: 'Designer', kind: 'admin', rule: 'jose' }
 ];
-// A name rule, unless its title has been given to an account.
-function openNameTitle(key){ const t = nameTitle(key); return t && !HUB_TITLES.claimed.has(t.id) ? t : null; }
 const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
 // Capitals, extra spaces and accents ignored ("José" = "jose").
 function titleKey(name){ return String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase().replace(/\s+/g, ' '); }
 function chatTitleFor(m){
+  const key = titleKey(m && m.author);
+  const named = nameTitle(key);
+  if(named) return named;
   const given = m && m.uid ? HUB_TITLES.byUid.get(m.uid) : null;
   if(given) return given;
-  const key = titleKey(m && m.author);
-  const named = openNameTitle(key);
-  if(named) return named;
-  if(m && m.uid && m.uid === hubOwnerUid()) return DEVELOPER_TITLE;
+  if(m && m.uid && m.uid === hubOwnerUid()) return DESIGNER_TITLE;
   const admin = m && m.uid ? HUB_ADMINS.uids.has(m.uid) : !!key && HUB_ADMINS.names.has(key);
   return admin ? { title: 'Administrator', kind: 'admin' } : null;
 }
@@ -13951,14 +13952,15 @@ function startHubTitles(){
   if(HUB_TITLES.started || !db) return;
   HUB_TITLES.started = true;
   db.collection('hub-titles').onSnapshot(snap => {
-    const by = new Map(), claimed = new Set();
+    const by = new Map();
     snap.docs.forEach(d => {
       const t = d.data() || {};
       if(!t.title) return;
-      by.set(d.id, { title: String(t.title), kind: t.kind === 'supervisor' ? 'supervisor' : 'admin', name: String(t.name || '') });
-      if(t.rule) claimed.add(String(t.rule));
+      // Given before 2026-11-11, "Developer" now reads "Designer".
+      const title = String(t.title) === 'Developer' ? 'Designer' : String(t.title);
+      by.set(d.id, { title, kind: t.kind === 'supervisor' ? 'supervisor' : 'admin', name: String(t.name || '') });
     });
-    HUB_TITLES.byUid = by; HUB_TITLES.claimed = claimed;
+    HUB_TITLES.byUid = by;
     if(activeCategory === 'chat') renderChatMessages();
     if(activeCategory === 'team-access') renderContent();
     document.dispatchEvent(new Event('ih:titles'));
@@ -13993,11 +13995,11 @@ async function setGivenTitle(uid, key, name){
 // own owner code (or its line in that list) does.
 window.myHubTitle = function(){
   const user = hubAuth && hubAuth.currentUser;
+  const named = nameTitle(titleKey(whoAmI()));
+  if(named) return named;
   const given = user ? HUB_TITLES.byUid.get(user.uid) : null;
   if(given) return given;
-  const named = openNameTitle(titleKey(whoAmI()));
-  if(named) return named;
-  if(user && user.uid === hubOwnerUid()) return DEVELOPER_TITLE;
+  if(user && user.uid === hubOwnerUid()) return DESIGNER_TITLE;
   return isHubOwner() || (user && HUB_ADMINS.uids.has(user.uid)) ? { title: 'Administrator', kind: 'admin' } : null;
 };
 // An owner phone keeps its own line current: on launch and when its name
@@ -14892,8 +14894,8 @@ async function sendChatMessageOnce(){
                       replyTo: replyingTo ? Object.assign({ id:replyingTo.id, author:replyingTo.author, text:replyingTo.text }, replyingTo.photo ? { photo: replyingTo.photo } : {}) : null };
     if(atts.length > 1) message.attachments = atts;
     if(chatChannel !== 'all') message.channel = chatChannel;
-    // The sending phone, so a title under the name can't be borrowed by
-    // typing someone else's name (chatTitleFor).
+    // The sending phone, so an owner-code or account title can't be
+    // borrowed by typing someone else's name (chatTitleFor).
     if(hubAuth && hubAuth.currentUser) message.uid = hubAuth.currentUser.uid;
     const reply = replyingTo;
     replyingTo = null; renderChatComposeBar();
@@ -15818,7 +15820,7 @@ async function loadAccessState(){
     const owner = ownerSnap.exists ? (ownerSnap.data() || {}) : null;
     ACCESS.ownerUid = owner ? owner.uid || '' : '';
     ACCESS.ownerName = owner ? owner.name || '' : '';
-    // The Hub owner's phone carries "Developer" (chatTitleFor): redraw titles.
+    // The Hub owner's phone carries "Designer" (chatTitleFor): redraw titles.
     document.dispatchEvent(new Event('ih:titles'));
     if(activeCategory === 'chat') renderChatMessages();
     try{ localStorage.setItem(ACCESS_OWNER_KEY, ACCESS.ownerName); }catch(e){}
