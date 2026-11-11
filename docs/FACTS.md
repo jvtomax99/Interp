@@ -8,7 +8,7 @@ anything. Add what you learn here, newest near the top, with the date.
 
 **Team Chat titles always theirs (Jose, 2026-11-11).** Fabiola Grijalva is
 always Administrator, Liz Lind / Elizabeth Lind always Supervisor of
-Language Services, Jose Vazquez / Jose V always Designer (was "Developer").
+Language Services, Jose Vazquez / Jose V always Developer.
 The name titles now come first in `chatTitleFor` and `myHubTitle`, over a
 title given on Team access and the owner-code tag; E3's "claim" (giving a
 name's title to an account switched the name off for everyone else) is

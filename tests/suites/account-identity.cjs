@@ -84,11 +84,11 @@ const LIZ = 'acct_11112222333344445555666677';
       await add('a6', 'Maria Ruiz', 3, 'acct_maria000000000000000000000');
       await add('a7', 'Fabiola', 2);                     // by name, as always
       await db.collection('hub-titles').doc('acct_fab00000000000000000000000').set({ title: 'Supervisor of Language Services', kind: 'supervisor', rule: 'liz', name: 'Fabiola Grijalva', at: now });
-      await db.collection('hub-titles').doc('acct_jose0000000000000000000000').set({ title: 'Developer', kind: 'admin', rule: 'jose', name: 'Jose Vazquez', at: now });
+      await db.collection('hub-titles').doc('acct_jose0000000000000000000000').set({ title: 'Administrator', kind: 'admin', rule: '', name: 'Jose Vazquez', at: now });
       await db.collection('hub-titles').doc('acct_rosa0000000000000000000000').set({ title: 'Developer', kind: 'admin', rule: 'jose', name: 'Rosa Diaz', at: now });
       await add('a8', 'Fabiola Grijalva', 1.5, 'acct_fab00000000000000000000000'); // another title given to her account
-      await add('a9', 'Jose V', 1, 'acct_jose0000000000000000000000');             // his old given title
-      await add('a10', 'Rosa Diaz', 0.5, 'acct_rosa0000000000000000000000');      // the old title, given to someone else
+      await add('a9', 'Jose V', 1, 'acct_jose0000000000000000000000');             // another title given to his account
+      await add('a10', 'Rosa Diaz', 0.5, 'acct_rosa0000000000000000000000');      // Developer, given to someone else
     }, { LIZ });
     await page.evaluate(() => setCategory('chat')); await wait(1200);
     const rows = await page.evaluate(() => [...document.querySelectorAll('.chat-author')].slice(-10).map(a => ({
@@ -100,8 +100,8 @@ const LIZ = 'acct_11112222333344445555666677';
     ok(t(5) === 'Administrator', 'a title given to any account shows on its messages', t(5));
     ok(t(1) === 'Administrator' && t(6) === 'Administrator', 'Fabiola by name: Administrator', [t(1), t(6)]);
     ok(t(7) === 'Administrator', 'Fabiola stays Administrator even with another title given to her account', t(7));
-    ok(t(8) === 'Designer', 'Jose V stays Designer, his old given "Developer" too', t(8));
-    ok(t(9) === 'Designer', 'an old given "Developer" title reads "Designer"', t(9));
+    ok(t(8) === 'Developer', 'Jose V stays Developer, even with another title given to his account', t(8));
+    ok(t(9) === 'Developer', 'Developer given to another account shows on its messages', t(9));
     const mine = await page.evaluate(async LIZ => {
       const a = myHubTitle();
       await hubAuth.signInWithCustomToken('ticket:' + LIZ);
@@ -137,7 +137,7 @@ const LIZ = 'acct_11112222333344445555666677';
       const btns = [...box.querySelectorAll('button')];
       return { labels: btns.map(x => x.textContent.trim()), taps: btns.map(x => { const r = x.getBoundingClientRect(); const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return (at === x || x.contains(at)) && r.height >= 44; }) };
     });
-    ok(pick && pick.labels.join('|') === 'Supervisor of Language Services|Administrator|Designer', 'the picker: the three titles', pick);
+    ok(pick && pick.labels.join('|') === 'Supervisor of Language Services|Administrator|Developer', 'the picker: the three titles', pick);
     ok(pick && pick.taps.every(Boolean), 'each takes its own tap, 44 px or taller', pick);
     if (!dark) await page.screenshot({ path: O + 'team-access-picker.png' });
     await page.evaluate(() => [...document.querySelectorAll('.ta-titles button')].find(x => /Supervisor/.test(x.textContent)).click()); await wait(700);

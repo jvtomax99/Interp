@@ -42,7 +42,7 @@ no Admin tags.
 email account on this screen (`hub-titles`). `docs/features/email-sign-in.md`,
 "As built (E3)".
 *Always theirs* (Jose, 2026-11-11): Fabiola is always Administrator, Liz
-always Supervisor, Jose always Designer. The name titles come first in
+always Supervisor, Jose always Developer. The name titles come first in
 `chatTitleFor` and `myHubTitle`, over a given title and the owner-code tag,
 and giving a title no longer switches a name off (E3's "claim", removed).
 The cost, accepted: anyone typing one of those names gets the title, as
@@ -53,13 +53,12 @@ Dr. Smiley or past the banner's edge; one line when it fits, else two even
 lines (`helloTitle` in `home-polish.js`, placed by `heartline.place`; who has
 one: `window.myHubTitle` in `index.html`, which counts this phone's own owner
 code or its line in `hub-admins`, never a name match against that list).
-*Designer* (Jose, 2026-11-11; "Developer" from 2026-10-15 until then; a
-given "Developer" in `hub-titles` reads "Designer"): Jose's title, over Administrator. By name,
+*Developer* (Jose, 2026-10-15): Jose's title, over Administrator. By name,
 "Jose V…"/"José V…" with any last name from V (plain "Jose" doesn't count),
 and by phone: the Hub owner's phone (`hub-access/owner.uid`, read into
 `ACCESS.ownerUid`, through `hubOwnerUid()` because `ACCESS` is declared later
 in the script). Names are compared without accents (`titleKey`).
-Jose (2026-11-06) asked that "Jose V" count as Jose Vazquez (then "Developer"):
+Jose (2026-11-06) asked that "Jose V" count as Jose Vazquez the Developer:
 the title already did (above, and by account since sign-in moved
 `hub-access/owner.uid` to his account id). What didn't was his face: chat
 photos and colours were filed by exact name, so "Jose V" showed a plain

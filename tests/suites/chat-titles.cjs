@@ -44,10 +44,10 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(by(7).title === 'Administrator', 'Fabiola, first name only: Administrator', by(7));
   ok(by(8).title === 'Administrator', 'Fabiola Grijalva, any capitals, any phone: Administrator', by(8));
   ok(by(9).title === '', 'a name that only starts with the letters: no title', by(9));
-  ok(by(10).title === 'Designer', 'José Vázquez, accents and any phone: Designer', by(10));
-  ok(by(11).title === 'Designer', 'Jose V: Designer', by(11));
+  ok(by(10).title === 'Developer', 'José Vázquez, accents and any phone: Developer', by(10));
+  ok(by(11).title === 'Developer', 'Jose V: Developer', by(11));
   ok(by(12).title === '', 'plain "Jose" with no last name: no title', by(12));
-  ok(by(13).title === 'Designer', 'the Hub owner\'s phone, whatever its name: Designer', by(13));
+  ok(by(13).title === 'Developer', 'the Hub owner\'s phone, whatever its name: Developer', by(13));
   const sent = await page.evaluate(async () => {
     const input = document.getElementById('chatInput') || document.querySelector('#tcPanel textarea, #tcPanel input[type=text]');
     if (!input) return 'no input';
@@ -76,7 +76,7 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   const ld = await hello('Liz Lind', 'desktop');
   ok(ld.text === 'Supervisor of Language Services' && ld.clear && ld.under, 'Liz on a computer: one line, clear', ld);
   const jv = await hello('Jose Vazquez');
-  ok(jv.text === 'Designer' && jv.clear && jv.under, 'Jose Vazquez: Designer under the heart line', jv);
+  ok(jv.text === 'Developer' && jv.clear && jv.under, 'Jose Vazquez: Developer under the heart line', jv);
   const mr = await hello('Maria Ruiz');
   ok(mr.text === '', 'no title: nothing under the heart line', mr);
 

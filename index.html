@@ -13879,7 +13879,7 @@ function tcPhotoTap(btn, mid, index, ev){
    this, with or without a last name. The tag reads "Administrator" (the
    owner-code one too).
    Always theirs (Jose, 2026-11-11): Fabiola is always Administrator, Liz
-   always Supervisor, Jose always Designer, on any phone or account, over
+   always Supervisor, Jose always Developer, on any phone or account, over
    every other title. Nothing on Team access takes them away.
    Given to an account (E3, 2026-11-07; docs/features/email-sign-in.md):
    the owner gives a title to a teammate's email account on Team access
@@ -13889,13 +13889,12 @@ const NAME_TITLES = [
   { names: ['liz lind', 'elizabeth lind', 'liz lind-smith', 'elizabeth lind-smith'],
     title: 'Supervisor of Language Services', kind: 'supervisor', id: 'liz' },
   { first: 'fabiola', title: 'Administrator', kind: 'admin', id: 'fabiola' },
-  // Jose: "Designer" for him (2026-11-11; it read "Developer" from
-  // 2026-10-15), owner or not. "Jose V…" / "José V…" with any last name
-  // from V; plain "Jose" doesn't count (another Jose could join). His
-  // Hub-owner phone also gets it whatever its name says.
-  { test: key => /^jose v/.test(key), title: 'Designer', kind: 'admin', id: 'jose' }
+  // Jose (2026-10-15): "Developer" for him, owner or not. "Jose V…" / "José
+  // V…" with any last name from V; plain "Jose" doesn't count (another Jose
+  // could join). His Hub-owner phone also gets it whatever its name says.
+  { test: key => /^jose v/.test(key), title: 'Developer', kind: 'admin', id: 'jose' }
 ];
-const DESIGNER_TITLE = NAME_TITLES[NAME_TITLES.length - 1];
+const DEVELOPER_TITLE = NAME_TITLES[NAME_TITLES.length - 1];
 // The Hub owner's phone (hub-access/owner). ACCESS is declared further down
 // this script; a title asked for before that line has run reads nothing.
 function hubOwnerUid(){ try{ return ACCESS.ownerUid || ''; }catch(e){ return ''; } }
@@ -13910,7 +13909,7 @@ const HUB_TITLES = { byUid: new Map(), started: false };
 const GIVEN_TITLES = [
   { key: 'supervisor', title: 'Supervisor of Language Services', kind: 'supervisor', rule: 'liz' },
   { key: 'admin', title: 'Administrator', kind: 'admin', rule: '' },
-  { key: 'designer', title: 'Designer', kind: 'admin', rule: 'jose' }
+  { key: 'developer', title: 'Developer', kind: 'admin', rule: 'jose' }
 ];
 const ICON_TITLE_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z"/></svg>';
 // Capitals, extra spaces and accents ignored ("José" = "jose").
@@ -13921,7 +13920,7 @@ function chatTitleFor(m){
   if(named) return named;
   const given = m && m.uid ? HUB_TITLES.byUid.get(m.uid) : null;
   if(given) return given;
-  if(m && m.uid && m.uid === hubOwnerUid()) return DESIGNER_TITLE;
+  if(m && m.uid && m.uid === hubOwnerUid()) return DEVELOPER_TITLE;
   const admin = m && m.uid ? HUB_ADMINS.uids.has(m.uid) : !!key && HUB_ADMINS.names.has(key);
   return admin ? { title: 'Administrator', kind: 'admin' } : null;
 }
@@ -13956,9 +13955,7 @@ function startHubTitles(){
     snap.docs.forEach(d => {
       const t = d.data() || {};
       if(!t.title) return;
-      // Given before 2026-11-11, "Developer" now reads "Designer".
-      const title = String(t.title) === 'Developer' ? 'Designer' : String(t.title);
-      by.set(d.id, { title, kind: t.kind === 'supervisor' ? 'supervisor' : 'admin', name: String(t.name || '') });
+      by.set(d.id, { title: String(t.title), kind: t.kind === 'supervisor' ? 'supervisor' : 'admin', name: String(t.name || '') });
     });
     HUB_TITLES.byUid = by;
     if(activeCategory === 'chat') renderChatMessages();
@@ -13999,7 +13996,7 @@ window.myHubTitle = function(){
   if(named) return named;
   const given = user ? HUB_TITLES.byUid.get(user.uid) : null;
   if(given) return given;
-  if(user && user.uid === hubOwnerUid()) return DESIGNER_TITLE;
+  if(user && user.uid === hubOwnerUid()) return DEVELOPER_TITLE;
   return isHubOwner() || (user && HUB_ADMINS.uids.has(user.uid)) ? { title: 'Administrator', kind: 'admin' } : null;
 };
 // An owner phone keeps its own line current: on launch and when its name
@@ -15820,7 +15817,7 @@ async function loadAccessState(){
     const owner = ownerSnap.exists ? (ownerSnap.data() || {}) : null;
     ACCESS.ownerUid = owner ? owner.uid || '' : '';
     ACCESS.ownerName = owner ? owner.name || '' : '';
-    // The Hub owner's phone carries "Designer" (chatTitleFor): redraw titles.
+    // The Hub owner's phone carries "Developer" (chatTitleFor): redraw titles.
     document.dispatchEvent(new Event('ih:titles'));
     if(activeCategory === 'chat') renderChatMessages();
     try{ localStorage.setItem(ACCESS_OWNER_KEY, ACCESS.ownerName); }catch(e){}
