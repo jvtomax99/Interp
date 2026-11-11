@@ -5,6 +5,12 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-11 `AGENTS.md`'s four stale lines corrected with Jose's OK (accounts are optional since email sign-in; `index.html`'s
+  real size; where the other screens' code lives; "Not building" confirmed). Notes only.
+- 2026-11-10 The notes trim (#264; Jose: "critically analyze my CLAUDE.md and all the .md files, optimize them"). `docs/PLAN.md`
+  116 KB to 13 KB (Done and Facts moved here and to `docs/FACTS.md`, word for word), `CLAUDE.md` 42 KB to 34 KB (repeats folded,
+  design values and history to `DESIGN.md`). A separate reviewer found 13 dropped or changed clauses, all put back. What the sweep
+  of the other notes found is in `docs/PLAN.md`, Later, "Notes that have drifted from the code". Notes only, no app change.
 - 2026-11-10 Faster app checks on GitHub (Jose's pick; tooling only, no app change). One machine ran all the suites in
   37-42 min, for every change, a notes-only one included. Now: the suites run as six even shares side by side
   (`tests/run.cjs --shard=K/N`, split by each suite's seconds in `tests/shard-times.json`; `tests/suites/shards.mjs` fails

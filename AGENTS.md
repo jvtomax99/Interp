@@ -227,8 +227,9 @@ guide (`guide/topics.js` and `index.html`).
 
 `home-polish.*` and `pin-icons.js` **only cover the Home screen.** They hold
 nothing for the glossary, terms, chat, Doctor Prep, study, quizzes, profile,
-settings or the guide — those exist only inside `index.html`. Say so rather
-than inventing a place to put them.
+settings or the guide — those are in `app.css` (styles) and in `index.html`
+or their `features/` file (code). Say so rather than inventing a place to
+put them.
 
 **Match specificity, do not escalate it.** `home-polish.css` is written with
 ID selectors (`#content.is-home .x`) and loads last, so it beats
@@ -278,11 +279,14 @@ applies now. So when you add something:
   a bare write just waits for the server: the screen stalls on it and the
   change is lost if the app closes. The outbox keeps it on the phone and
   sends it when the connection is back.
-- **There are no personal accounts.** The team code joins a *phone*; the name
-  is whatever was typed on it. Dr. Smiley's remembered preferences
+- **An account is optional** (email sign-in, live since 2026-11-07;
+  `docs/features/email-sign-in.md`). The team code joins a *phone*, and the
+  name is whatever was typed on it. Someone who also signs in with their
+  email gets their name, photo, practice and settings on every phone
+  (`account-sync/{uid}`). Dr. Smiley's remembered preferences
   (`ih_smileyMemory`: explanation language, brief/detailed, study focus, how
-  he moves, use my practice record) live only on that phone, filed under that
-  name. Never sync them to Firestore, never mix them into `hub-lessons`
+  he moves, use my practice record) still live only on that phone, filed
+  under that name, signed in or not (Jose's call, 2026-11-06). Never sync them to Firestore, never mix them into `hub-lessons`
   (approved team knowledge), never add a free-text field to them (no patient
   details), and never present team points as one person's progress.
 - **A conversation with Dr. Smiley is not a preference.** What "that" or
@@ -341,8 +345,9 @@ https://interp-six.vercel.app before reporting success.
 
 ## Before pushing `index.html`
 
-It is one ~24,500-line, 1.4 MB file with all the app's JS inline (its CSS is
-`app.css`), used mostly on phones in a hospital. Do not push it unverified.
+It is one 18,400-line, 1.0 MB file (measured 2026-11-10) with most of the
+app's JS still inline (its CSS is `app.css`; 22 features have their own
+file in `features/`), used mostly on phones in a hospital. Do not push it unverified.
 
 **The checks live in `tests/`** (see `tests/README.md`): `cd tests && npm
 install && node run.cjs`. GitHub runs the same suites on every pull
@@ -445,7 +450,7 @@ site), and say in the spec where ours can be better or should copy.
 or already covered by something in the app. No sugarcoating, no praise
 for its own sake. Disagree when he is wrong, then do what he decides.
 
-## Not building (proposed 2026-10-29, waiting for Jose's OK)
+## Not building (proposed 2026-10-29; Jose's OK, 2026-11-11)
 
 Things the Hub will not do. A request that crosses one gets flagged
 before any work starts.
