@@ -1,7 +1,7 @@
 # Measuring only, started by hand (Actions, "WebKit crash probe", Run
 # workflow) or by a push to the branch that is looking into it. Runs
 # tests/tools/webkit-crash.cjs in the same image as the tests' webkit job:
-# Home opened 20 times per variation, each printing whether the page died,
+# Home opened 60 times per variation, each printing whether the page died,
 # when, and its memory second by second. Nothing passes or fails; read each
 # job's last line (SUMMARY). docs/FACTS.md, "startup-work's rare red".
 name: WebKit crash probe
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [base, dsf1, reduce, still, penned]
+        variant: [base, dsf3, reduce, still, nooff, noworker]
     container:
       # The tag must match the playwright version in tests/package.json.
       image: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -34,5 +34,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install the test tools (WebKit is in the image)
         run: npm install --no-audit --no-fund
-      - name: Open Home 20 times in WebKit (${{ matrix.variant }})
-        run: BROWSER=webkit RUNS=20 VARIANT=${{ matrix.variant }} node tools/webkit-crash.cjs
+      - name: Open Home 60 times in WebKit (${{ matrix.variant }})
+        run: BROWSER=webkit RUNS=60 VARIANT=${{ matrix.variant }} node tools/webkit-crash.cjs

@@ -23,15 +23,29 @@ it is real there it is the app restarting on Home.
   doctor-page, dock-tuck and startup-work). The six Chromium jobs pass.
 - Not known: memory, a WebKit bug, or the machine. Nothing measured yet.
 
-**Exact next step:** this cloud machine has no WebKit and must not run
-`playwright install` (`docs/FACTS.md`), so the measuring happens on GitHub.
-On this branch, add a manual-only workflow (or a manual input on the tests
-workflow) that runs `startup-work.cjs` in the WebKit container 20 times and
-prints, per run: pass or crash, seconds to the crash, and the page's memory
-if WebKit gives it. Read the crash rate first. Then narrow: the same loop
-with the name pen off (`home-polish.js`, `namePen`), with the petals off,
-with Dr. Smiley still, to see which one the crash follows. Confirm the plan
-with Jose before starting. A workflow file is tooling: no bump, no deploy.
+**Found so far (2026-11-11, run 42940783637 of "WebKit crash probe", 20
+opens per variation in GitHub's WebKit):**
+- It is a freeze, then a kill; memory is not the cause. In 4 of 100 opens the page
+  stopped answering 1.3 to 3.4 s after it opened; its memory stayed flat
+  (about 600 MB at 1x, 900 MB at 3x, 13.6 GB free); WebKit killed it 18 to
+  28 s later. That is the suite's "32 s".
+- By variation: at 1x 3 of 20 froze; Dr. Smiley Still (3x) 1 of 20; as the
+  suite runs it (3x) 0 of 20; Reduce Motion 0 of 20; pen path already saved
+  0 of 20. Twenty opens each is too few to say which piece it follows.
+- In GitHub's WebKit the page draws about 5 frames a second at 3x and holds
+  about 1.3 GB.
+
+**Exact next step:** read the second run of the probe (pushed with this
+file: 60 opens per variation at 1x, a freeze counted after 3 silent
+seconds, and a trace of the page's heavy calls so a frozen run prints what
+it was doing last). `tests/tools/webkit-crash.cjs` says what each variation
+turns off. If the freeze follows one call (a worker starting, a canvas
+handed to a worker, getImageData), look at that code in `home-polish.js`.
+If it follows nothing, say so: it may be GitHub's WebKit build alone, and
+then the suite's check should say "the page froze" and retry, with Jose's
+OK. This cloud machine has no WebKit and must not run `playwright
+install`; all measuring is on GitHub (a push to this branch that touches
+the tool or the workflow starts it).
 
 **Done in the last chat (all merged):**
 - #266, live as build b1111.0136: the first cleanup audit
