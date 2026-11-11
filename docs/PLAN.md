@@ -170,6 +170,12 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
   dropped (`docs/PLAN-done.md`, "Smoothness: parked"); fixing it changes
   whether the bar ends open, so it needs Jose.
 
+- **WebKit's page crashes about 32 s into the hello, now and then, on
+  GitHub** (`startup-work`, twice: a0d66e0 and #266's first run; details
+  in `docs/FACTS.md`). Trigger: a third time, or Jose sees the app restart
+  on Home on an iPhone, which runs the same engine. First step: run the
+  suite 20 times in the WebKit job with the page's memory logged.
+
 - **Notes that have drifted from the code** (found 2026-11-10 by a sweep
   of every note; a helper's report, the lines marked "checked" re-run by
   hand). Trigger: the next time a chat touches that note, or Jose asks for

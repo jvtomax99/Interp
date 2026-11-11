@@ -484,3 +484,9 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   `city/${key}-paint${n}.webp`). Checked clean then: every picture, clip
   and sound is used; all 110 paths in `sw.js`'s list exist; every suite is
   in `run.cjs`; `home-polish.css` has no unused class.
+- `startup-work`'s rare red in GitHub's WebKit job is the page crashing,
+  not a wrong result (2026-11-11, #266's first run): "Target page, context
+  or browser has been closed [the page crashed]", 32.9 s after the pen
+  appeared, the same 32 s as on `main` (a0d66e0) the day before. The six
+  Chromium jobs passed and the one re-run of `webkit` passed with no
+  change. Not known: why WebKit's page dies about 32 s into the hello.
