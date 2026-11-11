@@ -517,3 +517,11 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   still fail; a page that answers and shows the wrong thing still fails).
   Its later opens have no such retry: neither red run was there. To
   measure again: Actions, "WebKit crash probe", Run workflow.
+- The cloud machine's Chromium and the tests' Playwright can disagree
+  (2026-11-11): the machine had build 1243, `tests/` pins Playwright
+  1.56.1, which looks for build 1194, and every browser suite failed to
+  start ("Executable doesn't exist at
+  /opt/pw-browsers/chromium_headless_shell-1194/..."). What worked, for
+  that chat only: `mkdir -p /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux && ln -sf /opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`;
+  the full suite then passed. Never `playwright install` here. A lasting
+  fix is Jose's call (`docs/PLAN.md`, Waiting on Jose).
