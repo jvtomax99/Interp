@@ -1,0 +1,38 @@
+# Measuring only, started by hand (Actions, "WebKit crash probe", Run
+# workflow) or by a push to the branch that is looking into it. Runs
+# tests/tools/webkit-crash.cjs in the same image as the tests' webkit job:
+# Home opened 20 times per variation, each printing whether the page died,
+# when, and its memory second by second. Nothing passes or fails; read each
+# job's last line (SUMMARY). docs/FACTS.md, "startup-work's rare red".
+name: WebKit crash probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/webkit-page-crash']
+    paths: ['tests/tools/webkit-crash.cjs', '.github/workflows/webkit-crash.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [base, dsf1, reduce, still, penned]
+    container:
+      # The tag must match the playwright version in tests/package.json.
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      options: --user 1001 --ipc=host
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the test tools (WebKit is in the image)
+        run: npm install --no-audit --no-fund
+      - name: Open Home 20 times in WebKit (${{ matrix.variant }})
+        run: BROWSER=webkit RUNS=20 VARIANT=${{ matrix.variant }} node tools/webkit-crash.cjs
