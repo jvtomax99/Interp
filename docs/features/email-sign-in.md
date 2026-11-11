@@ -161,9 +161,11 @@ typing the name stops earning it.
   **Title** button on each row signed in by email: Supervisor of Language
   Services, Administrator, Developer, No title (`teamGiveTitle`,
   `setGivenTitle`). Everyone listens (`startHubTitles`). A given title wins
-  on that account's messages and in Home's hello; giving a name rule's
-  title (`rule`: Liz's, Jose's, Fabiola's when given to her) stops the name
-  match for everyone else (`openNameTitle`). Rules not published: no given
+  on that account's messages and in Home's hello, except over the three
+  name titles. Changed 2026-11-11 (Jose: Fabiola always Administrator, Liz
+  always Supervisor, Jose always Developer): the name titles now come first,
+  and giving one (`rule`) no longer stops the name match for everyone else;
+  `rule` is still written but not read. Rules not published: no given
   titles, the name titles keep working.
 - **Chat runs** now need the same name *and* the same `uid`: before, an
   impostor's message right after Liz's joined her run and sat under her

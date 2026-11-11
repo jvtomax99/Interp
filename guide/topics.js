@@ -426,10 +426,11 @@ const GUIDE_TOPICS = [
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
 
-  { id:'chattitles', section:'team', k:'admin administrator developer supervisor title tag badge name leader owner liz lind fabiola jose language services who runs chat ribbon star give title account team access impostor fake', q:'What are the Administrator and Supervisor tags in Chat?', a:`
+  { id:'chattitles', section:'team', k:'admin administrator developer supervisor title tag badge name leader owner liz lind fabiola jose language services who runs chat ribbon star give title account team access impostor fake', q:'What are the Administrator, Supervisor and Developer tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
-    <p><b>Administrator</b> (a small outlined tag) is Fabiola, and anyone who joined the Hub with the <b>owner code</b>. <b>Developer</b> is Jose Vazquez, who builds the app. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind.</p>
-    <p>A title can also belong to someone's <b>account</b>: the owner gives it on <b>Team access</b> (the <b>Title</b> button beside anyone signed in with their email). Then it shows only on messages from that account, on every phone, and typing that person's name on another phone no longer gets it. Messages they sent before signing in lose it too, and messages from two different phones under the same name never run together under one title.</p>
+    <p><b>Administrator</b> (a small outlined tag) is Fabiola Grijalva, and anyone who joined the Hub with the <b>owner code</b>. <b>Developer</b> is Jose Vazquez (or Jose V), who builds the app. <b>Supervisor of Language Services</b> (a blue ribbon with a star) is Liz Lind (or Elizabeth Lind).</p>
+    <p>Those three are always theirs: on any phone, signed in or not, and nothing given on Team access replaces them.</p>
+    <p>Anyone else's title can belong to their <b>account</b>: the owner gives it on <b>Team access</b> (the <b>Title</b> button beside anyone signed in with their email). Then it shows only on messages from that account, on every phone. Messages from two different phones under the same name never run together under one title.</p>
     <p>In Chat, titles show above other people’s messages, not your own. Your own title shows on <b>Home</b>, in a ribbon under the heart line beneath your name.</p>` },
 
   { id:'mention', section:'team', k:'mention tag notify attention at symbol someone specific person', q:'How do I get one person’s attention?', a:`

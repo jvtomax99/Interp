@@ -2,8 +2,9 @@
    Term Review's record follows the email account, not the typed name (the
    name's record joins the account's once, the later answer winning; signing
    out goes back to the name's), and titles given to an account on Team
-   access show only on that account's messages: once given, typing the name
-   no longer earns it. The owner's Title picker on Team access: it saves,
+   access show only on that account's messages. Fabiola, Liz and Jose keep
+   their named titles always, over any given title (Jose, 2026-11-11).
+   The owner's Title picker on Team access: it saves,
    takes its own taps, reads in dark mode. The database rules behind both are
    checked against Firebase's own emulator by tests/tools/rules-e3.mjs. */
 const L = require('../support/harness.cjs');
@@ -81,16 +82,26 @@ const LIZ = 'acct_11112222333344445555666677';
       await add('a4', 'Liz Lind', 5, 'phone-x');         // anyone else typing her name
       await add('a5', 'Elizabeth Lind', 4);              // no phone on it
       await add('a6', 'Maria Ruiz', 3, 'acct_maria000000000000000000000');
-      await add('a7', 'Fabiola', 2);                     // her rule isn't given to anyone: still by name
+      await add('a7', 'Fabiola', 2);                     // by name, as always
+      await db.collection('hub-titles').doc('acct_fab00000000000000000000000').set({ title: 'Supervisor of Language Services', kind: 'supervisor', rule: 'liz', name: 'Fabiola Grijalva', at: now });
+      await db.collection('hub-titles').doc('acct_jose0000000000000000000000').set({ title: 'Administrator', kind: 'admin', rule: '', name: 'Jose Vazquez', at: now });
+      await db.collection('hub-titles').doc('acct_rosa0000000000000000000000').set({ title: 'Developer', kind: 'admin', rule: 'jose', name: 'Rosa Diaz', at: now });
+      await add('a8', 'Fabiola Grijalva', 1.5, 'acct_fab00000000000000000000000'); // another title given to her account
+      await add('a9', 'Jose V', 1, 'acct_jose0000000000000000000000');             // another title given to his account
+      await add('a10', 'Rosa Diaz', 0.5, 'acct_rosa0000000000000000000000');      // Developer, given to someone else
     }, { LIZ });
     await page.evaluate(() => setCategory('chat')); await wait(1200);
-    const rows = await page.evaluate(() => [...document.querySelectorAll('.chat-author')].slice(-7).map(a => ({
+    const rows = await page.evaluate(() => [...document.querySelectorAll('.chat-author')].slice(-10).map(a => ({
       name: a.firstChild.textContent, title: (a.querySelector('.chat-title') || {}).textContent || '' })));
     const t = i => (rows[i] || {}).title;
-    ok(t(0) === '' && t(2) === 'Supervisor of Language Services', 'once given to her account, Liz\'s older message from another phone loses it; her account\'s has it', rows);
-    ok(t(3) === '' && t(4) === '', 'typing "Liz Lind" or "Elizabeth Lind" no longer earns it', [t(3), t(4)]);
+    const SUP = 'Supervisor of Language Services';
+    ok(t(0) === SUP && t(2) === SUP, 'Liz is always Supervisor: from another phone and from her account', rows);
+    ok(t(3) === SUP && t(4) === SUP, '"Liz Lind" and "Elizabeth Lind" still read Supervisor after her title was given', [t(3), t(4)]);
     ok(t(5) === 'Administrator', 'a title given to any account shows on its messages', t(5));
-    ok(t(1) === 'Administrator' && t(6) === 'Administrator', 'a name rule not given to anyone keeps working (Fabiola)', [t(1), t(6)]);
+    ok(t(1) === 'Administrator' && t(6) === 'Administrator', 'Fabiola by name: Administrator', [t(1), t(6)]);
+    ok(t(7) === 'Administrator', 'Fabiola stays Administrator even with another title given to her account', t(7));
+    ok(t(8) === 'Developer', 'Jose V stays Developer, even with another title given to his account', t(8));
+    ok(t(9) === 'Developer', 'Developer given to another account shows on its messages', t(9));
     const mine = await page.evaluate(async LIZ => {
       const a = myHubTitle();
       await hubAuth.signInWithCustomToken('ticket:' + LIZ);
