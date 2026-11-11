@@ -336,7 +336,7 @@ animation (`cardIn`) was set to fill `both`, so its last frame's
 `transform` was held for ever, and an animation's held value beats
 every normal rule, the hover lift included. The fill is `backwards`
 now (the last frame is the card's own rest state, so nothing moves at
-rest). Rule in `DESIGN.md` and `CLAUDE.md`: an entrance never fills
+rest). Rule in `DESIGN.md` and `AGENTS.md`: an entrance never fills
 forwards on an element with a press or hover rule.
 
 After, light theme: no text under 4.5:1 on any of the 26 screens but

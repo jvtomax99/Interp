@@ -43,3 +43,30 @@ preference. Visible Stop (`.ask-stop`) and New conversation (`askNewConversation
 saved preferences stay). Nothing from a stopped or overtaken request is
 applied (`stale()` in `submitAsk`, `ASK.gen`). His voice is enforced
 server-side too (`tidyVoice`: no greeting, praise or introduction).
+
+## Rules moved here from `AGENTS.md` (2026-11-11)
+
+Word for word as they stood there; `AGENTS.md` keeps the short form.
+
+- **An account is optional** (email sign-in, live since 2026-11-07;
+  `docs/features/email-sign-in.md`). The team code joins a *phone*, and the
+  name is whatever was typed on it. Someone who also signs in with their
+  email gets their name, photo, practice and settings on every phone
+  (`account-sync/{uid}`). Dr. Smiley's remembered preferences
+  (`ih_smileyMemory`: explanation language, brief/detailed, study focus, how
+  he moves, use my practice record) still live only on that phone, filed
+  under that name, signed in or not (Jose's call, 2026-11-06). Never sync them to Firestore, never mix them into `hub-lessons`
+  (approved team knowledge), never add a free-text field to them (no patient
+  details), and never present team points as one person's progress.
+- **A conversation with Dr. Smiley is not a preference.** What "that" or
+  "the previous term" means, a language asked for with "Now in Spanish", the
+  briefing being talked about and the interpreter's own corrections live in
+  `ASK.convo` (in memory, bounded, cleared by New conversation), never in
+  `ih_smileyMemory` and never in Firestore. Only an explicit tap saves a
+  preference ("Use Spanish in every conversation"), and only an owner-approved
+  `hub-lessons` note is team knowledge: a correction is used for the rest of
+  the conversation, labelled "not checked", and never verified or a source.
+  A follow-up that can mean two things asks one question with a button per
+  option; one that refers to nothing says so. Never resolve a reference to an
+  entry the phone didn't send (`api/ask.js` drops such ids), and nothing from
+  a stopped request may change the screen or the record.

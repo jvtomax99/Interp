@@ -6,6 +6,81 @@ search it for the screen, file or word you are about to touch
 (`grep -n -i "tab bar" docs/FACTS.md`), before measuring or retrying
 anything. Add what you learn here, newest near the top, with the date.
 
+**The rule files shortened (2026-11-11).** `AGENTS.md` now holds every
+shared rule once; `CLAUDE.md` only what is Claude's alone; the handoff
+rules live only in `docs/PLAN.md`. Jose's picks that day: the list of
+rules first, and "one short copy in the repo" for what his claude.ai
+preferences also say. The dates and the "why" stories that left the rule
+lines are kept here.
+
+*When Jose set each rule:* speed never costs the look, 2026-10-15 (he
+reversed S1's stopped petals and one-shot heartline for it); evidence
+before confidence, and a preview plus a phone notification for every
+finished job, 2026-10-17; buttons for options, and "Archive this chat",
+2026-10-18; always say your recommendation, 2026-10-19; plain words,
+"working on it" and "done", the first handoff rule, and the Action that
+moves the version lines, 2026-10-20; handoff buttons, 2026-10-23 and
+2026-10-25; a phone notification for every "push", and the two-part
+summary, 2026-10-24; spec first, research first, challenge him,
+2026-10-29 ("Not building" proposed that day, his OK 2026-11-11); "push"
+as a button, and a notification when something goes live, 2026-11-03;
+settings ready to paste, ask then install, and deploys only on a bump,
+2026-11-04; Dr. Smiley's memory stays on the phone, 2026-11-06; the Hub
+locked, 2026-11-07; one pull request per phase, no commits to `main`,
+`SPEC.md` and `docs/PLAN.md`, the report style (was "sacrifice grammar"
+for everything), `builder` never writes code logic, 2026-11-10.
+
+*Why, for rules that now stand without their story:*
+- Two tools pushed to `main` with neither told about the other
+  ("Claude (git) Clear the grey haze under the hero", "ChatGPT (git)
+  Restore curved photo fade behind home search", "ChatGPT (git) Apply
+  approved glass hello banner"). Work was reviewed against a copy eleven
+  commits stale, and the press glow died: a `.is-pressed` rule in
+  `index.html` lost to an `#content.is-home` rule in `home-polish.css`,
+  found only by measuring six cards' computed shadows.
+- Deploy only on a bump: each merge used to deploy, then its bump deployed
+  the same app again seconds later, and that filled the free 10 GB of
+  Deployment Storage. Branches (`claude/**`) are turned off in
+  `vercel.json` (`git.deploymentEnabled`) for the same reason.
+- Version lines by hand: when every pull request bumped them, every open
+  one conflicted with every other on those lines. The bump landed about
+  10 minutes after a merge on 2026-10-20, behind the merge's test runs.
+- The Firebase SDK was four blocking `<script>` tags: 8 s of blank screen
+  on slow Wi-Fi.
+- `pin-icons.js` used to download 9 MB of sheets and cut every pin out on
+  a canvas at each launch (about 2.7 s on a phone).
+- Migrations `oncologySplit` and `slangGlossary` were deleted once their
+  flags read `true` live (2026-10-14; their code is in git history).
+- Nine User Guide answers had drifted before the same-commit rule.
+- `:has()` rules on `body` were most of Home's style work while
+  scrolling. `body.dock-mini .tabbar-btn > span:not(.x)` made every tab
+  bar tuck restyle every span on the page (S7b).
+- Between 761 and 900px the sidebar and the tab bar used to show together.
+- `DESIGN.md` is the only copy of the design values because `CLAUDE.md`'s
+  copy went stale (`--ink-faint` kept its old, too-pale value for a week).
+- `index.html`'s split finished 2026-10-25 (`docs/split-index.md`, phase
+  4): the CSS is `app.css` (2026-10-21), Translate moved first
+  (2026-10-22), the guide data 2026-10-21; what is left stays inline by
+  design. Subgroup tiles on All domains: 2026-11-03. The squash and
+  stretch pick: E3, 2026-10-19. `YOUR_VALUE_HERE`: 2026-11-10. The
+  docs-only skip of the checks, and the six shares: 2026-11-10.
+- The tests' suites cover: events-watcher login, Daily Drill, User Guide,
+  the end-to-end journey, Dr. Smiley's gaze and his five performances,
+  Home at rest, in headless Chromium with Firebase and the AI endpoints
+  stood in for (`tests/support/`). `.vercelignore` keeps `tests/` and
+  `.github/` out of the deployed site.
+- The events watcher's login, as `CLAUDE.md` recorded it:
+  - **The events watcher (`api/check-events.js`) has its own login.**
+    `api/_service-login.js` signs a JWT with the service account in
+    `FIREBASE_SERVICE_ACCOUNT` (Vercel setting, the whole JSON key; role
+    Cloud Datastore User), trades it for a one-hour token and sends that with
+    every Firestore call, which the lock doesn't apply to. Without the key it
+    goes in unsigned, as before (practice mode only). Each run's report says
+    which ("login"), and a refused key stops the run with the reason; a run
+    reported "service account" on 2026-11-07, 14:42 UTC, before the lock. Putting a
+    shared secret inside the documents it writes was rejected as a
+    credential leak.
+
 **Team Chat titles always theirs (Jose, 2026-11-11).** Fabiola Grijalva is
 always Administrator, Liz Lind / Elizabeth Lind always Supervisor of
 Language Services, Jose Vazquez / Jose V always Developer.
