@@ -144,6 +144,16 @@ with buttons.
   rows instead of two-column cards (mock up first: it reverses D3's
   cards), and search that also finds a doctor's terms and short forms (GI,
   cardio, peds).
+- **`CRON_SECRET` in Vercel** (asked 2026-11-11, no answer yet): the
+  events watcher checks its caller's secret only when that setting exists
+  (`api/check-events.js`, `if (secret && ...)`), so without it anyone can
+  start a run. Look under Settings, Environment Variables; if it is
+  missing, add it.
+- **The tests' browser on the cloud machine** (2026-11-11): the machine's
+  Chromium moved ahead of the Playwright the tests pin, so each chat has
+  to point the tests at it by hand (`docs/FACTS.md`). His pick: a line in
+  the environment's setup script, or moving `tests/` and the WebKit
+  image to the Playwright that matches.
 - **After South joins:** look at Firestore reads (Usage page) a week
   later. More people means more reads at every launch; the 50K/day trigger
   under Later may come from this alone.
