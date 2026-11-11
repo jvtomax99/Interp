@@ -13,8 +13,8 @@
  *           watcher (see the source below). Not fetched; each run logs
  *           "ccc disabled" so it is never mistaken for a working source.
  *
- * Findings are written to the existing activity-log collection, so the app's
- * notification system announces them with no extra wiring.
+ * Findings are written to the ce-events collection, which Training & Events
+ * reads.
  *
  * SETUP
  *   1. Add a CRON_SECRET environment variable in Vercel (any long random

@@ -196,4 +196,4 @@ box-shadow:
 
 - **Sizes set from script:** 8 inline `font-size` values in `index.html`, `features/csv.js` and `features/translate.js` are still plain pixels; the stylesheets are all on the scale (2026-11-03).
 - **Spacing:** the look is tokenized (69 `:root` variables); the rhythm mostly is not. Padding, margin and gap use a token about 99 times against about 1,737 pixel values (measured 2026-10-20), 12 of them crowding into 6 to 17px: 9px (251 uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each), then 12, 11, 16, 7 and 15. The scale 6 / 9 / 13 / 17 / 26 covers 42% of those uses as they stand. When you touch a component, move it onto the scale rather than adding to the tail.
-- **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`, `.doc-card-name`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
+- **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.

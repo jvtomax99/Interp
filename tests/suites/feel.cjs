@@ -100,7 +100,7 @@ const TEXT = () => (document.querySelector('.modal.show, .overlay.show, .gs-over
   await press(big, '.link-pill', 'a card\'s Hear pill');
   await press(null, '.card', 'a term card');
   await press('falsefriends', '.ff-chip', 'a filter pill');
-  await press('doctor-directory', '.doc-card, .dl-card', 'a doctor card');
+  await press('doctor-directory', '.dl-card', 'a doctor card');
 
   // ---- contrast, light theme ----
   const CONTRAST = () => {

@@ -94,7 +94,8 @@ a phase finishes but the next phase continues here.
 ## Next (in order)
 
 Nothing is queued. The cleanup audit ran on 2026-11-11: its list is
-`docs/CLEANUP.md` (20 items, a report; what gets cleaned is Jose's pick).
+`docs/CLEANUP.md` (20 items; the low-risk ones, 1 to 3, 18 and 19, were cleaned the same
+day, the rest wait for Jose's pick).
 
 The feel audit, the `index.html` split, the campus
 (2a to 2c), email sign-in (E1 to E3) and regions (R4) are finished

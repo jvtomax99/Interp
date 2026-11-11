@@ -474,3 +474,13 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   JFK is North. Details: `docs/features/regions.md`.
 - Weekly code report: Routine "Weekly code cleanup report", Mondays 11:51
   New York, report-only, phone notification.
+- Cleanup audit, 2026-11-11 (`docs/CLEANUP.md`). `npx knip` and `npx
+  depcheck` are no use on the app: with no import lines they call nearly
+  every file unused (81 in `tests/`, 57 in `promo/`); their one real
+  finding was a package `tests/tools/rules-e3.mjs` needs. What works: count
+  every function, constant and class name across the repo by script, then
+  check by hand for names inside `onclick="..."` and names built from
+  pieces (`'is-' + state`, `'ds-fx-' + kind`, `'op-' + look`,
+  `city/${key}-paint${n}.webp`). Checked clean then: every picture, clip
+  and sound is used; all 110 paths in `sw.js`'s list exist; every suite is
+  in `run.cjs`; `home-polish.css` has no unused class.

@@ -7,7 +7,9 @@ top, under this note: the date, a few lines, the PR number.
 
 - 2026-11-11 The cleanup audit, the first on record (`docs/cleanup-audit.md`; a report, nothing removed). `docs/CLEANUP.md` lists 20 items:
   unused script and styles, repeated code, one 520-line function, leftover files. `knip` and `depcheck` see nothing useful in an app with
-  no import lines; the list comes from a script count of every name, checked by hand. No app change.
+  no import lines; the list comes from a script count of every name, checked by hand. Then, Jose's pick ("Clean up the low-risk ones"),
+  items 1, 2, 3, 18 and 19 were removed: nine unused pieces of script, two unused settings, about 190 lines of styles nothing draws, ten
+  unused `export`s. Nothing visible changed, so the User Guide needed nothing.
 - 2026-11-11 `AGENTS.md`'s four stale lines corrected with Jose's OK (accounts are optional since email sign-in; `index.html`'s
   real size; where the other screens' code lives; "Not building" confirmed). Notes only.
 - 2026-11-10 The notes trim (#264; Jose: "critically analyze my CLAUDE.md and all the .md files, optimize them"). `docs/PLAN.md`

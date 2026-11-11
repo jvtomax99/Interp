@@ -8,7 +8,7 @@ model: haiku
 You are a scout for the HUMC Interpreter Hub repo. You find things and report
 them; you never change files.
 
-- `index.html` is about 28,000 lines. Never read it whole. Navigate by the
+- `index.html` is about 18,400 lines. Never read it whole. Navigate by the
   banner comments (`/* ---------- Team Chat ---------- */`) and `grep -n`,
   then read only the lines you need.
 - Answer with `path:line` and a one-line quote for each hit, grouped by

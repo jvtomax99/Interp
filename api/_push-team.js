@@ -62,7 +62,7 @@ export function typed(obj) {
 }
 
 // Every phone signed up, as plain objects with their document id.
-export async function listSubscriptions(db) {
+async function listSubscriptions(db) {
   const subs = [];
   let pageToken = '';
   for (let page = 0; page < 20; page++) {

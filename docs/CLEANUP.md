@@ -2,8 +2,11 @@
 
 Last audit: 2026-11-11, after phase "the notes trim" (#264, #265). The first audit on record.
 
-A report only: nothing here has been removed or changed. Made by running
-`docs/cleanup-audit.md`. An item is taken off this list when it is done.
+The audit itself changed nothing; what was cleaned afterwards is under
+"Done" at the end. Line numbers are as measured at the audit: `index.html`'s
+are about 40 lower now, `app.css`'s up to 190 lower. Made by running
+`docs/cleanup-audit.md`. An item is taken off this list when it is done, and the numbers stay
+as they were, so a gap is a finished item.
 
 **How it was made, and its limits.**
 - `npx knip` and `npx depcheck` were run in `tests/` and `promo/`. The app
@@ -19,8 +22,8 @@ A report only: nothing here has been removed or changed. Made by running
   misses use: a name inside an `onclick="..."`, a class or file name built
   from pieces (`'is-' + state`, `city/${key}-paint${n}.webp`), the service
   worker's list, the tests.
-- Not found by this method: code used only by other unused code (a second
-  pass after items 1 to 3 are removed would find it), and unused functions
+- Not found by this method: code used only by other unused code (the second pass, after
+  items 1 to 3 were removed, is still to run), and unused functions
   nested inside another function.
 - Not looked for in depth: database or API calls made twice. None turned
   up, so nothing was added to `SPEC.md`, "Later".
@@ -30,51 +33,7 @@ A report only: nothing here has been removed or changed. Made by running
   `run.cjs`; `home-polish.css` has no unused class; no function name is
   declared twice at the top level.
 
-## Unused code (safe to remove)
-
-1. **Nine unused pieces of script.** Each name appears exactly once in the
-   whole repo, its own definition. `index.html`: `ECG_STRIP` (line 10625,
-   an 18-line heartbeat drawing), `ICON_NOTE` (6903), `ICON_CAMERA_TC`
-   (6928), `ICON_CHEV_L_TC` (6934), `ICON_CHEV_R_TC` (6935),
-   `ICON_GUIDE_MAP` (6959). `features/doctor-sheets.js:204`
-   `openEditDoctorDirModal` (the app calls `_openEditDoctorDirModal`
-   directly). `features/sound-alikes.js:109` `setSAMode`.
-   `features/voice-check.js:249` `voiceCheckMoreHtml`.
-   Why not needed: nothing calls them, no `onclick` names them.
-   Improves: about 45 fewer lines downloaded and parsed at every launch,
-   and less to read past. Risk: **low**.
-
-2. **Two settings read at launch and never used.** `index.html:1221-1224`
-   reads `ih_collapsedDomainGroups` and `ih_toolsCollapsed` from the phone
-   into `collapsedDomainGroups` and `toolsCollapsed`. Nothing writes those
-   keys and nothing reads those variables.
-   Improves: four lines and two storage reads off startup. Risk: **low**.
-
-3. **Styles for things the app no longer draws** (about 75 rule lines in
-   `app.css`). No code or markup carries these class names:
-   - the old doctor cards, `.doc-card` and its 13 `.doc-card-*` children
-     (lines 1488-1576, plus 468, 5421, 7276); the list draws `.dl-card`
-     now. `.doc-card` is also still named in the `LIFTS` list
-     (`index.html:10830`) and in `tests/suites/feel.cjs:103`, and
-     `DESIGN.md:199` lists `.doc-card-name` as a known gap: all three
-     change with it;
-   - the old study goal and "ready" card: `.study-goal`,
-     `.study-goal-note`, `.study-goal-top`, `.study-goal-track`,
-     `.ready-card`, `.ready-main`, `.ready-say`, `.ready-stats`,
-     `.ready-stat` (3311-3400). `.study-goal-fill` is still named in a
-     selector at `index.html:10316`, which then matches nothing;
-   - the heartbeat strip of item 1: `.ecg-strip`, `.ecg-line`,
-     `.ecg-heart` (4252-4275, 4342-4346);
-   - singles: `.cp-face`, `.cp-sh`, `.cp-legend` (3947-4012), `.dl-head`
-     (6829), `.dl-floor.is-none` (6852), `.dp-have` (7054),
-     `.ask-head-acts` (6093), `.prep-fc.is-b2` (6383, 6390),
-     `.domain-chip-count` (924, 7372), `.vc-more` (1240, with item 1).
-   Why not needed: the screens that used them were redrawn.
-   Improves: a smaller stylesheet on every launch; removes dead rules that
-   look live to whoever edits next (the trap `CLAUDE.md` warns about).
-   Risk: **low**, with one check: `.is-none` and `.is-b2` sit next to
-   names built from pieces (`'is-' + state`), so confirm on the doctor list
-   and Doctor Prep by measurement before removing those two.
+## Unused code
 
 4. **Unused code in the 3D campus page** (`campus3d/index.html`): `ROOF`
    (line 262), `bollard` (630), `bayDoors` (651), `BACK_LEAF` (1071), each
@@ -170,7 +129,7 @@ A report only: nothing here has been removed or changed. Made by running
 
 15. **Two test tools nothing mentions**: `tests/tools/promo-shots.cjs` (16
     lines) and `tests/tools/smiley-clip.cjs` (52 lines; its header gives a
-    wrong path). Also `tests/support/fonts/urls.txt`. Sixteen more tools
+    path is right when run from inside `tests/`). Also `tests/support/fonts/urls.txt`. Sixteen more tools
     are named only in notes (`tests/README.md`, `docs/PLAN-done.md`):
     one-time measuring scripts, kept as the record of how a number was
     taken, so they stay. Risk: **low**.
@@ -192,19 +151,7 @@ A report only: nothing here has been removed or changed. Made by running
     holds five more sheets) and stop serving the `.webp`. Risk: **low**;
     Jose's call.
 
-## Small things in comments and notes
-
-18. `.claude/agents/scout.md:11` says `index.html` is about 28,000 lines
-    (18,407). `api/check-events.js:16` says findings go to `activity-log`
-    (the code writes `ce-events`). `tests/tools/smiley-clip.cjs` gives its
-    own path wrong. Risk: **low**.
-
-19. **Exports nobody imports** (`api/`): `ask.js:350` exports six names
-    used only inside the file; `buildMessage` (`_mail.js:35`),
-    `listSubscriptions` (`_push-team.js:65`), `signedAssertion`
-    (`_service-login.js:45`), `tidyEmail` (`sign-in.js:41`) the same.
-    Dropping the word `export` changes nothing that runs. Risk: **low**.
-    A helper's report.
+## Rules
 
 20. **`firestore.rules:153` still allows `terminology-hub`**, the old
     single-document glossary that nothing reads or writes. A rule, not
@@ -218,3 +165,13 @@ A report only: nothing here has been removed or changed. Made by running
   in Vercel, anyone can start the events watcher. Whether it is set can't
   be read from the repo: Jose can look in Vercel, Settings, Environment
   Variables.
+
+## Done
+
+- 2026-11-11: items 1, 2, 3, 18 and 19 (Jose's pick, "Clean up the
+  low-risk ones"). Out: nine unused pieces of script, two settings read and
+  never used, about 190 lines of styles nothing draws (the old doctor
+  cards, the old study-goal and "ready" card, the heartbeat strip and its
+  three animations, six singles), a wrong line count and a wrong comment,
+  ten `export`s nobody imported. Left in from item 3, to measure first:
+  `.dl-floor.is-none` and `.prep-fc.is-b2`.

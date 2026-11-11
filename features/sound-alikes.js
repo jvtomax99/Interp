@@ -106,9 +106,6 @@ function saStartDrill(g){
   saHush(); saGroup = g || 'all'; buildSADrill(); saMode = 'drill';
   render(); window.scrollTo(0, 0); saPlay();
 }
-function setSAMode(mode){
-  if(mode === 'drill') saStartDrill(saGroup); else if(mode === 'study') saOpenList(saFilter); else saHome();
-}
 function setSAFilter(f){ saFilter = f; render(); }
 function saSearch(value){
   saQuery = value;
