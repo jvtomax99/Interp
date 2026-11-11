@@ -2,7 +2,7 @@
 
 Jose picked this on 2026-11-05 as the next campus piece (item 2c in `docs/PLAN.md`: "tap a person: a term from your
 glossary, counts as practice; tap area bigger than the figure"). This is the spec, written before any code (his rule,
-`AGENTS.md`, "How Jose works with AI tools"). His go the same day: "Go, Term Review only".
+`AGENTS.md`, "How work is run"). His go the same day: "Go, Term Review only".
 
 ## As built (2026-11-05, branch `claude/campus-tap-person`)
 

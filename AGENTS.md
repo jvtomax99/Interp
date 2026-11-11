@@ -46,12 +46,17 @@ A request that crosses one of these gets flagged before any work starts.
   marked TO FILL for Jose). Keep it current, and update it whenever Jose
   corrects you. A request that isn't in it, or is on "Not in v1": say so
   and ask "now, or Later?". If it is ever missing, draft it from the code
-  and ask Jose to fill the gaps.
+  and ask Jose to fill the gaps; a new project gets its `SPEC.md` written
+  with him before any code. (The build order and its phases are
+  `docs/PLAN.md` here, with no checkboxes: a finished phase moves to
+  `docs/PLAN-done.md`.)
+- **Treat the AI as a junior developer Jose manages, not a genie.**
 - **A new feature starts with its spec, not its code.** Its note in
   `docs/features/` first (what it does, who for, what it does **not** do in
   this version) and its "Done when" line in `SPEC.md`. Before that, look at
   how two or three similar tools do it (their own docs or the product, not
-  a summary site) and say where ours can be better or should copy; new
+  a summary site) and say in the spec where ours can be better or should
+  copy; new
   ideas go to "Later" unless he approves.
 - **A big feature** (a new page or screen, a new kind of stored data, a new
   outside service) also needs a plan he OKs before any code: what you'll
@@ -76,7 +81,8 @@ moved eleven commits.
   commit message says what changed in a real sentence: the next tool has no
   other way to know.
 - **Fetch `main` before you write anything, and again before you push.** If
-  it moved, read what changed before continuing.
+  it moved, read what changed before continuing. Check for uncommitted
+  work before you start, too.
 - **Into `main`:** a pull request with a short plain summary, the "Done
   when" check and screenshots; then Jose's "push" (see "Push" below).
   Nothing merges without him. After a merge, say in one line how to undo it
@@ -87,8 +93,8 @@ moved eleven commits.
 - **Never without asking**, and if he asks for one, first explain what it
   will do and what can't be undone: force push, deleting a branch with work
   not in `main`, rewriting history (`git reset --hard`, rebase on `main`),
-  changing repo settings (the repo is public; making it private is his
-  call).
+  changing repo settings (the repo is public; Vercel works with a private
+  one, but making it private is his call).
 - **Never commit secrets, keys or `.env` files** (`.gitignore` keeps them
   out). The repo is public, so paid raw assets can't be committed either
   (`docs/assets.md`, section 9). Warn him before committing a file over
@@ -132,10 +138,13 @@ Hub: Dr. Smiley's conversation, actions and memory), `backfill`, `campus`
 (its motion, `campusLife` and `campusDepth`, stays in `index.html`),
 `credits`, `csv`, `doctor-sheets`, `duplicate-doctors`, `false-friends`,
 `sound-alikes`, `guide-front`, `knowledge-brain`, `opening`,
-`photo-adjust`, `smiley-engine`, `smiley-performances`, `term-lookup`,
-`tool-banners`, `translate`, `voice-check`. Each file's role and function
-names are in the full file map in `docs/ARCHITECTURE.md`; search there or
-in the code for a name.
+`photo-adjust` (with the name sheet's `handleMyPhotoSelected`),
+`smiley-engine`, `smiley-performances`, `term-lookup`,
+`tool-banners`, `translate` (`renderTranslate`, `runTranslate`),
+`voice-check`. Each file's role and function names are in the full file
+map in `docs/ARCHITECTURE.md`; search there or in the code for a name. A
+feature's styles sit in `app.css` under a section named for it ("Tool
+banners", "Opening", "Your account", "Adjust your photo").
 
 - **A feature's code lives in its file.** Edit it there; never paste a
   copy back into `index.html`. These files load with plain `<script src>`
@@ -368,9 +377,11 @@ before touching the feature.
 `docs/design-rules.md` before any visual change**, and change `DESIGN.md`
 in the same commit when a value changes. Take values from `DESIGN.md` or
 the code, never from memory. If `docs/design-rules.md` is ever missing,
-stop and ask Jose for his design rules. Assets (models, textures, icons,
+stop, ask Jose to paste his design rules, and create the file before
+starting. Assets (models, textures, icons,
 fonts, images, sounds, templates): read `docs/assets.md` first and follow
-it; if it is missing, stop and ask.
+it; if it is missing, stop, ask him to paste his asset rules, and create
+it before starting.
 
 - **Jose's bar is "high end", "dynamic", "alive"**, and he will notice a
   feature that does not match. Inherit the existing system; never invent a
@@ -405,7 +416,8 @@ it; if it is missing, stop and ask.
   only his drawn frames, a tilt and a lift, never a sideways slide, and
   the one squash (the cheer's and the greet's spring, Lively only, at most
   4%) is not added elsewhere or made bigger without showing Jose first.
-  New gestures go in `DR_PERF` (`features/smiley-performances.js`).
+  New gestures go in `DR_PERF` (`features/smiley-performances.js`). A
+  gesture the art can't draw needs new frames, not a trick.
 
 ## The User Guide
 
@@ -464,7 +476,7 @@ no guide change; say so in the commit message.
   or you're blocked on him), send screenshots of what changed (before and
   after when the look changed; phone size first), or for work with nothing
   to see, a short summary of what changed and what it needs from him. Then
-  notify his phone. Only when there is something to review or decide,
+  notify his phone, one line saying what's ready and what he needs to do. Only when there is something to review or decide,
   never for routine progress.
 - **"Push" is a phone notification and a button.** Every time a change is
   ready for his OK to go live (its checks passed), notify his phone,

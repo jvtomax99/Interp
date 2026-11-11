@@ -37,8 +37,8 @@ move each, with the same proof every time and nothing visible changing.
   network-first regex), `.github/bump-version.cjs` (which paths count as
   "the app changed" for the version bump), `tests/support/harness.cjs`
   (`route()` serves `home-polish.*` and `pin-icons.js` from the checkout and
-  honours `POLISH_DIR`; a new file needs the same). And the file maps in
-  `CLAUDE.md` and `AGENTS.md`.
+  honours `POLISH_DIR`; a new file needs the same). And the feature list in
+  `AGENTS.md` and the file map in `docs/ARCHITECTURE.md`.
 - **Tell ChatGPT.** A line in `AGENTS.md` before the first move: which files
   exist now and that a feature's code lives in its file, not in
   `index.html`. Two tools editing the same thing in two places is how the

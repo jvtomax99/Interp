@@ -25,7 +25,7 @@ and the short map at the top of `docs/ARCHITECTURE.md`.
 
 ## Helpers: the main model thinks, cheaper models fetch
 
-The main conversation plans, decides, writes the real code and reviews.
+The main conversation (Opus 5.5) plans, decides, writes the real code and reviews.
 Repetitive work goes to the agents in `.claude/agents/`:
 
 | Agent | Model | Use for |
