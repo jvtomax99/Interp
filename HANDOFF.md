@@ -26,12 +26,11 @@ notes were trimmed so a chat loads less (Jose's ask).
 - `CLAUDE.md` went from 42 KB to 34 KB: repeats folded, the design values
   and their history moved to `DESIGN.md` (its copy of `--ink-faint` was a
   week stale), the per-feature table cut to a list.
-- Not touched: `AGENTS.md` (needs Jose's OK). Its four stale lines are
-  listed in `docs/PLAN.md`, Later, "Notes that have drifted", with the rest
-  of what the sweep of every note found.
+- `AGENTS.md`: four stale lines corrected with Jose's OK (2026-11-11).
+  What the sweep of every other note found is in `docs/PLAN.md`, Later,
+  "Notes that have drifted from the code".
 
 **Open questions for Jose:**
-- OK to fix the four stale lines in `AGENTS.md`?
 - K2 (publish `firestore.rules` for Term Review privacy): done on
   2026-11-07 with the rest? `docs/PLAN.md` still lists it.
 - Left open from before: branch protection on `main`; removing from the

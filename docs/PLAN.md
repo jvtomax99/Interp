@@ -174,12 +174,9 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
   of every note; a helper's report, the lines marked "checked" re-run by
   hand). Trigger: the next time a chat touches that note, or Jose asks for
   the notes pass.
-  - `AGENTS.md` (needs Jose's OK to edit): "There are no personal
-    accounts" (email sign-in has been live since 2026-11-07; the rule
-    under it about Dr. Smiley's memory still holds); `index.html` given as
-    "~24,500-line, 1.4 MB" (checked: 18,407 lines, 1.0 MB); the other
-    screens "exist only inside `index.html`" (22 have `features/` files);
-    "Not building" still headed "proposed, waiting for Jose's OK".
+  - `AGENTS.md` (needs Jose's OK to edit): "Features are moving out of
+    `index.html`" still reads as under way; the split finished 2026-10-25.
+    (Its four other stale lines were fixed on 2026-11-11 with his OK.)
   - `docs/ARCHITECTURE.md`, Full file map: 11 line counts off by more than
     10% (checked three: `features/opening.js` 291 there, 655 now; `sw.js`
     220, 409; `features/campus.js` 157, 359); `pins/` given as 41 files
