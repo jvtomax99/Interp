@@ -8082,3 +8082,27 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 .pa-actions{ display:flex; justify-content:flex-end; gap:9px; }
 .pa-actions .btn{ min-height:44px; min-width:96px; }
 @media (prefers-reduced-motion: reduce){ .pa, .pa-sheet{ animation:none; } }
+
+/* ---------- Screen morph ----------
+   A domain tile's pin and name travel into the banner of the page that opens
+   (morphNav in index.html; docs/features/screen-morph.md). The pin and the
+   name get their view-transition-name from the script, on the two elements
+   that are a pair. Nothing else is named, on purpose: a named element is
+   photographed alone and drawn above the page, so the banner would cover
+   the search row that overlaps it, and anything made of glass (the tab bar,
+   the search row) would have nothing behind it to blur. The rest of the
+   screen cross-fades as one picture, which leaves the bars still. */
+::view-transition-group(hub-pin),
+::view-transition-group(hub-name){ animation-duration:.588s; animation-timing-function:var(--spring0, var(--ease)); }
+::view-transition-group(hub-pin){ z-index:3; }
+::view-transition-group(hub-name){ z-index:2; }
+::view-transition-old(root),
+::view-transition-new(root){ animation-duration:.38s; animation-timing-function:var(--ease); }
+/* The pictures keep their shape while the box between them changes size. */
+::view-transition-old(hub-pin),
+::view-transition-new(hub-pin){ width:100%; height:100%; object-fit:contain; }
+::view-transition-old(hub-name),
+::view-transition-new(hub-name){ width:auto; height:100%; object-fit:contain; object-position:left center; }
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
+}

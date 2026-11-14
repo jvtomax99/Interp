@@ -114,6 +114,12 @@ copy.
 - Done when: the app opens on a phone to a usable Home in a few seconds,
   even offline. TO FILL: Jose's target time.
 
+**Screen morph.** A domain tile's pin and name travel into the banner of
+the page that opens; the Back button sends them home (2026-11-14, Jose's
+pick from the visual options; doctor cards are the next step).
+- Done when: tapping a domain tile and then Back shows the pin leave and
+  return to its tile on an iPhone, and Back still retraces every step.
+
 ## Not in v1
 
 From `AGENTS.md` "Not building" (proposed 2026-10-29, Jose's OK

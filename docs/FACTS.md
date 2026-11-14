@@ -6,6 +6,31 @@ search it for the screen, file or word you are about to touch
 (`grep -n -i "tab bar" docs/FACTS.md`), before measuring or retrying
 anything. Add what you learn here, newest near the top, with the date.
 
+**Screen morph and the repo scan (2026-11-14).**
+- View Transitions, measured in the cloud Chromium: a named element is
+  drawn above the page and photographed without its backdrop, so naming
+  the tab bar or the domain search row (glass) dims them, and naming the
+  banner hides the search row over its edge. Two elements with one name:
+  "Snapshot capture failed", the whole transition dropped. The browser
+  calls the update a frame late, so a tile tap then Back in the same
+  instant ran Back first until `morphFlush` (`docs/features/screen-morph.md`).
+- To photograph a transition mid-way: pause every animation whose
+  `effect.pseudoElement` starts with `::view-transition` and set
+  `currentTime` in milliseconds (a share of each animation's own length
+  misleads: they differ).
+- Repo scan (stars and licences read from GitHub that day). Worth adding,
+  none started: leeoniya/uFuzzy (glossary search has no typo tolerance,
+  `foldText` then exact match), open-spaced-repetition/ts-fsrs (Term
+  Review steps are fixed, `REVIEW_INTERVALS`), dequelabs/axe-core (not in
+  `tests/package.json`), huggingface/transformers.js with Whisper plus
+  ricky0123/vad (auto-mark in the installed app; unproven on an iPhone).
+  Maybe: tijnjh/ios-haptics. Looked at and dropped: Fuse, MiniSearch,
+  Dexie, Workbox, Piper, Kokoro, LibreTranslate, canvas-confetti, uPlot,
+  GSAP. No vetted English/Spanish medical glossary exists as a repo;
+  PlanTL-GOB-ES/AbreMES-DB (abbreviations, 2019, Spain) only as a source
+  to check against. `atlas/` is on human-atlas's latest commit. The app
+  has no error reporting.
+
 **The rule files shortened (2026-11-11).** `AGENTS.md` now holds every
 shared rule once; `CLAUDE.md` only what is Claude's alone; the handoff
 rules live only in `docs/PLAN.md`. Jose's picks that day: the list of

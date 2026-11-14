@@ -5,6 +5,11 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-14 Screen morph, step 1 (Jose's pick from four visual options after a scan of GitHub for repos worth adding). On All domains a
+  tile's pin and name travel into the banner of the page that opens and the Back button sends them home: the browser's View Transitions,
+  no library. `morphNav` in `index.html`, styles in `app.css`, `tests/suites/screen-morph.cjs`, `docs/features/screen-morph.md`. Not
+  proven on an iPhone. The repo scan's other picks (uFuzzy for typo-proof search, ts-fsrs for Term Review timing, axe-core in the checks,
+  Whisper in the page for auto-mark) are in `docs/FACTS.md`.
 - 2026-11-11 The rule files shortened (Jose: "Start a new chat to shorten CLAUDE.md and AGENTS.md"). `AGENTS.md` holds every shared
   rule once (30.6 KB before, 30.8 after: it took in what was only in `CLAUDE.md`); `CLAUDE.md` holds what is Claude's alone (34.5 KB to
   3.4); the handoff rules live only in `docs/PLAN.md`. Detail moved word for word to its notes, the dates and stories to `docs/FACTS.md`.

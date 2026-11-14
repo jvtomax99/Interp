@@ -68,6 +68,7 @@ const SUITES = [
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
   ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once, in the background'],
   ['slow-open.cjs',       'Slow Wi-Fi: the saved copy opens past a second, with its own code; a new version waits for the background'],
+  ['screen-morph.cjs',    'Screen morph: a tile\'s pin and name travel into the banner and back; taps keep their order; Back swipe and Reduce Motion stay plain'],
   ['feel.cjs',            'The feel guard: no empty flash or jump on data, press feedback, contrast, a scroll that searches nothing, his face on its clock, Home at rest'],
 ];
 /* Shares for GitHub: suite i goes to one of n shares, the same answer on
