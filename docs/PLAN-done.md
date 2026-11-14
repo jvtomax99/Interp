@@ -7,7 +7,7 @@ top, under this note: the date, a few lines, the PR number.
 
 - 2026-11-14 Screen morph, step 1 (Jose's pick from four visual options after a scan of GitHub for repos worth adding). On All domains a
   tile's pin and name travel into the banner of the page that opens and the Back button sends them home: the browser's View Transitions,
-  no library. `morphNav` in `index.html`, styles in `app.css`, `tests/suites/screen-morph.cjs`, `docs/features/screen-morph.md`. Not
+  no library. `morphNav` in `index.html`, styles in `app.css`, `tests/suites/screen-morph.cjs`, `docs/features/screen-morph.md`. #273, live b1114.1040. Not
   proven on an iPhone. The repo scan's other picks (uFuzzy for typo-proof search, ts-fsrs for Term Review timing, axe-core in the checks,
   Whisper in the page for auto-mark) are in `docs/FACTS.md`.
 - 2026-11-11 The rule files shortened (Jose: "Start a new chat to shorten CLAUDE.md and AGENTS.md"). `AGENTS.md` holds every shared
