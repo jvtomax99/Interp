@@ -5,6 +5,14 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-14 The computer-only scroll jump (Jose's pick, plan OK'd). A held-back or background redraw (`scheduleRender`) of the screen
+  already on show is now a redraw in place: `render({ inPlace: true })` holds `#app` at its height while it is rebuilt (so the scroll
+  never moves; putting the scroll back afterwards stopped a glide to a search result partway, caught by the reviewer) and skips the
+  search box's autofocus. Rebuilding `#app` left the page one screen tall for a moment, and the autofocus made the browser measure then,
+  so a scrolled list jumped to the top; behind a doctor's page that meant no flight home. Phones had the jump too on any background
+  redraw (measured in Chromium's iPhone mode). Direct `render()` calls are unchanged.
+  `screen-morph.cjs` "desk" case (fails on the old code: scroll 3166 to 0) and "glide" case (fails on the first try: 1112, term off screen). PR number added on merge.
+
 - 2026-11-14 Screen morph, step 2 (#274): a doctor card's photo and name travel into the doctor's page; its back arrow and the top bar's Back
   send them home (`morphOpenDoctor`, `morphCloseDoctor`; the page's slide-up held back by `.dp-flown`). Jose said step 1 is smooth on his
   iPhone. Found and left for Jose: on a computer a held-back redraw scrolls the list behind a doctor's page to the top.
