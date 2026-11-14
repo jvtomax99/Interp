@@ -84,10 +84,23 @@ async function targets(page) {
         // A card opens the page inside the screen morph's flight, which waits
         // for the browser's snapshot first: wait for the page, and say how long.
         const t0 = Date.now();
+        // Where the time goes: the tap's moment, the page's .show, a timer due
+        // 50 ms after the tap, and the longest gap between frames.
+        await page.evaluate(() => {
+          const T = window.__cardT = { gap: 0 };
+          let last = performance.now();
+          const tick = () => { const n = performance.now(); T.gap = Math.max(T.gap, Math.round(n - last)); last = n; if (!T.show || n - T.show < 300) requestAnimationFrame(tick); };
+          requestAnimationFrame(tick);
+          document.addEventListener('click', () => { if (T.tap) return; T.tap = performance.now(); T.vt = !!document.startViewTransition; setTimeout(() => { T.timer = Math.round(performance.now() - T.tap); }, 50); }, { capture: true });
+          const ov = document.getElementById('doctorDirDetailOverlay');
+          new MutationObserver(() => { if (!T.show && ov.classList.contains('show')) T.show = performance.now(); }).observe(ov, { attributes: true });
+        });
         await page.locator('#content .dl-card').first().click();
         const opened = await page.waitForSelector('#doctorDirDetailOverlay.show .dp-hero', { state: 'attached', timeout: 5000 }).then(() => true, () => false);
         const took = Date.now() - t0;
-        ok(opened && took < 1500, 'a doctor card opens the doctor page (within 1.5 s)', { device, opened, ms: took });
+        await pause(page, 400);
+        const T = await page.evaluate(() => { const T = window.__cardT; return { tapToShow: T.show && T.tap ? Math.round(T.show - T.tap) : null, timer50: T.timer, longestFrameGap: T.gap, vt: T.vt }; });
+        ok(opened && took < 1500, 'a doctor card opens the doctor page (within 1.5 s)', { device, opened, ms: took, ...T });
         await pause(page, 400);
         await page.evaluate(() => closeDoctorDirDetail()); await pause(page);
 
