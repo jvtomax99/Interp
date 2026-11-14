@@ -116,9 +116,13 @@ copy.
 
 **Screen morph.** A domain tile's pin and name travel into the banner of
 the page that opens; the Back button sends them home (2026-11-14, Jose's
-pick from the visual options; doctor cards are the next step).
+pick from the visual options). Step 2: a doctor card's photo and name
+travel into the doctor's page, and its back arrow sends them home.
 - Done when: tapping a domain tile and then Back shows the pin leave and
   return to its tile on an iPhone, and Back still retraces every step.
+- Done when: tapping a doctor card and then the page's back arrow shows the
+  photo and name leave and return to the card on an iPhone, with the
+  page's own slide-up never playing on top of the flight.
 
 ## Not in v1
 

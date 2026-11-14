@@ -15,10 +15,36 @@ Smiley hold still.
 Who for: everyone, on the trip they make most (tiles to a domain and back).
 It tells the eye where the page came from, which a fade does not.
 
+**Doctor cards (step 2).** In the Doctor Directory, tapping a card carries
+its photo (or specialty pin) and the name into the top card of the
+doctor's page (`.dp-hero`). The page's round back arrow, and the top bar's
+Back while the page is the top layer, send them home to the card. The
+page is an overlay: it opens with `openDoctorDirDetail` and closes by
+losing `.show`, so `morphOpenDoctor` and `morphCloseDoctor` wrap exactly
+those, and only from a tap (the card's own `onclick`, the arrow, `goBack`).
+The page's own slide-up and its backdrop's fade are held back by
+`.dp-flown` on the overlay while it opened by a trip: the cross-fade under
+the pair is the entrance. The mark stays on until the page next opens from
+closed, because a class that came off would restart the entrance it held
+back. Home only to a card on screen; otherwise the page closes at once, as
+it always did (no cross-fade).
+
+A tap never waits on the flight. If the browser has not taken its snapshot
+within `MORPH_WAIT` (300 ms), `morphNav` drops the flight and navigates at
+once, as a plain open (no `.dp-flown`, so the page keeps its slide-up).
+(`doc stall` in `tests/suites/screen-morph.cjs`). The net can only fire
+while the page is free: Linux WebKit, the engine GitHub's iPhone checks
+use, blocks the page about 0.9 s taking the snapshot, for domain tiles
+and doctor cards alike, and the flight runs after it. Jose's iPhone shows
+no such pause on the domain tiles, so `doctor-page.cjs` checks that a card
+opens its page, not how fast the flight is there.
+
 ## What it does not do (this version)
 
-- Doctor cards. A doctor's page is an overlay with its own entrance, so its
-  morph is a separate step (in `docs/PLAN.md`, Next).
+- The Recent doctor chips above the directory: they open the page plainly.
+  A few lines to add if wanted.
+- A doctor's page opened any other way (after editing it, from a search,
+  from Doctor Prep): plain, as before.
 - Home's rails and cards, sheets, the opening, the tab bar's own move, Dr.
   Smiley. Their motion is untouched.
 - The phone's own back swipe. The phone already animates that, and a second
@@ -84,6 +110,20 @@ Rules, each one a mistake made while building it:
   helper that read them, so nothing is claimed from it here.
 - Where ours can be better: only the two things the eye is on move, at the
   app's one spring, so it stays quick; many apps grow the whole card.
+
+- **Doctor's page: entrance held, not removed.** Turning the slide-up off
+  with `html.morphing` restarted it when the trip ended (an animation that
+  goes from `none` back to its name plays again), so the mark is on the
+  overlay and lasts as long as it is open.
+
+## Found while building step 2 (not fixed here)
+
+- On a computer, a redraw the app held back while the search box had the
+  cursor runs as soon as a doctor's page opens (the focus moves), and it
+  rebuilds the screen, which scrolls the list behind the page to the top.
+  So on a computer the card is often not on screen to fly home to, and the
+  page closes plainly. Phones are not affected (no autofocus). Waiting on
+  Jose's pick (`docs/PLAN.md`, Next).
 
 ## Not proven
 
