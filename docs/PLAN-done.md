@@ -5,7 +5,7 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
-- 2026-11-14 Screen morph, step 2: a doctor card's photo and name travel into the doctor's page; its back arrow and the top bar's Back
+- 2026-11-14 Screen morph, step 2 (#274): a doctor card's photo and name travel into the doctor's page; its back arrow and the top bar's Back
   send them home (`morphOpenDoctor`, `morphCloseDoctor`; the page's slide-up held back by `.dp-flown`). Jose said step 1 is smooth on his
   iPhone. Found and left for Jose: on a computer a held-back redraw scrolls the list behind a doctor's page to the top.
 - 2026-11-14 Screen morph, step 1 (Jose's pick from four visual options after a scan of GitHub for repos worth adding). On All domains a
