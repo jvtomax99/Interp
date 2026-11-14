@@ -8939,19 +8939,20 @@ function morphFlush(){
   if(morphWaiting) morphWaiting();          // the tap before this one goes first
   if(morphVt){ try{ morphVt.skipTransition(); }catch(e){} }   // and its trip ends here
 }
+const MORPH_WAIT = 300;
 function morphNav(from, to, go){
   morphFlush();
   if(!morphOK()){ go(); return; }
   const root = document.documentElement, named = [];
   const put = pairs => pairs.forEach(([el, name]) => { if(el){ el.style.viewTransitionName = name; named.push(el); } });
   const wipe = () => { while(named.length) named.pop().style.viewTransitionName = ''; };
-  const run = () => {
+  const run = late => {
     if(morphWaiting !== run) return;
     morphWaiting = null;
     wipe();
     // A navigation that throws is reported as it always was, and can not
     // take the next tap down with it.
-    morphIn = true;
+    morphIn = late !== true;           // the safety net's late run is no flight
     try{ go(); }catch(e){ setTimeout(() => { throw e; }); }
     morphIn = false;
     try{ put(to()); }catch(e){}
@@ -8966,6 +8967,15 @@ function morphNav(from, to, go){
   morphVt = vt;
   vt.ready.catch(() => {});          // a skipped animation is not an error
   vt.finished.then(end, end);
+  // A tap never waits on the flight: a browser that has not taken its
+  // snapshot within MORPH_WAIT ms (WebKit on a phone was seen holding it 3 s)
+  // drops the flight and the page opens at once. run() is guarded, so the
+  // browser calling it late changes nothing.
+  setTimeout(() => {
+    if(morphWaiting !== run) return;
+    try{ vt.skipTransition(); }catch(e){}
+    run(true);
+  }, MORPH_WAIT);
 }
 // A pair only from something on screen: a pin must never fly in from, or
 // out to, somewhere the person cannot see.

@@ -29,6 +29,13 @@ closed, because a class that came off would restart the entrance it held
 back. Home only to a card on screen; otherwise the page closes at once, as
 it always did (no cross-fade).
 
+A tap never waits on the flight. If the browser has not taken its snapshot
+within `MORPH_WAIT` (300 ms), `morphNav` drops the flight and navigates at
+once, as a plain open (no `.dp-flown`, so the page keeps its slide-up).
+WebKit on a phone, in GitHub's checks, held the snapshot 3 s before this
+(`doc stall` in `tests/suites/screen-morph.cjs`). Whether a real iPhone
+ever does is not known.
+
 ## What it does not do (this version)
 
 - The Recent doctor chips above the directory: they open the page plainly.

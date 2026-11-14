@@ -192,6 +192,25 @@ const done = page => page.waitForFunction(() => !morphLive && !document.document
   await rm.evaluate(() => closeDoctorDirDetail());
   const old = await page.evaluate(id => { const keep = document.startViewTransition; document.startViewTransition = undefined; morphOpenDoctor(id); document.startViewTransition = keep; const ov = document.getElementById('doctorDirDetailOverlay'); return { open: ov.classList.contains('show'), flown: ov.classList.contains('dp-flown'), enter: getComputedStyle(document.getElementById('doctorDirDetailModal')).animationName }; }, DOC.id);
   ok(old.open && !old.flown && old.enter === 'modalIn', 'doc old: with no View Transitions the card opens the page with its slide-up', old);
+  // A browser that never takes its snapshot (WebKit on a phone held it 3 s):
+  // the page still opens within MORPH_WAIT, with its own slide-up, and the
+  // browser running the update late changes nothing.
+  await page.evaluate(() => closeDoctorDirDetail()); await page.waitForTimeout(300);
+  const stall = await page.evaluate(async id => {
+    const keep = document.startViewTransition; let late = null;
+    document.startViewTransition = cb => { late = cb; let done; const finished = new Promise(r => done = r); return { ready: Promise.reject(new Error('skipped')), finished, updateCallbackDone: finished, skipTransition(){ done(); } }; };
+    const t0 = performance.now(); morphOpenDoctor(id); document.startViewTransition = keep;
+    const ov = document.getElementById('doctorDirDetailOverlay');
+    const atOnce = ov.classList.contains('show');
+    while (!ov.classList.contains('show') && performance.now() - t0 < 2000) await new Promise(r => setTimeout(r, 10));
+    const ms = Math.round(performance.now() - t0);
+    const r = { atOnce, open: ov.classList.contains('show'), ms, flown: ov.classList.contains('dp-flown'), enter: getComputedStyle(document.getElementById('doctorDirDetailModal')).animationName };
+    await new Promise(r => setTimeout(r, 50)); late && late();
+    r.after = { open: ov.classList.contains('show'), cls: document.documentElement.classList.contains('morphing'), live: morphLive, waiting: morphWaiting };
+    return r;
+  }, DOC.id);
+  ok(!stall.atOnce && stall.open && stall.ms < 500 && !stall.flown && stall.enter === 'modalIn', 'doc stall: a browser that never starts the flight still opens the page within 0.3 s, with its slide-up', stall);
+  ok(stall.after.open && !stall.after.cls && !stall.after.live && stall.after.waiting === null, 'doc stall: the browser running the update late changes nothing, and the trip is over', stall.after);
 
   ok(page.__errors.length === 0 && rm.__errors.length === 0, 'no page errors', [page.__errors, rm.__errors]);
   await b.close();
