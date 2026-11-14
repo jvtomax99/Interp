@@ -41,7 +41,7 @@ const trip = (page, js, until) => page.evaluate(async ({ js, until }) => {
   for (let i = 0; i < 120 && !(0, eval)(until); i++) await raf();
   if (morphVt) await morphVt.ready.catch(() => {});
   const names = [...document.querySelectorAll('body *')].filter(e => getComputedStyle(e).viewTransitionName !== 'none').map(e => getComputedStyle(e).viewTransitionName + '=' + String(e.className).split(' ')[0]);
-  const dp = document.getElementById('doctorDirDetailModal'), enter = dp ? getComputedStyle(dp).animationName : '';
+  const dp = document.getElementById('doctorDirDetailModal'), enter = dp ? getComputedStyle(dp).animationName + '/' + getComputedStyle(dp.parentElement).animationName : '';
   // The end of the trip, held: where is the flying pin against the real one?
   document.getAnimations().forEach(a => { const pe = a.effect && a.effect.pseudoElement; if (pe && pe.startsWith('::view-transition')) { a.pause(); a.currentTime = a.effect.getComputedTiming().duration; } });
   await raf(); await raf();
@@ -134,7 +134,7 @@ const done = page => page.waitForFunction(() => !morphLive && !document.document
   const dOpen = await trip(page, `${card}.click()`, shown);
   ok(dOpen.live && dOpen.names.length === 2 && dOpen.names.includes('hub-pin=dp-ph') && dOpen.names.includes('hub-name=dp-name'), 'doc pair: mid-trip only the page\'s photo and name are named', dOpen);
   ok(dOpen.off && Math.abs(dOpen.off[0]) <= 1.5 && Math.abs(dOpen.off[1]) <= 1.5, 'doc lands: the flying photo ends on the page\'s photo', dOpen.off);
-  ok(dOpen.enter === 'none', 'doc enter: the page\'s own slide-up does not play inside the trip', dOpen.enter);
+  ok(dOpen.enter === 'none/none', 'doc enter: neither the page\'s slide-up nor its backdrop fade plays inside the trip', dOpen.enter);
   await done(page);
   const dAfter = await ds();
   ok(dAfter.open && dAfter.enter === 'none' && !dAfter.named && !dAfter.cls && !dAfter.waiting, 'doc enter: after the trip the page is open, clean, its slide-up not replayed', dAfter);
@@ -185,8 +185,13 @@ const done = page => page.waitForFunction(() => !morphLive && !document.document
   const quiet = await rm.evaluate(id => { morphOpenDomain(id); return { cat: activeCategory, cls: document.documentElement.classList.contains('morphing'), live: morphLive }; }, tileId);
   ok(quiet.cat === tileId && !quiet.cls && !quiet.live, 'quiet: with Reduce Motion the tap navigates at once, no transition', quiet);
   await seedDoctors(rm);
-  const dQuiet = await rm.evaluate(id => { morphOpenDoctor(id); return { open: document.getElementById('doctorDirDetailOverlay').classList.contains('show'), cls: document.documentElement.classList.contains('morphing'), live: morphLive }; }, DOC.id);
+  const dQuiet = await rm.evaluate(id => { morphOpenDoctor(id); const ov = document.getElementById('doctorDirDetailOverlay'); return { open: ov.classList.contains('show'), flown: ov.classList.contains('dp-flown'), cls: document.documentElement.classList.contains('morphing'), live: morphLive, backdrop: getComputedStyle(ov).animationName }; }, DOC.id);
   ok(dQuiet.open && !dQuiet.cls && !dQuiet.live, 'quiet: with Reduce Motion a doctor card opens its page at once, no transition', dQuiet);
+  ok(!dQuiet.flown && dQuiet.backdrop === 'overlayIn', 'quiet: with no flight the page keeps its own entrance (backdrop fade)', dQuiet);
+  // No View Transitions at all (iPhones before iOS 18): the card still opens the page with its slide-up.
+  await rm.evaluate(() => closeDoctorDirDetail());
+  const old = await page.evaluate(id => { const keep = document.startViewTransition; document.startViewTransition = undefined; morphOpenDoctor(id); document.startViewTransition = keep; const ov = document.getElementById('doctorDirDetailOverlay'); return { open: ov.classList.contains('show'), flown: ov.classList.contains('dp-flown'), enter: getComputedStyle(document.getElementById('doctorDirDetailModal')).animationName }; }, DOC.id);
+  ok(old.open && !old.flown && old.enter === 'modalIn', 'doc old: with no View Transitions the card opens the page with its slide-up', old);
 
   ok(page.__errors.length === 0 && rm.__errors.length === 0, 'no page errors', [page.__errors, rm.__errors]);
   await b.close();

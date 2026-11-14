@@ -9012,10 +9012,12 @@ function morphOpenDoctor(id){
   // The page's own slide-up and its backdrop's fade would play inside the
   // trip as a second entrance; the cross-fade under the pair replaces both.
   // The mark stays until the page next opens closed (a class that came off
-  // would restart the entrance it was holding back).
+  // would restart the entrance it was holding back). Only inside a real trip
+  // (morphIn): with no flight (older iPhone, Still, Reduce Motion) the page
+  // keeps its entrance.
   morphNav(morphDoctorCard(id), morphDoctorHero, () => {
     openDoctorDirDetail(id);
-    document.getElementById('doctorDirDetailOverlay').classList.add('dp-flown');
+    if(morphIn) document.getElementById('doctorDirDetailOverlay').classList.add('dp-flown');
   });
 }
 // Home to the card only when the card is on screen to land on; otherwise the
