@@ -32,7 +32,8 @@
      desk         on a computer, a redraw held back for the search box (which
                   has the cursor) runs when a doctor's page opens: the list
                   keeps its scroll, the cursor is not pulled back, and the back
-                  arrow from a scrolled list flies home (desk doc pair) */
+                  arrow from a scrolled list flies home (desk doc pair)
+     glide        a redraw during the glide to a search result still lands on it */
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 const named = page => page.evaluate(() => [...document.querySelectorAll('body *')].filter(e => getComputedStyle(e).viewTransitionName !== 'none').map(e => getComputedStyle(e).viewTransitionName + '=' + String(e.className).split(' ')[0]));
@@ -220,6 +221,20 @@ const done = page => page.waitForFunction(() => !morphLive && !document.document
   const bg = await dk.evaluate(() => { const y0 = Math.round(scrollY); scheduleRender(); return new Promise(r => setTimeout(() => r({ y0, y1: Math.round(scrollY) }), 500)); });
   ok(bg.y0 > 300 && Math.abs(bg.y1 - bg.y0) <= 2, 'desk: a background redraw keeps the scroll', bg);
   ok(dk.__errors.length === 0, 'desk: no page errors', dk.__errors);
+
+  // A redraw landing while the page glides to a search result does not stop
+  // the glide short of the term (the reviewer's case: a held redraw runs the
+  // moment the search box lets go, mid-glide).
+  const glide = await page.evaluate(async () => {
+    const cat = DATA.categories.filter(c => !c.parentId).sort((a, b) => b.terms.length - a.terms.length)[0];
+    const ids = domainRenderOrder(cat.id), tid = ids[Math.floor(ids.length * 0.8)];
+    revealTerm(cat.id, tid);
+    scheduleRender();
+    await new Promise(r => setTimeout(r, 2500));
+    const rc = document.querySelector(`.card[data-term-id="${CSS.escape(tid)}"]`).getBoundingClientRect();
+    return { n: ids.length, y: Math.round(scrollY), top: Math.round(rc.top), onScreen: rc.bottom > 0 && rc.top < innerHeight };
+  });
+  ok(glide.n > 20 && glide.y > 300 && glide.onScreen, 'glide: a redraw during the glide to a search result still lands on the term', glide);
 
   const { page: rm } = await L.boot(b, { device: 'iphone', reducedMotion: true });
   await L.go(rm, 'all');

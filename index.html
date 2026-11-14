@@ -7420,9 +7420,13 @@ function render(opts){
   if(!DATA) return;
   fmNote('render');
   const inPlace = !!(opts && opts.inPlace) && renderedCategory === activeCategory;
-  const keepY = inPlace ? (window.scrollY || 0) : 0;
   renderedCategory = activeCategory;
   const app = document.getElementById('app');
+  // Hold the page at its height while it is rebuilt, so the browser never has
+  // a short page to pull the scroll up to. Not a scroll put back afterwards:
+  // that stopped a glide in progress (a search result's revealTerm) partway.
+  const holdH = inPlace && (window.scrollY || 0) > 0 ? app.getBoundingClientRect().height : 0;
+  if(holdH) app.style.minHeight = holdH + 'px';
   // Creating a domain lived only in the sidebar, which on a phone means two
   // taps into the More sheet. It belongs next to "Add term" on the screens
   // where domains are what you're looking at.
@@ -7565,12 +7569,7 @@ function render(opts){
   syncTopBar();
   fitDomainBannerName();
   renderContent();
-  if(keepY > 0){
-    // Lay every card out first, so the scroll lands on real heights, not guesses.
-    const ct = document.getElementById('content');
-    if(ct) ct.classList.add('cv-all');
-    window.scrollTo({ top: keepY, behavior: 'instant' });
-  }
+  if(holdH) app.style.minHeight = '';
   anatomySync();
   smileyRider.sync();
   dockAfterRender();

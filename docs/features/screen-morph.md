@@ -123,8 +123,10 @@ Rules, each one a mistake made while building it:
   rebuilt the screen, which scrolled the list behind the page to the top.
   So the card was off screen to fly home to, and the page closed plainly.
   Fixed in `render()`: a redraw from `scheduleRender` of the screen already
-  on show keeps the scroll and does not autofocus the search box (it was
-  pulling the cursor back behind the open page). The "desk" case in
+  on show holds `#app` at its height while it is rebuilt, so the scroll
+  never moves (putting it back afterwards would stop a glide in progress,
+  the "glide" case), and does not autofocus the search box (it was pulling
+  the cursor back behind the open page). The "desk" case in
   `tests/suites/screen-morph.cjs` checks it at desktop width.
 - Phones had the same jump on any background redraw (data arriving while
   a list was scrolled: 3000 to 0 in Chromium's iPhone mode, before the
