@@ -81,9 +81,14 @@ async function targets(page) {
       try {
         await go(page, 'doctor-directory');
         // The list's own cards still open the page.
+        // A card opens the page inside the screen morph's flight, which waits
+        // for the browser's snapshot first: wait for the page, and say how long.
+        const t0 = Date.now();
         await page.locator('#content .dl-card').first().click();
+        const opened = await page.waitForSelector('#doctorDirDetailOverlay.show .dp-hero', { state: 'attached', timeout: 5000 }).then(() => true, () => false);
+        const took = Date.now() - t0;
+        ok(opened && took < 1500, 'a doctor card opens the doctor page (within 1.5 s)', { device, opened, ms: took });
         await pause(page, 400);
-        ok(await page.locator('#doctorDirDetailOverlay.show .dp-hero').count() === 1, 'a doctor card opens the doctor page');
         await page.evaluate(() => closeDoctorDirDetail()); await pause(page);
 
         // The list (D3): cards two to a row on a phone, labels, + Prep terms,
