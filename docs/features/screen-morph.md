@@ -32,9 +32,12 @@ it always did (no cross-fade).
 A tap never waits on the flight. If the browser has not taken its snapshot
 within `MORPH_WAIT` (300 ms), `morphNav` drops the flight and navigates at
 once, as a plain open (no `.dp-flown`, so the page keeps its slide-up).
-WebKit on a phone, in GitHub's checks, held the snapshot 3 s before this
-(`doc stall` in `tests/suites/screen-morph.cjs`). Whether a real iPhone
-ever does is not known.
+(`doc stall` in `tests/suites/screen-morph.cjs`). The net can only fire
+while the page is free: Linux WebKit, the engine GitHub's iPhone checks
+use, blocks the page about 0.9 s taking the snapshot, for domain tiles
+and doctor cards alike, and the flight runs after it. Jose's iPhone shows
+no such pause on the domain tiles, so `doctor-page.cjs` checks that a card
+opens its page, not how fast the flight is there.
 
 ## What it does not do (this version)
 

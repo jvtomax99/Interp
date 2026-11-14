@@ -82,7 +82,9 @@ async function targets(page) {
         await go(page, 'doctor-directory');
         // The list's own cards still open the page.
         // A card opens the page inside the screen morph's flight, which waits
-        // for the browser's snapshot first: wait for the page, and say how long.
+        // for the browser's snapshot first. Linux WebKit takes ~0.9 s for that
+        // snapshot (the live domain tiles too; an iPhone does not), so this
+        // checks the wiring, not the flight's speed (screen-morph.cjs does).
         const t0 = Date.now();
         // Where the time goes: the tap's moment, the page's .show, a timer due
         // 50 ms after the tap, and the longest gap between frames.
@@ -100,7 +102,7 @@ async function targets(page) {
         const took = Date.now() - t0;
         await pause(page, 400);
         const T = await page.evaluate(() => { const T = window.__cardT; return { tapToShow: T.show && T.tap ? Math.round(T.show - T.tap) : null, timer50: T.timer, longestFrameGap: T.gap, vt: T.vt }; });
-        ok(opened && took < 1500, 'a doctor card opens the doctor page (within 1.5 s)', { device, opened, ms: took, ...T });
+        ok(opened, 'a doctor card opens the doctor page', { device, opened, ms: took, ...T });
         await pause(page, 400);
         await page.evaluate(() => closeDoctorDirDetail()); await pause(page);
 
