@@ -8917,16 +8917,28 @@ function closeAllOverlays(){
      Back button). setCategory itself is never wrapped: its other callers
      read the new screen on the next line.
    - A second navigation while one is still waiting runs the waiting one
-     first, so taps can never land out of order. */
+     first, so taps can never land out of order.
+   - A tap during the trip is never lost. While a transition is on screen
+     the browser hands every tap to the page itself (<html>), not to the
+     button under the finger (measured: elementFromPoint returns <html>,
+     and pointer-events on the transition's layer does not change that).
+     morphTap catches that tap, ends the trip and presses whatever is
+     really there; a navigation that arrives then happens at once. */
 let morphWaiting = null;   // the `go` a transition has not called yet
 let morphLive = false;     // a transition is on screen
+let morphVt = null;        // that transition
+let morphIn = false;       // inside a transition's own `go`
 function morphOK(){
   return typeof document.startViewTransition === 'function'
     && !morphLive && document.visibilityState === 'visible'
     && !(typeof drStill === 'function' && drStill())
     && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
-function morphFlush(){ if(morphWaiting) morphWaiting(); }
+function morphFlush(){
+  if(morphIn) return;                       // the transition's own navigation
+  if(morphWaiting) morphWaiting();          // the tap before this one goes first
+  if(morphVt){ try{ morphVt.skipTransition(); }catch(e){} }   // and its trip ends here
+}
 function morphNav(from, to, go){
   morphFlush();
   if(!morphOK()){ go(); return; }
@@ -8937,7 +8949,11 @@ function morphNav(from, to, go){
     if(morphWaiting !== run) return;
     morphWaiting = null;
     wipe();
-    go();
+    // A navigation that throws is reported as it always was, and can not
+    // take the next tap down with it.
+    morphIn = true;
+    try{ go(); }catch(e){ setTimeout(() => { throw e; }); }
+    morphIn = false;
     try{ put(to()); }catch(e){}
   };
   put(from);
@@ -8945,23 +8961,40 @@ function morphNav(from, to, go){
   morphWaiting = run; morphLive = true;
   let vt = null;
   try{ vt = document.startViewTransition(run); }catch(e){}
-  const end = () => { wipe(); root.classList.remove('morphing'); morphLive = false; };
+  const end = () => { wipe(); root.classList.remove('morphing'); morphLive = false; morphVt = null; };
   if(!vt){ run(); end(); return; }
+  morphVt = vt;
   vt.ready.catch(() => {});          // a skipped animation is not an error
   vt.finished.then(end, end);
 }
+// A pair only from something on screen: a pin must never fly in from, or
+// out to, somewhere the person cannot see.
+function morphTap(e){
+  if(!morphLive || !e.isTrusted || e.target !== document.documentElement) return;
+  const x = e.clientX, y = e.clientY;
+  if(morphVt){ try{ morphVt.skipTransition(); }catch(err){} }
+  // The layer goes with the trip, a frame or two later.
+  const press = left => {
+    const el = document.elementFromPoint(x, y);
+    // dispatched, not el.click(): the thing under a finger is often an icon's
+    // <path>, which has no click() of its own; the event bubbles to its button.
+    if(el && el !== document.documentElement) el.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, view:window, clientX:x, clientY:y }));
+    else if(left) requestAnimationFrame(() => press(left - 1));
+  };
+  press(4);
+}
+document.addEventListener('click', morphTap, true);
 function morphParts(box, pin, name){
-  return box ? [[box.querySelector(pin), 'hub-pin'], [box.querySelector(name), 'hub-name']] : [];
+  if(!box) return [];
+  const r = box.getBoundingClientRect();
+  if(r.bottom <= 0 || r.top >= window.innerHeight) return [];
+  return [[box.querySelector(pin), 'hub-pin'], [box.querySelector(name), 'hub-name']];
 }
 function morphBanner(){ return morphParts(document.querySelector('.domain-banner'), '.domain-banner-pin', '.domain-banner-name'); }
-// The tile for a domain, only when it is drawn as a tile and on screen: a
-// pin must never fly to somewhere the person cannot see.
+// The tile for a domain, only when it is drawn as a tile.
 function morphTile(id){
   const t = document.getElementById('domain-' + id);
-  if(!t || !t.classList.contains('dt-tile')) return [];
-  const r = t.getBoundingClientRect();
-  if(r.bottom < 0 || r.top > window.innerHeight) return [];
-  return morphParts(t, '.dt-tile-pin', '.dt-tile-name');
+  return t && t.classList.contains('dt-tile') ? morphParts(t, '.dt-tile-pin', '.dt-tile-name') : [];
 }
 function morphOpenDomain(id){
   morphNav(morphTile(id), morphBanner, () => setCategory(id));

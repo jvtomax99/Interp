@@ -56,6 +56,20 @@ Rules, each one a mistake made while building it:
   it; naming the tab bar or the search row (glass) left them with nothing
   behind to blur, so they went dim. Bars stay still by being part of the
   page's own picture.
+- **A tap during the trip is not lost.** While a transition is on screen
+  the browser gives every tap to `<html>`, not to the button under the
+  finger (measured: `elementFromPoint` returns `<html>`; `pointer-events`
+  on the transition's layer changes nothing). A reviewer caught this: Back
+  right after a tile was a dead tap for about half a second. `morphTap`
+  hears that tap, ends the trip (`skipTransition`) and sends a click to
+  what is really there; Back mid-flight now takes 142 ms in the cloud
+  Chromium. Any navigation that arrives also ends a trip (`morphFlush`).
+  A tap mid-trip on a text box presses it but does not open the keyboard.
+- **A pair only from something on screen** (`morphParts`): a banner
+  scrolled away, or a tile off screen after Back, sends no pin.
+- **The pair follows the page.** The new screen rises 6px as it fades in
+  (`contentFadeIn`) while the pin is in flight; the browser keeps the
+  flying pin on the real one (measured: centres within 1px at the end).
 - **Names are inline and wiped** when the trip ends; two elements with one
   name make the browser drop the whole transition ("Snapshot capture
   failed").
@@ -65,7 +79,7 @@ Rules, each one a mistake made while building it:
 - Apple's zoom transition (iOS 18; WWDC24 session 10145,
   developer.apple.com/videos/play/wwdc2024/10145): the same idea, and it
   can be grabbed and dragged mid-way. Ours cannot be dragged; a tap during
-  the trip is ignored until the page settles (the browser's rule).
+  the trip ends it and is acted on.
 - Material's "container transform": its pages would not load for the
   helper that read them, so nothing is claimed from it here.
 - Where ours can be better: only the two things the eye is on move, at the
