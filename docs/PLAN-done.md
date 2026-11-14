@@ -8,7 +8,8 @@ top, under this note: the date, a few lines, the PR number.
 - 2026-11-14 The computer-only scroll jump (Jose's pick, plan OK'd). A held-back or background redraw (`scheduleRender`) of the screen
   already on show is now a redraw in place: `render({ inPlace: true })` keeps the scroll (cards laid out first, `cv-all`) and skips the
   search box's autofocus. Rebuilding `#app` left the page one screen tall for a moment, and the autofocus made the browser measure then,
-  so a scrolled list jumped to the top; behind a doctor's page that meant no flight home. Direct `render()` calls are unchanged.
+  so a scrolled list jumped to the top; behind a doctor's page that meant no flight home. Phones had the jump too on any background
+  redraw (measured in Chromium's iPhone mode). Direct `render()` calls are unchanged.
   `screen-morph.cjs` "desk" case (fails on the old code: scroll 3166 to 0). PR number added on merge.
 
 - 2026-11-14 Screen morph, step 2 (#274): a doctor card's photo and name travel into the doctor's page; its back arrow and the top bar's Back
