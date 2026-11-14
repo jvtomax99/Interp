@@ -28,7 +28,11 @@
      doc tap      the page's back arrow tapped mid-flight closes it
      doc order    open then close in one instant ends closed and clean
      doc away     a card scrolled off screen: the page closes at once, no trip
-     doc swipe    the phone's own back closes the page with no trip */
+     doc swipe    the phone's own back closes the page with no trip
+     desk         on a computer, a redraw held back for the search box (which
+                  has the cursor) runs when a doctor's page opens: the list
+                  keeps its scroll, the cursor is not pulled back, and the back
+                  arrow from a scrolled list flies home (desk doc pair) */
 const L = require('../support/harness.cjs');
 const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d === undefined ? '' : ' ' + JSON.stringify(d))); if (!c) process.exitCode = 1; };
 const named = page => page.evaluate(() => [...document.querySelectorAll('body *')].filter(e => getComputedStyle(e).viewTransitionName !== 'none').map(e => getComputedStyle(e).viewTransitionName + '=' + String(e.className).split(' ')[0]));
@@ -179,6 +183,43 @@ const done = page => page.waitForFunction(() => !morphLive && !document.document
   await page.evaluate(id => openDoctorDirDetail(id), DOC.id); await page.waitForTimeout(300);
   const dSwipe = await page.evaluate(async () => { history.back(); for (let i = 0; i < 60 && document.getElementById('doctorDirDetailOverlay').classList.contains('show'); i++) await new Promise(r => requestAnimationFrame(r)); return { open: document.getElementById('doctorDirDetailOverlay').classList.contains('show'), cls: document.documentElement.classList.contains('morphing'), live: morphLive }; });
   ok(!dSwipe.open && !dSwipe.cls && !dSwipe.live, 'doc swipe: the phone\'s own back closes the page with no trip', dSwipe);
+
+  // ---- On a computer: a held-back redraw does not throw the list to the top ----
+  // The search box has the cursor there (autofocus), so a redraw waits for it to
+  // let go; opening a doctor's page lets go. That redraw used to rebuild the
+  // screen at the top, so the card was off screen and the page closed plainly.
+  const { page: dk } = await L.boot(b, { device: 'desktop' });
+  await seedDoctors(dk);
+  await dk.evaluate(d => {   // a long directory, the doctor in its middle
+    for (let i = 0; i < 40; i++) {
+      const f = { id: 'sm-fill-' + i, name: (i < 20 ? 'Dr. Aaron Fill ' : 'Dr. Zed Fill ') + String(i).padStart(2, '0'), specialty: 'Cardiology', hospitalLocation: '', locationDetails: '', notes: '', customTerms: [] };
+      const { id, ...rest } = f;
+      if (window.__DB) window.__DB['doctor-directory'][id] = JSON.parse(JSON.stringify(rest));
+      if (!DOCTOR_DIRECTORY.some(x => x.id === id)) DOCTOR_DIRECTORY.push(f);
+    }
+    render();
+  }, DOC);
+  await dk.waitForTimeout(600);
+  await dk.evaluate(sel => { const c = (0, eval)(sel); window.scrollTo(0, c.getBoundingClientRect().top + scrollY - 300); }, card);
+  await dk.waitForTimeout(250);
+  const held = await dk.evaluate(() => { const s = document.getElementById('searchInput'); if (document.activeElement !== s) s.focus({ preventScroll: true }); scheduleRender(); return new Promise(r => setTimeout(() => r({ y: Math.round(scrollY), focus: document.activeElement === s, held: renderDeferredByTyping }), 400)); });
+  ok(held.y > 300 && held.focus && held.held, 'desk: precondition, the list is scrolled and a redraw is held for the search box', held);
+  const nb = await dk.locator(`.dl-card[data-doc="${DOC.id}"] .dl-name`).boundingBox();
+  await dk.mouse.click(nb.x + nb.width / 2, nb.y + nb.height / 2);   // a real click: the search box lets go
+  await done(dk);
+  await dk.waitForTimeout(700);   // the held redraw runs (250 ms settle) behind the page
+  const kept = await dk.evaluate(sel => { const r = (0, eval)(sel).getBoundingClientRect(); return { y: Math.round(scrollY), open: document.getElementById('doctorDirDetailOverlay').classList.contains('show'), onScreen: r.bottom > 0 && r.top < innerHeight, held: renderDeferredByTyping, focusSearch: document.activeElement && document.activeElement.id === 'searchInput' }; }, card);
+  ok(kept.open && !kept.held && Math.abs(kept.y - held.y) <= 2 && kept.onScreen, 'desk: the held redraw ran and the list stayed where it was, the card on screen', { held, kept });
+  ok(!kept.focusSearch, 'desk: the redraw did not pull the cursor back into the search box behind the page', kept);
+  const dkClose = await trip(dk, `document.querySelector('#doctorDirDetailModal .dp-ib').click()`, '!' + shown);
+  ok(dkClose.live && dkClose.names.length === 2 && dkClose.names.includes('hub-pin=dl-ph') && dkClose.names.includes('hub-name=dl-name'), 'desk doc pair: from a scrolled list the back arrow flies the photo and name home', dkClose);
+  await done(dk);
+  ok(Math.abs((await dk.evaluate(() => Math.round(scrollY))) - held.y) <= 2, 'desk: after the flight the list is still where it was');
+  // A background redraw (data arriving) on a scrolled screen keeps its place too.
+  await dk.evaluate(() => document.activeElement && document.activeElement.blur());
+  const bg = await dk.evaluate(() => { const y0 = Math.round(scrollY); scheduleRender(); return new Promise(r => setTimeout(() => r({ y0, y1: Math.round(scrollY) }), 500)); });
+  ok(bg.y0 > 300 && Math.abs(bg.y1 - bg.y0) <= 2, 'desk: a background redraw keeps the scroll', bg);
+  ok(dk.__errors.length === 0, 'desk: no page errors', dk.__errors);
 
   const { page: rm } = await L.boot(b, { device: 'iphone', reducedMotion: true });
   await L.go(rm, 'all');

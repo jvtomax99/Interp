@@ -7235,7 +7235,7 @@ function scheduleRender(){
       return;
     }
     renderPendingSince = 0;
-    render();
+    render({ inPlace: true });
   }, delay);
 }
 
@@ -7406,9 +7406,22 @@ function closeDomainMenu(instant){
 }
 function domainMenuKeys(e){ if(e.key === 'Escape') closeDomainMenu(); }
 
-function render(){
+/* A held-back or background redraw (scheduleRender) of the screen already on
+   show is a redraw in place: it keeps the scroll and doesn't autofocus.
+   Rebuilding #app leaves the page one screen tall for a moment, the browser
+   pulls the scroll to the top to fit, and on a computer the search box's
+   autofocus made it measure right then. That threw a scrolled list back to
+   the top whenever data arrived, and when the doctor's page opened (the
+   focus moved, so the held redraw ran) its card was no longer on screen to
+   fly home to (Screen morph). Direct render() calls keep their old way:
+   some change mode on purpose and expect the top. */
+let renderedCategory = null;
+function render(opts){
   if(!DATA) return;
   fmNote('render');
+  const inPlace = !!(opts && opts.inPlace) && renderedCategory === activeCategory;
+  const keepY = inPlace ? (window.scrollY || 0) : 0;
+  renderedCategory = activeCategory;
   const app = document.getElementById('app');
   // Creating a domain lived only in the sidebar, which on a phone means two
   // taps into the More sheet. It belongs next to "Add term" on the screens
@@ -7536,7 +7549,8 @@ function render(){
     });
     // Autofocus is a convenience with a mouse, but on a phone it forces the
     // on-screen keyboard open every time you tap a section in the sidebar.
-    if(prefersAutoFocus()) searchInputEl.focus();
+    // A redraw in place leaves the focus where it is (a page open over it).
+    if(prefersAutoFocus() && !inPlace) searchInputEl.focus();
   }
   watchDomainDock();
   if(window.__lastWho) { const wi = document.getElementById('whoInput'); if(wi) wi.value = window.__lastWho; }
@@ -7551,6 +7565,12 @@ function render(){
   syncTopBar();
   fitDomainBannerName();
   renderContent();
+  if(keepY > 0){
+    // Lay every card out first, so the scroll lands on real heights, not guesses.
+    const ct = document.getElementById('content');
+    if(ct) ct.classList.add('cv-all');
+    window.scrollTo({ top: keepY, behavior: 'instant' });
+  }
   anatomySync();
   smileyRider.sync();
   dockAfterRender();

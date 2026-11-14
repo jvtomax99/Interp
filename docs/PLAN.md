@@ -112,9 +112,7 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-Waiting on Jose's pick: the computer-only scroll jump
-behind a doctor's page (`docs/features/screen-morph.md`, "Found while
-building step 2"), or the repo scan's other picks (`docs/FACTS.md`).
+Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 
 Nothing else is queued. The cleanup audit ran on 2026-11-11: its list is
 `docs/CLEANUP.md` (20 items; the low-risk ones, 1 to 3, 18 and 19, were cleaned the same
