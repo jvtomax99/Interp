@@ -112,14 +112,9 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-- **Screen morph, step 2: doctor cards** (Jose's "Build it", 2026-11-14,
-  covered tiles and doctor cards; step 1, the tiles, is its own pull
-  request). A doctor's page is an overlay (`openDoctorDirDetail`,
-  `.overlay.show`) with its own entrance, and Back closes it by removing
-  the class, so `morphNav` needs the card's photo and name paired with the
-  page's, and the overlay's entrance held back during the trip. Read
-  `docs/features/screen-morph.md` first. Before it: Jose's verdict on step
-  1 on his iPhone (smooth or not).
+Waiting on Jose's pick: the computer-only scroll jump
+behind a doctor's page (`docs/features/screen-morph.md`, "Found while
+building step 2"), or the repo scan's other picks (`docs/FACTS.md`).
 
 Nothing else is queued. The cleanup audit ran on 2026-11-11: its list is
 `docs/CLEANUP.md` (20 items; the low-risk ones, 1 to 3, 18 and 19, were cleaned the same

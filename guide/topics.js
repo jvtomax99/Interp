@@ -243,8 +243,9 @@ const GUIDE_TOPICS = [
     </ol>
     <p>You don't need the whole word. Typing <b>hemo</b> will find <i>hemorragia</i>. Search also finds doctors and answers from this guide.</p>` },
 
-  { id:'morph', section:'find', k:'morph fly flies flying picture pin icon moves animation zoom grows banner dizzy', q:'Why does the picture fly up when I open a domain?', a:`
+  { id:'morph', section:'find', k:'morph fly flies flying picture pin icon moves animation zoom grows banner dizzy doctor card photo name', q:'Why does the picture fly up when I open a domain or a doctor?', a:`
     <p>On <b>All domains</b>, tap a tile and its picture and name lift off the tile and settle into the banner of the page that opens, so you can see where the page came from. The <b>Back</b> arrow at the top left sends them home to their tile.</p>
+    <p>The <b>Doctor Directory</b> does the same: tap a doctor's card and the photo (or the specialty picture) and the name fly into the top of the doctor's page. The round back arrow on that page sends them home to the card. If you've scrolled the card out of sight, the page simply closes.</p>
     <p>Nothing else changes: Back still retraces your steps one at a time, and swiping back on your phone works as before, without the flight.</p>
     <p><b>To turn it off</b>, tap your circle at the top right and pick <b>Still</b> under <b>How Dr. Smiley moves</b>, or turn on Reduce Motion in your phone's settings. The page then opens with no flight.</p>
     <p>An older iPhone (before iOS 18) opens the page with the plain fade it always had.</p>` },

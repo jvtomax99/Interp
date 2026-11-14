@@ -8103,6 +8103,9 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 ::view-transition-new(hub-pin){ width:100%; height:100%; object-fit:contain; }
 ::view-transition-old(hub-name),
 ::view-transition-new(hub-name){ width:auto; height:100%; object-fit:contain; object-position:left center; }
+/* A doctor's page that opened by a trip (morphOpenDoctor) skips its own
+   slide-up and backdrop fade: the cross-fade under the pair is its entrance. */
+.overlay.dp-overlay.dp-flown, .dp-overlay.dp-flown .dp-page{ animation:none; }
 @media (prefers-reduced-motion: reduce){
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
 }

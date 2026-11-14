@@ -6004,7 +6004,7 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'morph',       tone:'gd-n1', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from their tile', title:'Tap a domain tile and its picture and name fly into the page that opens; Back sends them home' },
+  { id:'morph',       tone:'gd-n1', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
   { id:'regions',     tone:'gd-n2', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
   { id:'opening',     tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
 ];
@@ -8999,6 +8999,32 @@ function morphTile(id){
 function morphOpenDomain(id){
   morphNav(morphTile(id), morphBanner, () => setCategory(id));
 }
+// Doctor cards (step 2): the card's photo or pin and the name travel into the
+// top card of the doctor's page, and its back arrow sends them home. The page
+// is an overlay, not a screen: it opens by openDoctorDirDetail and closes by
+// losing .show, so only those calls are wrapped, and only from a tap.
+function morphDoctorCard(id){
+  const c = id && document.querySelector('.dl-card[data-doc="' + CSS.escape(id) + '"]');
+  return morphParts(c, '.dl-ph', '.dl-name');
+}
+function morphDoctorHero(){ return morphParts(document.querySelector('#doctorDirDetailModal .dp-hero'), '.dp-ph', '.dp-name'); }
+function morphOpenDoctor(id){
+  // The page's own slide-up and its backdrop's fade would play inside the
+  // trip as a second entrance; the cross-fade under the pair replaces both.
+  // The mark stays until the page next opens closed (a class that came off
+  // would restart the entrance it was holding back).
+  morphNav(morphDoctorCard(id), morphDoctorHero, () => {
+    openDoctorDirDetail(id);
+    document.getElementById('doctorDirDetailOverlay').classList.add('dp-flown');
+  });
+}
+// Home to the card only when the card is on screen to land on; otherwise the
+// page closes as it always has, at once.
+function morphCloseDoctor(){
+  const ov = document.getElementById('doctorDirDetailOverlay');
+  if(ov.classList.contains('show') && morphDoctorCard(currentDoctorDetailId).length) morphNav(morphDoctorHero(), () => morphDoctorCard(currentDoctorDetailId), closeDoctorDirDetail);
+  else { morphFlush(); closeDoctorDirDetail(); }
+}
 
 function setCategory(id, isBack, returnState){
   morphFlush();   // never overtake a navigation that is waiting on its transition
@@ -9278,6 +9304,9 @@ function navigateBack(byButton){
   if(PV.open){ closePhotoViewer(); return true; }
   // The last one open is on top (a doctor's tips over the doctor's page).
   const openOverlay = [...document.querySelectorAll('.overlay.show')].pop();
+  // The Back button from a doctor's page sends the photo and name home to the
+  // card (Screen morph); the back swipe stays plain, as for tiles.
+  if(openOverlay && byButton && openOverlay.id === 'doctorDirDetailOverlay'){ morphCloseDoctor(); return true; }
   if(openOverlay){ openOverlay.classList.remove('show'); return true; }
 
   // Back is history, full stop. It used to try to be clever: on a subgroup
@@ -13115,9 +13144,9 @@ function doctorListCard(d, showPlace){
   // tell an unresearched doctor from one whose research hasn't arrived.
   const prep = !c.researched && DOCTOR_DIR_STATE === 'ok'
     ? `<button type="button" class="dl-prep" onclick="event.stopPropagation(); researchThisDoctorFromDirectory('${id}')">+ Prep terms</button>` : '';
-  return `<div class="dl-card" role="button" tabindex="0" style="--dp-sp:${specialtyColor(d.specialty)}"
+  return `<div class="dl-card" role="button" tabindex="0" data-doc="${id}" style="--dp-sp:${specialtyColor(d.specialty)}"
       aria-label="${escapeAttr(d.name)}${d.specialty ? ', ' + escapeAttr(d.specialty) : ''}"
-      onclick="openDoctorDirDetail('${id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openDoctorDirDetail('${id}')}">
+      onclick="morphOpenDoctor('${id}')" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();morphOpenDoctor('${id}')}">
       ${ph}
       <div class="dl-name">${escapeHtml(d.name)}</div>
       ${d.specialty ? `<div class="dl-spec"><span>${escapeHtml(d.specialty).replace(/\//g, '/<wbr>')}</span></div>` : ''}
@@ -13349,7 +13378,9 @@ function openDoctorDirDetail(id, tab){
   activeResearchTier.detail = tab || '';
   const page = document.getElementById('doctorDirDetailModal');
   page.innerHTML = renderDoctorDirDetail(d);
-  document.getElementById('doctorDirDetailOverlay').classList.add('show');
+  const ov = document.getElementById('doctorDirDetailOverlay');
+  if(!ov.classList.contains('show')) ov.classList.remove('dp-flown');   // a plain open has its entrance (Screen morph)
+  ov.classList.add('show');
   page.scrollTop = 0;
   if(tab === 'team') doctorPageTabIntoView(false);
   if(!d.researchResult && DOCTOR_DIR_STATE !== 'ok') doctorPageFetch(id);
@@ -13693,7 +13724,7 @@ function renderDoctorDirDetail(d){
 
   return `
     <div class="dp-top">
-      <button type="button" class="dp-ib" aria-label="Back to all doctors" onclick="closeDoctorDirDetail()">${ICON_CHEVRON_LEFT}</button>
+      <button type="button" class="dp-ib" aria-label="Back to all doctors" onclick="morphCloseDoctor()">${ICON_CHEVRON_LEFT}</button>
       <h2 class="dp-top-title">Doctor</h2>
       <button type="button" class="dp-ib is-edit" aria-label="Edit ${escapeAttr(d.name)}" onclick="doctorPageEdit('${id}')">${ICON_EDIT}</button>
     </div>
