@@ -169,6 +169,7 @@ box-shadow:
 - **A plain tap settles on `--spring0`,** Apple's spring with no bounce (`linear()`, falling back to `--ease`, `cubic-bezier(.2,.8,.2,1)`): press .368s, screen .588s, sheet .662s.
 - **Overshoot only where it is the point:** the Practice buttons' `--spring-settle`, Dr. Smiley's acting. No new overshooting `cubic-bezier`; `tests/suites/springs.cjs` holds the kept list.
 - **Touch press feedback:** `:hover` never fires on a phone. Presses use `:active` plus a JS `.is-pressed` class held about 260ms (the `LIFTS` list in `index.html`).
+- **A tile that opens a page sends its pin and name into that page's banner** (Screen morph, `docs/features/screen-morph.md`): the screen value, .588s on `--spring0`, with the rest of the screen cross-fading .38s on `--ease`. Only the pair is lifted; bars and glass are never named.
 - **Every animation has a `prefers-reduced-motion` guard;** every control keeps `:focus-visible`.
 - **An entrance never fills forwards** (`animation-fill-mode: both` or `forwards`) on anything with a press or hover rule: the held last frame beats every normal rule, so the press glow dies with no error (the term and doctor cards, 2026-11-04). Use `backwards`; the last frame is the rest state anyway. The feel guard (`tests/suites/feel.cjs`) checks the cards.
 - **Speed never costs the look:** make a visual cheaper, never smaller, shorter or stopped.

@@ -6004,9 +6004,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'regions',     tone:'gd-n1', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
-  { id:'opening',     tone:'gd-n2', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
-  { id:'account',     tone:'gd-n3', pin:'pins/chat.webp',              eyebrow:'Your account, more of you', title:'Signed in with your email, your Term Review record follows you to every phone too, and your title in Team Chat belongs to you alone' },
+  { id:'morph',       tone:'gd-n1', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from their tile', title:'Tap a domain tile and its picture and name fly into the page that opens; Back sends them home' },
+  { id:'regions',     tone:'gd-n2', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
+  { id:'opening',     tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -8902,7 +8902,106 @@ function closeAllOverlays(){
   sync();
 })();
 
+/* ---------- Screen morph ----------
+   A domain tile's pin and name travel into the banner of the page that
+   opens, and Back sends them home (docs/features/screen-morph.md). It is
+   the browser's own View Transitions: the old screen is photographed, `go`
+   draws the new one, and the browser animates between the parts that carry
+   the same view-transition-name. Rules that keep navigation exactly as it
+   was:
+   - `go` is the unchanged navigation call and always runs, once, whether
+     or not the browser animates (no support, Reduce Motion, Still, a
+     hidden page, a failed snapshot).
+   - The browser calls `go` a frame later, so only a tap that has nothing
+     left to do afterwards may come through here (a tile's own onclick, the
+     Back button). setCategory itself is never wrapped: its other callers
+     read the new screen on the next line.
+   - A second navigation while one is still waiting runs the waiting one
+     first, so taps can never land out of order.
+   - A tap during the trip is never lost. While a transition is on screen
+     the browser hands every tap to the page itself (<html>), not to the
+     button under the finger (measured: elementFromPoint returns <html>,
+     and pointer-events on the transition's layer does not change that).
+     morphTap catches that tap, ends the trip and presses whatever is
+     really there; a navigation that arrives then happens at once. */
+let morphWaiting = null;   // the `go` a transition has not called yet
+let morphLive = false;     // a transition is on screen
+let morphVt = null;        // that transition
+let morphIn = false;       // inside a transition's own `go`
+function morphOK(){
+  return typeof document.startViewTransition === 'function'
+    && !morphLive && document.visibilityState === 'visible'
+    && !(typeof drStill === 'function' && drStill())
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+function morphFlush(){
+  if(morphIn) return;                       // the transition's own navigation
+  if(morphWaiting) morphWaiting();          // the tap before this one goes first
+  if(morphVt){ try{ morphVt.skipTransition(); }catch(e){} }   // and its trip ends here
+}
+function morphNav(from, to, go){
+  morphFlush();
+  if(!morphOK()){ go(); return; }
+  const root = document.documentElement, named = [];
+  const put = pairs => pairs.forEach(([el, name]) => { if(el){ el.style.viewTransitionName = name; named.push(el); } });
+  const wipe = () => { while(named.length) named.pop().style.viewTransitionName = ''; };
+  const run = () => {
+    if(morphWaiting !== run) return;
+    morphWaiting = null;
+    wipe();
+    // A navigation that throws is reported as it always was, and can not
+    // take the next tap down with it.
+    morphIn = true;
+    try{ go(); }catch(e){ setTimeout(() => { throw e; }); }
+    morphIn = false;
+    try{ put(to()); }catch(e){}
+  };
+  put(from);
+  root.classList.add('morphing');
+  morphWaiting = run; morphLive = true;
+  let vt = null;
+  try{ vt = document.startViewTransition(run); }catch(e){}
+  const end = () => { wipe(); root.classList.remove('morphing'); morphLive = false; morphVt = null; };
+  if(!vt){ run(); end(); return; }
+  morphVt = vt;
+  vt.ready.catch(() => {});          // a skipped animation is not an error
+  vt.finished.then(end, end);
+}
+// A pair only from something on screen: a pin must never fly in from, or
+// out to, somewhere the person cannot see.
+function morphTap(e){
+  if(!morphLive || !e.isTrusted || e.target !== document.documentElement) return;
+  const x = e.clientX, y = e.clientY;
+  if(morphVt){ try{ morphVt.skipTransition(); }catch(err){} }
+  // The layer goes with the trip, a frame or two later.
+  const press = left => {
+    const el = document.elementFromPoint(x, y);
+    // dispatched, not el.click(): the thing under a finger is often an icon's
+    // <path>, which has no click() of its own; the event bubbles to its button.
+    if(el && el !== document.documentElement) el.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, view:window, clientX:x, clientY:y }));
+    else if(left) requestAnimationFrame(() => press(left - 1));
+  };
+  press(4);
+}
+document.addEventListener('click', morphTap, true);
+function morphParts(box, pin, name){
+  if(!box) return [];
+  const r = box.getBoundingClientRect();
+  if(r.bottom <= 0 || r.top >= window.innerHeight) return [];
+  return [[box.querySelector(pin), 'hub-pin'], [box.querySelector(name), 'hub-name']];
+}
+function morphBanner(){ return morphParts(document.querySelector('.domain-banner'), '.domain-banner-pin', '.domain-banner-name'); }
+// The tile for a domain, only when it is drawn as a tile.
+function morphTile(id){
+  const t = document.getElementById('domain-' + id);
+  return t && t.classList.contains('dt-tile') ? morphParts(t, '.dt-tile-pin', '.dt-tile-name') : [];
+}
+function morphOpenDomain(id){
+  morphNav(morphTile(id), morphBanner, () => setCategory(id));
+}
+
 function setCategory(id, isBack, returnState){
+  morphFlush();   // never overtake a navigation that is waiting on its transition
   const movedForward = !isBack && activeCategory !== id;
   const previousView = { id: activeCategory, query: searchQuery, termRenderLimit };
   // The search box above a domain filters that domain only. It used to keep
@@ -9163,7 +9262,8 @@ function goHome(){
 // exactly how they drifted apart — fix one, the other kept the old bug.
 // Both restore the saved position immediately. A smooth scroll can stop
 // short of its target while the restored screen is being drawn.
-function navigateBack(){
+function navigateBack(byButton){
+  morphFlush();   // a tile tap still waiting on its transition goes first
   // Same reason as closeAllOverlays: the search panel is the top layer, so
   // Back closes it rather than navigating the screen behind it.
   if(document.getElementById('gsOverlay')?.classList.contains('show')){ closeGlobalSearch(); return true; }
@@ -9189,12 +9289,19 @@ function navigateBack(){
   // top of a subgroup page is for; this arrow only ever retraces your steps.
   if(navStack.length){
     const prev = navStack.pop();
-    setCategory(prev.id, true, prev);
-    // Return people to where they were reading, not to the top of a list
-    // they'd already scrolled halfway down. Every card above that line at its
-    // real height first, or the restore lands on a guess (S4).
-    if(prev.scroll) document.getElementById('content').classList.add('cv-all');
-    window.scrollTo({ top: prev.scroll || 0, behavior: 'instant' });
+    const left = activeCategory;
+    const back = () => {
+      setCategory(prev.id, true, prev);
+      // Return people to where they were reading, not to the top of a list
+      // they'd already scrolled halfway down. Every card above that line at its
+      // real height first, or the restore lands on a guess (S4).
+      if(prev.scroll) document.getElementById('content').classList.add('cv-all');
+      window.scrollTo({ top: prev.scroll || 0, behavior: 'instant' });
+    };
+    // The Back button from a domain to the tiles sends the pin home (Screen
+    // morph). The phone's own back swipe already animates, so it stays plain.
+    if(byButton && prev.id === 'all' && document.querySelector('.domain-banner')) morphNav(morphBanner(), () => morphTile(left), back);
+    else back();
     return true;
   }
 
@@ -9205,7 +9312,7 @@ function navigateBack(){
 }
 
 function goBack(){
-  navigateBack();
+  navigateBack(true);
 }
 
 // The phone's own back gesture should do the same thing. Each navigation
@@ -13647,7 +13754,7 @@ function domainTilesHtml(icons){
     const n = cat.terms.length + kids.reduce((t, k) => t + k.terms.length, 0);
     const pin = (icons && icons.get(cat.id)) || '';
     const meta = `${n} term${n === 1 ? '' : 's'}`;
-    return `<button type="button" class="dt-tile" id="domain-${cat.id}" style="--fold-color:${cat.color || 'var(--accent)'}" onclick="setCategory('${cat.id}')"
+    return `<button type="button" class="dt-tile" id="domain-${cat.id}" style="--fold-color:${cat.color || 'var(--accent)'}" onclick="morphOpenDomain('${cat.id}')"
         aria-label="${escapeAttr(cat.name)}, ${meta}${kids.length ? `, ${kids.length} subgroup${kids.length === 1 ? '' : 's'}` : ''}">
         <span class="dt-tile-pin" aria-hidden="true">${pin}</span>
         <span class="dt-tile-name">${escapeHtml(cat.name)}</span>
