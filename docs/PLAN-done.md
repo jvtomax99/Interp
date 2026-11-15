@@ -12,6 +12,10 @@ top, under this note: the date, a few lines, the PR number.
   where they are drawn; `externalUrl` allows only https, http, mailto, tel. New suite `hidden-values.cjs`: 94 payload runs on the old
   code, 0 after. (2) `api/sign-in.js`: the 5th wrong try deleted the record that counts an address's codes per hour, so guessing
   earned unlimited codes (40 codes, 200 guesses, no time passing); now kept. The rest of the audit: `docs/PLAN.md`, Waiting on Jose.
+- 2026-11-15 Keep the Hub's saved data (Jose's pick, from the phone-app plan across his apps). At the first change someone makes after
+  the Hub opens, `askToKeepData()` (just above `queuedWrite` in `index.html`) asks the phone to keep the Hub's storage when space runs
+  low (`navigator.storage.persist`): the outbox, the glossary cache, the preferences. The phone may refuse; nothing on screen changes,
+  so no guide change. PR #276.
 - 2026-11-14 The computer-only scroll jump (Jose's pick, plan OK'd). A held-back or background redraw (`scheduleRender`) of the screen
   already on show is now a redraw in place: `render({ inPlace: true })` holds `#app` at its height while it is rebuilt (so the scroll
   never moves; putting the scroll back afterwards stopped a glide to a search result partway, caught by the reviewer) and skips the

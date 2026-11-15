@@ -640,6 +640,9 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   still fail; a page that answers and shows the wrong thing still fails).
   Its later opens have no such retry: neither red run was there. To
   measure again: Actions, "WebKit crash probe", Run workflow.
+- Keeping saved data (2026-11-15): `navigator.storage.persist()` is asked from `queuedWrite`, once per opening. Headless
+  Chromium always answers no, so a test can only see that it was asked (spy on `navigator.storage.persist`), never a yes. The same
+  browser link as below was needed again on 2026-11-15 before any suite would start.
 - The cloud machine's Chromium and the tests' Playwright can disagree
   (2026-11-11): the machine had build 1243, `tests/` pins Playwright
   1.56.1, which looks for build 1194, and every browser suite failed to
