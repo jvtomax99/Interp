@@ -6,6 +6,20 @@ search it for the screen, file or word you are about to touch
 (`grep -n -i "tab bar" docs/FACTS.md`), before measuring or retrying
 anything. Add what you learn here, newest near the top, with the date.
 
+**Security pass (2026-11-15).**
+- Rows used to load as `{ id: d.id, ...d.data() }`, so a field named `id`
+  replaced the document's id. Load with `hubRows(snap)` (the document's id
+  wins, a row with a bad id is dropped); a new collection listener uses it too.
+- HTML-escaping does not protect a value inside a JS string in an `onclick`:
+  `&#39;` turns back into a quote before the code runs. Pass values to inline
+  handlers with `jsArg(x)`, never `'${x}'` or `JSON.stringify(x).replace(...)`.
+- Firestore document ids may hold `"`, `'`, `<`, `>`: only `/` is refused.
+- The new suite needs the browser already installed: a `tests/node_modules`
+  playwright newer than it says "run npx playwright install"; delete
+  `tests/node_modules/playwright*` and the harness falls back to the global one.
+- A full `node run.cjs` takes over 20 minutes in the cloud. `feel.cjs`'s
+  "Home at rest" hitch varies run to run (150.7 then 109.3 ms/s against 120).
+
 **Screen morph and the repo scan (2026-11-14).**
 - View Transitions, measured in the cloud Chromium: a named element is
   drawn above the page and photographed without its backdrop, so naming

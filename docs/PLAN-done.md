@@ -5,6 +5,13 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-15 Security pass, the two serious holes (Jose's pick, after an audit of all his projects). (1) Hidden values from the
+  database (a document's id, a colour, a picture size, an address) were drawn unchecked, so any phone with the team code could make
+  script run on every phone (chat, Home, updates, events, recently deleted, attachments, Link Directory, domains). Helpers after
+  `escapeAttr` (`safeId`, `hubRows`, `jsArg`, `safeColor`, `safeSrc`, `sizeAttr`, `cleanCategories`) check them where rows load and
+  where they are drawn; `externalUrl` allows only https, http, mailto, tel. New suite `hidden-values.cjs`: 94 payload runs on the old
+  code, 0 after. (2) `api/sign-in.js`: the 5th wrong try deleted the record that counts an address's codes per hour, so guessing
+  earned unlimited codes (40 codes, 200 guesses, no time passing); now kept. The rest of the audit: `docs/PLAN.md`, Waiting on Jose.
 - 2026-11-14 The computer-only scroll jump (Jose's pick, plan OK'd). A held-back or background redraw (`scheduleRender`) of the screen
   already on show is now a redraw in place: `render({ inPlace: true })` holds `#app` at its height while it is rebuilt (so the scroll
   never moves; putting the scroll back afterwards stopped a glide to a search result partway, caught by the reviewer) and skips the
