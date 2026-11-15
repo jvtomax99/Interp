@@ -5,6 +5,18 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-15 Security pass, the two serious holes (Jose's pick, after an audit of all his projects). (1) Hidden values from the
+  database (a document's id, a colour, a picture size, an address) were drawn unchecked, so any phone with the team code could make
+  script run on every phone (chat, Home, updates, events, recently deleted, attachments, Link Directory, domains). Helpers after
+  `escapeAttr` (`safeId`, `hubRows`, `jsArg`, `safeColor`, `safeSrc`, `sizeAttr`, `cleanCategories`) check them where rows load and
+  where they are drawn; `externalUrl` allows only https, http, mailto, tel. New suite `hidden-values.cjs`: 94 payload runs on the old
+  code, 0 after. (2) `api/sign-in.js`: the 5th wrong try deleted the record that counts an address's codes per hour, so guessing
+  earned unlimited codes (40 codes, 200 guesses, no time passing); now kept, and each guess claims its try in the database before it
+  is checked (20 guesses at once used to all be checked). The independent reviewer then caught more: two no-tap holes (the weekly
+  practice board's counts, a doctor's stored `_n` counts), `escapeAttr` inside '...' handler arguments (doctor tips and terms, slang
+  country), research tier keys, Restore from the bin, photos breaking out of CSS `url()` (`cssUrl`), a number in chat's author
+  crashing chat, and a regression of the first pass (a dropped domain colour would have made every domain save fail). All fixed and
+  in `hidden-values.cjs` (19 checks; the previous version fails 9). The rest of the audit: `docs/PLAN.md`, Waiting on Jose.
 - 2026-11-15 Keep the Hub's saved data (Jose's pick, from the phone-app plan across his apps). At the first change someone makes after
   the Hub opens, `askToKeepData()` (just above `queuedWrite` in `index.html`) asks the phone to keep the Hub's storage when space runs
   low (`navigator.storage.persist`): the outbox, the glossary cache, the preferences. The phone may refuse; nothing on screen changes,

@@ -23,6 +23,7 @@ const REAL = new Set(['newPhone', 'pc']);
 // may read only its own hub-members document; the service token reads all.
 function world() {
   const docs = new Map();
+  const times = new Map(); let writes = 0;   // each document's last write, as Firestore's updateTime
   const typedToPlain = (f) => { const o = {}; for (const [k, v] of Object.entries(f || {})) o[k] = 'integerValue' in v ? Number(v.integerValue) : 'booleanValue' in v ? v.booleanValue : v.stringValue; return o; };
   const plainToTyped = (o) => { const f = {}; for (const [k, v] of Object.entries(o)) f[k] = typeof v === 'number' ? { integerValue: String(v) } : typeof v === 'boolean' ? { booleanValue: v } : { stringValue: String(v) }; return f; };
   const calls = [];
@@ -44,11 +45,15 @@ function world() {
       const uid = auth.replace('Bearer tok-', '');
       if (!(method === 'GET' && p === `hub-members/${uid}`)) return new Response('{}', { status: 403 });
     }
-    if (method === 'GET') return docs.has(p) ? new Response(JSON.stringify({ fields: plainToTyped(docs.get(p)) }), { status: 200 }) : new Response('{}', { status: 404 });
-    if (method === 'DELETE') { docs.delete(p); return new Response('{}', { status: 200 }); }
+    if (method === 'GET') return docs.has(p) ? new Response(JSON.stringify({ fields: plainToTyped(docs.get(p)), updateTime: times.get(p) }), { status: 200 }) : new Response('{}', { status: 404 });
+    if (method === 'DELETE') { docs.delete(p); times.delete(p); return new Response('{}', { status: 200 }); }
     if (method === 'PATCH') {
       const body = typedToPlain(JSON.parse(opts.body).fields);
       const mask = u.searchParams.getAll('updateMask.fieldPaths');
+      // Firestore's "only if nobody wrote it since": refused when the document moved on.
+      const since = u.searchParams.get('currentDocument.updateTime');
+      if (since && since !== times.get(p)) return new Response('{"error":{"status":"FAILED_PRECONDITION"}}', { status: 400 });
+      times.set(p, 't' + (++writes));
       docs.set(p, mask.length ? { ...(docs.get(p) || {}), ...Object.fromEntries(mask.map(k => [k, body[k]])) } : body);
       return new Response('{}', { status: 200 });
     }
@@ -224,6 +229,26 @@ console.log('== Limits');
   ok(fifth.status === 400 && fifth.body.error === 'expired' && fifth.body.tooMany, 'the 5th wrong try spends the code', fifth.body);
   const sixth = await call(h2, 'anonA', { action: 'check', email: 'x@y.com', code: '111111' });
   ok(sixth.body.error === 'expired', 'then even the right code is refused: ask for a new one', sixth.body);
+  // Five wrong tries used to delete the record that counts the hour's codes,
+  // so guessing earned fresh codes without end (security pass, 2026-11-15).
+  const { h: h6, sent: sent6 } = setup({ codes: Array.from({ length: 12 }, (_, i) => 700000 + i) });
+  let refused = null;
+  for (let round = 0; round < 6 && !refused; round++) {
+    const s = await call(h6, 'anonA', { action: 'send', email: 'x@y.com' });
+    if (s.status !== 200) { refused = s; break; }
+    for (let i = 0; i < 5; i++) await call(h6, 'anonA', { action: 'check', email: 'x@y.com', code: '000000' });
+  }
+  ok(sent6.length === 3 && refused && refused.status === 429 && refused.body.error === 'too_many', 'wrong guesses don\'t reset the hour\'s count: still 3 codes, then "too many"', { sent: sent6.length, refused: refused && refused.body });
+  // Guesses sent all at the same moment each read the same count; now each
+  // must claim its try first, so at most 5 are ever checked.
+  const { h: h7, w: w7 } = setup({ codes: [123456] });
+  await call(h7, 'anonA', { action: 'send', email: 'x@y.com' });
+  const burst = await Promise.all(Array.from({ length: 20 }, () => call(h7, 'anonA', { action: 'check', email: 'x@y.com', code: '000000' })));
+  const checked = burst.filter(r => r.body && r.body.error === 'wrong_code').length + burst.filter(r => r.body && r.body.tooMany).length;
+  const after = await call(h7, 'anonA', { action: 'check', email: 'x@y.com', code: '123456' });
+  ok(checked <= 5 && burst.every(r => ['wrong_code', 'busy', 'expired'].includes(r.body && r.body.error)), '20 guesses at once: at most 5 are checked, the rest are told to wait', { checked, kinds: [...new Set(burst.map(r => r.body.error))] });
+  const triesLeft = 5 - Number((w7.docs.get([...w7.docs.keys()].find(k => k.startsWith('sign-in-codes/e_'))) || {}).tries || 0);
+  ok(after.status === 200 || triesLeft <= 0 || after.body.error === 'expired', 'the right code still works if tries are left', { status: after.status, body: after.body, triesLeft });
   const { h: h5 } = setup();
   await call(h5, 'anonA', { action: 'send', email: 'x@y.com' });
   for (let i = 0; i < 4; i++) await call(h5, 'anonA', { action: 'check', email: 'x@y.com', code: '000000' });

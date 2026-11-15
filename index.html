@@ -1728,8 +1728,8 @@ function weeklyBoard(){
     const key = h.who.trim();
     if(!key) return;
     const row = by[key] || (by[key] = { who:key, q:0, right:0, sessions:0 });
-    row.q += h.total || 0;
-    row.right += h.correct || 0;
+    row.q += Number(h.total) || 0;
+    row.right += Number(h.correct) || 0;
     row.sessions++;
   });
   return Object.values(by).sort((a,b)=> b.q - a.q || b.right - a.right);
@@ -2252,7 +2252,7 @@ function renderSlangPanel(activeCat){
     <div class="sl-panel-head"><span class="sl-panel-title">Country</span></div>
     <div class="sl-countries" role="group" aria-label="Filter by country">
       <button type="button" class="sl-country" aria-pressed="${!slangCountry}" onclick="setSlangCountry('')">All</button>
-      ${countryList.map(([k, n]) => `<button type="button" class="sl-country" aria-pressed="${slangCountry === k}" onclick="setSlangCountry('${escapeAttr(k)}')">${ICON_SL_PIN}${escapeHtml(slangCountryLabel(k))}<em>${n}</em></button>`).join('')}
+      ${countryList.map(([k, n]) => `<button type="button" class="sl-country" aria-pressed="${slangCountry === k}" onclick="setSlangCountry(${jsArg(k)})">${ICON_SL_PIN}${escapeHtml(slangCountryLabel(k))}<em>${n}</em></button>`).join('')}
     </div>` : '';
   const count = l => levels.filter(x => x === l).length;
   const order = ['Neutral','Low','Medium','Varies','Medium-high','High'];
@@ -2357,7 +2357,7 @@ function loadGlossaryCache(){
     if(!raw) return false;
     const cached = JSON.parse(raw);
     if(!cached || !Array.isArray(cached.categories) || !cached.categories.length) return false;
-    DATA = { ...DATA, categories: cached.categories };
+    DATA = { ...DATA, categories: cleanCategories(cached.categories).map(c => ({ ...c, terms: (Array.isArray(c.terms) ? c.terms : []).filter(t => t && safeId(t.id)) })) };
     return true;
   }catch(err){
     console.warn('Glossary cache unreadable, ignoring:', err && err.name);
@@ -2376,7 +2376,7 @@ function applyCategoriesMeta(meta){
   lastCategoriesMeta = JSON.stringify(meta || []);
   const existingTerms = {};
   ((DATA && DATA.categories) || []).forEach(c=>{ existingTerms[c.id] = c.terms; });
-  DATA = { categories: (meta || []).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
+  DATA = { categories: cleanCategories(meta).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
 }
 
 async function loadCategoriesMeta(){
@@ -2407,7 +2407,7 @@ function applyTermsSnapshot(snap, opts){
   snap.docChanges().forEach(change=>{
     const doc = change.doc;
     if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
-    else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+    else if(safeId(doc.id)) TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
   });
   bucketTermsIntoCategories();
 }
@@ -2447,7 +2447,7 @@ function startTermsListener(){
     snap.docChanges().forEach(change=>{
       const doc = change.doc;
       if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
-      else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+      else if(safeId(doc.id)) TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
     });
     clearTimeout(termsSnapTimer);
     termsSnapTimer = setTimeout(()=>{
@@ -2515,7 +2515,7 @@ async function loadTrash(){
   try{
     if(!db){ TRASH = []; return; }
     const snap = await db.collection('deleted-items').get();
-    TRASH = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    TRASH = hubRows(snap)
       .sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
     // Drop anything past the retention window rather than letting the bin
     // grow forever.
@@ -2558,7 +2558,11 @@ async function dropFromTrash(id){
 async function restoreTrashItem(id){
   const entry = TRASH.find(t => t.id === id);
   if(!entry) return;
-  const p = entry.payload || {};
+  const p = { ...(entry.payload || {}) };
+  // A bin entry is anyone's to write: a bad id or a planted count never comes back.
+  delete p._n;
+  if(!safeId(p.id)){ showToast('That item can\u2019t be restored.'); return; }
+  if(entry.type === 'domain'){ const c = cleanCategories([p])[0]; if(!c){ showToast('That item can\u2019t be restored.'); return; } Object.assign(p, c); if(!safeColor(p.color)) p.color = DOMAIN_COLORS[0]; }
   let ok = false;
 
   try{
@@ -2647,7 +2651,7 @@ async function loadQuizHistory(){
   if(!db){ QUIZ_HISTORY = []; return; }
   try{
     const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
-    QUIZ_HISTORY = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    QUIZ_HISTORY = hubRows(snap).map(h => ({ ...h, total: Number(h.total) || 0, correct: Number(h.correct) || 0 }));
   }catch(err){
     QUIZ_HISTORY = [];
   }
@@ -2774,7 +2778,7 @@ async function loadProviders(){
   try{
     if(!db){ PROVIDERS = []; return; }
     const snap = await db.collection('healthcare-providers').get();
-    PROVIDERS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    PROVIDERS = hubRows(snap);
   }catch(err){
     console.error('Could not load providers', err);
     PROVIDERS = [];
@@ -2836,7 +2840,7 @@ function doctorDirectoryKey(name){
 const DOCTOR_DIR_CACHE_KEY = 'ih_doctorDirectory';
 let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '', doctorDirRetries = 0;
 function doctorDirFromCache(){
-  try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c : null; }catch(e){ return null; }
+  try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c.filter(d => d && safeId(d.id)) : null; }catch(e){ return null; }
 }
 function doctorDirToCache(list){
   // Without the full research text (re-fetched when a doctor is opened), so
@@ -2854,7 +2858,7 @@ async function loadDoctorDirectory(){
     if(!db) await hubAuthReady;
     if(!db) throw Object.assign(new Error('The database did not start.'), { code: 'no-db' });
     const snap = await db.collection('doctor-directory').get();
-    DOCTOR_DIRECTORY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    DOCTOR_DIRECTORY = hubRows(snap);
     DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIR_ERROR = '';
     doctorDirToCache(DOCTOR_DIRECTORY);
   }catch(err){
@@ -2964,7 +2968,10 @@ function startChatListener(){
   // without it the chat could only guess.
   db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
     fmNote('data: chat');
-    CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
+    CHAT_MESSAGES = snap.docs.filter(d => safeId(d.id)).map(d => { const m = { ...d.data(), id: d.id, _local: !!(d.metadata && d.metadata.hasPendingWrites) };
+      // Text that isn't text broke the chat for everyone.
+      ['text', 'author'].forEach(k => { if(m[k] != null && typeof m[k] !== 'string') m[k] = String(m[k]); });
+      return m; });
     if(isInitialChatLoad){
       isInitialChatLoad = false;
       markAllChatSeen(); // don't flag pre-existing history as "unread"
@@ -3045,7 +3052,7 @@ function startAnnouncementsListener(){
   if(announcementsListenerStarted || !db) return;
   announcementsListenerStarted = true;
   db.collection('announcements').orderBy('createdAt','desc').onSnapshot(snap=>{
-    ANNOUNCEMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ANNOUNCEMENTS = hubRows(snap);
     // Only the strip: rebuilding the screen used to wipe a half-typed message.
     if(activeCategory === 'chat'){ renderPinnedStrip(); fitChatPanel(); }
   }, err=> console.error('announcements listener error:', err));
@@ -3299,7 +3306,7 @@ function startActivityListener(){
   // ever shows the newest entries anyway.
   db.collection('activity-log').orderBy('timestamp').limitToLast(ACTIVITY_HISTORY_LIMIT).onSnapshot(snap=>{
     fmNote('data: activity');
-    ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ACTIVITY = hubRows(snap);
     if(isInitialActivityLoad){
       isInitialActivityLoad = false;
       markActivitySeen();
@@ -3374,7 +3381,7 @@ function renderActivityFeed(){
       <div class="activity-row">
         <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
         <span class="activity-summary">${activityMarkup(a.summary)}</span>
-        <span class="activity-time" data-ts="${a.timestamp||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
+        <span class="activity-time" data-ts="${Number(a.timestamp)||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
         <button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>
       </div>
     `;
@@ -3441,13 +3448,13 @@ function attachmentChipHtml(att, removeJs){
   if(isImage){
     // JSON-encode the values so filenames containing quotes or apostrophes
     // (common with scanned documents) can't break the inline handler.
-    const args = `${JSON.stringify(att.dataUrl)}, ${JSON.stringify(att.filename||'image')}`.replace(/"/g,'&quot;');
+    const args = `${jsArg(safeSrc(att.dataUrl))}, ${jsArg(att.filename||'image')}`;
     return `<button type="button" class="attach-chip attach-image" title="View image" onclick="openLightbox(${args})">
-      <img src="${att.dataUrl}" alt="${escapeAttr(att.filename||'attachment')}">
+      <img src="${escapeAttr(safeSrc(att.dataUrl))}" alt="${escapeAttr(att.filename||'attachment')}">
       ${removeBtn}
     </button>`;
   }
-  return `<a class="attach-chip attach-file" href="${att.dataUrl}" download="${escapeAttr(att.filename||'file.pdf')}">
+  return `<a class="attach-chip attach-file" href="${escapeAttr(safeSrc(att.dataUrl))}" download="${escapeAttr(att.filename||'file.pdf')}">
     ${ICON_PDF}<span>${escapeHtml(att.filename||'file.pdf')}</span>
     ${removeBtn}
   </a>`;
@@ -3460,7 +3467,7 @@ async function loadAttachments(){
   try{
     if(!db){ ATTACHMENTS = []; return; }
     const snap = await db.collection('term-attachments').get();
-    ATTACHMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ATTACHMENTS = hubRows(snap);
   }catch(err){
     console.error('Could not load attachments', err);
     ATTACHMENTS = [];
@@ -4652,7 +4659,7 @@ async function loadPushScreen(){
   if(db){
     try{
       const snap = await db.collection('push-log').orderBy('at', 'desc').limit(12).get();
-      PUSH.log = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      PUSH.log = hubRows(snap);
     }catch(e){ PUSH.log = PUSH.log || []; }
     if(isHubOwner()){
       try{ PUSH.phones = (await db.collection('push-subs').get()).size; }catch(e){ PUSH.phones = null; }
@@ -4883,7 +4890,7 @@ function updateMentionSuggestions(input){
   if(!candidates.length){ box.innerHTML = ''; box.classList.remove('show'); return; }
 
   box.innerHTML = candidates.map(n=>
-    `<button type="button" onclick="pickMention(${JSON.stringify(n).replace(/"/g,'&quot;')})">@${escapeHtml(n)}</button>`
+    `<button type="button" onclick="pickMention(${jsArg(n)})">@${escapeHtml(n)}</button>`
   ).join('');
   box.classList.add('show');
 }
@@ -5183,7 +5190,7 @@ function startCeListener(){
   if(ceListenerStarted || !db) return;
   ceListenerStarted = true;
   db.collection('ce-events').orderBy('timestamp').onSnapshot(snap=>{
-    CE_EVENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    CE_EVENTS = hubRows(snap);
     if(isInitialCeLoad){
       isInitialCeLoad = false;
       lastSeenCeCount = CE_EVENTS.length;
@@ -5245,7 +5252,7 @@ function renderEvents(){
       <div class="ce-row">
         <div class="ce-head">
           <span class="ce-src">${escapeHtml(src)}</span>${isRegion(ev.region) ? `<span class="ce-region">${regionName(ev.region)}</span>` : ''}
-          <span class="ce-time" data-ts="${ev.timestamp||''}">${when}</span>
+          <span class="ce-time" data-ts="${Number(ev.timestamp)||''}">${when}</span>
           <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
         </div>
         <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
@@ -5359,13 +5366,13 @@ function nameToColor(name){
 // Stable per-specialty tint. Same input always yields the same colour, so a
 // specialty looks identical on every card and across sessions.
 function specialtyColor(specialty){
-  const s = (specialty || '').trim();
+  const s = String(specialty || '').trim();
   if(!s) return '#7C6A9C';
   return nameToColor(s.toLowerCase());
 }
 
 function initialsOf(name){
-  const trimmed = (name || '').trim();
+  const trimmed = String(name || '').trim();
   if(!trimmed) return '?';
   // Nearly every entry in the doctor directory starts with "Dr", so taking
   // the first two words gave "DB" for Dr Barry Love and "DA" for Dr Ana Ruiz
@@ -6633,7 +6640,8 @@ function researchTiers(result){
     return result.tiers
       .filter(t => t && Array.isArray(t.terms) && t.terms.length)
       .map(t => ({
-        key: t.key || 'core',
+        // The key goes into onclick handlers, and the document is anyone's to write.
+        key: typeof t.key === 'string' && /^[a-z]{1,24}$/.test(t.key) ? t.key : 'core',
         label: t.label || RESEARCH_TIER_LABELS[t.key] || 'Terms',
         blurb: RESEARCH_TIER_BLURBS[t.key] || '',
         terms: t.terms,
@@ -6755,9 +6763,10 @@ function renderResearchTierBlocks(tiers, specialtyOverride, scope){
       <div class="doc-research-terms">
         ${tier.terms.map(t => {
           const exists = termInGlossary(allTerms, t);
-          const enSafe = escapeHtml(t.en||'').replace(/'/g,"\\'");
-          const esSafe = escapeHtml(t.es||'').replace(/'/g,"\\'");
-          const defSafe = escapeHtml(t.def||'').replace(/'/g,"\\'");
+          // jsArg, not escapeHtml: &#39; turns back into a quote before the handler runs.
+          const enSafe = jsArg(String(t.en||''));
+          const esSafe = jsArg(String(t.es||''));
+          const defSafe = jsArg(String(t.def||''));
           return `
             <div class="doc-research-term-card${tier.key === 'falsefriends' ? ' is-pitfall' : ''}${exists ? ' is-have' : ''}">
               <div class="doc-research-term-main">
@@ -6767,7 +6776,7 @@ function renderResearchTierBlocks(tiers, specialtyOverride, scope){
               </div>
               ${exists
                 ? `<span class="doc-research-badge is-existing">${ICON_CHECK}</span>`
-                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this${overrideArg})">${ICON_PLUS} Add</button>`}
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary(${enSafe}, ${esSafe}, ${defSafe}, this${overrideArg})">${ICON_PLUS} Add</button>`}
             </div>`;
         }).join('')}
       </div>
@@ -6847,9 +6856,50 @@ function tileVars(color){
 }
 
 function escapeHtml(s){
-  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
+/* Hidden values from the database (2026-11-15 security pass). Text someone
+   reads goes through escapeHtml. These are for the values nobody reads but
+   the page is built from: a document's id, a colour, an address, a size. Any
+   teammate's phone can write those, so each is checked before it is drawn;
+   one that fails is left out instead of being trusted.
+
+   safeId:   an id the app or Firestore made never has a quote, a bracket, an
+             ampersand, a backslash or a control character. One that does is
+             not ours. Safe inside "..." attributes and '...' handler arguments.
+   hubRows:  a snapshot's documents as rows. The document's own id always
+             wins over a field called "id", and a row with a bad id is dropped.
+   jsArg:    any value as an argument inside an onclick="..." (it used to be
+             jsArg(x), which text holding a
+             literal "&quot;" could break out of).
+   safeColor, safeSrc, sizeAttr: a #rrggbb colour, a picture or file address
+             (https, or the app's own data:/blob: pictures and PDFs), a whole
+             number of pixels. */
+function safeId(v){ return typeof v === 'string' && v !== '' && v.length <= 300 && !/["'<>&`\\\u0000-\u001f\u007f\u2028\u2029]/.test(v); }
+function idOr(v){ return safeId(v) ? v : ''; }
+function hubRows(snap){ return snap.docs.filter(d => safeId(d.id)).map(d => ({ ...d.data(), id: d.id })); }
+function jsArg(v){ return escapeAttr(JSON.stringify(v === undefined ? null : v)); }
+function safeColor(v){ return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v : ''; }
+function safeSrc(v){
+  v = String(v == null ? '' : v).trim();
+  return /^(https:\/\/|blob:|data:(image\/(png|jpe?g|gif|webp)|application\/pdf)[;,])/i.test(v) ? v : '';
+}
+function cssUrl(v){
+  const s = safeSrc(v);
+  return s ? `url(&quot;${escapeAttr(s.replace(/["'\\()\s<>]/g, c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase()))}&quot;)` : 'none';
+}
+function sizeAttr(v){ v = Math.round(Number(v)); return v > 0 && v < 100000 ? v : 0; }
+/* Domains as the app keeps them: a bad id drops the domain, a bad colour or
+   parent is left off (the page falls back to its own). */
+function cleanCategories(list){
+  return (Array.isArray(list) ? list : []).filter(c => c && safeId(c.id)).map(c => {
+    const o = { ...c };
+    if(!safeColor(o.color)) o.color = DOMAIN_COLORS[0];
+    if('parentId' in o && o.parentId && !safeId(o.parentId)) delete o.parentId;
+    return o;
+  });
+}
 /* A link pasted without "https://" is not a link. The browser resolves it
    against the app, so "medlineplus.gov/ency/article/000101.htm" becomes a
    request for interp-six.vercel.app/medlineplus.gov/... — a page of ours that
@@ -6867,7 +6917,9 @@ function externalUrl(raw){
   const url = String(raw == null ? '' : raw).trim();
   if(!url) return '';
   const scheme = url.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
-  if(scheme && !scheme[1].includes('.')) return url;
+  // Only addresses that open a page, an email or a call: a javascript: or
+  // data: address from the database would run as code on a tap.
+  if(scheme && !scheme[1].includes('.')) return /^(https?|mailto|tel)$/i.test(scheme[1]) ? url : '';
   return 'https://' + url.replace(/^\/+/, '');
 }
 
@@ -7056,7 +7108,7 @@ function renderLinks(t, categoryId, lead = ''){
   // get more wrong, and did: it opened a blank page. It now searches at the
   // moment of the tap, so every link offered came back from a live result.
   if(categoryId !== 'resources' && t.en && !isSlangDomain(DATA.categories.find(c => c.id === categoryId))){
-    links.push(`<button type="button" class="link-pill" onclick="openTermLookup('${escapeAttr(categoryId)}','${escapeAttr(t.id)}')">Look up ${ICON_SEARCH}</button>`);
+    links.push(`<button type="button" class="link-pill" onclick="openTermLookup(${jsArg(categoryId)},${jsArg(t.id)})">Look up ${ICON_SEARCH}</button>`);
   }
   if(links.length===0 && !lead) return '';
   // links-say-only: nothing but the phone's hear pills, which desktop hides.
@@ -8802,21 +8854,21 @@ function renderContent(){
       // and the English the second line's, so the order reads as intended.
       const enLine = `<div class="${slang ? 'term-es' : 'term-en'}">
             <span>${escapeHtml(t.en)}</span>
-            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${jsArg(t.en)})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${jsArg(t.en)}, 'en-US')">${ICON_SPEAKER}</button>
           </div>`;
       const esLine = t.es ? `<div class="${slang ? 'term-en' : 'term-es'}">
             <span>${escapeHtml(t.es)}</span>
-            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
+            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${jsArg(t.es)})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${jsArg(t.es)}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : '';
       // Phones: hearing a term is the action used most mid-session, so it gets
       // a full-size pill in the bottom row (see .say-pill). The headword first.
-      const sayPill = (text, lang, code) => `<button type="button" class="link-pill say-pill" aria-label="Hear ${code === 'EN' ? 'in English' : 'in Spanish'}: ${escapeAttr(text)}" onclick="speakText(this, ${JSON.stringify(text).replace(/"/g,'&quot;')}, '${lang}')">${ICON_SPEAKER}<span>${code}</span></button>`;
+      const sayPill = (text, lang, code) => `<button type="button" class="link-pill say-pill" aria-label="Hear ${code === 'EN' ? 'in English' : 'in Spanish'}: ${escapeAttr(text)}" onclick="speakText(this, ${jsArg(text)}, '${lang}')">${ICON_SPEAKER}<span>${code}</span></button>`;
       const sayEn = sayPill(t.en, 'en-US', 'EN'), sayEs = t.es ? sayPill(t.es, 'es-ES', 'ES') : '';
       const say = slang ? sayEs + sayEn : sayEn + sayEs;
       html += `
-        <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm('${escapeAttr(t.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm('${escapeAttr(t.id)}')}"` : ''}>
+        <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm(${jsArg(t.id)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm(${jsArg(t.id)})}"` : ''}>
           <div class="card-top">
             <span class="tag" style="--tag-color:${cat.color};">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
@@ -9921,7 +9973,7 @@ function renderWeeklyBoard(){
     html += `<div class="board-row${mine?' is-me':''}">
       <span class="board-rank">${medal || (i+1)}</span>
       <span class="board-face${face?' has-photo':''}" style="${face
-        ? `background-color:${colour};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        ? `background-color:${colour};background-image:${cssUrl(face)};background-size:cover;background-position:center;`
         : `background:linear-gradient(140deg, ${colour}, ${darkenHex(colour,30)});`}">${escapeHtml(initialsOf(r.who))}</span>
       <span class="board-who">${escapeHtml(r.who)}${mine?' <em>you</em>':''}</span>
       <span class="board-bar"><span class="board-fill" style="width:${Math.round((r.q/top)*100)}%; background:${colour};"></span></span>
@@ -12687,7 +12739,7 @@ function renderHome(){
           <span class="home-feed-icon">${ICON_BELL}</span>
           <span class="home-feed-main">
             <span class="home-feed-title">${escapeHtml(a.author || 'Someone')} ${escapeHtml(a.summary || '')}</span>
-            <span class="home-feed-meta" data-ts="${a.timestamp || ''}">${relativeTime(a.timestamp)}</span>
+            <span class="home-feed-meta" data-ts="${Number(a.timestamp) || ''}">${relativeTime(a.timestamp)}</span>
           </span>
           <span class="home-feed-go">${ICON_ARROW_RIGHT}</span>
         </button>`).join('')
@@ -12798,7 +12850,7 @@ function renderProviders(q){
         </div>
         <div class="provider-top">
           ${p.photo
-            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(p.photo)}, ${JSON.stringify(p.name||'Provider photo')}`.replace(/"/g,'&quot;')})">`
+            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${jsArg(p.photo)}, ${jsArg(p.name||'Provider photo')})">`
             : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
           <div>
             <div class="provider-name">${escapeHtml(p.name)}</div>
@@ -12834,7 +12886,7 @@ function renderTrash(){
         <div class="doc-research-term-card">
           <div class="doc-research-term-main">
             <div class="doc-research-term-en">${escapeHtml(t.label)}</div>
-            <div class="trash-meta">${typeLabel[t.type] || t.type} \u00b7 deleted by ${escapeHtml(t.deletedBy || 'someone')}${t.deletedAt ? ` on ${new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</div>
+            <div class="trash-meta">${typeLabel[t.type] || escapeHtml(String(t.type || 'item'))} \u00b7 deleted by ${escapeHtml(t.deletedBy || 'someone')}${t.deletedAt ? ` on ${new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</div>
           </div>
           <button class="doc-research-badge is-missing" onclick="restoreTrashItem('${t.id}')">Restore</button>
         </div>`).join('')}
@@ -13010,7 +13062,7 @@ function doctorRecentHtml(){
     const art = d.photo
       ? `<img class="is-photo" src="${escapeAttr(d.photo)}" alt="" loading="lazy">`
       : pinImgHtml(specialtyPinKey(d.specialty, place));
-    return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail('${escapeAttr(d.id)}')"
+    return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail(${jsArg(d.id)})"
       aria-label="${escapeAttr(d.name)}"><span class="dl-recent-ph" aria-hidden="true">${art}</span><span>${escapeHtml(label)}</span></button>`;
   }).join('');
   return `<div class="dl-recent"><h3 class="dl-recent-h">Recent</h3><div class="dl-recent-row">${items}</div></div>`;
@@ -13166,9 +13218,11 @@ function renderDoctorDirectory(q){
    research yet: "+ Prep terms" (Doctor Prep, filled in). The whole card
    opens the doctor's page; edit and delete are on the page's pencil. */
 function doctorListCounts(d){
-  const n = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || { terms: 0, traps: 0 });
+  const raw = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || {});
+  // `_n` can come from a document anyone on the team wrote: numbers only.
+  const n = { terms: Number(raw.terms) || 0, traps: Number(raw.traps) || 0 };
   return { terms: n.terms + (Array.isArray(d.customTerms) ? d.customTerms.length : 0), traps: n.traps,
-    researched: !!(d.researchResult ? n.terms : (d._n && d._n.terms)), tips: doctorTips(d).length };
+    researched: !!n.terms, tips: doctorTips(d).length };
 }
 function doctorResearchCounts(r){
   const tiers = researchTiers(r);
@@ -13304,7 +13358,7 @@ async function saveDoctorTerm(){
   try{
     await persistDoctorDirectoryEntry(d.id, record);
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
-    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    DOCTOR_DIRECTORY[idx] = { ...record, id: d.id };
     logActivity(`added the term "${en}" to ${d.name}`);
     closeDoctorTermModal();
     successBurst();
@@ -13327,7 +13381,7 @@ async function deleteDoctorTerm(doctorId, termId){
   try{
     await persistDoctorDirectoryEntry(d.id, record);
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
-    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    DOCTOR_DIRECTORY[idx] = { ...record, id: d.id };
     showToast('Term removed.');
     render();
     openDoctorDirDetail(d.id, 'team');
@@ -13443,7 +13497,7 @@ async function doctorPageFetch(id){
     const snap = await db.collection('doctor-directory').doc(id).get();
     if(!snap.exists) return;
     const i = DOCTOR_DIRECTORY.findIndex(x => x.id === id);
-    if(i > -1 && !DOCTOR_DIRECTORY[i].researchResult) DOCTOR_DIRECTORY[i] = { id, ...snap.data() };
+    if(i > -1 && !DOCTOR_DIRECTORY[i].researchResult) DOCTOR_DIRECTORY[i] = { ...snap.data(), id };
     if(currentDoctorDetailId === id && document.getElementById('doctorDirDetailOverlay').classList.contains('show')) refreshDoctorDirDetail();
   }catch(e){}
 }
@@ -13610,8 +13664,8 @@ function renderDoctorTips(){
     return `<div class="dt-tip${DT.editing === t.id ? ' is-editing' : ''}">
       <p>${escapeHtml(t.text)}</p>
       <div class="dt-meta"><small>${escapeHtml(meta)}</small>${mine ? `
-        <button type="button" class="dt-act" onclick="editDoctorTip('${escapeAttr(t.id)}')" aria-label="Edit this tip">Edit</button>
-        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip('${escapeAttr(t.id)}')" aria-label="Delete this tip">Delete</button>` : ''}</div>
+        <button type="button" class="dt-act" onclick="editDoctorTip(${jsArg(t.id)})" aria-label="Edit this tip">Edit</button>
+        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip(${jsArg(t.id)})" aria-label="Delete this tip">Delete</button>` : ''}</div>
     </div>`;
   }).join('') : `<p class="dt-empty">No tips yet. How do they phrase things? What do they always explain? What should a newer interpreter know before walking in?</p>`;
   const editing = DT.editing && tips.find(t => t.id === DT.editing);
@@ -13709,7 +13763,7 @@ function renderDoctorDirDetail(d){
   const allTerms = allGlossaryTermsFlat();
 
   const photo = d.photo
-    ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
+    ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${jsArg(d.photo)}, ${jsArg(d.name||'Doctor photo')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
     : `<div class="dp-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty || specialtyForMatch, place))}<span class="dp-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
 
   const most = Math.max(1, ...tabs.map(t => t.terms.length));
@@ -13743,7 +13797,7 @@ function renderDoctorDirDetail(d){
         ${t.es ? `<div class="dp-es" lang="es">${escapeHtml(t.es)}</div>` : ''}
         ${t.def ? `<div class="dp-def">${escapeHtml(t.def)}</div>` : ''}
         ${on.key === 'team' ? `<div class="dp-row-foot">
-          <button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm('${id}','${escapeAttr(t.id)}')">Remove</button>
+          <button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm(${jsArg(id)},${jsArg(t.id)})">Remove</button>
           ${t.addedBy ? `<span>Added by ${escapeHtml(t.addedBy)}</span>` : ''}
         </div>` : ''}
       </div>
@@ -14208,7 +14262,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
   // .has-photo class that sets `cover` -- so the photo rendered at its full
   // pixel size inside a circle, showing one flat corner of the image.
   const avStyle = face
-    ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
+    ? `background-color:${avatarColor};background-image:${cssUrl(face)};background-size:cover;background-position:center;background-repeat:no-repeat;`
     : `background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});`;
   // The coloured initials stay as the element's own content under every
   // photo, so a URL that 404s falls back to them instead of a broken image.
@@ -14222,7 +14276,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
     ? `<div class="chat-reactions">${reactions.map(r=>{
         const iReacted = r.names.some(n=> String(n).trim().toLowerCase() === me);
         return `<button type="button" class="chat-reaction${iReacted?' is-mine':''}" data-emoji="${escapeAttr(r.emoji)}" aria-pressed="${iReacted}" aria-label="${escapeAttr(r.emoji)} ${r.names.length}: ${escapeAttr(r.names.join(', '))}${iReacted ? '. Tap to remove yours' : '. Tap to add yours'}" title="${escapeAttr(r.names.join(', '))}"
-          onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(r.emoji).replace(/"/g,'&quot;')})">
+          onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${jsArg(r.emoji)})">
           <span>${escapeHtml(r.emoji)}</span><b>${r.names.length}</b></button>`;
       }).join('')}</div>`
     : '';
@@ -14231,7 +14285,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
     ? `<div class="chat-actions">
         <div class="chat-act-emojis">
           ${CHAT_REACTIONS.map(e=>`<button type="button" class="chat-act-emoji" title="React ${escapeAttr(e)}"
-              onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(e).replace(/"/g,'&quot;')})">${escapeHtml(e)}</button>`).join('')}
+              onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${jsArg(e)})">${escapeHtml(e)}</button>`).join('')}
         </div>
         <div class="chat-act-row">
           <button type="button" class="chat-act" onclick="event.stopPropagation(); startChatReply('${m.id}')">${ICON_REPLY}<span>Reply</span></button>
@@ -14245,7 +14299,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
 
   // What this message is answering, above it. Tapping it goes there.
   const quote = m.replyTo
-    ? `<button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')">
+    ? `<button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${idOr(m.replyTo.id)}')">
          <b>${escapeHtml(m.replyTo.author || 'Teammate')}</b><span>${escapeHtml(m.replyTo.text || '')}</span>
        </button>`
     : '';
@@ -14272,7 +14326,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
         return `<button type="button" class="tc-photo" data-pv="${m.id}:${i}"
             onclick="tcPhotoTap(this, '${m.id}', ${i}, event)" oncontextmenu="openChatMenuFor(event, '${m.id}', this)" onkeydown="if(event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10')){openChatMenuFor(event,'${m.id}',this)}"
             aria-label="Photo ${i + 1} of ${photos.length} from ${escapeAttr(who)}. Open full screen">
-          <img src="${escapeAttr(a.dataUrl)}" alt="" decoding="async"${i > 1 ? ' loading="lazy"' : ''}${a.width && a.height ? ` width="${a.width}" height="${a.height}"` : ''} onload="tcPhotoLoaded(this)" onerror="tcPhotoFailed(this)">
+          <img src="${escapeAttr(a.dataUrl)}" alt="" decoding="async"${i > 1 ? ' loading="lazy"' : ''}${sizeAttr(a.width) && sizeAttr(a.height) ? ` width="${sizeAttr(a.width)}" height="${sizeAttr(a.height)}"` : ''} onload="tcPhotoLoaded(this)" onerror="tcPhotoFailed(this)">
           <span class="tc-photo-fail">${ICON_RETRY_TC}<span>Photo didn’t load.<br>Tap to try again</span></span>
         </button>`;
       }).join('')}${timeOnPhoto}</div>`;
@@ -14284,10 +14338,10 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
             aria-label="${escapeAttr(mine ? 'You' : who)}: ${escapeAttr(m.text.slice(0, 300))}. Press Enter to react or reply.">${linkifyChat(highlightMentions(m.text))}${m.editedAt ? '<span class="tc-edited">edited</span>' : ''}</div>`
       : '';
     const fileChips = files.length ? `<div class="tc-files">${files.map(a =>
-        `<a class="tc-file" href="${escapeAttr(a.dataUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICON_PDF}<span>${escapeHtml(a.filename || 'file.pdf')}</span></a>`).join('')}</div>` : '';
+        `<a class="tc-file" href="${escapeAttr(safeSrc(a.dataUrl))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICON_PDF}<span>${escapeHtml(a.filename || 'file.pdf')}</span></a>`).join('')}</div>` : '';
     const replyQuote = m.replyTo
       ? `<span class="tc-quote-label">${mine ? 'You' : escapeHtml(who)} replied to ${escapeHtml(m.replyTo.author || 'Teammate')}</span>
-         <button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')" aria-label="Go to the message from ${escapeAttr(m.replyTo.author || 'Teammate')} this replies to">
+         <button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${idOr(m.replyTo.id)}')" aria-label="Go to the message from ${escapeAttr(m.replyTo.author || 'Teammate')} this replies to">
            ${m.replyTo.photo ? `<img src="${escapeAttr(m.replyTo.photo)}" alt="">` : ''}<span>${escapeHtml(m.replyTo.text || (m.replyTo.photo ? 'Photo' : ''))}</span>
          </button>`
       : '';
@@ -14367,7 +14421,7 @@ function renderChatMessages(){
           <div class="tc-empty-wave" aria-hidden="true">👋</div>
           <h3>Say hi to the team</h3>
           <p>Ask about a term, share a photo of new signage, or flag what’s busy on your floor.</p>
-          <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${JSON.stringify(t).replace(/"/g, '&quot;')})">${escapeHtml(t)}</button>`).join('')}</div>
+          <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${jsArg(t)})">${escapeHtml(t)}</button>`).join('')}</div>
         </div>`
       : `<div class="chat-empty">
           <div class="chat-empty-mark">👋</div>
@@ -14578,7 +14632,7 @@ function renderChatHeader(){
       const fn = faceOf.get(name) || name;
       const c = nameToColor(fn), face = memberPhotoFor(fn);
       const st = face
-        ? `background-color:${c};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        ? `background-color:${c};background-image:${cssUrl(face)};background-size:cover;background-position:center;`
         : `background:linear-gradient(140deg, ${c}, ${darkenHex(c, 30)});`;
       return `<span class="chat-avatar${face ? ' has-photo' : ''}" style="${st}">${escapeHtml(initialsOf(name))}</span>`;
     }).join('');
@@ -15140,7 +15194,7 @@ function renderDirectory(q){
       .map((t)=>({ t }))
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
     sortedTerms.forEach(({ t })=>{
-      const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
+      const label = t.es ? `${escapeHtml(t.en)} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
       const matches = !q || foldText(t.en).includes(q) || foldText(t.es).includes(q) || foldText(t.def).includes(q) || foldText(t.notes).includes(q);
       if(!matches) return;
 
@@ -15465,7 +15519,7 @@ function openTermCheck(record, findings){
   list.innerHTML = findings.map(f=>{
     const sev = ['high','medium','low'].includes(f.severity) ? f.severity : 'low';
     const dup = f.type === 'duplicate' && f.duplicateId
-      ? `<button class="tc-dup" onclick="openDuplicateTerm('${escapeAttr(f.duplicateId)}')">See the existing entry</button>`
+      ? `<button class="tc-dup" onclick="openDuplicateTerm(${jsArg(f.duplicateId)})">See the existing entry</button>`
       : '';
     const suggestion = f.suggestion
       ? `<div class="tc-suggest"><b>Suggested:</b> ${escapeHtml(f.suggestion)}</div>`

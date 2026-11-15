@@ -126,6 +126,31 @@ with buttons.
 
 ## Waiting on Jose (nothing to build until he does)
 
+- **Security audit, 2026-11-15: the rest of what it found** (the two serious
+  holes were fixed, `docs/PLAN-done.md`). Each needs Jose's pick; the first
+  two need a plan he OKs, because tightening them can lock teammates out.
+  1. *The database trusts every member completely.* `firestore.rules` lets
+     any joined phone delete or rewrite every term, doctor, provider and
+     the deleted-items bin, edit or delete anyone's chat message, and post
+     under any author name (omit `uid`). The app hides those buttons; the
+     rules don't refuse them. `storage.rules` accepts any file type and size
+     under `attachments/`.
+  2. *No per-person cap on the AI endpoints* (`api/_hub-access.js` only
+     checks membership): one leaked team code is an open Anthropic bill.
+     Also set a monthly spend limit in the Anthropic console.
+  3. *Smaller:* no security headers on the main app (`vercel.json` sets them
+     only for `atlas/`); sign-in says whether an email is on the team
+     (404 `no_account`); restrict the public Firebase web key to the Hub's
+     address in Google Cloud; the Firebase SDK loads without an integrity
+     hash; `hub-invites` codes can be guessed with no throttle (32^8).
+  Not checked from the cloud: the rules actually published in the Firebase
+  console (the repo file is a copy).
+  Also from the reviewer, not fixed: photo addresses (providers, doctors,
+  chat) can point at any https site, so every phone that shows one loads
+  it and that site sees the phone's IP address; the per-phone code limit is
+  per sign-in, and fresh anonymous sign-ins get round it (the 3 codes an
+  hour per address still holds, so at most 15 guesses an hour per account).
+
 - **Feel audit:** five phone screenshots (Ask and Team access with the
   keyboard up; a doctor's page, the doctor list's A-Z strip, a toast) and
   his frame-meter numbers.
