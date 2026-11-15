@@ -2357,7 +2357,7 @@ function loadGlossaryCache(){
     if(!raw) return false;
     const cached = JSON.parse(raw);
     if(!cached || !Array.isArray(cached.categories) || !cached.categories.length) return false;
-    DATA = { ...DATA, categories: cached.categories };
+    DATA = { ...DATA, categories: cleanCategories(cached.categories).map(c => ({ ...c, terms: (Array.isArray(c.terms) ? c.terms : []).filter(t => t && safeId(t.id)) })) };
     return true;
   }catch(err){
     console.warn('Glossary cache unreadable, ignoring:', err && err.name);
@@ -2376,7 +2376,7 @@ function applyCategoriesMeta(meta){
   lastCategoriesMeta = JSON.stringify(meta || []);
   const existingTerms = {};
   ((DATA && DATA.categories) || []).forEach(c=>{ existingTerms[c.id] = c.terms; });
-  DATA = { categories: (meta || []).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
+  DATA = { categories: cleanCategories(meta).map(c=>({ ...c, terms: existingTerms[c.id] || [] })) };
 }
 
 async function loadCategoriesMeta(){
@@ -2407,7 +2407,7 @@ function applyTermsSnapshot(snap, opts){
   snap.docChanges().forEach(change=>{
     const doc = change.doc;
     if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
-    else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+    else if(safeId(doc.id)) TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
   });
   bucketTermsIntoCategories();
 }
@@ -2447,7 +2447,7 @@ function startTermsListener(){
     snap.docChanges().forEach(change=>{
       const doc = change.doc;
       if(change.type === 'removed') TERMS_BY_ID.delete(doc.id);
-      else TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
+      else if(safeId(doc.id)) TERMS_BY_ID.set(doc.id, { ...doc.data(), id: doc.id });
     });
     clearTimeout(termsSnapTimer);
     termsSnapTimer = setTimeout(()=>{
@@ -2515,7 +2515,7 @@ async function loadTrash(){
   try{
     if(!db){ TRASH = []; return; }
     const snap = await db.collection('deleted-items').get();
-    TRASH = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    TRASH = hubRows(snap)
       .sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
     // Drop anything past the retention window rather than letting the bin
     // grow forever.
@@ -2647,7 +2647,7 @@ async function loadQuizHistory(){
   if(!db){ QUIZ_HISTORY = []; return; }
   try{
     const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
-    QUIZ_HISTORY = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    QUIZ_HISTORY = hubRows(snap);
   }catch(err){
     QUIZ_HISTORY = [];
   }
@@ -2774,7 +2774,7 @@ async function loadProviders(){
   try{
     if(!db){ PROVIDERS = []; return; }
     const snap = await db.collection('healthcare-providers').get();
-    PROVIDERS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    PROVIDERS = hubRows(snap);
   }catch(err){
     console.error('Could not load providers', err);
     PROVIDERS = [];
@@ -2854,7 +2854,7 @@ async function loadDoctorDirectory(){
     if(!db) await hubAuthReady;
     if(!db) throw Object.assign(new Error('The database did not start.'), { code: 'no-db' });
     const snap = await db.collection('doctor-directory').get();
-    DOCTOR_DIRECTORY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    DOCTOR_DIRECTORY = hubRows(snap);
     DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIR_ERROR = '';
     doctorDirToCache(DOCTOR_DIRECTORY);
   }catch(err){
@@ -2964,7 +2964,7 @@ function startChatListener(){
   // without it the chat could only guess.
   db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
     fmNote('data: chat');
-    CHAT_MESSAGES = snap.docs.map(d => ({ id: d.id, ...d.data(), _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
+    CHAT_MESSAGES = snap.docs.filter(d => safeId(d.id)).map(d => ({ ...d.data(), id: d.id, _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
     if(isInitialChatLoad){
       isInitialChatLoad = false;
       markAllChatSeen(); // don't flag pre-existing history as "unread"
@@ -3045,7 +3045,7 @@ function startAnnouncementsListener(){
   if(announcementsListenerStarted || !db) return;
   announcementsListenerStarted = true;
   db.collection('announcements').orderBy('createdAt','desc').onSnapshot(snap=>{
-    ANNOUNCEMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ANNOUNCEMENTS = hubRows(snap);
     // Only the strip: rebuilding the screen used to wipe a half-typed message.
     if(activeCategory === 'chat'){ renderPinnedStrip(); fitChatPanel(); }
   }, err=> console.error('announcements listener error:', err));
@@ -3299,7 +3299,7 @@ function startActivityListener(){
   // ever shows the newest entries anyway.
   db.collection('activity-log').orderBy('timestamp').limitToLast(ACTIVITY_HISTORY_LIMIT).onSnapshot(snap=>{
     fmNote('data: activity');
-    ACTIVITY = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ACTIVITY = hubRows(snap);
     if(isInitialActivityLoad){
       isInitialActivityLoad = false;
       markActivitySeen();
@@ -3374,7 +3374,7 @@ function renderActivityFeed(){
       <div class="activity-row">
         <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
         <span class="activity-summary">${activityMarkup(a.summary)}</span>
-        <span class="activity-time" data-ts="${a.timestamp||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
+        <span class="activity-time" data-ts="${Number(a.timestamp)||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
         <button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>
       </div>
     `;
@@ -3441,13 +3441,13 @@ function attachmentChipHtml(att, removeJs){
   if(isImage){
     // JSON-encode the values so filenames containing quotes or apostrophes
     // (common with scanned documents) can't break the inline handler.
-    const args = `${JSON.stringify(att.dataUrl)}, ${JSON.stringify(att.filename||'image')}`.replace(/"/g,'&quot;');
+    const args = `${jsArg(safeSrc(att.dataUrl))}, ${jsArg(att.filename||'image')}`;
     return `<button type="button" class="attach-chip attach-image" title="View image" onclick="openLightbox(${args})">
-      <img src="${att.dataUrl}" alt="${escapeAttr(att.filename||'attachment')}">
+      <img src="${escapeAttr(safeSrc(att.dataUrl))}" alt="${escapeAttr(att.filename||'attachment')}">
       ${removeBtn}
     </button>`;
   }
-  return `<a class="attach-chip attach-file" href="${att.dataUrl}" download="${escapeAttr(att.filename||'file.pdf')}">
+  return `<a class="attach-chip attach-file" href="${escapeAttr(safeSrc(att.dataUrl))}" download="${escapeAttr(att.filename||'file.pdf')}">
     ${ICON_PDF}<span>${escapeHtml(att.filename||'file.pdf')}</span>
     ${removeBtn}
   </a>`;
@@ -3460,7 +3460,7 @@ async function loadAttachments(){
   try{
     if(!db){ ATTACHMENTS = []; return; }
     const snap = await db.collection('term-attachments').get();
-    ATTACHMENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    ATTACHMENTS = hubRows(snap);
   }catch(err){
     console.error('Could not load attachments', err);
     ATTACHMENTS = [];
@@ -4652,7 +4652,7 @@ async function loadPushScreen(){
   if(db){
     try{
       const snap = await db.collection('push-log').orderBy('at', 'desc').limit(12).get();
-      PUSH.log = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      PUSH.log = hubRows(snap);
     }catch(e){ PUSH.log = PUSH.log || []; }
     if(isHubOwner()){
       try{ PUSH.phones = (await db.collection('push-subs').get()).size; }catch(e){ PUSH.phones = null; }
@@ -4883,7 +4883,7 @@ function updateMentionSuggestions(input){
   if(!candidates.length){ box.innerHTML = ''; box.classList.remove('show'); return; }
 
   box.innerHTML = candidates.map(n=>
-    `<button type="button" onclick="pickMention(${JSON.stringify(n).replace(/"/g,'&quot;')})">@${escapeHtml(n)}</button>`
+    `<button type="button" onclick="pickMention(${jsArg(n)})">@${escapeHtml(n)}</button>`
   ).join('');
   box.classList.add('show');
 }
@@ -5183,7 +5183,7 @@ function startCeListener(){
   if(ceListenerStarted || !db) return;
   ceListenerStarted = true;
   db.collection('ce-events').orderBy('timestamp').onSnapshot(snap=>{
-    CE_EVENTS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    CE_EVENTS = hubRows(snap);
     if(isInitialCeLoad){
       isInitialCeLoad = false;
       lastSeenCeCount = CE_EVENTS.length;
@@ -5245,7 +5245,7 @@ function renderEvents(){
       <div class="ce-row">
         <div class="ce-head">
           <span class="ce-src">${escapeHtml(src)}</span>${isRegion(ev.region) ? `<span class="ce-region">${regionName(ev.region)}</span>` : ''}
-          <span class="ce-time" data-ts="${ev.timestamp||''}">${when}</span>
+          <span class="ce-time" data-ts="${Number(ev.timestamp)||''}">${when}</span>
           <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
         </div>
         <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
@@ -6850,6 +6850,43 @@ function escapeHtml(s){
   return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
+/* Hidden values from the database (2026-11-15 security pass). Text someone
+   reads goes through escapeHtml. These are for the values nobody reads but
+   the page is built from: a document's id, a colour, an address, a size. Any
+   teammate's phone can write those, so each is checked before it is drawn;
+   one that fails is left out instead of being trusted.
+
+   safeId:   an id the app or Firestore made never has a quote, a bracket, an
+             ampersand, a backslash or a control character. One that does is
+             not ours. Safe inside "..." attributes and '...' handler arguments.
+   hubRows:  a snapshot's documents as rows. The document's own id always
+             wins over a field called "id", and a row with a bad id is dropped.
+   jsArg:    any value as an argument inside an onclick="..." (it used to be
+             jsArg(x), which text holding a
+             literal "&quot;" could break out of).
+   safeColor, safeSrc, sizeAttr: a #rrggbb colour, a picture or file address
+             (https, or the app's own data:/blob: pictures and PDFs), a whole
+             number of pixels. */
+function safeId(v){ return typeof v === 'string' && v !== '' && v.length <= 300 && !/["'<>&`\\\u0000-\u001f\u007f\u2028\u2029]/.test(v); }
+function idOr(v){ return safeId(v) ? v : ''; }
+function hubRows(snap){ return snap.docs.filter(d => safeId(d.id)).map(d => ({ ...d.data(), id: d.id })); }
+function jsArg(v){ return escapeAttr(JSON.stringify(v === undefined ? null : v)); }
+function safeColor(v){ return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v : ''; }
+function safeSrc(v){
+  v = String(v == null ? '' : v).trim();
+  return /^(https:\/\/|blob:|data:(image\/(png|jpe?g|gif|webp)|application\/pdf)[;,])/i.test(v) ? v : '';
+}
+function sizeAttr(v){ v = Math.round(Number(v)); return v > 0 && v < 100000 ? v : 0; }
+/* Domains as the app keeps them: a bad id drops the domain, a bad colour or
+   parent is left off (the page falls back to its own). */
+function cleanCategories(list){
+  return (Array.isArray(list) ? list : []).filter(c => c && safeId(c.id)).map(c => {
+    const o = { ...c };
+    if('color' in o && !safeColor(o.color)) delete o.color;
+    if('parentId' in o && o.parentId && !safeId(o.parentId)) delete o.parentId;
+    return o;
+  });
+}
 /* A link pasted without "https://" is not a link. The browser resolves it
    against the app, so "medlineplus.gov/ency/article/000101.htm" becomes a
    request for interp-six.vercel.app/medlineplus.gov/... — a page of ours that
@@ -6867,7 +6904,9 @@ function externalUrl(raw){
   const url = String(raw == null ? '' : raw).trim();
   if(!url) return '';
   const scheme = url.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
-  if(scheme && !scheme[1].includes('.')) return url;
+  // Only addresses that open a page, an email or a call: a javascript: or
+  // data: address from the database would run as code on a tap.
+  if(scheme && !scheme[1].includes('.')) return /^(https?|mailto|tel)$/i.test(scheme[1]) ? url : '';
   return 'https://' + url.replace(/^\/+/, '');
 }
 
@@ -8786,17 +8825,17 @@ function renderContent(){
       // and the English the second line's, so the order reads as intended.
       const enLine = `<div class="${slang ? 'term-es' : 'term-en'}">
             <span>${escapeHtml(t.en)}</span>
-            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${JSON.stringify(t.en).replace(/"/g,'&quot;')}, 'en-US')">${ICON_SPEAKER}</button>
+            <button class="copy-btn" title="Copy term" onclick="copyText(this, ${jsArg(t.en)})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term" onclick="speakText(this, ${jsArg(t.en)}, 'en-US')">${ICON_SPEAKER}</button>
           </div>`;
       const esLine = t.es ? `<div class="${slang ? 'term-en' : 'term-es'}">
             <span>${escapeHtml(t.es)}</span>
-            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')})">${ICON_COPY}</button>
-            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${JSON.stringify(t.es).replace(/"/g,'&quot;')}, 'es-ES')">${ICON_SPEAKER}</button>
+            <button class="copy-btn" title="Copy Spanish term" onclick="copyText(this, ${jsArg(t.es)})">${ICON_COPY}</button>
+            <button class="copy-btn" title="Hear this term in Spanish" onclick="speakText(this, ${jsArg(t.es)}, 'es-ES')">${ICON_SPEAKER}</button>
           </div>` : '';
       // Phones: hearing a term is the action used most mid-session, so it gets
       // a full-size pill in the bottom row (see .say-pill). The headword first.
-      const sayPill = (text, lang, code) => `<button type="button" class="link-pill say-pill" aria-label="Hear ${code === 'EN' ? 'in English' : 'in Spanish'}: ${escapeAttr(text)}" onclick="speakText(this, ${JSON.stringify(text).replace(/"/g,'&quot;')}, '${lang}')">${ICON_SPEAKER}<span>${code}</span></button>`;
+      const sayPill = (text, lang, code) => `<button type="button" class="link-pill say-pill" aria-label="Hear ${code === 'EN' ? 'in English' : 'in Spanish'}: ${escapeAttr(text)}" onclick="speakText(this, ${jsArg(text)}, '${lang}')">${ICON_SPEAKER}<span>${code}</span></button>`;
       const sayEn = sayPill(t.en, 'en-US', 'EN'), sayEs = t.es ? sayPill(t.es, 'es-ES', 'ES') : '';
       const say = slang ? sayEs + sayEn : sayEn + sayEs;
       html += `
@@ -12671,7 +12710,7 @@ function renderHome(){
           <span class="home-feed-icon">${ICON_BELL}</span>
           <span class="home-feed-main">
             <span class="home-feed-title">${escapeHtml(a.author || 'Someone')} ${escapeHtml(a.summary || '')}</span>
-            <span class="home-feed-meta" data-ts="${a.timestamp || ''}">${relativeTime(a.timestamp)}</span>
+            <span class="home-feed-meta" data-ts="${Number(a.timestamp) || ''}">${relativeTime(a.timestamp)}</span>
           </span>
           <span class="home-feed-go">${ICON_ARROW_RIGHT}</span>
         </button>`).join('')
@@ -12782,7 +12821,7 @@ function renderProviders(q){
         </div>
         <div class="provider-top">
           ${p.photo
-            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${`${JSON.stringify(p.photo)}, ${JSON.stringify(p.name||'Provider photo')}`.replace(/"/g,'&quot;')})">`
+            ? `<img class="provider-avatar provider-avatar-clickable" src="${escapeAttr(p.photo)}" alt="${escapeAttr(p.name)}" title="View photo" onclick="openLightbox(${jsArg(p.photo)}, ${jsArg(p.name||'Provider photo')})">`
             : `<div class="provider-avatar provider-avatar-fallback" style="background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});">${escapeHtml(initials||'?')}</div>`}
           <div>
             <div class="provider-name">${escapeHtml(p.name)}</div>
@@ -12818,7 +12857,7 @@ function renderTrash(){
         <div class="doc-research-term-card">
           <div class="doc-research-term-main">
             <div class="doc-research-term-en">${escapeHtml(t.label)}</div>
-            <div class="trash-meta">${typeLabel[t.type] || t.type} \u00b7 deleted by ${escapeHtml(t.deletedBy || 'someone')}${t.deletedAt ? ` on ${new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</div>
+            <div class="trash-meta">${typeLabel[t.type] || escapeHtml(String(t.type || 'item'))} \u00b7 deleted by ${escapeHtml(t.deletedBy || 'someone')}${t.deletedAt ? ` on ${new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</div>
           </div>
           <button class="doc-research-badge is-missing" onclick="restoreTrashItem('${t.id}')">Restore</button>
         </div>`).join('')}
@@ -13288,7 +13327,7 @@ async function saveDoctorTerm(){
   try{
     await persistDoctorDirectoryEntry(d.id, record);
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
-    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    DOCTOR_DIRECTORY[idx] = { ...record, id: d.id };
     logActivity(`added the term "${en}" to ${d.name}`);
     closeDoctorTermModal();
     successBurst();
@@ -13311,7 +13350,7 @@ async function deleteDoctorTerm(doctorId, termId){
   try{
     await persistDoctorDirectoryEntry(d.id, record);
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
-    DOCTOR_DIRECTORY[idx] = { id: d.id, ...record };
+    DOCTOR_DIRECTORY[idx] = { ...record, id: d.id };
     showToast('Term removed.');
     render();
     openDoctorDirDetail(d.id, 'team');
@@ -13427,7 +13466,7 @@ async function doctorPageFetch(id){
     const snap = await db.collection('doctor-directory').doc(id).get();
     if(!snap.exists) return;
     const i = DOCTOR_DIRECTORY.findIndex(x => x.id === id);
-    if(i > -1 && !DOCTOR_DIRECTORY[i].researchResult) DOCTOR_DIRECTORY[i] = { id, ...snap.data() };
+    if(i > -1 && !DOCTOR_DIRECTORY[i].researchResult) DOCTOR_DIRECTORY[i] = { ...snap.data(), id };
     if(currentDoctorDetailId === id && document.getElementById('doctorDirDetailOverlay').classList.contains('show')) refreshDoctorDirDetail();
   }catch(e){}
 }
@@ -13693,7 +13732,7 @@ function renderDoctorDirDetail(d){
   const allTerms = allGlossaryTermsFlat();
 
   const photo = d.photo
-    ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${`${JSON.stringify(d.photo)}, ${JSON.stringify(d.name||'Doctor photo')}`.replace(/"/g,'&quot;')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
+    ? `<button type="button" class="dp-ph is-photo" aria-label="View photo of ${escapeAttr(d.name)}" onclick="openLightbox(${jsArg(d.photo)}, ${jsArg(d.name||'Doctor photo')})"><img src="${escapeAttr(d.photo)}" alt=""></button>`
     : `<div class="dp-ph" aria-hidden="true">${pinImgHtml(specialtyPinKey(d.specialty || specialtyForMatch, place))}<span class="dp-ini">${escapeHtml(initialsOf(d.name))}</span></div>`;
 
   const most = Math.max(1, ...tabs.map(t => t.terms.length));
@@ -14206,7 +14245,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
     ? `<div class="chat-reactions">${reactions.map(r=>{
         const iReacted = r.names.some(n=> String(n).trim().toLowerCase() === me);
         return `<button type="button" class="chat-reaction${iReacted?' is-mine':''}" data-emoji="${escapeAttr(r.emoji)}" aria-pressed="${iReacted}" aria-label="${escapeAttr(r.emoji)} ${r.names.length}: ${escapeAttr(r.names.join(', '))}${iReacted ? '. Tap to remove yours' : '. Tap to add yours'}" title="${escapeAttr(r.names.join(', '))}"
-          onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(r.emoji).replace(/"/g,'&quot;')})">
+          onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${jsArg(r.emoji)})">
           <span>${escapeHtml(r.emoji)}</span><b>${r.names.length}</b></button>`;
       }).join('')}</div>`
     : '';
@@ -14215,7 +14254,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
     ? `<div class="chat-actions">
         <div class="chat-act-emojis">
           ${CHAT_REACTIONS.map(e=>`<button type="button" class="chat-act-emoji" title="React ${escapeAttr(e)}"
-              onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${JSON.stringify(e).replace(/"/g,'&quot;')})">${escapeHtml(e)}</button>`).join('')}
+              onclick="event.stopPropagation(); toggleChatReaction('${m.id}', ${jsArg(e)})">${escapeHtml(e)}</button>`).join('')}
         </div>
         <div class="chat-act-row">
           <button type="button" class="chat-act" onclick="event.stopPropagation(); startChatReply('${m.id}')">${ICON_REPLY}<span>Reply</span></button>
@@ -14229,7 +14268,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
 
   // What this message is answering, above it. Tapping it goes there.
   const quote = m.replyTo
-    ? `<button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')">
+    ? `<button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${idOr(m.replyTo.id)}')">
          <b>${escapeHtml(m.replyTo.author || 'Teammate')}</b><span>${escapeHtml(m.replyTo.text || '')}</span>
        </button>`
     : '';
@@ -14256,7 +14295,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
         return `<button type="button" class="tc-photo" data-pv="${m.id}:${i}"
             onclick="tcPhotoTap(this, '${m.id}', ${i}, event)" oncontextmenu="openChatMenuFor(event, '${m.id}', this)" onkeydown="if(event.key==='ContextMenu'||(event.shiftKey&&event.key==='F10')){openChatMenuFor(event,'${m.id}',this)}"
             aria-label="Photo ${i + 1} of ${photos.length} from ${escapeAttr(who)}. Open full screen">
-          <img src="${escapeAttr(a.dataUrl)}" alt="" decoding="async"${i > 1 ? ' loading="lazy"' : ''}${a.width && a.height ? ` width="${a.width}" height="${a.height}"` : ''} onload="tcPhotoLoaded(this)" onerror="tcPhotoFailed(this)">
+          <img src="${escapeAttr(a.dataUrl)}" alt="" decoding="async"${i > 1 ? ' loading="lazy"' : ''}${sizeAttr(a.width) && sizeAttr(a.height) ? ` width="${sizeAttr(a.width)}" height="${sizeAttr(a.height)}"` : ''} onload="tcPhotoLoaded(this)" onerror="tcPhotoFailed(this)">
           <span class="tc-photo-fail">${ICON_RETRY_TC}<span>Photo didn’t load.<br>Tap to try again</span></span>
         </button>`;
       }).join('')}${timeOnPhoto}</div>`;
@@ -14268,10 +14307,10 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
             aria-label="${escapeAttr(mine ? 'You' : who)}: ${escapeAttr(m.text.slice(0, 300))}. Press Enter to react or reply.">${linkifyChat(highlightMentions(m.text))}${m.editedAt ? '<span class="tc-edited">edited</span>' : ''}</div>`
       : '';
     const fileChips = files.length ? `<div class="tc-files">${files.map(a =>
-        `<a class="tc-file" href="${escapeAttr(a.dataUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICON_PDF}<span>${escapeHtml(a.filename || 'file.pdf')}</span></a>`).join('')}</div>` : '';
+        `<a class="tc-file" href="${escapeAttr(safeSrc(a.dataUrl))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ICON_PDF}<span>${escapeHtml(a.filename || 'file.pdf')}</span></a>`).join('')}</div>` : '';
     const replyQuote = m.replyTo
       ? `<span class="tc-quote-label">${mine ? 'You' : escapeHtml(who)} replied to ${escapeHtml(m.replyTo.author || 'Teammate')}</span>
-         <button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${escapeAttr(m.replyTo.id)}')" aria-label="Go to the message from ${escapeAttr(m.replyTo.author || 'Teammate')} this replies to">
+         <button type="button" class="chat-quote" onclick="event.stopPropagation(); jumpToChatMessage('${idOr(m.replyTo.id)}')" aria-label="Go to the message from ${escapeAttr(m.replyTo.author || 'Teammate')} this replies to">
            ${m.replyTo.photo ? `<img src="${escapeAttr(m.replyTo.photo)}" alt="">` : ''}<span>${escapeHtml(m.replyTo.text || (m.replyTo.photo ? 'Photo' : ''))}</span>
          </button>`
       : '';
@@ -14351,7 +14390,7 @@ function renderChatMessages(){
           <div class="tc-empty-wave" aria-hidden="true">👋</div>
           <h3>Say hi to the team</h3>
           <p>Ask about a term, share a photo of new signage, or flag what’s busy on your floor.</p>
-          <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${JSON.stringify(t).replace(/"/g, '&quot;')})">${escapeHtml(t)}</button>`).join('')}</div>
+          <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${jsArg(t)})">${escapeHtml(t)}</button>`).join('')}</div>
         </div>`
       : `<div class="chat-empty">
           <div class="chat-empty-mark">👋</div>
@@ -15124,7 +15163,7 @@ function renderDirectory(q){
       .map((t)=>({ t }))
       .sort((a,b)=> collateTerms(a.t.en, b.t.en));
     sortedTerms.forEach(({ t })=>{
-      const label = t.es ? `${t.en} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
+      const label = t.es ? `${escapeHtml(t.en)} <span style="color:var(--ink-faint); font-weight:400;">/ ${escapeHtml(t.es)}</span>` : escapeHtml(t.en);
       const matches = !q || foldText(t.en).includes(q) || foldText(t.es).includes(q) || foldText(t.def).includes(q) || foldText(t.notes).includes(q);
       if(!matches) return;
 

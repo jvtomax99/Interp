@@ -243,7 +243,7 @@ function renderTermLookup(rawSources, note, term, fromCache){
     return;
   }
   const cards = sources.map(sc => `
-    <a class="lookup-card" href="${escapeAttr(sc.url)}" target="_blank" rel="noopener">
+    <a class="lookup-card" href="${escapeAttr(externalUrl(sc.url))}" target="_blank" rel="noopener">
       <span class="lookup-card-top">
         <span class="lookup-site">${escapeHtml(sc.site || '')}</span>
         ${sc.language === 'es' ? '<span class="lookup-lang">Español</span>' : ''}

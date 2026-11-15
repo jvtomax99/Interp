@@ -224,6 +224,16 @@ console.log('== Limits');
   ok(fifth.status === 400 && fifth.body.error === 'expired' && fifth.body.tooMany, 'the 5th wrong try spends the code', fifth.body);
   const sixth = await call(h2, 'anonA', { action: 'check', email: 'x@y.com', code: '111111' });
   ok(sixth.body.error === 'expired', 'then even the right code is refused: ask for a new one', sixth.body);
+  // Five wrong tries used to delete the record that counts the hour's codes,
+  // so guessing earned fresh codes without end (security pass, 2026-11-15).
+  const { h: h6, sent: sent6 } = setup({ codes: Array.from({ length: 12 }, (_, i) => 700000 + i) });
+  let refused = null;
+  for (let round = 0; round < 6 && !refused; round++) {
+    const s = await call(h6, 'anonA', { action: 'send', email: 'x@y.com' });
+    if (s.status !== 200) { refused = s; break; }
+    for (let i = 0; i < 5; i++) await call(h6, 'anonA', { action: 'check', email: 'x@y.com', code: '000000' });
+  }
+  ok(sent6.length === 3 && refused && refused.status === 429 && refused.body.error === 'too_many', 'wrong guesses don\'t reset the hour\'s count: still 3 codes, then "too many"', { sent: sent6.length, refused: refused && refused.body });
   const { h: h5 } = setup();
   await call(h5, 'anonA', { action: 'send', email: 'x@y.com' });
   for (let i = 0; i < 4; i++) await call(h5, 'anonA', { action: 'check', email: 'x@y.com', code: '000000' });

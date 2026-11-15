@@ -141,7 +141,7 @@ function startAskLessons(){
   hubAuthReady.then(() => {
     db.collection('hub-lessons').onSnapshot(snap => {
       ASK.lessonsBlocked = false;
-      ASK.lessons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      ASK.lessons = hubRows(snap);
       if(activeCategory === 'ask') refreshAskChrome();
       if(activeCategory === 'team-access') renderContent();
     }, err => {
@@ -277,7 +277,7 @@ function askTurnHtml(t){
         : a.fromHub || a.local || a.clarify || askHandoff(t) ? '' : `<p class="ask-details ask-check">This came from general knowledge, not the Hub. Double-check it.</p>`}
       ${askSourceLineHtml(t)}
       ${askActionsHtml(t)}
-      ${sources.length ? `<div class="ask-src" role="group" aria-label="Sources"><span class="ask-src-lab" aria-hidden="true">Sources</span>${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${escapeAttr(s.id)}')" aria-label="Open source: ${escapeAttr(s.label)}">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
+      ${sources.length ? `<div class="ask-src" role="group" aria-label="Sources"><span class="ask-src-lab" aria-hidden="true">Sources</span>${sources.map(s => `<button type="button" onclick="askOpenSource('${t.id}','${idOr(s.id)}')" aria-label="Open source: ${escapeAttr(s.label)}">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}
       ${a.local || a.clarify ? '' : t.fixOpen ? `
         <div class="ask-fix">
           <label class="ask-lab" for="askFix-${t.id}">What works better?</label>

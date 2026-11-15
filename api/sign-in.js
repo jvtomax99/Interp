@@ -16,7 +16,8 @@
  * matches it); only this endpoint touches it, with the service account. A
  * code is kept as a salted hash, lasts 10 minutes, works only on the phone
  * that asked for it, and allows 5 tries. Limits: 3 codes per address per
- * hour, 10 per phone per day.
+ * hour, 10 per phone per day. Five wrong tries end the code but keep the
+ * hour's count, so guessing can't earn more codes.
  *
  * On a right code the account id is made from the address (the same on every
  * phone), and the phone's place in the team moves to it: hub-members (team
@@ -155,7 +156,13 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
     const tries = Number(saved.tries) || 0;
     const right = crypto.timingSafeEqual(Buffer.from(codeHash(saved.salt, code)), Buffer.from(String(saved.hash).padEnd(64, '0').slice(0, 64)));
     if (!right) {
-      if (tries + 1 >= MAX_TRIES) { await db.remove(codePath); return res.status(400).json({ error: 'expired', tooMany: true }); }
+      if (tries + 1 >= MAX_TRIES) {
+        // The code is finished, but the record stays: it holds how many
+        // codes this address was sent this hour. Deleting it here let five
+        // wrong guesses wipe that count, so codes (and guesses) had no limit.
+        await db.set(codePath, { hash: '', exp: 0, tries: MAX_TRIES }, ['hash', 'exp', 'tries']);
+        return res.status(400).json({ error: 'expired', tooMany: true });
+      }
       await db.set(codePath, { tries: tries + 1 }, ['tries']);
       return res.status(400).json({ error: 'wrong_code', left: MAX_TRIES - tries - 1 });
     }

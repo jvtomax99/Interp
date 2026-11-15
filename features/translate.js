@@ -198,7 +198,7 @@ async function runTranslate(){
         ${h.t.def ? `<p class="tr-note">${escapeHtml(h.t.def)}</p>` : ''}
         <div class="tr-actions">
           <button class="tr-mini" onclick="setCategory('${h.cat.id}')">Open in ${escapeHtml(h.cat.name.split(',')[0])}</button>
-          ${primary ? `<button class="tr-mini" onclick="copyText(this, ${JSON.stringify(primary).replace(/"/g,'&quot;')})">${ICON_COPY} Copy</button>` : ''}
+          ${primary ? `<button class="tr-mini" onclick="copyText(this, ${jsArg(primary)})">${ICON_COPY} Copy</button>` : ''}
         </div>
       </div>`;
   });
@@ -223,8 +223,8 @@ async function runTranslate(){
         ${ai.caution ? `<p class="tr-note tr-caution"><b>Caution:</b> ${escapeHtml(ai.caution)}</p>` : ''}
         ${ai.notes ? `<p class="tr-note">${escapeHtml(ai.notes)}</p>` : ''}
         <div class="tr-actions">
-          ${ai.primary ? `<button class="tr-mini" onclick="copyText(this, ${JSON.stringify(ai.primary).replace(/"/g,'&quot;')})">${ICON_COPY} Copy</button>` : ''}
-          <button class="tr-mini" onclick="addTermFromTranslate(${JSON.stringify(q).replace(/"/g,'&quot;')}, ${JSON.stringify((ai.primary)||'').replace(/"/g,'&quot;')})">+ Add to glossary</button>
+          ${ai.primary ? `<button class="tr-mini" onclick="copyText(this, ${jsArg(ai.primary)})">${ICON_COPY} Copy</button>` : ''}
+          <button class="tr-mini" onclick="addTermFromTranslate(${jsArg(q)}, ${jsArg((ai.primary)||'')})">+ Add to glossary</button>
         </div>
         <p class="tr-note" style="margin-top:10px;opacity:.75;">AI-generated reference. Verify before adding to the glossary.</p>
       </div>`;
@@ -254,8 +254,8 @@ async function runTranslate(){
         : `<p class="tr-note">Automatic translation isn’t available right now. Use Google Translate below.</p>`}
       <div class="tr-actions">
         <a class="tr-mini" href="${escapeAttr(gtUrl)}" target="_blank" rel="noopener">${ICON_EXTERNAL} Open in Google Translate</a>
-        ${mt ? `<button class="tr-mini" onclick="copyText(this, ${JSON.stringify(mt).replace(/"/g,'&quot;')})">${ICON_COPY} Copy</button>` : ''}
-        <button class="tr-mini" onclick="addTermFromTranslate(${JSON.stringify(q).replace(/"/g,'&quot;')}, ${JSON.stringify(mt||'').replace(/"/g,'&quot;')})">+ Add to glossary</button>
+        ${mt ? `<button class="tr-mini" onclick="copyText(this, ${jsArg(mt)})">${ICON_COPY} Copy</button>` : ''}
+        <button class="tr-mini" onclick="addTermFromTranslate(${jsArg(q)}, ${jsArg(mt||'')})">+ Add to glossary</button>
       </div>
     </div>`;
 
