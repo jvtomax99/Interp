@@ -52,6 +52,7 @@ function acctError(code, data){
     case 'mail_failed': return "The email didn't go out. Try again in a moment.";
     case 'wrong_code':  return data && data.left ? `That code isn't right. ${data.left} ${data.left === 1 ? 'try' : 'tries'} left.` : "That code isn't right. It's the 6 numbers in the email.";
     case 'expired':     return data && data.tooMany ? 'Too many wrong tries. Ask for a new code.' : 'That code has run out. Ask for a new one.';
+    case 'busy':        return 'One moment, then tap Sign in again.';
     case 'other_phone': return 'That code was asked for on another phone. Ask for a new one here.';
     case 'no_account':  return 'No account with that email yet. The first time, use the team code, then sign in from More.';
     case 'signin_failed': return `Signing in didn't finish. Try again, or let ${who} know.`;
@@ -413,7 +414,7 @@ function accountPickSelf(mine, theirs){
       const col = typeof nameToColor === 'function' ? nameToColor(name) : '#5A6478';
       const ini = typeof initialsOf === 'function' ? initialsOf(name) : Array.from(name)[0].toUpperCase();
       const st = photo
-        ? `background-color:${col};background-image:url(&quot;${escapeAttr(photo)}&quot;);background-size:cover;background-position:center;`
+        ? `background-color:${col};background-image:${cssUrl(photo)};background-size:cover;background-position:center;`
         : `background-color:${col};`;
       return `<button type="button" class="acct-pick-opt" data-keep="${keep}">
           <span class="acct-pick-av${photo ? ' has-photo' : ''}" style="${st}" aria-hidden="true">${photo ? '' : escapeHtml(ini)}</span>

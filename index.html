@@ -1728,8 +1728,8 @@ function weeklyBoard(){
     const key = h.who.trim();
     if(!key) return;
     const row = by[key] || (by[key] = { who:key, q:0, right:0, sessions:0 });
-    row.q += h.total || 0;
-    row.right += h.correct || 0;
+    row.q += Number(h.total) || 0;
+    row.right += Number(h.correct) || 0;
     row.sessions++;
   });
   return Object.values(by).sort((a,b)=> b.q - a.q || b.right - a.right);
@@ -2252,7 +2252,7 @@ function renderSlangPanel(activeCat){
     <div class="sl-panel-head"><span class="sl-panel-title">Country</span></div>
     <div class="sl-countries" role="group" aria-label="Filter by country">
       <button type="button" class="sl-country" aria-pressed="${!slangCountry}" onclick="setSlangCountry('')">All</button>
-      ${countryList.map(([k, n]) => `<button type="button" class="sl-country" aria-pressed="${slangCountry === k}" onclick="setSlangCountry('${escapeAttr(k)}')">${ICON_SL_PIN}${escapeHtml(slangCountryLabel(k))}<em>${n}</em></button>`).join('')}
+      ${countryList.map(([k, n]) => `<button type="button" class="sl-country" aria-pressed="${slangCountry === k}" onclick="setSlangCountry(${jsArg(k)})">${ICON_SL_PIN}${escapeHtml(slangCountryLabel(k))}<em>${n}</em></button>`).join('')}
     </div>` : '';
   const count = l => levels.filter(x => x === l).length;
   const order = ['Neutral','Low','Medium','Varies','Medium-high','High'];
@@ -2558,7 +2558,11 @@ async function dropFromTrash(id){
 async function restoreTrashItem(id){
   const entry = TRASH.find(t => t.id === id);
   if(!entry) return;
-  const p = entry.payload || {};
+  const p = { ...(entry.payload || {}) };
+  // A bin entry is anyone's to write: a bad id or a planted count never comes back.
+  delete p._n;
+  if(!safeId(p.id)){ showToast('That item can\u2019t be restored.'); return; }
+  if(entry.type === 'domain'){ const c = cleanCategories([p])[0]; if(!c){ showToast('That item can\u2019t be restored.'); return; } Object.assign(p, c); if(!safeColor(p.color)) p.color = DOMAIN_COLORS[0]; }
   let ok = false;
 
   try{
@@ -2647,7 +2651,7 @@ async function loadQuizHistory(){
   if(!db){ QUIZ_HISTORY = []; return; }
   try{
     const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
-    QUIZ_HISTORY = hubRows(snap);
+    QUIZ_HISTORY = hubRows(snap).map(h => ({ ...h, total: Number(h.total) || 0, correct: Number(h.correct) || 0 }));
   }catch(err){
     QUIZ_HISTORY = [];
   }
@@ -2836,7 +2840,7 @@ function doctorDirectoryKey(name){
 const DOCTOR_DIR_CACHE_KEY = 'ih_doctorDirectory';
 let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '', doctorDirRetries = 0;
 function doctorDirFromCache(){
-  try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c : null; }catch(e){ return null; }
+  try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c.filter(d => d && safeId(d.id)) : null; }catch(e){ return null; }
 }
 function doctorDirToCache(list){
   // Without the full research text (re-fetched when a doctor is opened), so
@@ -2964,7 +2968,10 @@ function startChatListener(){
   // without it the chat could only guess.
   db.collection('team-chat').orderBy('timestamp').limitToLast(CHAT_HISTORY_LIMIT).onSnapshot({ includeMetadataChanges: true }, snap=>{
     fmNote('data: chat');
-    CHAT_MESSAGES = snap.docs.filter(d => safeId(d.id)).map(d => ({ ...d.data(), id: d.id, _local: !!(d.metadata && d.metadata.hasPendingWrites) }));
+    CHAT_MESSAGES = snap.docs.filter(d => safeId(d.id)).map(d => { const m = { ...d.data(), id: d.id, _local: !!(d.metadata && d.metadata.hasPendingWrites) };
+      // Text that isn't text broke the chat for everyone.
+      ['text', 'author'].forEach(k => { if(m[k] != null && typeof m[k] !== 'string') m[k] = String(m[k]); });
+      return m; });
     if(isInitialChatLoad){
       isInitialChatLoad = false;
       markAllChatSeen(); // don't flag pre-existing history as "unread"
@@ -5359,13 +5366,13 @@ function nameToColor(name){
 // Stable per-specialty tint. Same input always yields the same colour, so a
 // specialty looks identical on every card and across sessions.
 function specialtyColor(specialty){
-  const s = (specialty || '').trim();
+  const s = String(specialty || '').trim();
   if(!s) return '#7C6A9C';
   return nameToColor(s.toLowerCase());
 }
 
 function initialsOf(name){
-  const trimmed = (name || '').trim();
+  const trimmed = String(name || '').trim();
   if(!trimmed) return '?';
   // Nearly every entry in the doctor directory starts with "Dr", so taking
   // the first two words gave "DB" for Dr Barry Love and "DA" for Dr Ana Ruiz
@@ -6633,7 +6640,8 @@ function researchTiers(result){
     return result.tiers
       .filter(t => t && Array.isArray(t.terms) && t.terms.length)
       .map(t => ({
-        key: t.key || 'core',
+        // The key goes into onclick handlers, and the document is anyone's to write.
+        key: typeof t.key === 'string' && /^[a-z]{1,24}$/.test(t.key) ? t.key : 'core',
         label: t.label || RESEARCH_TIER_LABELS[t.key] || 'Terms',
         blurb: RESEARCH_TIER_BLURBS[t.key] || '',
         terms: t.terms,
@@ -6755,9 +6763,10 @@ function renderResearchTierBlocks(tiers, specialtyOverride, scope){
       <div class="doc-research-terms">
         ${tier.terms.map(t => {
           const exists = termInGlossary(allTerms, t);
-          const enSafe = escapeHtml(t.en||'').replace(/'/g,"\\'");
-          const esSafe = escapeHtml(t.es||'').replace(/'/g,"\\'");
-          const defSafe = escapeHtml(t.def||'').replace(/'/g,"\\'");
+          // jsArg, not escapeHtml: &#39; turns back into a quote before the handler runs.
+          const enSafe = jsArg(String(t.en||''));
+          const esSafe = jsArg(String(t.es||''));
+          const defSafe = jsArg(String(t.def||''));
           return `
             <div class="doc-research-term-card${tier.key === 'falsefriends' ? ' is-pitfall' : ''}${exists ? ' is-have' : ''}">
               <div class="doc-research-term-main">
@@ -6767,7 +6776,7 @@ function renderResearchTierBlocks(tiers, specialtyOverride, scope){
               </div>
               ${exists
                 ? `<span class="doc-research-badge is-existing">${ICON_CHECK}</span>`
-                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary('${enSafe}', '${esSafe}', '${defSafe}', this${overrideArg})">${ICON_PLUS} Add</button>`}
+                : `<button class="doc-research-badge is-missing" onclick="addSuggestedTermToGlossary(${enSafe}, ${esSafe}, ${defSafe}, this${overrideArg})">${ICON_PLUS} Add</button>`}
             </div>`;
         }).join('')}
       </div>
@@ -6847,7 +6856,7 @@ function tileVars(color){
 }
 
 function escapeHtml(s){
-  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
 /* Hidden values from the database (2026-11-15 security pass). Text someone
@@ -6876,13 +6885,17 @@ function safeSrc(v){
   v = String(v == null ? '' : v).trim();
   return /^(https:\/\/|blob:|data:(image\/(png|jpe?g|gif|webp)|application\/pdf)[;,])/i.test(v) ? v : '';
 }
+function cssUrl(v){
+  const s = safeSrc(v);
+  return s ? `url(&quot;${escapeAttr(s.replace(/["'\\()\s<>]/g, c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase()))}&quot;)` : 'none';
+}
 function sizeAttr(v){ v = Math.round(Number(v)); return v > 0 && v < 100000 ? v : 0; }
 /* Domains as the app keeps them: a bad id drops the domain, a bad colour or
    parent is left off (the page falls back to its own). */
 function cleanCategories(list){
   return (Array.isArray(list) ? list : []).filter(c => c && safeId(c.id)).map(c => {
     const o = { ...c };
-    if('color' in o && !safeColor(o.color)) delete o.color;
+    if(!safeColor(o.color)) o.color = DOMAIN_COLORS[0];
     if('parentId' in o && o.parentId && !safeId(o.parentId)) delete o.parentId;
     return o;
   });
@@ -7095,7 +7108,7 @@ function renderLinks(t, categoryId, lead = ''){
   // get more wrong, and did: it opened a blank page. It now searches at the
   // moment of the tap, so every link offered came back from a live result.
   if(categoryId !== 'resources' && t.en && !isSlangDomain(DATA.categories.find(c => c.id === categoryId))){
-    links.push(`<button type="button" class="link-pill" onclick="openTermLookup('${escapeAttr(categoryId)}','${escapeAttr(t.id)}')">Look up ${ICON_SEARCH}</button>`);
+    links.push(`<button type="button" class="link-pill" onclick="openTermLookup(${jsArg(categoryId)},${jsArg(t.id)})">Look up ${ICON_SEARCH}</button>`);
   }
   if(links.length===0 && !lead) return '';
   // links-say-only: nothing but the phone's hear pills, which desktop hides.
@@ -8855,7 +8868,7 @@ function renderContent(){
       const sayEn = sayPill(t.en, 'en-US', 'EN'), sayEs = t.es ? sayPill(t.es, 'es-ES', 'ES') : '';
       const say = slang ? sayEs + sayEn : sayEn + sayEs;
       html += `
-        <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm('${escapeAttr(t.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm('${escapeAttr(t.id)}')}"` : ''}>
+        <div class="card${slang ? ' card-slang' : ''}${veiled ? ' is-veiled' : ''}" data-term-id="${escapeAttr(t.id)}" style="--card-accent:${cat.color}; animation-delay:${delay.toFixed(2)}s;"${veiled ? ` role="button" tabindex="0" aria-label="Strong word hidden. Tap to show." onclick="showSlangTerm(${jsArg(t.id)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showSlangTerm(${jsArg(t.id)})}"` : ''}>
           <div class="card-top">
             <span class="tag" style="--tag-color:${cat.color};">${escapeHtml(cat.name.split(',')[0].split('&')[0].trim())}</span>
             <span class="chart-id">${cat.id.slice(0,3).toUpperCase()}-${String(t._num).padStart(2,'0')}</span>
@@ -9960,7 +9973,7 @@ function renderWeeklyBoard(){
     html += `<div class="board-row${mine?' is-me':''}">
       <span class="board-rank">${medal || (i+1)}</span>
       <span class="board-face${face?' has-photo':''}" style="${face
-        ? `background-color:${colour};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        ? `background-color:${colour};background-image:${cssUrl(face)};background-size:cover;background-position:center;`
         : `background:linear-gradient(140deg, ${colour}, ${darkenHex(colour,30)});`}">${escapeHtml(initialsOf(r.who))}</span>
       <span class="board-who">${escapeHtml(r.who)}${mine?' <em>you</em>':''}</span>
       <span class="board-bar"><span class="board-fill" style="width:${Math.round((r.q/top)*100)}%; background:${colour};"></span></span>
@@ -13049,7 +13062,7 @@ function doctorRecentHtml(){
     const art = d.photo
       ? `<img class="is-photo" src="${escapeAttr(d.photo)}" alt="" loading="lazy">`
       : pinImgHtml(specialtyPinKey(d.specialty, place));
-    return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail('${escapeAttr(d.id)}')"
+    return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail(${jsArg(d.id)})"
       aria-label="${escapeAttr(d.name)}"><span class="dl-recent-ph" aria-hidden="true">${art}</span><span>${escapeHtml(label)}</span></button>`;
   }).join('');
   return `<div class="dl-recent"><h3 class="dl-recent-h">Recent</h3><div class="dl-recent-row">${items}</div></div>`;
@@ -13205,9 +13218,11 @@ function renderDoctorDirectory(q){
    research yet: "+ Prep terms" (Doctor Prep, filled in). The whole card
    opens the doctor's page; edit and delete are on the page's pencil. */
 function doctorListCounts(d){
-  const n = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || { terms: 0, traps: 0 });
+  const raw = d.researchResult ? doctorResearchCounts(d.researchResult) : (d._n || {});
+  // `_n` can come from a document anyone on the team wrote: numbers only.
+  const n = { terms: Number(raw.terms) || 0, traps: Number(raw.traps) || 0 };
   return { terms: n.terms + (Array.isArray(d.customTerms) ? d.customTerms.length : 0), traps: n.traps,
-    researched: !!(d.researchResult ? n.terms : (d._n && d._n.terms)), tips: doctorTips(d).length };
+    researched: !!n.terms, tips: doctorTips(d).length };
 }
 function doctorResearchCounts(r){
   const tiers = researchTiers(r);
@@ -13649,8 +13664,8 @@ function renderDoctorTips(){
     return `<div class="dt-tip${DT.editing === t.id ? ' is-editing' : ''}">
       <p>${escapeHtml(t.text)}</p>
       <div class="dt-meta"><small>${escapeHtml(meta)}</small>${mine ? `
-        <button type="button" class="dt-act" onclick="editDoctorTip('${escapeAttr(t.id)}')" aria-label="Edit this tip">Edit</button>
-        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip('${escapeAttr(t.id)}')" aria-label="Delete this tip">Delete</button>` : ''}</div>
+        <button type="button" class="dt-act" onclick="editDoctorTip(${jsArg(t.id)})" aria-label="Edit this tip">Edit</button>
+        <button type="button" class="dt-act is-del" onclick="deleteDoctorTip(${jsArg(t.id)})" aria-label="Delete this tip">Delete</button>` : ''}</div>
     </div>`;
   }).join('') : `<p class="dt-empty">No tips yet. How do they phrase things? What do they always explain? What should a newer interpreter know before walking in?</p>`;
   const editing = DT.editing && tips.find(t => t.id === DT.editing);
@@ -13782,7 +13797,7 @@ function renderDoctorDirDetail(d){
         ${t.es ? `<div class="dp-es" lang="es">${escapeHtml(t.es)}</div>` : ''}
         ${t.def ? `<div class="dp-def">${escapeHtml(t.def)}</div>` : ''}
         ${on.key === 'team' ? `<div class="dp-row-foot">
-          <button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm('${id}','${escapeAttr(t.id)}')">Remove</button>
+          <button type="button" class="dp-link is-quiet" onclick="deleteDoctorTerm(${jsArg(id)},${jsArg(t.id)})">Remove</button>
           ${t.addedBy ? `<span>Added by ${escapeHtml(t.addedBy)}</span>` : ''}
         </div>` : ''}
       </div>
@@ -14247,7 +14262,7 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
   // .has-photo class that sets `cover` -- so the photo rendered at its full
   // pixel size inside a circle, showing one flat corner of the image.
   const avStyle = face
-    ? `background-color:${avatarColor};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;background-repeat:no-repeat;`
+    ? `background-color:${avatarColor};background-image:${cssUrl(face)};background-size:cover;background-position:center;background-repeat:no-repeat;`
     : `background:linear-gradient(140deg, ${avatarColor}, ${darkenHex(avatarColor, 30)});`;
   // The coloured initials stay as the element's own content under every
   // photo, so a URL that 404s falls back to them instead of a broken image.
@@ -14617,7 +14632,7 @@ function renderChatHeader(){
       const fn = faceOf.get(name) || name;
       const c = nameToColor(fn), face = memberPhotoFor(fn);
       const st = face
-        ? `background-color:${c};background-image:url(&quot;${escapeAttr(face)}&quot;);background-size:cover;background-position:center;`
+        ? `background-color:${c};background-image:${cssUrl(face)};background-size:cover;background-position:center;`
         : `background:linear-gradient(140deg, ${c}, ${darkenHex(c, 30)});`;
       return `<span class="chat-avatar${face ? ' has-photo' : ''}" style="${st}">${escapeHtml(initialsOf(name))}</span>`;
     }).join('');
@@ -15504,7 +15519,7 @@ function openTermCheck(record, findings){
   list.innerHTML = findings.map(f=>{
     const sev = ['high','medium','low'].includes(f.severity) ? f.severity : 'low';
     const dup = f.type === 'duplicate' && f.duplicateId
-      ? `<button class="tc-dup" onclick="openDuplicateTerm('${escapeAttr(f.duplicateId)}')">See the existing entry</button>`
+      ? `<button class="tc-dup" onclick="openDuplicateTerm(${jsArg(f.duplicateId)})">See the existing entry</button>`
       : '';
     const suggestion = f.suggestion
       ? `<div class="tc-suggest"><b>Suggested:</b> ${escapeHtml(f.suggestion)}</div>`

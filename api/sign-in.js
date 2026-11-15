@@ -70,12 +70,15 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
         if (r.status === 404) return null;
         if (!r.ok) throw Object.assign(new Error(`read ${path.split('/')[0]} ${r.status}`), { status: r.status });
         const d = await r.json();
-        return plain(d.fields);
+        // When it was last written, so a write can say "only if nobody wrote it since".
+        return Object.defineProperty(plain(d.fields), '_updateTime', { value: d.updateTime || '', enumerable: false });
       },
-      set: async (path, obj, mask) => {
-        const q = mask ? '?' + mask.map(f => 'updateMask.fieldPaths=' + encodeURIComponent(f)).join('&') : '';
+      set: async (path, obj, mask, onlyIfUnchangedSince) => {
+        const params = (mask || []).map(f => 'updateMask.fieldPaths=' + encodeURIComponent(f));
+        if (onlyIfUnchangedSince) params.push('currentDocument.updateTime=' + encodeURIComponent(onlyIfUnchangedSince));
+        const q = params.length ? '?' + params.join('&') : '';
         const r = await fetchImpl(`${FS}/${path}${q}`, { method: 'PATCH', headers: H({ 'Content-Type': 'application/json' }), body: JSON.stringify({ fields: typed(obj) }) });
-        if (!r.ok) throw new Error(`write ${path.split('/')[0]} ${r.status}`);
+        if (!r.ok) throw Object.assign(new Error(`write ${path.split('/')[0]} ${r.status}`), { status: r.status });
       },
       remove: async (path) => { await fetchImpl(`${FS}/${path}`, { method: 'DELETE', headers: H() }); }
     };
@@ -154,6 +157,12 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
     if (!saved || !saved.hash || Number(saved.exp) < t) return res.status(400).json({ error: 'expired' });
     if (saved.uid !== callerUid) return res.status(400).json({ error: 'other_phone' });
     const tries = Number(saved.tries) || 0;
+    if (tries >= MAX_TRIES) return res.status(400).json({ error: 'expired', tooMany: true });
+    // Claim this try before looking at the code, and only if nobody else
+    // claimed one since we read it. Guesses sent all at once used to read the
+    // same count, so each got checked and the 5-try limit didn't hold.
+    try { await db.set(codePath, { tries: tries + 1 }, ['tries'], saved._updateTime); }
+    catch (e) { return res.status(429).json({ error: 'busy' }); }
     const right = crypto.timingSafeEqual(Buffer.from(codeHash(saved.salt, code)), Buffer.from(String(saved.hash).padEnd(64, '0').slice(0, 64)));
     if (!right) {
       if (tries + 1 >= MAX_TRIES) {
@@ -163,7 +172,6 @@ export function makeHandler({ fetchImpl = fetch, mail = sendMail, env = process.
         await db.set(codePath, { hash: '', exp: 0, tries: MAX_TRIES }, ['hash', 'exp', 'tries']);
         return res.status(400).json({ error: 'expired', tooMany: true });
       }
-      await db.set(codePath, { tries: tries + 1 }, ['tries']);
       return res.status(400).json({ error: 'wrong_code', left: MAX_TRIES - tries - 1 });
     }
     // Spent: a right code works once. The send history goes with it, which is fine.

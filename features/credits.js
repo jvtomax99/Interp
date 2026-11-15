@@ -167,7 +167,7 @@ function creditOpen(key, section) {
       ${c.words ? `<blockquote class="credit-words">“${escapeHtml(c.words)}”<small>${escapeHtml(c.name)}</small></blockquote>` : ''}
       ${meta ? `<p class="credit-meta">${meta}</p>` : ''}
       <div class="credit-row">
-        ${owner ? `<button type="button" class="credit-btn credit-btn-soft" onclick="creditClose(); creditEdit('${escapeAttr(key)}')">Edit</button>` : ''}
+        ${owner ? `<button type="button" class="credit-btn credit-btn-soft" onclick="creditClose(); creditEdit(${jsArg(key)})">Edit</button>` : ''}
         <button type="button" class="credit-btn credit-btn-main" onclick="creditClose()">Close</button>
       </div>
     </div>`, `${r.tag(c.name)}`, '.credit-btn-main');
@@ -192,7 +192,7 @@ function creditEdit(key, section) {
         <textarea id="creditWords" maxlength="300" placeholder="What they said when they suggested it">${escapeHtml(c && c.words ? c.words : '')}</textarea></div>
       <div class="field"><span class="credit-label">Credit for</span><div class="credit-chips" role="radiogroup" aria-label="Credit for">${chips}</div></div>
       <div class="credit-row">
-        ${c ? `<button type="button" class="credit-btn credit-btn-danger" onclick="creditRemove('${escapeAttr(key)}')">Remove</button>` : ''}
+        ${c ? `<button type="button" class="credit-btn credit-btn-danger" onclick="creditRemove(${jsArg(key)})">Remove</button>` : ''}
         <button type="button" class="credit-btn credit-btn-soft" onclick="creditClose()">Cancel</button>
         <button type="button" class="credit-btn credit-btn-main" onclick="creditSave()">Save</button>
       </div>

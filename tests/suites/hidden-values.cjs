@@ -103,8 +103,74 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   }));
   ok(res.pwned === 0, 'none of the doctored values ran (chat, updates, events, trash, attachments, terms, domains, Link Directory)', res.where);
   ok(res.chat.every(id => /^(ok|c)\d+$/.test(id)) && res.chat.filter(id => /^ok\d$/.test(id)).length === 7, 'chat rows keep their document\'s id; the row whose id is doctored is left out', res.chat);
-  ok(res.cats.length === 0 && res.color0 === undefined && res.badTerm === 0, 'a domain or term with a doctored id is dropped; a doctored colour is left off', res);
+  ok(res.cats.length === 0 && res.color0 === '#8B7BAE' && res.badTerm === 0, 'a domain or term with a doctored id is dropped; a doctored colour becomes the first palette colour (a save never sends an empty one)', res);
   ok(res.jsLinks === 0, 'no javascript: address in any link');
+
+  console.log('== the reviewer\'s cases (2026-11-15): numbers, doctor pages, slang, photos, the bin');
+  const rv = await page.evaluate(async () => {
+    window.__where = [];
+    const hit = 'window.__pwned=(window.__pwned||0)+1';
+    const TAG = '<img src=x onerror="' + hit + '">';
+    const JS1 = "');" + hit + ";('";
+    const now = Date.now();
+    const out = {};
+    // Handlers are swapped for recorders, so a tap runs only what the attribute holds.
+    const names = ['editDoctorTip', 'deleteDoctorTip', 'deleteDoctorTerm', 'setSlangCountry', 'doctorPageTab', 'setResearchTier', 'addAllInTier', 'addSuggestedTermToGlossary', 'openTermLookup', 'openDoctorDirDetail', 'morphOpenDoctor', 'researchThisDoctorFromDirectory'];
+    const saved = {}; window.__args = [];
+    names.forEach(n => { saved[n] = window[n]; window[n] = (...a) => { window.__args.push([n, ...a.filter(x => typeof x === 'string')]); }; });
+    const host = document.createElement('div'); document.body.appendChild(host);
+    const draw = html => { host.innerHTML = html || ''; host.querySelectorAll('[onclick]').forEach(el => { try { el.click(); } catch (e) {} }); };
+    // 1. the practice board: a total that is markup
+    QUIZ_HISTORY = [{ id: 'q1', who: 'Liz Lind', total: TAG, correct: TAG, timestamp: now }];
+    draw(renderWeeklyBoard());
+    out.board = host.textContent.includes('Liz');
+    // 2. the doctor list and page: planted counts, tip and term ids, tier keys and words
+    const doc = { id: 'drx', name: 'Dr X Test', specialty: 'Cardiology', _n: { terms: TAG, traps: TAG }, notes: 'old note',
+      tips: [{ id: JS1, text: 'A tip', by: 'Ana Torres' }], customTerms: [{ id: JS1, en: 'murmur', es: 'soplo', addedBy: 'Liz' }] };
+    DOCTOR_DIRECTORY = [doc];
+    out.counts = doctorListCounts(doc);
+    draw(doctorListCard(doc, false));
+    const research = { tiers: [{ key: JS1, label: 'Core', terms: [{ en: JS1, es: JS1, def: '&quot;);' + hit + ';(&quot;' }] }] };
+    draw(renderResearchTierBlocks(researchTiers(research), null, 'detail'));
+    draw(renderDoctorDirDetail({ ...doc, researchResult: research }));
+    DT.id = 'drx'; try { renderDoctorTips(); } catch (e) {}
+    document.querySelectorAll('.dt-act').forEach(el => { try { el.click(); } catch (e) {} });
+    out.tipArgs = window.__args.filter(a => /DoctorTip|DoctorTerm/.test(a[0])).map(a => a.slice(1)).flat();
+    // 3. slang: a country that is code
+    const sl = { id: 'slang', name: 'Slang', color: '#112233', terms: [{ id: 'sl1', en: 'chamba', es: 'trabajo', def: 'Vulgarity: Low. Region: ' + JS1 + '. Used for work.' }] };
+    const slCat = DATA.categories.find(c => c.id === 'slang') || DATA.categories[0];
+    slCat.terms.push(sl.terms[0]);
+    draw(renderSlangPanel(slCat));
+    slCat.terms.pop();
+    out.slangArgs = window.__args.filter(a => a[0] === 'setSlangCountry').map(a => a[1]);
+    // 7. a photo that ends the CSS url() and covers the app
+    const evilPhoto = 'x");position:fixed;inset:0;z-index:99999;background:red url("https://evil.test/t';
+    const cssUrl = window.cssUrl || (v => `url(&quot;${escapeAttr(v)}&quot;)`);   // the old way, when testing old code
+    out.css = [cssUrl(evilPhoto), cssUrl('https://firebasestorage.googleapis.com/v0/b/x/o/a%20b.jpg?alt=media'), cssUrl('data:image/jpeg;base64,AAAA')];
+    host.innerHTML = '<div style="background-image:' + cssUrl(evilPhoto) + '"></div>';
+    out.cover = getComputedStyle(host.firstChild).position;
+    // 9. text that isn't text
+    try { out.esc = [escapeHtml(5), escapeHtml(0), escapeHtml(null), initialsOf(42), specialtyColor(7)]; } catch (e) { out.esc = ['threw: ' + e.message]; }
+    names.forEach(n => { window[n] = saved[n]; });
+    host.remove();
+    return { ...out, where: window.__where };
+  });
+  // 6. the bin: a planted entry with a bad id is refused
+  const bin = await page.evaluate(async () => {
+    TRASH = [{ id: 'bin1', type: 'domain', label: 'Evil', payload: { id: 'ev"><img src=x>', name: 'Evil', color: '#000' }, extra: {} },
+             { id: 'bin2', type: 'domain', label: 'Odd colour', payload: { id: 'oddcolour', name: 'Odd', color: 'red;}' }, extra: {} }];
+    await restoreTrashItem('bin1'); await restoreTrashItem('bin2');
+    const odd = DATA.categories.find(c => c.id === 'oddcolour');
+    return { bad: DATA.categories.some(c => /img/.test(c.id)), odd: odd && odd.color };
+  });
+  ok(rv.where.length === 0, 'none of the reviewer\'s payloads ran (practice board, doctor list and page, tips, research tiers, slang, photo)', rv.where);
+  ok(rv.board, 'the practice board still draws');
+  ok(rv.counts.terms === 1 && rv.counts.traps === 0, 'a doctor\'s planted counts become numbers (1 custom term, 0 traps)', rv.counts);
+  ok(rv.tipArgs.filter(a => a === "');window.__pwned=(window.__pwned||0)+1;('").length >= 2 && rv.tipArgs.every(a => a === 'notes' || a === 'drx' || a.startsWith("');")), 'tip and term buttons hand over the exact id, quote and all', rv.tipArgs);
+  ok(rv.slangArgs.some(a => a.startsWith("');")), 'the slang country button hands over the exact text', rv.slangArgs);
+  ok(rv.css[0] === 'none' && /^url\(&quot;https:\/\/firebasestorage/.test(rv.css[1]) && /^url\(&quot;data:image\/jpeg/.test(rv.css[2]) && rv.cover !== 'fixed', 'a photo address can\'t end the CSS url(); real Storage and data photos still work', rv.css);
+  ok(rv.esc[0] === '5' && rv.esc[1] === '' && rv.esc[2] === '' && typeof rv.esc[3] === 'string' && typeof rv.esc[4] === 'string', 'a number where text belongs no longer throws', rv.esc);
+  ok(!bin.bad && bin.odd === '#8B7BAE', 'the bin refuses an entry with a bad id; a domain with a bad colour comes back with a palette colour', bin);
   ok(page.__errors.length === 0, 'no page errors', page.__errors.slice(0, 3));
   await b.close();
 })();

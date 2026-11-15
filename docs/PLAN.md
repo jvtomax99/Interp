@@ -145,6 +145,11 @@ with buttons.
      hash; `hub-invites` codes can be guessed with no throttle (32^8).
   Not checked from the cloud: the rules actually published in the Firebase
   console (the repo file is a copy).
+  Also from the reviewer, not fixed: photo addresses (providers, doctors,
+  chat) can point at any https site, so every phone that shows one loads
+  it and that site sees the phone's IP address; the per-phone code limit is
+  per sign-in, and fresh anonymous sign-ins get round it (the 3 codes an
+  hour per address still holds, so at most 15 guesses an hour per account).
 
 - **Feel audit:** five phone screenshots (Ask and Team access with the
   keyboard up; a doctor's page, the doctor list's A-Z strip, a toast) and

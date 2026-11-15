@@ -402,7 +402,7 @@ function askLayoutHtml(lay, t){
       <p class="ask-ll">Still learning · from your Term Review</p>
       <ul>${lay.list.map(term => {
         const key = t.id + '|' + term.id, open = ASK.revealed && ASK.revealed.has(key), [c, label] = fb(TERM_REVIEWS[term.id]);
-        return `<li><button type="button" class="ask-pr" aria-expanded="${open}" onclick="askReveal('${t.id}','${escapeAttr(term.id)}', this)">
+        return `<li><button type="button" class="ask-pr" aria-expanded="${open}" onclick="askReveal('${t.id}',${jsArg(term.id)}, this)">
           <b lang="en">${escapeHtml(term.en)}</b><span class="ask-pr-es" lang="es"${open ? '' : ' hidden'}>${escapeHtml(term.es || '—')}</span><span class="ask-pr-show"${open ? ' hidden' : ''}>Show Spanish</span></button>
           ${label ? `<span class="ask-fb ${c}">${label}</span>` : ''}</li>`;
       }).join('')}</ul></div>`;
@@ -1867,7 +1867,7 @@ function renderMemory(status){
     ${row('practice', `<p class="mem-help">He can suggest continuing practice you left unfinished, from your own record. Team points aren’t yours alone, so he never counts them.</p>${opts('practice')}`)}
     <p class="mem-status" id="memStatus" role="status">${status ? escapeHtml(status) : ''}</p>
     <p class="mem-note">Kept only on this phone, under the name set here. Not shared with the team, and never patient details. The ones that shape answers (language, length, focus, and your practice counts when on) go with your questions.</p>
-    ${others.length ? `<div class="mem-others"><span>Also on this phone</span>${others.map(o => `<button type="button" onclick="memForgetOther('${escapeAttr(o.key)}')">Forget ${escapeHtml(o.key === '_' ? 'no-name' : o.key)}’s (${o.n})</button>`).join('')}</div>` : ''}
+    ${others.length ? `<div class="mem-others"><span>Also on this phone</span>${others.map(o => `<button type="button" onclick="memForgetOther(${jsArg(o.key)})">Forget ${escapeHtml(o.key === '_' ? 'no-name' : o.key)}’s (${o.n})</button>`).join('')}</div>` : ''}
     <div class="modal-actions"><button type="button" class="btn btn-ghost mem-forget-all" onclick="memForget('all')"${Object.keys(mine).length ? '' : ' disabled'}>Forget everything</button>
       <button type="button" class="btn btn-primary" onclick="closeMemory()">Done</button></div>
   </div>`;
