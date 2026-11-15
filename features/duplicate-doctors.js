@@ -127,7 +127,8 @@ async function mergeDuplicateDoctors(keepId){
     for(const other of group){
       if(other.id === merged.id) continue;
       // Trashed rather than dropped — a bad merge is recoverable.
-      await trashItem('doctor', `${other.name} (merged)`, other);
+      // No copy, no delete: the database refuses one anyway.
+      if(!(await trashItem('doctor', `${other.name} (merged)`, other))) continue;
       await deleteDoctorDirectoryEntryRemote(other.id);
       DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x => x.id !== other.id);
     }

@@ -351,10 +351,9 @@ async function deleteDoctorDirEntry(id){
   if(!confirm(`Delete "${d.name}"?`)) return;
   try{
     const trashId = await trashItem('doctor', d.name, d);
+    if(!trashId){ showToast(TRASH_FAILED); return false; }
     await deleteDoctorDirectoryEntryRemote(id);
-    if(storage && d.photoPath){
-      storage.ref().child(d.photoPath).delete().catch(()=>{});
-    }
+    // The photo stays, so a restore brings the doctor back with it.
     DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x=>x.id!==id);
     logActivity(`removed ${d.name} from the doctor directory`);
     showUndoToast('Doctor deleted.', trashId);

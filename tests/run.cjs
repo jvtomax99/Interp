@@ -65,6 +65,7 @@ const SUITES = [
   ['photo-adjust.cjs',    'Adjust your photo: opens after you pick one, drag and zoom with the photo always covering the frame, the two previews, Save keeps exactly the square, Cancel and Escape keep the old one'],
   ['credits.cjs',         'Idea credits: the tag under a credited title, the card (tap or double-tap), the owner\'s Give credit, Edit, Remove, a refused save taken back'],
   ['tool-banners.cjs',   'Tool banners: Translate, Term Review, Ask and Doctor Directory under a colour banner with their pin (one-line title, no spill, the count above the search, + Add and Ask\'s links on it, his face in a conversation, a credit\'s tag), the pin flying from Home and nothing left behind, none under reduced motion or from the tab bar, Back'],
+  ['delete-safety.cjs',   'Nothing lost by a teammate\'s phone: a delete leaves its copy in the bin first (offline too), attachments restore, Delete and Clear only where allowed'],
   ['hidden-values.cjs',   'Hidden values: a doctored id, colour, size or address from the database is checked before it is drawn, and never runs'],
   ['load-order.cjs',      'Load order: a resize, a key, a message before index.html\'s script raise no error'],
   ['deploy-open.cjs',     'The first open after a deploy: no reload, the hello once; a page older than the worker reloads once, in the background'],

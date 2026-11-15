@@ -100,6 +100,13 @@ synced, titles by account.
 - Done when: a new teammate joins with the code, signs in by email on a
   second phone and finds their practice there.
 
+**Nothing lost by a teammate's phone.** Every delete of a term, doctor,
+provider or attachment leaves a copy in Recently deleted; you remove your own
+posts, owner phones remove anyone's (`docs/features/deleted-items.md`).
+- Done when: a teammate's phone can't remove anyone else's posts or empty the
+  bin, even from outside the app, and every deleted term, doctor, provider
+  and attachment can be restored.
+
 **3D Body.** Human Atlas in a walled-off frame, 30 bilingual cards.
 - Done when: a user taps a body part and reads its card in both languages.
 

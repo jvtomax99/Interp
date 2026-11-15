@@ -412,11 +412,13 @@ const GUIDE_TOPICS = [
   { id:'deleted', section:'change', k:'delete deleted undo restore trash bin recover accident gone', q:'I deleted something by accident', a:`
     <p>It isn't gone.</p>
     <p>Right after deleting, a small bar appears at the bottom with an <b>Undo</b> button. That's the fastest way back.</p>
-    <p>If you missed it, open <b>More</b> → <b>Recently deleted</b>. Everything stays there for 30 days.</p>` },
+    <p>If you missed it, open <b>More</b> → <b>Recently deleted</b>. Terms, doctors, providers and attachments all go there and stay for 30 days, and anyone on the team can tap <b>Restore</b>.</p>
+    <p>The Hub always keeps that copy: if it can't (no connection, say), it doesn't delete and tells you so. Only the Hub's owner can empty the bin early.</p>` },
 
   { id:'attach', section:'change', k:'attach attachment photo picture image pdf file document upload paperclip', q:'Can I attach a photo or a PDF to a word?', a:`
     <p>Yes. A diagram, a consent form, a photo of a whiteboard.</p>
-    <p>Tap <b>⋯</b> on the term's card, then <b>Attach photo or PDF</b>, and pick the file. It appears on the card for everyone.</p>` },
+    <p>Tap <b>⋯</b> on the term's card, then <b>Attach photo or PDF</b>, and pick the file. It appears on the card for everyone.</p>
+    <p>Removed one by mistake? It goes to <b>More</b> → <b>Recently deleted</b> for 30 days, where <b>Restore</b> puts it back.</p>` },
 
   { id:'domain', section:'change', k:'new domain create category list rename color pin icon edit domain specialty', q:'How do I start a new domain, or rename one?', a:`
     <p><b>New domain:</b> tap <b>+ New</b> next to Medical Terminology on Home. Or, inside any domain, tap <b>⋯</b> in its colored banner, then <b>New domain</b>.</p>
@@ -430,7 +432,8 @@ const GUIDE_TOPICS = [
 
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
-    <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>` },
+    <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>
+    <p>Hold a message (or tap it) for its menu. You can <b>Edit</b> and <b>Delete</b> your own messages; you can react to anyone's. Only the Hub's owner can delete someone else's message.</p>` },
 
   { id:'chattitles', section:'team', k:'admin administrator developer supervisor title tag badge name leader owner liz lind fabiola jose language services who runs chat ribbon star give title account team access impostor fake', q:'What are the Administrator, Supervisor and Developer tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>
@@ -449,7 +452,7 @@ const GUIDE_TOPICS = [
 
   { id:'pin', section:'team', k:'pin pinned announcement important update top of chat keep notice region north south channel', q:'How do I pin something important for everyone?', a:`
     <p>In Team Chat, tap the <b>pin</b> at the top and write the update, like a new CE requirement or a changed protocol.</p>
-    <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Anyone can unpin one when it's no longer needed.</p>
+    <p>Pinned updates stay in a bar at the top of Chat, so they don't get lost in the scroll. Tap the bar to see them all. Whoever pinned it can unpin it when it's no longer needed, and so can the Hub's owner.</p>
     <p>A pin goes where you are. Pinned in <b>Everyone</b>, it shows in every channel; pinned in <b>North</b> or <b>South</b>, only in that channel, marked "North only" or "South only". The sheet says which before you pin.</p>` },
 
   { id:'notifications', section:'team', k:'notifications push notify alert alerts closed lock screen badge phone banner sound iphone home screen send owner administrator message team broadcast test not arriving not working', q:'How do I get notifications on my phone?', a:`
@@ -465,7 +468,8 @@ const GUIDE_TOPICS = [
 
   { id:'updates', section:'team', k:'bell notification updates activity feed what changed news', q:'What is the bell at the top of the screen?', a:`
     <p>It tells you what your teammates have changed: terms added, terms edited, announcements posted.</p>
-    <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>` },
+    <p>Tap it to read them. You can also find the full list under <b>More</b> → <b>Recent Updates</b>.</p>
+    <p>The list keeps a record for everyone, so only the Hub's owner can remove an update or clear the list.</p>` },
 
   { id:'practice', section:'study', k:'practice quiz test exam corechi cchi study certification ready readiness dashboard scores trend chart focus next weakest campus buildings city game hospital streak flame squash spring press daylight cherry blossom flowers fountain 3d three-d rotate turn spin zoom pinch finished preview parallax depth drag time of day sun sunrise sunset night moon hour slider now toy model ambulance emergency traffic light signal stop sign lane one-way crosswalk pedestrians people walking doors wheelchair helicopter helipad atlantic street visitors parking garage employee garage gate entrance floors height link pavilion helena theurer jurist medical plaza tap a person people bench plaza word glossary term review show got it missed it weather sun rainbow sky streak days in a row', q:'How do I practice for the CoreCHI exam?', a:`
     <p>Open <b>More</b> → <b>CoreCHI Practice</b> and start a quiz.</p>
@@ -528,7 +532,8 @@ const GUIDE_TOPICS = [
     <p>These are short summaries based on the NCIHC and CCHI codes, not the official text.</p>` },
 
   { id:'events', section:'study', k:'training events ce continuing education credits webinar conference hours region north south tag', q:'Where do I find CE and training opportunities?', a:`
-    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. CHIA, CCHI and NCIHC are checked once a day and new items appear on their own. Cross-Cultural Communications blocks automated checks, so their trainings show up only when someone adds them with <b>+ Add</b>. When you add one, <b>For</b> can mark it North or South (a local in-service, say); it gets a small tag and everyone still sees it. For a requirement the whole team needs to see, pin it in Team Chat.</p>` },
+    <p><b>More</b> → <b>Training &amp; Events</b> lists upcoming continuing-education opportunities. CHIA, CCHI and NCIHC are checked once a day and new items appear on their own. Cross-Cultural Communications blocks automated checks, so their trainings show up only when someone adds them with <b>+ Add</b>. When you add one, <b>For</b> can mark it North or South (a local in-service, say); it gets a small tag and everyone still sees it. For a requirement the whole team needs to see, pin it in Team Chat.</p>
+    <p>You can remove an event you added (the <b>✕</b> on its row); the ones the Hub finds by itself, and other people's, only the Hub's owner can remove.</p>` },
 
   { id:'body', section:'study', k:'3d body anatomy model organ muscle bone heart rotate zoom human atlas', q:'What is 3D Body?', a:`
     <p>A model of the human body you can turn and zoom. Tap any part to see its card. It's handy when a doctor points to something you can't picture.</p>
