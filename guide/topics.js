@@ -413,7 +413,7 @@ const GUIDE_TOPICS = [
     <p>It isn't gone.</p>
     <p>Right after deleting, a small bar appears at the bottom with an <b>Undo</b> button. That's the fastest way back.</p>
     <p>If you missed it, open <b>More</b> → <b>Recently deleted</b>. Terms, doctors, providers and attachments all go there and stay for 30 days, and anyone on the team can tap <b>Restore</b>.</p>
-    <p>The Hub always keeps that copy: if it can't (no connection, say), it doesn't delete and tells you so. Only the Hub's owner can empty the bin early.</p>` },
+    <p>The Hub always keeps that copy: if it can't, it doesn't delete and tells you so. Entries clear themselves after 30 days; nobody on the team can empty the bin.</p>` },
 
   { id:'attach', section:'change', k:'attach attachment photo picture image pdf file document upload paperclip', q:'Can I attach a photo or a PDF to a word?', a:`
     <p>Yes. A diagram, a consent form, a photo of a whiteboard.</p>
@@ -433,7 +433,8 @@ const GUIDE_TOPICS = [
   { id:'chat', section:'team', k:'chat message text team talk send photo channel everyone north south', q:'How do I message the team?', a:`
     <p>Tap <b>Chat</b> at the bottom. Pick a channel at the top: <b>Everyone</b> reaches both regions, <b>North</b> or <b>South</b> just that region (anyone can still read it). Type and send, like any messaging app.</p>
     <p>The <b>paperclip</b> sends photos or a PDF. Tap a photo to see it full screen.</p>
-    <p>Hold a message (or tap it) for its menu. You can <b>Edit</b> and <b>Delete</b> your own messages; you can react to anyone's. Only the Hub's owner can delete someone else's message.</p>` },
+    <p>Hold a message (or tap it) for its menu. You can <b>Edit</b> and <b>Delete</b> your own messages; you can react to anyone's. Only the Hub's owner can delete someone else's message.</p>
+    <p>"Your own" follows this phone's sign-in. On a new phone, or after clearing the browser, messages you sent before can't be edited any more; the owner can still remove them.</p>` },
 
   { id:'chattitles', section:'team', k:'admin administrator developer supervisor title tag badge name leader owner liz lind fabiola jose language services who runs chat ribbon star give title account team access impostor fake', q:'What are the Administrator, Supervisor and Developer tags in Chat?', a:`
     <p>Some names in <b>Team Chat</b> have a title under them, so you can tell who leads the team.</p>

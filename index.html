@@ -2551,7 +2551,7 @@ async function trashItem(type, label, payload, extra){
   const id = trashIdFor(type, payload && payload.id);
   if(!id || !db){ console.error('trashItem: nothing to name the copy after', type); return null; }
   try{
-    await queuedWrite({ collection: 'deleted-items', docId: id, op: 'set', data: stripUndefined(entry) });
+    TRASH_STATE[id] = await queuedWrite({ collection: 'deleted-items', docId: id, op: 'set', data: stripUndefined(entry) });
   }catch(err){
     console.error('trashItem failed:', err);
     return null;
@@ -2559,45 +2559,64 @@ async function trashItem(type, label, payload, extra){
   TRASH = [{ id, ...entry }, ...TRASH.filter(t => t.id !== id)];
   return id;
 }
-const TRASH_FAILED = 'Not deleted: a copy couldn\u2019t be kept in Recently deleted. Check your connection and try again.';
+const TRASH_STATE = {};   // bin id -> 'sent' | 'queued', for the delete that follows
+const TRASH_FAILED = 'Not deleted: a copy couldn\u2019t be kept in Recently deleted. Try again in a moment.';
+/* The delete behind its bin copy: through the outbox, and queued whenever
+   the copy was, so it never reaches the database first. */
+function queuedDelete(collection, docId){
+  return queuedWrite({ collection, docId, op: 'delete' }, { behind: TRASH_STATE[`${collection}__${docId}`] });
+}
+/* What to say when a remove fails: the database refuses what isn't yours. */
+function removeFailedMessage(err){
+  return err && (err.code === 'permission-denied' || /permission/i.test(String(err.message || '')))
+    ? 'Only the person who posted it, or the Hub\u2019s owner, can remove that.'
+    : 'Could not remove \u2014 check your connection.';
+}
 
-async function dropFromTrash(id){
+async function dropFromTrash(id, behind){
   TRASH = TRASH.filter(t => t.id !== id);
   // Through the outbox, behind the restore's own write: the database lets a
   // bin entry go once its item is back.
-  try{ if(db) await queuedWrite({ collection: 'deleted-items', docId: id, op: 'delete' }); }catch(err){ console.error(err); }
+  try{ if(db) await queuedWrite({ collection: 'deleted-items', docId: id, op: 'delete' }, { behind }); }catch(err){ console.error(err); }
 }
 
-async function restoreTrashItem(id){
+async function restoreTrashItem(id, quiet){
   const entry = TRASH.find(t => t.id === id);
-  if(!entry) return;
+  if(!entry) return false;
   const p = { ...(entry.payload || {}) };
   // A bin entry is anyone's to write: a bad id or a planted count never comes back.
   delete p._n;
   if(!safeId(p.id)){ showToast('That item can\u2019t be restored.'); return; }
   if(entry.type === 'domain'){ const c = cleanCategories([p])[0]; if(!c){ showToast('That item can\u2019t be restored.'); return; } Object.assign(p, c); if(!safeColor(p.color)) p.color = DOMAIN_COLORS[0]; }
-  let ok = false;
+  // Already back under the same id (a doctor's id is their name, so Doctor
+  // Prep can bring one back): a whole restore would wipe what was added since.
+  const already = entry.type === 'term' ? DATA.categories.some(c => (c.terms || []).some(t => t.id === p.id))
+    : entry.type === 'doctor' ? DOCTOR_DIRECTORY.some(d => d.id === p.id)
+    : entry.type === 'provider' ? PROVIDERS.some(x => x.id === p.id)
+    : entry.type === 'attachment' ? ATTACHMENTS.some(a => a.id === p.id) : false;
+  if(already && !confirm(`${entry.label} is already back. Replace it with the deleted copy? Changes made since will be lost.`)) return false;
+  let ok = false, state = 'sent';
+  const put = async (collection, data) => { state = await queuedWrite({ collection, docId: p.id, op: 'set', data: stripUndefined(data) }); return true; };
 
   try{
     if(entry.type === 'term'){
       const categoryId = (entry.extra && entry.extra.categoryId) || p.categoryId;
       const cat = DATA.categories.find(c => c.id === categoryId);
-      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return; }
+      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return false; }
       ok = await saveTermDoc({ ...p, id: p.id, categoryId });
+      if(ok === 'queued') state = 'queued';
       if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
     } else if(entry.type === 'doctor'){
-      await persistDoctorDirectoryEntry(p.id, p, true);
-      if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...p });
-      ok = true;
+      const { _n, ...rec } = p;
+      ok = await put('doctor-directory', rec);
+      if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...rec });
     } else if(entry.type === 'provider'){
-      await persistProvider(p, p.id);
+      ok = await put('healthcare-providers', p);
       if(!PROVIDERS.some(x => x.id === p.id)) PROVIDERS.push({ ...p });
-      ok = true;
     } else if(entry.type === 'attachment'){
       const { id: attId, ...rec } = p;
-      await queuedWrite({ collection: 'term-attachments', docId: attId, op: 'set', data: stripUndefined(rec) });
+      ok = await put('term-attachments', rec);
       if(!ATTACHMENTS.some(a => a.id === attId)) ATTACHMENTS.push({ ...p });
-      ok = true;
     } else if(entry.type === 'domain'){
       if(!DATA.categories.some(c => c.id === p.id)) DATA.categories.push({ ...p, terms: p.terms || [] });
       ok = await saveCategoriesMeta();
@@ -2607,14 +2626,22 @@ async function restoreTrashItem(id){
     ok = false;
   }
 
-  if(!ok && entry.type !== 'doctor' && entry.type !== 'provider'){
-    showToast('Could not restore \u2014 check your connection.');
-    return;
+  // Never drop the bin copy unless the item really went back.
+  if(!ok){
+    if(!quiet) showToast('Could not restore \u2014 check your connection.');
+    return false;
   }
-  await dropFromTrash(id);
+  await dropFromTrash(id, state);
+  // A term's attachments went to the bin with it: they come back with it.
+  if(entry.type === 'term'){
+    for(const a of TRASH.filter(t => t.type === 'attachment' && t.extra && t.extra.termId === p.id))
+      await restoreTrashItem(a.id, true);
+  }
+  if(quiet) return true;
   logActivity(`restored ${entry.label}`);
   showToast(`Restored ${entry.label}.`);
   render();
+  return true;
 }
 
 // A toast you can act on, so undo is available at the moment of the mistake
@@ -2635,7 +2662,7 @@ function showUndoToast(msg, trashId){
 async function deleteTermDoc(id){
   if(!db) return false;
   try{
-    const state = await queuedWrite({ collection: 'terms', docId: id, op: 'delete' });
+    const state = await queuedDelete('terms', id);
     if(state === 'queued') showToast(queuedNotice('Deleted'));
     return state;
   }catch(err){
@@ -2816,7 +2843,7 @@ async function persistProvider(record, existingId){
 
 async function deleteProviderRemote(id){
   if(!db) return;
-  await trackWrite(db.collection('healthcare-providers').doc(id).delete());
+  return queuedDelete('healthcare-providers', id);
 }
 
 // ============ Doctor Directory ============
@@ -2922,7 +2949,7 @@ async function persistDoctorDirectoryEntry(id, record, whole){
 
 async function deleteDoctorDirectoryEntryRemote(id){
   if(!db) return;
-  await trackWrite(db.collection('doctor-directory').doc(id).delete());
+  return queuedDelete('doctor-directory', id);
 }
 
 // Called after every FRESH (non-cached) successful Doctor Prep search —
@@ -3101,7 +3128,7 @@ async function deleteAnnouncement(id){
   try{
     await db.collection('announcements').doc(id).delete();
   }catch(err){
-    showToast('Could not remove. Check connection and retry.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -3528,7 +3555,7 @@ async function deleteAttachment(id){
     // brings the attachment back whole.
     const trashId = await trashItem('attachment', att.filename || 'Attachment', att, { termId: att.termId });
     if(!trashId){ showToast(TRASH_FAILED); return; }
-    if(db) await queuedWrite({ collection: 'term-attachments', docId: id, op: 'delete' });
+    if(db) await queuedDelete('term-attachments', id);
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.id!==id);
     showUndoToast('Attachment removed.', trashId);
     render();
@@ -4171,7 +4198,7 @@ async function deleteChatMessage(id){
     }
     showToast('Message deleted.');
   }catch(err){
-    showToast('Could not delete — check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -4180,7 +4207,7 @@ async function deleteActivity(id){
   try{
     await db.collection('activity-log').doc(id).delete();
   }catch(err){
-    showToast('Could not remove — check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -5336,7 +5363,7 @@ async function deleteCeEvent(id){
   try{
     await db.collection('ce-events').doc(id).delete();
   }catch(err){
-    showToast('Could not remove \u2014 check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -7852,9 +7879,13 @@ function askToKeepData(){
     if(s && s.persist && s.persisted) s.persisted().then(kept => kept || s.persist()).catch(() => {});
   }catch(e){}
 }
-async function queuedWrite(entry){
+async function queuedWrite(entry, opts){
   askToKeepData();
   if(!navigator.onLine){ enqueueWrite(entry); return 'queued'; }
+  // The second write of a pair (a delete behind its bin copy, a bin entry's
+  // removal behind its restore) waits in the outbox when the first did, or it
+  // could land first and be refused.
+  if(opts && opts.behind === 'queued'){ enqueueWrite(entry); flushOutbox(); return 'queued'; }
   // An older change to this same document is still waiting. Writing past it
   // would let the replay land afterwards and undo this newer one, so join
   // the queue behind it instead.
@@ -14963,8 +14994,7 @@ function startChatReply(id){
 }
 function startChatEdit(id){
   const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
-  const me = whoAmI().trim().toLowerCase();
-  if(!me || (m.author||'').trim().toLowerCase() !== me){
+  if(!isMine(m)){
     showToast('You can only edit your own messages.'); return;
   }
   replyingTo = null;
@@ -15597,10 +15627,10 @@ async function deleteTerm(categoryId, termId){
   // Clean up any files that were attached to this term.
   const orphaned = ATTACHMENTS.filter(a=>a.termId===term.id);
   if(orphaned.length && db){
-    // Into the bin with the term, so restoring both brings the files back too.
+    // Into the bin with the term; restoring the term brings them back with it.
     for(const a of orphaned){
       if(await trashItem('attachment', a.filename || 'Attachment', a, { termId: a.termId }))
-        queuedWrite({ collection: 'term-attachments', docId: a.id, op: 'delete' }).catch(()=>{});
+        queuedDelete('term-attachments', a.id).catch(()=>{});
     }
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.termId!==term.id);
   }

@@ -55,6 +55,32 @@ const me = (role, uid) => `try{ localStorage.setItem('ih_access_me_v1', JSON.str
       await restoreTrashItem('term-attachments__att1');
       await new Promise(r => setTimeout(r, 300));
       out.attBack = !!__DB['term-attachments'].att1 && __DB['term-attachments'].att1.filename === 'scan.pdf' && ATTACHMENTS.some(a => a.id === 'att1');
+      // 5. a provider offline: copy, then the delete, both queued
+      __DB['healthcare-providers'] = __DB['healthcare-providers'] || {};
+      __DB['healthcare-providers'].pv1 = { name: 'Dr Test Provider', role: 'RN', addedBy: 'Liz' };
+      PROVIDERS.push({ id: 'pv1', name: 'Dr Test Provider', role: 'RN' });
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+      await deleteProvider('pv1');
+      out.pvQueue = OUTBOX.map(e => e.collection + ':' + e.op + ':' + e.docId).slice(-2);
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true });
+      await flushOutbox(); await new Promise(r => setTimeout(r, 300));
+      out.pvGone = !__DB['healthcare-providers'].pv1 && !!__DB['deleted-items']['healthcare-providers__pv1'];
+      // 6. a restore that fails keeps the bin copy
+      const real2 = window.queuedWrite;
+      window.queuedWrite = (e, o) => e.collection === 'healthcare-providers' ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' })) : real2(e, o);
+      await restoreTrashItem('healthcare-providers__pv1');
+      await new Promise(r => setTimeout(r, 300));
+      window.queuedWrite = real2;
+      out.failedKeepsCopy = !!__DB['deleted-items']['healthcare-providers__pv1'] && TRASH.some(t => t.id === 'healthcare-providers__pv1');
+      // 7. a term's attachments come back with the term
+      __DB['term-attachments'].att2 = { termId: t2.id, filename: 'photo.jpg', mimeType: 'image/jpeg', dataUrl: 'https://firebasestorage.googleapis.com/b.jpg', storagePath: 'attachments/b.jpg', uploadedBy: 'Liz' };
+      await loadAttachments();
+      await deleteTerm(cat.id, t2.id);
+      await new Promise(r => setTimeout(r, 300));
+      out.attWithTerm = !__DB['term-attachments'].att2 && !!__DB['deleted-items']['term-attachments__att2'];
+      await restoreTrashItem('terms__' + t2.id);
+      await new Promise(r => setTimeout(r, 400));
+      out.attBackWithTerm = !!__DB.terms[t2.id] && !!__DB['term-attachments'].att2 && !__DB['deleted-items']['term-attachments__att2'];
       return { ...out, t3: t3.id };
     });
     ok(r.binNamed && r.termGone, 'a deleted term leaves its copy in the bin as terms__<id>', r);
@@ -63,6 +89,9 @@ const me = (role, uid) => `try{ localStorage.setItem('ih_access_me_v1', JSON.str
     ok(r.queue[0] === 'deleted-items:set:terms__' + r.t3 && r.queue[1] === 'terms:delete:' + r.t3, 'offline: the copy is queued just ahead of the delete', r.queue);
     ok(r.replayed, 'back online: both replay, the term goes and its copy stays', r);
     ok(r.attBinned && r.attBack, 'an attachment goes to the bin and comes back whole', r);
+    ok(r.pvQueue[0] === 'deleted-items:set:healthcare-providers__pv1' && r.pvQueue[1] === 'healthcare-providers:delete:pv1' && r.pvGone, 'a provider deleted offline: copy then delete, both through the outbox', r.pvQueue);
+    ok(r.failedKeepsCopy, 'a restore that fails keeps the copy in the bin', r);
+    ok(r.attWithTerm && r.attBackWithTerm, 'a term\'s attachments go to the bin with it and come back with it', r);
 
     console.log('== what a teammate sees');
     const v = await page.evaluate(async () => {

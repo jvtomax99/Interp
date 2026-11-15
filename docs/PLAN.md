@@ -122,6 +122,11 @@ a phase finishes but the next phase continues here.
    @firebase/rules-unit-testing in `tests/package.json`; Java 21 is on the
    cloud machine), then give Jose the paste steps. Before he pastes, he copies
    the rules live in the console into a note: that is the undo.
+   From change 1's review: let a bin entry go whenever its original exists
+   again, judged from the entry's own `type` and `payload.id` (old random-id
+   entries made before change 1 have no `<collection>__` name), and when it
+   has no `deletedAt` at all; judge "over 30 days" by `request.time`, never
+   the phone's clock.
 
 Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 

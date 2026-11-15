@@ -18,9 +18,15 @@ Updates, and delete anyone's chat message. Two changes fix it:
   the caller shows `TRASH_FAILED`.
 - **The copy and the delete both go through the outbox** (`queuedWrite`), in
   that order, so an offline delete still works and replays copy first.
-- **Restore** writes the item back, then removes its bin entry through the
-  outbox (the rules allow that once the item exists again). Anyone can
-  restore. The 30-day auto-clean (`loadTrash`) keeps running on every phone.
+- **Restore** writes the item back through the outbox, then removes its bin
+  entry behind it (the rules allow that once the item exists again). A
+  restore that fails keeps the copy. An item already back under the same id
+  (a doctor's id is their name) asks before it is replaced. A term brings its
+  attachments back with it. Anyone can restore. The 30-day auto-clean
+  (`loadTrash`) keeps running on every phone.
+- **Order holds in every case:** `queuedWrite(entry, { behind })` queues the
+  second write of a pair whenever the first was queued (`TRASH_STATE`,
+  `queuedDelete`), so a delete never reaches the database before its copy.
 - **Attachments are restorable** (`restoreTrashItem`, type `attachment`). The
   file stays in Storage on delete, as do provider and doctor photos, so a
   restore brings the picture back. Deleting a term moves its attachments to
@@ -38,6 +44,8 @@ Updates, and delete anyone's chat message. Two changes fix it:
 - **Editing** a term's or domain's text stays open to the whole team (it's
   the Hub's job); only removing is guarded.
 - **No daily database backups** (needs Google's paid plan; ask Jose).
+- **A new sign-in id** (a new phone, cleared browser data) makes earlier posts
+  no longer "yours"; the owner can still remove them. The guide says so.
 - **Older items** without a `uid` (messages sent before signing in by email,
   old announcements, the events watcher's finds) can be removed only by an
   owner.

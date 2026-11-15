@@ -124,18 +124,19 @@ async function mergeDuplicateDoctors(keepId){
       await trackWrite(db.collection('doctor-directory').doc(merged.id).update({ tips: firebase.firestore.FieldValue.arrayUnion(...moved) }));
       merged.tips = [...(Array.isArray(merged.tips) ? merged.tips : []), ...moved];
     }
+    let kept = 0;
     for(const other of group){
       if(other.id === merged.id) continue;
       // Trashed rather than dropped — a bad merge is recoverable.
       // No copy, no delete: the database refuses one anyway.
-      if(!(await trashItem('doctor', `${other.name} (merged)`, other))) continue;
+      if(!(await trashItem('doctor', `${other.name} (merged)`, other))){ kept++; continue; }
       await deleteDoctorDirectoryEntryRemote(other.id);
       DOCTOR_DIRECTORY = DOCTOR_DIRECTORY.filter(x => x.id !== other.id);
     }
     const idx = DOCTOR_DIRECTORY.findIndex(d => d.id === merged.id);
     if(idx > -1) DOCTOR_DIRECTORY[idx] = merged; else DOCTOR_DIRECTORY.push(merged);
     logActivity(`merged ${group.length} duplicate entries into ${merged.name}`);
-    showToast(`Merged into ${merged.name}.`);
+    showToast(kept ? `Merged into ${merged.name}, but ${kept} duplicate${kept === 1 ? ' was' : 's were'} kept: a copy couldn\u2019t be saved to Recently deleted.` : `Merged into ${merged.name}.`);
     render();
   }catch(err){
     console.error('merge failed:', err);
