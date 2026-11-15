@@ -7763,7 +7763,23 @@ function applyQueuedWrite(entry){
    on a change that could not be stored (code ih/outbox-full,
    ih/storage-full, ih/storage-unavailable); callers surface both and keep
    the person's draft. */
+/* Ask the phone to keep the Hub's saved data when it runs low on space, instead of
+   clearing it: the outbox (changes not sent yet), the glossary cache, the
+   preferences. The phone may say no, and then nothing changes. Asked at the
+   first change someone makes after the Hub opens, so nobody is asked before
+   they have anything to lose (Firefox shows a question; Chrome and Safari
+   decide by themselves). */
+let askedToKeepData = false;
+function askToKeepData(){
+  if(askedToKeepData) return;
+  askedToKeepData = true;
+  try{
+    const s = navigator.storage;
+    if(s && s.persist && s.persisted) s.persisted().then(kept => kept || s.persist()).catch(() => {});
+  }catch(e){}
+}
 async function queuedWrite(entry){
+  askToKeepData();
   if(!navigator.onLine){ enqueueWrite(entry); return 'queued'; }
   // An older change to this same document is still waiting. Writing past it
   // would let the replay land afterwards and undo this newer one, so join
