@@ -1336,7 +1336,7 @@ async function uploadAvatar(file, key, ready){
   const slug = String(key||'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40) || 'member';
   const path = `attachments/avatars/${slug}-${Date.now()}.jpg`;
   const ref = storage.ref().child(path);
-  const snapshot = await ref.put(blob, { contentType:'image/jpeg' });
+  const snapshot = await ref.put(blob, { contentType:'image/jpeg', customMetadata: { uid: myUid() } });
   return { photo: await snapshot.ref.getDownloadURL(), photoPath: path };
 }
 
@@ -2529,6 +2529,17 @@ async function loadTrash(){
   }
 }
 
+/* Where each kind of bin entry came from. The entry is named after it,
+   "<collection>__<id>", because the database only lets an item go once its
+   copy is in the bin under that name (firestore.rules, deleted-items).
+   docs/features/deleted-items.md. */
+const TRASH_COLLECTIONS = { term: 'terms', doctor: 'doctor-directory', provider: 'healthcare-providers', attachment: 'term-attachments' };
+function trashIdFor(type, docId){ return TRASH_COLLECTIONS[type] && safeId(docId) ? `${TRASH_COLLECTIONS[type]}__${docId}` : ''; }
+
+/* Puts a copy in Recently deleted. Returns the entry's id, or null when the
+   copy couldn't be kept: the caller must not delete then. The copy goes
+   through the outbox just ahead of the delete, so offline both wait and
+   replay in that order. */
 async function trashItem(type, label, payload, extra){
   const entry = {
     type, label: label || '(untitled)',
@@ -2537,49 +2548,75 @@ async function trashItem(type, label, payload, extra){
     deletedBy: whoAmI() || 'Someone',
     deletedAt: Date.now(),
   };
-  const id = genId();
+  const id = trashIdFor(type, payload && payload.id);
+  if(!id || !db){ console.error('trashItem: nothing to name the copy after', type); return null; }
   try{
-    if(db) await db.collection('deleted-items').doc(id).set(stripUndefined(entry));
+    TRASH_STATE[id] = await queuedWrite({ collection: 'deleted-items', docId: id, op: 'set', data: stripUndefined(entry) });
   }catch(err){
-    // Never block the delete on the backup write, but say so — the user is
-    // about to be told they can undo.
     console.error('trashItem failed:', err);
     return null;
   }
-  TRASH.unshift({ id, ...entry });
+  TRASH = [{ id, ...entry }, ...TRASH.filter(t => t.id !== id)];
   return id;
 }
-
-async function dropFromTrash(id){
-  TRASH = TRASH.filter(t => t.id !== id);
-  try{ if(db) await db.collection('deleted-items').doc(id).delete(); }catch(err){ console.error(err); }
+const TRASH_STATE = {};   // bin id -> 'sent' | 'queued', for the delete that follows
+const TRASH_FAILED = 'Not deleted: a copy couldn\u2019t be kept in Recently deleted. Try again in a moment.';
+/* The delete behind its bin copy: through the outbox, and queued whenever
+   the copy was, so it never reaches the database first. */
+function queuedDelete(collection, docId){
+  return queuedWrite({ collection, docId, op: 'delete' }, { behind: TRASH_STATE[`${collection}__${docId}`] });
+}
+/* What to say when a remove fails: the database refuses what isn't yours. */
+function removeFailedMessage(err){
+  return err && (err.code === 'permission-denied' || /permission/i.test(String(err.message || '')))
+    ? 'Only the person who posted it, or the Hub\u2019s owner, can remove that.'
+    : 'Could not remove \u2014 check your connection.';
 }
 
-async function restoreTrashItem(id){
+async function dropFromTrash(id, behind){
+  TRASH = TRASH.filter(t => t.id !== id);
+  // Through the outbox, behind the restore's own write: the database lets a
+  // bin entry go once its item is back.
+  try{ if(db) await queuedWrite({ collection: 'deleted-items', docId: id, op: 'delete' }, { behind }); }catch(err){ console.error(err); }
+}
+
+async function restoreTrashItem(id, quiet){
   const entry = TRASH.find(t => t.id === id);
-  if(!entry) return;
+  if(!entry) return false;
   const p = { ...(entry.payload || {}) };
   // A bin entry is anyone's to write: a bad id or a planted count never comes back.
   delete p._n;
   if(!safeId(p.id)){ showToast('That item can\u2019t be restored.'); return; }
   if(entry.type === 'domain'){ const c = cleanCategories([p])[0]; if(!c){ showToast('That item can\u2019t be restored.'); return; } Object.assign(p, c); if(!safeColor(p.color)) p.color = DOMAIN_COLORS[0]; }
-  let ok = false;
+  // Already back under the same id (a doctor's id is their name, so Doctor
+  // Prep can bring one back): a whole restore would wipe what was added since.
+  const already = entry.type === 'term' ? DATA.categories.some(c => (c.terms || []).some(t => t.id === p.id))
+    : entry.type === 'doctor' ? DOCTOR_DIRECTORY.some(d => d.id === p.id)
+    : entry.type === 'provider' ? PROVIDERS.some(x => x.id === p.id)
+    : entry.type === 'attachment' ? ATTACHMENTS.some(a => a.id === p.id) : false;
+  if(already && !confirm(`${entry.label} is already back. Replace it with the deleted copy? Changes made since will be lost.`)) return false;
+  let ok = false, state = 'sent';
+  const put = async (collection, data) => { state = await queuedWrite({ collection, docId: p.id, op: 'set', data: stripUndefined(data) }); return true; };
 
   try{
     if(entry.type === 'term'){
       const categoryId = (entry.extra && entry.extra.categoryId) || p.categoryId;
       const cat = DATA.categories.find(c => c.id === categoryId);
-      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return; }
+      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return false; }
       ok = await saveTermDoc({ ...p, id: p.id, categoryId });
+      if(ok === 'queued') state = 'queued';
       if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
     } else if(entry.type === 'doctor'){
-      await persistDoctorDirectoryEntry(p.id, p, true);
-      if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...p });
-      ok = true;
+      const { _n, ...rec } = p;
+      ok = await put('doctor-directory', rec);
+      if(!DOCTOR_DIRECTORY.some(d => d.id === p.id)) DOCTOR_DIRECTORY.push({ ...rec });
     } else if(entry.type === 'provider'){
-      await persistProvider(p, p.id);
+      ok = await put('healthcare-providers', p);
       if(!PROVIDERS.some(x => x.id === p.id)) PROVIDERS.push({ ...p });
-      ok = true;
+    } else if(entry.type === 'attachment'){
+      const { id: attId, ...rec } = p;
+      ok = await put('term-attachments', rec);
+      if(!ATTACHMENTS.some(a => a.id === attId)) ATTACHMENTS.push({ ...p });
     } else if(entry.type === 'domain'){
       if(!DATA.categories.some(c => c.id === p.id)) DATA.categories.push({ ...p, terms: p.terms || [] });
       ok = await saveCategoriesMeta();
@@ -2589,14 +2626,22 @@ async function restoreTrashItem(id){
     ok = false;
   }
 
-  if(!ok && entry.type !== 'doctor' && entry.type !== 'provider'){
-    showToast('Could not restore \u2014 check your connection.');
-    return;
+  // Never drop the bin copy unless the item really went back.
+  if(!ok){
+    if(!quiet) showToast('Could not restore \u2014 check your connection.');
+    return false;
   }
-  await dropFromTrash(id);
+  await dropFromTrash(id, state);
+  // A term's attachments went to the bin with it: they come back with it.
+  if(entry.type === 'term'){
+    for(const a of TRASH.filter(t => t.type === 'attachment' && t.extra && t.extra.termId === p.id))
+      await restoreTrashItem(a.id, true);
+  }
+  if(quiet) return true;
   logActivity(`restored ${entry.label}`);
   showToast(`Restored ${entry.label}.`);
   render();
+  return true;
 }
 
 // A toast you can act on, so undo is available at the moment of the mistake
@@ -2617,7 +2662,7 @@ function showUndoToast(msg, trashId){
 async function deleteTermDoc(id){
   if(!db) return false;
   try{
-    const state = await queuedWrite({ collection: 'terms', docId: id, op: 'delete' });
+    const state = await queuedDelete('terms', id);
     if(state === 'queued') showToast(queuedNotice('Deleted'));
     return state;
   }catch(err){
@@ -2798,7 +2843,7 @@ async function persistProvider(record, existingId){
 
 async function deleteProviderRemote(id){
   if(!db) return;
-  await trackWrite(db.collection('healthcare-providers').doc(id).delete());
+  return queuedDelete('healthcare-providers', id);
 }
 
 // ============ Doctor Directory ============
@@ -2904,7 +2949,7 @@ async function persistDoctorDirectoryEntry(id, record, whole){
 
 async function deleteDoctorDirectoryEntryRemote(id){
   if(!db) return;
-  await trackWrite(db.collection('doctor-directory').doc(id).delete());
+  return queuedDelete('doctor-directory', id);
 }
 
 // Called after every FRESH (non-cached) successful Doctor Prep search —
@@ -3065,7 +3110,7 @@ async function addAnnouncement(){
   if(!db){ showToast('Not connected — check your connection and retry.'); return; }
   try{
     // Pinned in a region's channel: that channel's pin (no channel = Everyone's).
-    const rec = { text, author: whoAmI(), createdAt: Date.now() };
+    const rec = { text, author: whoAmI(), createdAt: Date.now(), uid: myUid() };
     if(isRegion(chatChannel)) rec.channel = chatChannel;
     await db.collection('announcements').add(rec);
     input.value = '';
@@ -3083,7 +3128,7 @@ async function deleteAnnouncement(id){
   try{
     await db.collection('announcements').doc(id).delete();
   }catch(err){
-    showToast('Could not remove. Check connection and retry.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -3118,7 +3163,7 @@ function renderPinnedStrip(){
   if(!pins.length){ host.innerHTML = ''; return; }
   const top = pins[0];
   const rows = pins.map(a => `<div class="tc-pin-row"><p>${escapeHtml(a.text)}<small>${a.author ? escapeHtml(a.author) : 'Someone'} · ${a.createdAt ? relativeTime(a.createdAt) : ''}${isRegion(a.channel) ? ` · ${regionName(a.channel)} only` : ''}</small></p>
-      <button type="button" class="tc-text-btn" onclick="deleteAnnouncement('${a.id}')" aria-label="Unpin: ${escapeAttr(a.text.slice(0, 60))}">Unpin</button></div>`).join('');
+      ${canRemove(a) ? `<button type="button" class="tc-text-btn" onclick="deleteAnnouncement('${a.id}')" aria-label="Unpin: ${escapeAttr(a.text.slice(0, 60))}">Unpin</button>` : ''}</div>`).join('');
   host.innerHTML = `<div class="tc-pinned${tcPinnedOpen ? ' is-open' : ''}">
     <button type="button" class="tc-pinned-bar" onclick="toggleTcPinned()" aria-expanded="${tcPinnedOpen}" aria-controls="tcPinnedList">
       ${ICON_PIN}<span class="tc-pinned-text">${escapeHtml(top.text)}</span>
@@ -3382,7 +3427,7 @@ function renderActivityFeed(){
         <span class="activity-author">${escapeHtml(a.author||'Someone')}</span>
         <span class="activity-summary">${activityMarkup(a.summary)}</span>
         <span class="activity-time" data-ts="${Number(a.timestamp)||''}" title="${a.timestamp ? escapeAttr(new Date(a.timestamp).toLocaleString()) : ''}">${time}</span>
-        <button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>
+        ${isHubOwner() ? `<button class="activity-delete" title="Remove this update" onclick="deleteActivity('${a.id}')">✕</button>` : ''}
       </div>
     `;
   }).join('');
@@ -3436,7 +3481,7 @@ async function readFileAsAttachment(file){
   const storagePath = `attachments/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${file.name}`;
 
   const ref = storage.ref().child(storagePath);
-  const snapshot = await ref.put(blobToUpload, { contentType: mimeType });
+  const snapshot = await ref.put(blobToUpload, { contentType: mimeType, customMetadata: { uid: myUid() } });
   const url = await snapshot.ref.getDownloadURL();
 
   return { filename: file.name, mimeType, dataUrl: url, storagePath };
@@ -3504,12 +3549,15 @@ async function handleTermAttachSelected(event){
 async function deleteAttachment(id){
   if(!confirm('Remove this attachment?')) return;
   const att = ATTACHMENTS.find(a=>a.id===id);
+  if(!att) return;
   try{
-    if(db) await db.collection('term-attachments').doc(id).delete();
-    if(storage && att && att.storagePath){
-      storage.ref().child(att.storagePath).delete().catch(()=>{}); // best-effort, don't block on it
-    }
+    // A copy in Recently deleted first; the file itself stays, so a restore
+    // brings the attachment back whole.
+    const trashId = await trashItem('attachment', att.filename || 'Attachment', att, { termId: att.termId });
+    if(!trashId){ showToast(TRASH_FAILED); return; }
+    if(db) await queuedDelete('term-attachments', id);
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.id!==id);
+    showUndoToast('Attachment removed.', trashId);
     render();
   }catch(err){
     showToast('Could not remove — check your connection.');
@@ -3614,7 +3662,7 @@ async function startChatUpload(item){
     if(!pendingChatAttachments.includes(item)) return;          // removed while it was being prepared
     const safe = (item.name || 'file').replace(/[^\w.\-]+/g, '_').slice(-60);
     const storagePath = `attachments/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${item.isImage ? safe.replace(/\.\w+$/, '') + '.jpg' : safe}`;
-    const task = storage.ref().child(storagePath).put(blob, { contentType: mimeType });
+    const task = storage.ref().child(storagePath).put(blob, { contentType: mimeType, customMetadata: { uid: myUid() } });
     item.task = task; item.storagePath = storagePath;
     if(task && typeof task.on === 'function'){
       task.on('state_changed', snap => {
@@ -4150,7 +4198,7 @@ async function deleteChatMessage(id){
     }
     showToast('Message deleted.');
   }catch(err){
-    showToast('Could not delete — check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -4159,7 +4207,7 @@ async function deleteActivity(id){
   try{
     await db.collection('activity-log').doc(id).delete();
   }catch(err){
-    showToast('Could not remove — check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -5253,7 +5301,7 @@ function renderEvents(){
         <div class="ce-head">
           <span class="ce-src">${escapeHtml(src)}</span>${isRegion(ev.region) ? `<span class="ce-region">${regionName(ev.region)}</span>` : ''}
           <span class="ce-time" data-ts="${Number(ev.timestamp)||''}">${when}</span>
-          <button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>
+          ${canRemove(ev) ? `<button class="activity-delete" title="Remove" onclick="deleteCeEvent('${ev.id}')">\u2715</button>` : ''}
         </div>
         <p class="ce-title">${escapeHtml(ev.title || ev.summary || 'Untitled')}</p>
         ${ev.notes ? `<p class="ce-notes">${escapeHtml(ev.notes)}</p>` : ''}
@@ -5297,6 +5345,7 @@ async function saveEvent(){
   // A tag, not a filter: everyone still sees it (regions.md).
   const evRegion = document.getElementById('fEvRegion').value;
   if(isRegion(evRegion)) record.region = evRegion;
+  record.uid = myUid();   // who may remove it (theirs, or an owner's)
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('ce-events').add(record);
@@ -5314,7 +5363,7 @@ async function deleteCeEvent(id){
   try{
     await db.collection('ce-events').doc(id).delete();
   }catch(err){
-    showToast('Could not remove \u2014 check your connection.');
+    showToast(removeFailedMessage(err));
   }
 }
 
@@ -6011,9 +6060,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'morph',       tone:'gd-n1', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
-  { id:'regions',     tone:'gd-n2', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
-  { id:'opening',     tone:'gd-n3', pin:'pins/practice.webp',          eyebrow:'Pins on your lanyard',  title:'Your CoreCHI practice badges now hang as pins on your badge\'s lanyard when the Hub opens. A new one clicks on with a sparkle; tap the lanyard to see them all' },
+  { id:'deleted',     tone:'gd-n1', pin:'pins/trash.webp',            eyebrow:'Nothing lost by accident', title:'Deleting a term, doctor, provider or attachment always leaves a copy in Recently deleted for 30 days. You edit and remove your own chat messages, pins and events; only the owner removes other people\'s.' },
+  { id:'morph',       tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
+  { id:'regions',     tone:'gd-n3', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -7830,9 +7879,13 @@ function askToKeepData(){
     if(s && s.persist && s.persisted) s.persisted().then(kept => kept || s.persist()).catch(() => {});
   }catch(e){}
 }
-async function queuedWrite(entry){
+async function queuedWrite(entry, opts){
   askToKeepData();
   if(!navigator.onLine){ enqueueWrite(entry); return 'queued'; }
+  // The second write of a pair (a delete behind its bin copy, a bin entry's
+  // removal behind its restore) waits in the outbox when the first did, or it
+  // could land first and be refused.
+  if(opts && opts.behind === 'queued'){ enqueueWrite(entry); flushOutbox(); return 'queued'; }
   // An older change to this same document is still waiting. Writing past it
   // would let the replay land afterwards and undo this newer one, so join
   // the queue behind it instead.
@@ -8557,7 +8610,7 @@ function renderContent(){
         notificationsSupported()
           ? `<button class="head-action ${notifyActivityEnabled?'on':''}" onclick="toggleActivityNotifications()" title="${notifyActivityEnabled?'Turn off update notifications':'Get notified when your team adds or edits something'}">${ICON_BELL_SM} ${notifyActivityEnabled?'Notifications on':'Notify me'}</button>`
           : ''
-      }${ACTIVITY.length ? `<button class="head-action" onclick="clearAllActivity()">Clear all</button>` : ''}</div>
+      }${ACTIVITY.length && isHubOwner() ? `<button class="head-action" onclick="clearAllActivity()">Clear all</button>` : ''}</div>
       <div id="activityFeed"></div>
     `;
     renderActivityFeed();
@@ -10798,7 +10851,7 @@ async function shareResultToChat(correct, total){
   try{
     const ref = db.collection('team-chat').doc();
     const state = await queuedWrite({ collection:'team-chat', docId:ref.id, op:'set',
-      data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null } });
+      data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null, uid: myUid() } });
     showToast(state === 'queued' ? queuedNotice('Shared') : 'Shared to Team Chat.');
   }catch(err){
     const stored = outboxErrorMessage(err, 'Not shared', 'Your result is still here.');
@@ -14290,9 +14343,9 @@ function chatRowHtml(m, mine, face, mentionsMe, first, last, open, status){
         <div class="chat-act-row">
           <button type="button" class="chat-act" onclick="event.stopPropagation(); startChatReply('${m.id}')">${ICON_REPLY}<span>Reply</span></button>
           ${m.text ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); copyChatMessage('${m.id}')">${ICON_COPY}<span>Copy</span></button>` : ''}
-          ${(mine && m.text) ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); startChatEdit('${m.id}')">${ICON_EDIT}<span>Edit</span></button>` : ''}
+          ${(isMine(m) && m.text) ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); startChatEdit('${m.id}')">${ICON_EDIT}<span>Edit</span></button>` : ''}
           ${m.text ? `<button type="button" class="chat-act" onclick="event.stopPropagation(); saveChatToGlossary('${m.id}')">${ICON_BOOK_PLUS}<span>Glossary</span></button>` : ''}
-          <button type="button" class="chat-act is-danger" onclick="event.stopPropagation(); deleteChatMessage('${m.id}')">${ICON_TRASH}<span>Delete</span></button>
+          ${canRemove(m) ? `<button type="button" class="chat-act is-danger" onclick="event.stopPropagation(); deleteChatMessage('${m.id}')">${ICON_TRASH}<span>Delete</span></button>` : ''}
         </div>
       </div>`
     : '';
@@ -14756,9 +14809,9 @@ function openChatMenuFor(ev, mid, anchor){
     <div class="tc-menu-list">
       ${item('reply', 'Reply', ICON_REPLY)}
       ${m.text ? item('copy', 'Copy', ICON_COPY) : ''}
-      ${(mine && m.text) ? item('edit', 'Edit', ICON_EDIT) : ''}
+      ${(isMine(m) && m.text) ? item('edit', 'Edit', ICON_EDIT) : ''}
       ${m.text ? item('glossary', 'Add to glossary', ICON_BOOK_PLUS) : ''}
-      ${item('delete', 'Delete', ICON_TRASH, true)}
+      ${canRemove(m) ? item('delete', 'Delete', ICON_TRASH, true) : ''}
     </div>`;
   document.body.appendChild(scrim);
   document.body.appendChild(menu);
@@ -14941,8 +14994,7 @@ function startChatReply(id){
 }
 function startChatEdit(id){
   const m = CHAT_MESSAGES.find(x=>x.id===id); if(!m) return;
-  const me = whoAmI().trim().toLowerCase();
-  if(!me || (m.author||'').trim().toLowerCase() !== me){
+  if(!isMine(m)){
     showToast('You can only edit your own messages.'); return;
   }
   replyingTo = null;
@@ -15566,6 +15618,7 @@ async function deleteTerm(categoryId, termId){
   if(!term) return;
   if(!confirm(`Delete "${term.en}"?`)) return;
   const trashId = await trashItem('term', `"${term.en}"`, { ...term, categoryId }, { categoryId });
+  if(!trashId){ showToast(TRASH_FAILED); return; }
   const ok = await deleteTermDoc(termId);
   if(!ok) return;
   cat.terms = cat.terms.filter(t=>t.id!==termId);
@@ -15574,7 +15627,11 @@ async function deleteTerm(categoryId, termId){
   // Clean up any files that were attached to this term.
   const orphaned = ATTACHMENTS.filter(a=>a.termId===term.id);
   if(orphaned.length && db){
-    orphaned.forEach(a=> db.collection('term-attachments').doc(a.id).delete().catch(()=>{}));
+    // Into the bin with the term; restoring the term brings them back with it.
+    for(const a of orphaned){
+      if(await trashItem('attachment', a.filename || 'Attachment', a, { termId: a.termId }))
+        queuedDelete('term-attachments', a.id).catch(()=>{});
+    }
     ATTACHMENTS = ATTACHMENTS.filter(a=>a.termId!==term.id);
   }
 
@@ -15919,10 +15976,9 @@ async function deleteProvider(id){
   if(!confirm(`Delete "${p.name}"?`)) return;
   try{
     const trashId = await trashItem('provider', p.name, p);
+    if(!trashId){ showToast(TRASH_FAILED); return; }
     await deleteProviderRemote(id);
-    if(storage && p.photoPath){
-      storage.ref().child(p.photoPath).delete().catch(()=>{});
-    }
+    // The photo stays, so a restore brings the provider back with it.
     PROVIDERS = PROVIDERS.filter(x=>x.id!==id);
     logActivity(`removed the provider ${p.name}`);
     showUndoToast('Provider deleted.', trashId);
@@ -16007,6 +16063,12 @@ function writeAccessMe(me){
 }
 function isHubMember(){ const me = readAccessMe(); return !!(me && me.member); }
 function isHubOwner(){ const me = readAccessMe(); return !!(me && me.member && me.role === 'owner'); }
+/* Whose post it is follows the phone's sign-in, not the typed name, the same
+   as the database does (firestore.rules): you edit and remove your own chat
+   messages, announcements and events; owner phones remove anyone's. */
+function myUid(){ return (typeof hubAuth !== 'undefined' && hubAuth && hubAuth.currentUser && hubAuth.currentUser.uid) || ''; }
+function isMine(item){ const u = myUid(); return !!(item && u && item.uid === u); }
+function canRemove(item){ return isMine(item) || isHubOwner(); }
 function setAccessState(state){
   ACCESS.state = state;
   try{ localStorage.setItem(ACCESS_STATE_KEY, state); }catch(e){}

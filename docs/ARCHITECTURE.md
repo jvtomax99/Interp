@@ -188,6 +188,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Integration rules from the journey audit (each has a check in the journey test): `journey-rules.md`
 - 3D Body cards and the frame bridge (`ATLAS`, `atlasOnMessage`): `3d-body.md`
 - The User Guide screen (`GUIDE_TOPICS`, `guideShowMe`): `user-guide.md`
+- Recently deleted, who may remove what (`trashItem`, `canRemove`, the rules): `deleted-items.md`
 - Team access, team code, practice mode (`hub-invites`, `hub-members`, `team()`): `team-access.md`
 - Regions, North and South: chat channels, directory by region, `ih_region`, `HMH_LOCATIONS` regions: `regions.md`
 - The doctor's page (`renderDoctorDirDetail`, `SPECIALTY_PINS`, tabs, glass bar): `doctor-page.md`
