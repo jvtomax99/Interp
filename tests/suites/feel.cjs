@@ -96,7 +96,9 @@ const TEXT = () => (document.querySelector('.modal.show, .overlay.show, .gs-over
   await press(null, '.qa-tile', 'a quick tile');
   await press('updates', '.tg-back', 'the top bar\'s Back');
   await press(null, '.btn.btn-primary', 'a primary button');
-  await press(null, '.activity-delete', 'a list action (the ✕)');
+  // Only owner phones see Updates' ✕ (docs/features/deleted-items.md): check its press as one.
+  await page.evaluate(() => { writeAccessMe({ ...(readAccessMe() || {}), member: true, role: 'owner' }); });
+  await press('updates', '.activity-delete', 'a list action (the ✕, on an owner phone)');
   await press(big, '.link-pill', 'a card\'s Hear pill');
   await press(null, '.card', 'a term card');
   await press('falsefriends', '.ff-chip', 'a filter pill');
