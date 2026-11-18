@@ -156,7 +156,8 @@ const GUIDE_TOPICS = [
       <li><b>Your correction · not checked</b>: it uses something you told him in this conversation. The team hasn't checked it.</li>
     </ul>
     <p>You can follow up the way you would with a teammate: <i>Make it simpler.</i> <i>Now in Spanish.</i> See <b>Can I ask a follow-up, or start over?</b></p>
-    <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>` },
+    <p>He can also open things for you: a briefing, practice, a term. Tap the button he offers. He only says it's done once the screen is open.</p>
+    <p>Each phone can make 400 AI requests a day (Ask, Translate, Term lookup, Doctor Prep together), far more than a working day needs. If a phone ever reaches it, he says so, and the tools work again the next day.</p>` },
 
   { id:'askcards', section:'ask', k:'answer card english spanish bilingual side by side compare comparison difference checklist practice sources source loading stopped offline failed error new answer scroll dr smiley', q:'What are the cards in Dr. Smiley’s answers?', a:`
     <p>Each answer starts with <b>Dr. Smiley</b> and how sure it is (<b>From the Hub</b> or <b>Not from the Hub</b>), then the headline. When it fits, there's one card:</p>

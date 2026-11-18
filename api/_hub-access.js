@@ -20,6 +20,38 @@ const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'language-specialist';
 const FIREBASE_KEY = process.env.FIREBASE_API_KEY || 'AIzaSyAvCLXI4RT8Ma_SpGzBIbx-U4zCTm12mKg';
 const FS = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
+import { serviceToken } from './_service-login.js';
+
+/* A ceiling on what one phone can spend in a day. Far above real use (a busy
+ * interpreter makes a few dozen requests), so nobody meets it by working; it
+ * is there so a lost phone or a runaway loop can't run up the bill. Counted
+ * in ai-usage/{uid}_{day}, which phones can't read or write (no rule matches
+ * it): only the server touches it, with its service account. If the count
+ * can't be kept (no service account, Firestore trouble) the request goes
+ * ahead: the limit must never be what breaks the tools. */
+export const DAILY_LIMIT = 400;
+
+export async function underDailyLimit(uid, { env = process.env, fetchImpl = fetch, now = Date.now() } = {}) {
+  try {
+    const token = await serviceToken(env, fetchImpl);
+    if (!token) return true;
+    const day = new Date(now).toISOString().slice(0, 10);
+    const name = `projects/${PROJECT_ID}/databases/(default)/documents/ai-usage/${uid}_${day}`;
+    const r = await fetchImpl(`${FS}:commit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      // An update with an empty mask makes the document if it isn't there
+      // yet (a phone's first request of the day) and changes nothing else.
+      body: JSON.stringify({ writes: [{ update: { name, fields: {} }, updateMask: { fieldPaths: [] },
+        updateTransforms: [{ fieldPath: 'n', increment: { integerValue: '1' } }] }] })
+    });
+    if (!r.ok) return true;
+    const d = await r.json();
+    const n = Number(d?.writeResults?.[0]?.transformResults?.[0]?.integerValue);
+    return !(n > DAILY_LIMIT);
+  } catch (e) { return true; }
+}
+
 const SETTINGS_TTL = 60 * 1000;
 const MAX_REMEMBERED_TOKENS = 200;
 
@@ -34,7 +66,6 @@ async function isPractice() {
   try {
     const r = await fetch(`${FS}/hub-access/settings?key=${FIREBASE_KEY}`);
     if (r.status === 404) practice = true;           // nobody has claimed the Hub yet
-    else if (r.status === 403) practice = true;      // access rules not published yet
     else if (r.ok) {
       const doc = await r.json();
       practice = doc?.fields?.practice?.booleanValue !== false;
@@ -87,10 +118,19 @@ async function isMemberToken(token) {
 
 /* Returns true when the request may go ahead. Otherwise it has already sent a
  * 401 the app knows how to explain, and the caller should just return. */
-export async function allowTeam(req, res) {
+export async function allowTeam(req, res, { free = false, limitWith } = {}) {
   if (await isPractice()) return true;
   const token = readToken(req);
-  if (token && await isMemberToken(token)) return true;
+  if (token && await isMemberToken(token)) {
+    if (free) return true;                 // costs nothing (notifications)
+    const claims = claimsOf(token) || {};
+    if (await underDailyLimit(claims.user_id || claims.sub, limitWith)) return true;
+    res.status(429).json({
+      error: 'daily_limit',
+      message: 'This phone has reached today\u2019s limit for the AI tools. They work again tomorrow.'
+    });
+    return false;
+  }
   res.status(401).json({
     error: 'members_only',
     message: 'This tool is for the interpreter team. Open the Hub and enter the team code.'

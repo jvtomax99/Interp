@@ -84,6 +84,7 @@ hub-titles/{account}                                                 <-- Titles 
 hub-credits/{key}                                                    <-- Idea credits, one per credited screen (credits.md)
 push-subs/{id}  push-sent/{msgId}  push-log/{id}                     <-- Notifications (notifications.md)
 accounts/{uid}  sign-in-codes/{id}  account-sync/{uid}               <-- Email sign-in (email-sign-in.md)
+ai-usage/{uid}_{day}                                              <-- Server only: one phone's AI requests that day (api/_hub-access.js, 400 a day)
 ```
 
 ## Deploy

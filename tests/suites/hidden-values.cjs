@@ -171,6 +171,42 @@ const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ') + m + (c || d 
   ok(rv.css[0] === 'none' && /^url\(&quot;https:\/\/firebasestorage/.test(rv.css[1]) && /^url\(&quot;data:image\/jpeg/.test(rv.css[2]) && rv.cover !== 'fixed', 'a photo address can\'t end the CSS url(); real Storage and data photos still work', rv.css);
   ok(rv.esc[0] === '5' && rv.esc[1] === '' && rv.esc[2] === '' && typeof rv.esc[3] === 'string' && typeof rv.esc[4] === 'string', 'a number where text belongs no longer throws', rv.esc);
   ok(!bin.bad && bin.odd === '#8B7BAE', 'the bin refuses an entry with a bad id; a domain with a bad colour comes back with a palette colour', bin);
+  // 10. the audit of 2026-11-18: edit-screen photos, a term's history, practice counts, the export
+  const au = await page.evaluate(async () => {
+    const before = window.__where.length;
+    const hit = 'window.__pwned=(window.__pwned||0)+1';
+    const TAG = `"><img src=x onerror="${hit}">`;
+    const out = {};
+    pendingPhotoDataUrl = `x" onerror="${hit}`; renderPhotoPreview();
+    pendingDDPhotoDataUrl = `x" onerror="${hit}`; renderDDPhotoPreview();
+    const imgs = [...document.querySelectorAll('#photoPreviewWrap img, #ddPhotoPreviewWrap img')];
+    out.photo = imgs.length === 2 && imgs.every(i => !i.hasAttribute('onerror') && i.getAttribute('src') === '');
+    pendingPhotoDataUrl = 'data:image/jpeg;base64,AAAA'; renderPhotoPreview();
+    out.photoOk = document.querySelector('#photoPreviewWrap img').getAttribute('src') === 'data:image/jpeg;base64,AAAA';
+    pendingPhotoDataUrl = null; pendingDDPhotoDataUrl = null;
+    const c = DATA.categories.find(x => x.terms && x.terms.length), t = c.terms[0], kept = t.history;
+    t.history = { length: `<img src=x onerror="${hit}">` };
+    _openEditModal(c.id, t.id);
+    out.history = document.getElementById('historyLinkSlot').innerHTML;
+    t.history = [null, { editedBy: 'Ana', savedAt: 1 }];
+    _openEditModal(c.id, t.id);
+    out.count = document.getElementById('historyLinkSlot').textContent.trim();
+    try { openHistoryModal(c.id, t.id); out.list = document.querySelectorAll('#historyList .history-entry').length; } catch (e) { out.list = 'threw: ' + e.message; }
+    t.history = kept;
+    document.querySelectorAll('.overlay.show, #overlay.show').forEach(o => o.classList.remove('show'));
+    const r = cleanReview({ box: TAG, misses: TAG, reviewCount: '3', nextReviewAt: 5, lastAt: NaN, lastResult: 7 });
+    out.review = [r.box, r.misses, r.reviewCount, r.nextReviewAt, r.lastAt, r.lastResult];
+    out.csv = [csvEscape('=HYPERLINK("x")'), csvEscape('+1'), csvEscape('-itis'), csvEscape('@a'), csvEscape('plain'), csvEscape("'quoted")];
+    out.back = ['=1+1', '-itis', '+1', '@a', 'plain', "'quoted", 'a,b'].map(v => parseCsv('h,k\r\n' + csvEscape(v) + ',z').map(row => row.map(csvPlain))[1][0]);
+    await new Promise(r => setTimeout(r, 300));
+    out.ran = window.__where.slice(before);
+    return out;
+  });
+  ok(au.ran.length === 0 && au.photo && au.photoOk, 'a doctored photo address on the provider and doctor edit screens is dropped, and a real one still shows', au);
+  ok(au.history === '' && au.count === 'View edit history (2)' && au.list === 2, 'a term\'s edit history counts only a real list, and an empty entry in it doesn\'t break the list', [au.history, au.count, au.list]);
+  ok(au.review[0] === undefined && au.review[1] === undefined && au.review[2] === undefined && au.review[3] === 5 && au.review[4] === undefined && au.review[5] === undefined, 'a practice record\'s counts are numbers or nothing', au.review);
+  ok(au.csv[0] === '"\'=HYPERLINK(""x"")"' && au.csv[1] === "'+1" && au.csv[2] === "'-itis" && au.csv[3] === "'@a" && au.csv[4] === 'plain' && au.csv[5] === "'quoted", 'the export marks a cell that starts like a formula as plain text', au.csv);
+  ok(JSON.stringify(au.back) === JSON.stringify(['=1+1', '-itis', '+1', '@a', 'plain', "'quoted", 'a,b']), 'export then import gives back the same words', au.back);
   ok(page.__errors.length === 0, 'no page errors', page.__errors.slice(0, 3));
   await b.close();
 })();
