@@ -31,9 +31,9 @@ service firebase.storage {
     // the phone). SVG is left out because it can carry script.
     function allowedFile() {
       return request.resource.size < 26 * 1024 * 1024
-        && (request.resource.contentType == 'application/pdf'
-            || (request.resource.contentType.matches('image/.*')
-                && !request.resource.contentType.matches('image/svg.*')));
+        && (request.resource.contentType.lower() == 'application/pdf'
+            || (request.resource.contentType.lower().matches('image/.*')
+                && !request.resource.contentType.lower().matches('image/svg.*')));
     }
 
     function isOwner() {

@@ -82,6 +82,15 @@ type and size, the AI daily cap). Added:
   phone or an owner.
 - Practice mode (`practice()`) still opens everything, as before.
 
+From the rules review: bin and item checks use `existsAfter`, so a batch or
+transaction is judged by the database as it will be (deleting a copy and its
+item together was possible with `exists`). Data the app never deletes
+(terminology-meta's other documents, practice questions, quiz results, faces,
+the caches, the watcher's memory, the old glossary blob) is now an owner's to
+delete; notification lines are their own phone's. SVG is refused in any
+letter case. Still open: the domain list swapped for a same-length one
+(`docs/PLAN.md`, Later).
+
 Still possible, by design: a teammate can edit a term to junk, or recreate a
 deleted term and then replace its bin copy (the copy is overwritable once
 the item exists). Both are the same as editing, which stays open. A phone
@@ -92,5 +101,5 @@ says so).
 
 `tests/suites/delete-safety.cjs` covers the app side: the named copy, no
 copy no delete, offline order and replay, attachment restore, and the
-buttons for a teammate and an owner. The rules: `tests/rules/` (66 cases,
-its own GitHub check); the rules before change 2 let 23 of them through.
+buttons for a teammate and an owner. The rules: `tests/rules/` (86 cases,
+its own GitHub check).

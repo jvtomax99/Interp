@@ -66,6 +66,45 @@ await t('an old random-named entry whose term is gone, by a teammate', () => db(
 await t('an owner removes any bin entry', () => db('owner').doc('deleted-items/legacy456').delete(), true);
 await t('a teammate reads Recently deleted', () => db('m2').collection('deleted-items').get(), true);
 
+console.log('== batches and transactions (from the review: judged by the database as it will be)');
+await seed(async d => { await d.doc('terms/bx').set({ en: 'bx' }); await d.doc('terms/by').set({ en: 'by' }); await d.doc('deleted-items/terms__bx').set(bin('term', 'bx')); });
+await t('one batch deletes the bin copy and its term together', () => { const x = db('m1'); const b = x.batch(); b.delete(x.doc('deleted-items/terms__bx')); b.delete(x.doc('terms/bx')); return b.commit(); }, false);
+await t('one batch recreates a deleted term and empties its bin entry, then nothing is left', async () => { const x = db('m1'); await x.doc('terms/gone2').set({ en: 'junk' }).catch(() => {});
+  await seed(async d => d.doc('deleted-items/terms__gone2').set(bin('term', 'gone2')));
+  const b = x.batch(); b.delete(x.doc('deleted-items/terms__gone2')); b.delete(x.doc('terms/gone2')); return b.commit(); }, false);
+await t('one batch overwrites a copy with junk and deletes the term', async () => { await seed(async d => d.doc('deleted-items/terms__by').set(bin('term', 'by')));
+  const x = db('m1'); const b = x.batch(); b.set(x.doc('deleted-items/terms__by'), bin('term', 'by', { payload: { id: 'by', en: 'junk' } })); b.delete(x.doc('terms/by')); return b.commit(); }, false);
+await t('one batch that writes the copy and deletes the term (the right order, at once)', async () => { await seed(async d => d.doc('terms/bz').set({ en: 'bz' }));
+  const x = db('m1'); const b = x.batch(); b.set(x.doc('deleted-items/terms__bz'), bin('term', 'bz')); b.delete(x.doc('terms/bz')); return b.commit(); }, true);
+await t('a transaction deletes the bin copy and its term together', async () => { await seed(async d => { await d.doc('terms/tx').set({ en: 'tx' }); await d.doc('deleted-items/terms__tx').set(bin('term', 'tx')); });
+  const x = db('m1'); return x.runTransaction(async tr => { tr.delete(x.doc('deleted-items/terms__tx')); tr.delete(x.doc('terms/tx')); }); }, false);
+
+console.log('== shared data the app never deletes');
+await seed(async d => {
+  await d.doc('terminology-meta/migrations').set({ oncologySplit: true });
+  await d.doc('practice-questions/q1').set({ q: 'What is...', addedBy: 'Liz' });
+  await d.doc('quiz-history/h1').set({ who: 'Liz', total: 10, correct: 7 });
+  await d.doc('push-subs/lizphone').set({ endpoint: 'https://push.example/liz', uid: 'm2', name: 'Liz' });
+  await d.doc('push-subs/anaphone').set({ endpoint: 'https://push.example/ana', uid: 'm1', name: 'Ana' });
+  await d.doc('team-members/liz-lind').set({ name: 'Liz Lind', photo: 'https://x/y.jpg' });
+  await d.doc('watcher-state/chia').set({ seen: ['a'] });
+  await d.doc('term-link-cache/k1').set({ sources: [] });
+});
+await t('delete the migrations record (they would rerun on every launch)', () => db('m1').doc('terminology-meta/migrations').delete(), false);
+await t('delete a practice question the team wrote', () => db('m1').doc('practice-questions/q1').delete(), false);
+await t('add a practice question', () => db('m1').collection('practice-questions').add({ q: 'New', addedBy: 'Ana' }), true);
+await t('rewrite a teammate\'s quiz result', () => db('m1').doc('quiz-history/h1').update({ correct: 0 }), false);
+await t('save your own quiz result', () => db('m1').collection('quiz-history').add({ who: 'Ana', total: 10, correct: 9 }), true);
+await t('delete a teammate\'s notification line', () => db('m1').doc('push-subs/lizphone').delete(), false);
+await t('point a teammate\'s notification line elsewhere', () => db('m1').doc('push-subs/lizphone').set({ endpoint: 'https://evil.example/', uid: '' }), false);
+await t('turn your own notifications off (delete your line)', () => db('m1').doc('push-subs/anaphone').delete(), true);
+await t('turn notifications on (your new line)', () => db('m1').doc('push-subs/ananew').set({ endpoint: 'https://push.example/ana2', uid: 'm1', name: 'Ana' }), true);
+await t('delete a teammate\'s face record', () => db('m1').doc('team-members/liz-lind').delete(), false);
+await t('change your face (set, as the app does)', () => db('m1').doc('team-members/ana-torres').set({ name: 'Ana Torres', photo: null }), true);
+await t('edit the watcher\'s memory to hide events', () => db('m1').doc('watcher-state/chia').set({ seen: [] }), false);
+await t('delete a cached lookup', () => db('m1').doc('term-link-cache/k1').delete(), false);
+await t('write the old shared glossary blob', () => db('m1').doc('terminology-hub/main').set({ x: 1 }), false);
+
 console.log('== Team Chat, pins, events, Updates');
 await t('send a message as yourself', () => db('m1').doc('team-chat/new').set({ text: 'Hi', author: 'Ana Torres', uid: 'm1', timestamp: now }), true);
 await t('send a message as another phone', () => db('m1').doc('team-chat/fake').set({ text: 'Hi', author: 'Liz Lind', uid: 'm2', timestamp: now }), false);
@@ -111,6 +150,7 @@ await t('upload a PDF under your own sign-in', () => put('m1', 'attachments/2-ab
 await t('upload with no uploader on it', () => put('m1', 'attachments/3.jpg', { contentType: 'image/jpeg' }), false);
 await t('upload under another phone\'s name', () => put('m1', 'attachments/4.jpg', { contentType: 'image/jpeg', customMetadata: { uid: 'm2' } }), false);
 await t('upload an SVG', () => put('m1', 'attachments/5.svg', { contentType: 'image/svg+xml', customMetadata: { uid: 'm1' } }), false);
+await t('upload an SVG in capitals (image/SVG+xml)', () => put('m1', 'attachments/5b.svg', { contentType: 'image/SVG+xml', customMetadata: { uid: 'm1' } }), false);
 await t('upload a web page', () => put('m1', 'attachments/6.html', { contentType: 'text/html', customMetadata: { uid: 'm1' } }), false);
 await t('upload a 27 MB file', () => put('m1', 'attachments/7.pdf', { contentType: 'application/pdf', customMetadata: { uid: 'm1' } }, new Uint8Array(27 * 1024 * 1024)), false);
 await t('overwrite a teammate\'s file', () => put('m1', 'attachments/liz.jpg', { contentType: 'image/jpeg', customMetadata: { uid: 'm1' } }), false);

@@ -218,6 +218,12 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
 
+- **The domain list can be swapped for a same-length one** (found by the
+  rules review, 2026-11-18). Rules can't compare two lists item by item; a
+  member could replace every domain at once. Options for Jose: Google's
+  daily backups (needs the paid plan), or a write-once history of the list
+  that each save must add to. Trigger: Jose picks one, or it happens.
+
 - **Found in Jose's slow Wi-Fi recording (2026-11-08), not fixed.**
   Trigger: he sees one again, or asks. An apparent restart on CoreCHI
   Practice while the campus loads (likely memory); the tab bar over the

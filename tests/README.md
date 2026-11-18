@@ -76,7 +76,7 @@ as `test-output-1` to `-6` and `test-output-webkit`.
 
 `firestore.rules` and `storage.rules` against Firebase's own emulators: every
 kind of write the app makes must pass, every listed attack must be refused
-(66 cases; `rules/rules.test.mjs`). It needs Java and a ~200 MB download, so
+(86 cases; `rules/rules.test.mjs`). It needs Java and a ~200 MB download, so
 it has its own folder and its own GitHub check ("Rules check"), which runs
 only when the rules or this test change.
 
