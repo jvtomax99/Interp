@@ -65,7 +65,7 @@ export default async function handler(req, res) {
   try { keys = vapidKeys(); } catch (e) { keys = null; }
   if (!keys) return res.status(503).json({ error: 'not_set_up', message: 'Notifications are not set up on the server yet (VAPID keys).' });
 
-  if (!await allowTeam(req, res)) return;
+  if (!await allowTeam(req, res, { free: true })) return;
   const callerToken = readToken(req);
   const callerUid = (claimsOf(callerToken) || {}).user_id || '';
   const body = bodyOf(req);

@@ -18,6 +18,7 @@ const SUITES = [
   ['shards.mjs',          'Shares (no browser): every file in suites/ is listed here, and GitHub\'s shares together run each suite exactly once'],
   ['deploy-rule.mjs',     'Deploy rule (no browser): only the bump commit deploys, its title matches, nothing the bump skips is deployed'],
   ['sign-in.mjs',         'Email sign-in (no browser): who may ask, the code and its limits, the ticket, the owner keeps the Hub, the mail conversation'],
+  ['daily-limit.mjs',     'The daily AI ceiling (no browser): one phone\'s count, the refusal past it, a new day, never blocking when the count can\'t be kept'],
   ['push.mjs',            'Notifications (no browser): sealed and signed pushes, who hears about a chat message, owner sends, gone phones'],
   ['more-sheet.cjs',      'More, grouped: Study, Doctors, Reference, You; no tabs or domain list; every tool placed; numbers that need you; the settings sheet'],
   ['notifications-screen.cjs', 'More → Notifications: install first on iPhone, off/blocked/on, switches, owners\' Send to the team, ?open= from a notification'],

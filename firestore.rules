@@ -188,10 +188,20 @@ service cloud.firestore {
     // A message may carry the phone that sent it (`uid`), which is what an
     // Admin title under the name follows; if it does, it must be this phone,
     // and an edit can't change it.
+    // Once the Hub is locked, a message is edited or deleted only by the
+    // phone that sent it, or by an owner (the app shows the buttons the same
+    // way: canRemove). Anyone on the team may still react to any message:
+    // that is the one field another phone may change.
     match /team-chat/{docId} {
-      allow read, delete: if team();
+      allow read: if team();
       allow create: if team() && ownSender(request.resource.data);
-      allow update: if team() && request.resource.data.get('uid', null) == resource.data.get('uid', null);
+      allow update: if team() && request.resource.data.get('uid', null) == resource.data.get('uid', null)
+        && (practice() || mineOrOwner(resource.data)
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']));
+      allow delete: if practice() || mineOrOwner(resource.data);
+    }
+    function mineOrOwner(d) {
+      return isMember() && (d.get('uid', '') == request.auth.uid || isOwner());
     }
     function ownSender(d) {
       return !('uid' in d) || (signedIn() && d.uid == request.auth.uid);
@@ -270,7 +280,13 @@ service cloud.firestore {
     // the collection and faces silently never appear -- no error, no clue.
     match /team-members/{docId}   { allow read, write: if team(); }
     match /activity-log/{docId}   { allow read, write: if team(); }
-    match /announcements/{docId}  { allow read, write: if team(); }
+    // Pinned announcements: anyone on the team pins one under its own
+    // sign-in; only that phone or an owner changes or unpins it.
+    match /announcements/{docId} {
+      allow read: if team();
+      allow create: if team() && ownSender(request.resource.data);
+      allow update, delete: if practice() || mineOrOwner(resource.data);
+    }
 
     // ---- Notifications (Web Push; docs/features/notifications.md) ----
     // One line per phone that turned notifications on: where its push
@@ -296,6 +312,9 @@ service cloud.firestore {
       allow create: if isOwner() && request.resource.data.uid == request.auth.uid;
       allow update, delete: if isOwner();
     }
+
+    // ai-usage/ (how many AI requests a phone made today, api/_hub-access.js)
+    // has no rule on purpose, like sign-in-codes/: only the server touches it.
 
     // ---- Study ----
     match /practice-questions/{docId} { allow read, write: if team(); }
