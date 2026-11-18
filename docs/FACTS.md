@@ -6,6 +6,16 @@ search it for the screen, file or word you are about to touch
 (`grep -n -i "tab bar" docs/FACTS.md`), before measuring or retrying
 anything. Add what you learn here, newest near the top, with the date.
 
+**The rules emulator (2026-11-18).**
+- `tests/rules/` holds its own packages (firebase-tools, rules-unit-testing),
+  so the everyday `tests/` install stays small. The emulator refuses a rules
+  file outside its project folder: the test loads the rules itself.
+- In the Storage emulator an overwrite of an existing file is checked as a
+  `create`, not an `update`: `allow update: if false` alone did not stop it;
+  `resource == null` on create does.
+- IPv6 isn't available in the cloud machine: the emulators bind 127.0.0.1
+  (`tests/rules/firebase.json`); the ::1 warnings are harmless.
+
 **Security pass (2026-11-15).**
 - Rows used to load as `{ id: d.id, ...d.data() }`, so a field named `id`
   replaced the document's id. Load with `hubRows(snap)` (the document's id

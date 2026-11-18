@@ -112,21 +112,13 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-1. **Database rules, change 2 of 2** (plan OK'd by Jose, 2026-11-15;
-   `docs/features/deleted-items.md`, plan in its "What it does"). Start no
-   earlier than 2 days after change 1 (the app side) is live, so every phone
-   has it. Write the rules (bin copy required for deletes, own-or-owner for
-   chat, pins, events and Updates, the domain list can't shrink, Storage:
-   images and PDFs up to 26 MB, no overwrite, delete by uploader or owner),
-   prove them in the emulators (`tests/suites/rules.mjs`, firebase-tools and
-   @firebase/rules-unit-testing in `tests/package.json`; Java 21 is on the
-   cloud machine), then give Jose the paste steps. Before he pastes, he copies
-   the rules live in the console into a note: that is the undo.
-   From change 1's review: let a bin entry go whenever its original exists
-   again, judged from the entry's own `type` and `payload.id` (old random-id
-   entries made before change 1 have no `<collection>__` name), and when it
-   has no `deletedAt` at all; judge "over 30 days" by `request.time`, never
-   the phone's clock.
+1. **Database rules, change 2 of 2: written and tested, waiting for Jose to
+   paste them** (2026-11-18; `docs/features/deleted-items.md`, "The rules").
+   Once its pull request is merged, Jose copies the rules live in the Firebase
+   console into a note (the undo), then pastes `firestore.rules` and
+   `storage.rules`. After that: a teammate's phone tries the everyday actions
+   (send, edit and delete its own message, react, add, delete and restore a
+   term), and this item moves to `docs/PLAN-done.md`.
 
 Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 

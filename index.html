@@ -2680,7 +2680,11 @@ async function saveCategoriesMeta(){
     await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
     return true;
   }catch(err){
-    showToast('Could not save. Check connection and retry.');
+    // The database refuses a domain list shorter than the one it holds: this
+    // phone's copy is behind (someone added a domain), and saving would drop it.
+    showToast(err && err.code === 'permission-denied'
+      ? 'Someone just added a domain. Close and reopen the Hub, then try again.'
+      : 'Could not save. Check connection and retry.');
     return false;
   }
 }

@@ -72,6 +72,20 @@ as `test-output-1` to `-6` and `test-output-webkit`.
 `ROOT=/other/checkout node run.cjs` tests another copy of the app;
 `INDEX=/path/to/index.html` serves a different `index.html` (before/after).
 
+## The database rules (`rules/`, not part of `run.cjs`)
+
+`firestore.rules` and `storage.rules` against Firebase's own emulators: every
+kind of write the app makes must pass, every listed attack must be refused
+(66 cases; `rules/rules.test.mjs`). It needs Java and a ~200 MB download, so
+it has its own folder and its own GitHub check ("Rules check"), which runs
+only when the rules or this test change.
+
+    cd tests/rules && npm install && npm test
+
+`FIRESTORE_RULES=<file> STORAGE_RULES=<file> npm test` runs it against other
+rules, to compare versions. A new collection or a new kind of write in the
+app needs a case here.
+
 ## Tools (run by hand, not part of `run.cjs`)
 
 - `tools/perf.cjs`: smoothness numbers (idle busy %, tap waits, startup, layout shift, animations that aren't transform/opacity) at iPhone size with the CPU slowed 4x. The S-phases in `docs/PLAN.md` are judged by it.

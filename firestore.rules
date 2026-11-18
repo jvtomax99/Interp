@@ -148,10 +148,32 @@ service cloud.firestore {
     }
 
     // ---- Glossary ----
-    match /terms/{docId}               { allow read, write: if team(); }
-    match /terminology-meta/{docId}    { allow read, write: if team(); }
+    // A term, doctor, provider or attachment goes only once its copy is in
+    // Recently deleted under the name "<collection>__<id>" (deleted-items,
+    // below; docs/features/deleted-items.md). Adding and editing stay open
+    // to the whole team.
+    match /terms/{docId} {
+      allow read, create, update: if team();
+      allow delete: if practice() || (isMember() && binned('terms', docId));
+    }
+    // The domain list (categories) may grow but never shrink: the app has no
+    // domain delete, so a shorter list is a wipe. Its other documents
+    // (migrations, smiley points, places, memory-flags) stay open.
+    match /terminology-meta/{docId} {
+      allow read, create: if team();
+      allow update: if team() && (docId != 'categories' || practice() || keepsDomains());
+      allow delete: if team() && (docId != 'categories' || practice() || isOwner());
+    }
+    function keepsDomains() {
+      return !('categories' in resource.data) || !(resource.data.categories is list)
+        || (request.resource.data.get('categories', null) is list
+            && request.resource.data.categories.size() >= resource.data.categories.size());
+    }
     match /terminology-hub/{docId}     { allow read, write: if team(); }
-    match /term-attachments/{docId}    { allow read, write: if team(); }
+    match /term-attachments/{docId} {
+      allow read, create, update: if team();
+      allow delete: if practice() || (isMember() && binned('term-attachments', docId));
+    }
     // Each person's practice record (Term Review, Daily Drill, Doctor Prep
     // flashcards; the knowledge brain reads it). Once the Hub is locked, a
     // phone reads and writes only the records under the name it goes by in
@@ -180,8 +202,14 @@ service cloud.firestore {
     match /term-link-cache/{docId}     { allow read, write: if team(); }
 
     // ---- Providers and doctors ----
-    match /healthcare-providers/{docId}  { allow read, write: if team(); }
-    match /doctor-directory/{docId}      { allow read, write: if team(); }
+    match /healthcare-providers/{docId} {
+      allow read, create, update: if team();
+      allow delete: if practice() || (isMember() && binned('healthcare-providers', docId));
+    }
+    match /doctor-directory/{docId} {
+      allow read, create, update: if team();
+      allow delete: if practice() || (isMember() && binned('doctor-directory', docId));
+    }
     match /doctor-research-cache/{docId} { allow read, write: if team(); }
 
     // ---- Team ----
@@ -279,7 +307,12 @@ service cloud.firestore {
     // NOTE: the app reads this on startup. Without this line Firestore denies
     // the collection and faces silently never appear -- no error, no clue.
     match /team-members/{docId}   { allow read, write: if team(); }
-    match /activity-log/{docId}   { allow read, write: if team(); }
+    // Recent Updates is the team's record: anyone adds to it, only an owner
+    // removes from it (the app shows ✕ and Clear all to owners only).
+    match /activity-log/{docId} {
+      allow read, create: if team();
+      allow update, delete: if practice() || isOwner();
+    }
     // Pinned announcements: anyone on the team pins one under its own
     // sign-in; only that phone or an owner changes or unpins it.
     match /announcements/{docId} {
@@ -324,9 +357,56 @@ service cloud.firestore {
     // The watcher's own memory of what it has already seen on public event
     // pages (api/check-events.js). It was missing from this file entirely.
     match /watcher-state/{docId}  { allow read, write: if team(); }
-    match /ce-events/{docId}      { allow read, write: if team(); }
+    // Events: anyone adds one under its own sign-in; only that phone or an
+    // owner changes or removes it. The watcher's finds (no uid) are an
+    // owner's to remove; the watcher itself writes with its service account.
+    match /ce-events/{docId} {
+      allow read: if team();
+      allow create: if team() && ownSender(request.resource.data);
+      allow update, delete: if practice() || mineOrOwner(resource.data);
+    }
 
     // ---- Recoverable deletes ----
-    match /deleted-items/{docId}  { allow read, write: if team(); }
+    // Recently deleted. An entry is named after what it holds
+    // ("<collection>__<id>", the same as its type and payload.id say), so the
+    // delete rules above can find it. Nobody back-dates one to make it look
+    // old: deletedAt is within the last 7 days (an offline phone may send it
+    // late) and not ahead of now. An entry is overwritten only while its item
+    // exists again (the old copy is stale). It goes when an owner removes
+    // it, when it is over 30 days old by the server's clock (the app's
+    // auto-clean), or when its item exists again (a restore; this also
+    // covers entries from before 2026-11-16, which have random names).
+    match /deleted-items/{docId} {
+      allow read: if team();
+      allow create: if practice() || (isMember() && newBin(docId));
+      allow update: if practice() || (isMember() && newBin(docId) && itemBack(resource.data));
+      allow delete: if practice() || isOwner() || (isMember() && (oldBin(resource.data) || itemBack(resource.data)));
+    }
+    function binCollection(type) {
+      return {'term': 'terms', 'doctor': 'doctor-directory', 'provider': 'healthcare-providers',
+              'attachment': 'term-attachments'}.get(type, '');
+    }
+    function binned(collection, id) {
+      return exists(/databases/$(database)/documents/deleted-items/$(collection + '__' + id));
+    }
+    function newBin(docId) {
+      let d = request.resource.data;
+      let c = binCollection(d.get('type', ''));
+      let id = d.get('payload', {}).get('id', '');
+      let now = request.time.toMillis();
+      return c != '' && id is string && id != '' && docId == c + '__' + id
+        && d.get('deletedAt', null) is number
+        && d.deletedAt <= now + 300000 && d.deletedAt >= now - 7 * 86400000;
+    }
+    function itemBack(d) {
+      let c = binCollection(d.get('type', ''));
+      let id = d.get('payload', {}).get('id', '');
+      return c != '' && id is string && id != '' && !id.matches('.*/.*')
+        && exists(/databases/$(database)/documents/$(c)/$(id));
+    }
+    function oldBin(d) {
+      return !(d.get('deletedAt', null) is number)
+        || d.deletedAt < request.time.toMillis() - 30 * 86400000;
+    }
   }
 }
