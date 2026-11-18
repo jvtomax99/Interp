@@ -322,7 +322,7 @@ function accountLockRender(focusId){
         <button class="access-go" id="acctLockCheckBtn" type="submit"${busy}>${ACCT_LOCK.busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
       <div class="access-email-row">
-        <button class="access-skip" type="button" onclick="accountLockSend(null, '${acctEsc(p.email).replace(/'/g, '&#39;')}')"${busy}>Send a new code</button>
+        <button class="access-skip" type="button" onclick="accountLockSend(null, ${jsArg(p.email)})"${busy}>Send a new code</button>
         <button class="access-skip" type="button" onclick="accountLockOther()">Different email</button>
       </div>
       <button class="access-skip" type="button" onclick="accountLockToggle(false)">Use the team code instead</button>` : `

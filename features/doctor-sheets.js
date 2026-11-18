@@ -238,7 +238,7 @@ function renderDDPhotoPreview(){
   const wrap = document.getElementById('ddPhotoPreviewWrap');
   if(!wrap) return;
   if(pendingDDPhotoDataUrl){
-    wrap.innerHTML = `<img class="photo-preview" src="${pendingDDPhotoDataUrl}" alt="Preview">`;
+    wrap.innerHTML = `<img class="photo-preview" src="${escapeAttr(safeSrc(pendingDDPhotoDataUrl))}" alt="Preview">`;
   } else {
     wrap.innerHTML = `<div class="photo-placeholder">${ICON_PERSON}</div>`;
   }

@@ -14,10 +14,16 @@
    glossary from a bad file without a human looking at the plan first. */
 
 function csvEscape(val){
-  const s = String(val==null ? '' : val);
+  let s = String(val==null ? '' : val);
+  // A cell that starts like a formula would run when the file opens in Excel
+  // or Sheets. A leading apostrophe makes it plain text; the import takes it
+  // off again (csvPlain), so export then import gives back the same words.
+  if(/^[=+\-@\t\r]/.test(s)) s = "'" + s;
   if(/[",\r\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
   return s;
 }
+
+function csvPlain(s){ return String(s==null ? '' : s).replace(/^'(?=[=+\-@\t\r])/, ''); }
 
 function downloadTextFile(content, filename, mime){
   const blob = new Blob([content], { type: mime });
@@ -70,7 +76,7 @@ async function handleCsvImportSelected(event){
   event.target.value = '';
   if(!file) return;
   const text = await file.text();
-  const rows = parseCsv(text);
+  const rows = parseCsv(text).map(r => r.map(csvPlain));
   if(rows.length < 2){ showToast('That file doesn\u2019t look like a valid CSV.'); return; }
 
   const header = rows[0].map(h=>h.trim().toLowerCase());

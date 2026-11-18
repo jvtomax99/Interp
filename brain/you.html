@@ -525,7 +525,7 @@ function why(t){
   if(t.lv===1) return t.miss>=2 ? `Missed ${t.miss} times` : "Missed last time";
   if(t.over) return `Due: last ${ago(t.last)}`;
   if(t.lv===0) return "Not practised yet";
-  return t.lv===3 ? `Known: right ${t.box} in a row` : `Learning: right ${t.box} in a row`;
+  return t.lv===3 ? `Known: right ${Number(t.box)||0} in a row` : `Learning: right ${Number(t.box)||0} in a row`;
 }
 function selectDom(g){
   sel={type:"dom", d:g}; const D=DOMS[g], list=inDom(g), c=tally(list), isTop=D.parent<0;
@@ -555,8 +555,8 @@ function selectTerm(i){
       <button class="close" type="button" aria-label="Close">×</button></div>
     <dl class="fields">
       <div><dt>Where you are</dt><dd style="color:${t.lv ? LCOL[t.lv] : "var(--ink-soft)"}">${LEVEL[t.lv]}${t.over && t.lv>1 ? ", due again" : ""}</dd></div>
-      <div><dt>Right in a row</dt><dd>${t.lv>1 ? t.box : 0}</dd></div>
-      <div><dt>Misses</dt><dd>${t.miss}</dd></div>
+      <div><dt>Right in a row</dt><dd>${t.lv>1 ? (Number(t.box)||0) : 0}</dd></div>
+      <div><dt>Misses</dt><dd>${Number(t.miss)||0}</dd></div>
       <div><dt>Last practised</dt><dd>${t.last ? ago(t.last) : "never"}</dd></div>
     </dl>
     <div class="acts"><button class="act" type="button" data-act="card">Open the card</button><button class="act ghost" type="button" data-act="practise">Practise ${esc(D.name)}</button></div>`;

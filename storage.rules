@@ -26,8 +26,19 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/hub-members/$(request.auth.uid));
     }
 
+    // What may be stored: photos and PDFs only, each under 26 MB (the app's
+    // own limit is 25 MB for a PDF, and photos are shrunk before they leave
+    // the phone). SVG is left out because it can carry script.
+    function allowedFile() {
+      return request.resource.size < 26 * 1024 * 1024
+        && (request.resource.contentType == 'application/pdf'
+            || (request.resource.contentType.matches('image/.*')
+                && !request.resource.contentType.matches('image/svg.*')));
+    }
+
     match /attachments/{allPaths=**} {
-      allow read, write: if isMember() || practice();
+      allow read, delete: if isMember() || practice();
+      allow create, update: if (isMember() || practice()) && allowedFile();
     }
   }
 }

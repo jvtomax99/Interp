@@ -2692,11 +2692,19 @@ async function saveCategoriesMeta(){
 // "who" — names are free-text, so casing/whitespace can vary session to
 // session, and matching client-side (like chat's "mine" check already
 // does) is more forgiving than requiring an exact query match.
+/* A practice record as the app keeps it: numbers are numbers or left out, so
+   a saved record can never put text (or markup) where a count is shown. */
+function cleanReview(d){
+  const n = v => (typeof v === 'number' && isFinite(v)) ? v : undefined;
+  return { box: n(d.box), nextReviewAt: n(d.nextReviewAt), reviewCount: n(d.reviewCount),
+    lastResult: typeof d.lastResult === 'string' ? d.lastResult.slice(0, 40) : undefined,
+    misses: n(d.misses), lastAt: n(d.lastAt) };
+}
 async function loadQuizHistory(){
   if(!db){ QUIZ_HISTORY = []; return; }
   try{
     const snap = await db.collection('quiz-history').orderBy('timestamp','desc').limit(300).get();
-    QUIZ_HISTORY = hubRows(snap).map(h => ({ ...h, total: Number(h.total) || 0, correct: Number(h.correct) || 0 }));
+    QUIZ_HISTORY = hubRows(snap).map(h => ({ ...h, total: Number(h.total) || 0, correct: Number(h.correct) || 0, timestamp: Number(h.timestamp) || 0 }));
   }catch(err){
     QUIZ_HISTORY = [];
   }
@@ -2739,8 +2747,7 @@ async function loadTermReviews(){
     const snap = await q().catch(async err => { if(err && err.code === 'permission-denied' && await syncAccessWhoNow()) return q(); throw err; });
     snap.forEach(doc=>{
       const d = doc.data();
-      TERM_REVIEWS[d.termId] = { box: d.box, nextReviewAt: d.nextReviewAt, reviewCount: d.reviewCount,
-        lastResult: d.lastResult, misses: d.misses, lastAt: d.lastAt };
+      TERM_REVIEWS[d.termId] = cleanReview(d);
     });
     if(/^acct_/.test(me)) await reviewMoveToAccount(me);
     termReviewsLoaded = true;
@@ -2768,8 +2775,9 @@ async function reviewMoveToAccount(uid){
     catch(err){ console.warn('reviewMoveToAccount: name record not read', err); return; }
     const writes = [];
     snap.forEach(doc => {
-      const d = doc.data() || {};
-      if(!d.termId) return;
+      const raw = doc.data() || {};
+      if(!raw.termId) return;
+      const d = { ...cleanReview(raw), termId: raw.termId };
       const cur = TERM_REVIEWS[d.termId];
       if(cur && (cur.lastAt || 0) >= (d.lastAt || 0) && (cur.reviewCount || 0) >= (d.reviewCount || 0) && (cur.misses || 0) >= (d.misses || 0)) return;
       const later = !cur || (d.lastAt || 0) > (cur.lastAt || 0) ? d : cur;
@@ -15328,8 +15336,10 @@ function _openEditModal(categoryId, termId){
   populateCategorySelect();
   document.getElementById('fCategory').value = categoryId;
   const historySlot = document.getElementById('historyLinkSlot');
-  historySlot.innerHTML = (term.history && term.history.length)
-    ? `<button type="button" class="link-btn" onclick="openHistoryModal('${categoryId}','${termId}')">View edit history (${term.history.length})</button>`
+  // Only a real list counts: the number shown is its own length, never a saved value.
+  const historyCount = Array.isArray(term.history) ? term.history.length : 0;
+  historySlot.innerHTML = historyCount
+    ? `<button type="button" class="link-btn" onclick="openHistoryModal('${categoryId}','${termId}')">View edit history (${historyCount})</button>`
     : '';
   document.getElementById('overlay').classList.add('show');
   document.getElementById('fEn').focus();
@@ -15337,9 +15347,9 @@ function _openEditModal(categoryId, termId){
 
 function openHistoryModal(categoryId, termId){
   const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
-  if(!term || !term.history || !term.history.length){ showToast('No earlier versions saved for this term.'); return; }
+  if(!term || !Array.isArray(term.history) || !term.history.length){ showToast('No earlier versions saved for this term.'); return; }
   const list = document.getElementById('historyList');
-  list.innerHTML = term.history.map((v, i)=>`
+  list.innerHTML = term.history.map((v, i)=>{ v = v && typeof v === 'object' ? v : {}; return `
     <div class="history-entry">
       <div class="history-entry-meta">
         <span>${v.editedBy ? escapeHtml(v.editedBy) : 'Unknown editor'}</span>
@@ -15350,7 +15360,7 @@ function openHistoryModal(categoryId, termId){
       <p class="history-entry-def">${escapeHtml(v.def || '')}</p>
       <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="restoreHistoryVersion('${categoryId}','${termId}', ${i})">Restore this version</button>
     </div>
-  `).join('');
+  `; }).join('');
   document.getElementById('historyOverlay').classList.add('show');
 }
 
@@ -15364,7 +15374,7 @@ function closeHistoryModal(){
 // entry (meaning a bad restore can itself be undone).
 function restoreHistoryVersion(categoryId, termId, historyIndex){
   const term = DATA.categories.find(c=>c.id===categoryId).terms.find(t=>t.id===termId);
-  const version = term && term.history && term.history[historyIndex];
+  const version = term && Array.isArray(term.history) && term.history[historyIndex];
   if(!version) return;
   document.getElementById('fEn').value = version.en || '';
   document.getElementById('fEs').value = version.es || '';
@@ -15408,7 +15418,7 @@ async function saveTerm(){
   // Snapshot the pre-edit values before overwriting them, so an accidental
   // or unwanted change can be undone later. Capped at 10 — enough to catch
   // a mistake without a term's document growing without bound.
-  let history = (existingTerm && existingTerm.history) || [];
+  let history = (existingTerm && Array.isArray(existingTerm.history)) ? existingTerm.history : [];
   if(existingTerm){
     const snapshot = {
       en: existingTerm.en, es: existingTerm.es, def: existingTerm.def,
@@ -15881,7 +15891,7 @@ function renderPhotoPreview(){
   const wrap = document.getElementById('photoPreviewWrap');
   if(pendingPhotoDataUrl){
     wrap.innerHTML = `
-      <img class="photo-preview" src="${pendingPhotoDataUrl}" alt="Preview">
+      <img class="photo-preview" src="${escapeAttr(safeSrc(pendingPhotoDataUrl))}" alt="Preview">
     `;
   } else {
     wrap.innerHTML = `<div class="photo-placeholder">${ICON_PERSON}</div>`;

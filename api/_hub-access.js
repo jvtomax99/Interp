@@ -34,7 +34,6 @@ async function isPractice() {
   try {
     const r = await fetch(`${FS}/hub-access/settings?key=${FIREBASE_KEY}`);
     if (r.status === 404) practice = true;           // nobody has claimed the Hub yet
-    else if (r.status === 403) practice = true;      // access rules not published yet
     else if (r.ok) {
       const doc = await r.json();
       practice = doc?.fields?.practice?.booleanValue !== false;
