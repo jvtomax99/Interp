@@ -31,14 +31,29 @@ service firebase.storage {
     // the phone). SVG is left out because it can carry script.
     function allowedFile() {
       return request.resource.size < 26 * 1024 * 1024
-        && (request.resource.contentType == 'application/pdf'
-            || (request.resource.contentType.matches('image/.*')
-                && !request.resource.contentType.matches('image/svg.*')));
+        && (request.resource.contentType.lower() == 'application/pdf'
+            || (request.resource.contentType.lower().matches('image/.*')
+                && !request.resource.contentType.lower().matches('image/svg.*')));
     }
 
+    function isOwner() {
+      return isMember()
+        && firestore.get(/databases/(default)/documents/hub-members/$(request.auth.uid)).data.get('role', '') == 'owner';
+    }
+
+    // A file is never overwritten (every upload has a new name), carries the
+    // uploader's sign-in as metadata `uid`, and is deleted only by that phone
+    // or an owner. Files from before 2026-11-16 have no uid: an owner's to
+    // delete. Replacing someone else's photo leaves the old file behind.
     match /attachments/{allPaths=**} {
-      allow read, delete: if isMember() || practice();
-      allow create, update: if (isMember() || practice()) && allowedFile();
+      allow read: if isMember() || practice();
+      // resource == null: the name is new. The emulator treats an overwrite
+      // as a create, so this is what stops one.
+      allow create: if (isMember() || practice()) && allowedFile() && resource == null
+        && (practice() || request.resource.metadata.get('uid', '') == request.auth.uid);
+      allow update: if false;
+      allow delete: if practice() || isOwner()
+        || (isMember() && resource.metadata != null && resource.metadata.get('uid', '') == request.auth.uid);
     }
   }
 }

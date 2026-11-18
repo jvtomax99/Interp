@@ -112,21 +112,13 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-1. **Database rules, change 2 of 2** (plan OK'd by Jose, 2026-11-15;
-   `docs/features/deleted-items.md`, plan in its "What it does"). Start no
-   earlier than 2 days after change 1 (the app side) is live, so every phone
-   has it. Write the rules (bin copy required for deletes, own-or-owner for
-   chat, pins, events and Updates, the domain list can't shrink, Storage:
-   images and PDFs up to 26 MB, no overwrite, delete by uploader or owner),
-   prove them in the emulators (`tests/suites/rules.mjs`, firebase-tools and
-   @firebase/rules-unit-testing in `tests/package.json`; Java 21 is on the
-   cloud machine), then give Jose the paste steps. Before he pastes, he copies
-   the rules live in the console into a note: that is the undo.
-   From change 1's review: let a bin entry go whenever its original exists
-   again, judged from the entry's own `type` and `payload.id` (old random-id
-   entries made before change 1 have no `<collection>__` name), and when it
-   has no `deletedAt` at all; judge "over 30 days" by `request.time`, never
-   the phone's clock.
+1. **Database rules, change 2 of 2: written and tested, waiting for Jose to
+   paste them** (2026-11-18; `docs/features/deleted-items.md`, "The rules").
+   Once its pull request is merged, Jose copies the rules live in the Firebase
+   console into a note (the undo), then pastes `firestore.rules` and
+   `storage.rules`. After that: a teammate's phone tries the everyday actions
+   (send, edit and delete its own message, react, add, delete and restore a
+   term), and this item moves to `docs/PLAN-done.md`.
 
 Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 
@@ -225,6 +217,22 @@ the page, or something on top of it like Dr. Smiley's lean or the tab bar.
 The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
+
+- **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
+  am: the sun is left of the middle" reads the real date; by mid-November
+  the 8 am sun sits at x -19 against a limit of -20, so every pull request
+  goes red on that one check until spring. Pinning the date failed both
+  ways tried: `page.clock.setFixedTime` mid-run freezes the sun's own
+  animation, and `page.clock.install` before boot stops the app's timers.
+  The fix belongs in the campus code: let the slider take a date, or compare
+  against the sun's real azimuth for the date instead of a pixel limit.
+  Trigger: next change to the campus, or Jose asks.
+
+- **The domain list can be swapped for a same-length one** (found by the
+  rules review, 2026-11-18). Rules can't compare two lists item by item; a
+  member could replace every domain at once. Options for Jose: Google's
+  daily backups (needs the paid plan), or a write-once history of the list
+  that each save must add to. Trigger: Jose picks one, or it happens.
 
 - **Found in Jose's slow Wi-Fi recording (2026-11-08), not fixed.**
   Trigger: he sees one again, or asks. An apparent restart on CoreCHI

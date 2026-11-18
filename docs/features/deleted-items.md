@@ -60,9 +60,46 @@ Updates, and delete anyone's chat message. Two changes fix it:
 Where the Hub is better: there, recovery depends on the app or on support.
 Here the database refuses a delete that leaves no copy in the bin.
 
+## The rules (change 2, 2026-11-18)
+
+Written on top of the other chat's #279 (chat and pins own-or-owner, upload
+type and size, the AI daily cap). Added:
+
+- `terms`, `doctor-directory`, `healthcare-providers`, `term-attachments`: a
+  delete needs `deleted-items/<collection>__<id>` (`binned`), owners included.
+- `deleted-items`: created only under the name its `type` and `payload.id`
+  give, dated within the last 7 days (an offline copy may arrive late) and
+  not ahead of now (`newBin`); overwritten only while its item exists again;
+  removed by an owner, after 30 days by the server's clock (`oldBin`), or
+  once its item exists again (`itemBack`, which also covers entries from
+  before change 1 with random names).
+- `ce-events`: created under your own sign-in; changed or removed by that
+  phone or an owner. The watcher's finds are an owner's.
+- `activity-log`: anyone adds; only an owner removes.
+- `terminology-meta/categories`: the list may not get shorter.
+- Storage: a new name only (`resource == null`; the emulator treats an
+  overwrite as a create), the uploader's `uid` as metadata, deleted by that
+  phone or an owner.
+- Practice mode (`practice()`) still opens everything, as before.
+
+From the rules review: bin and item checks use `existsAfter`, so a batch or
+transaction is judged by the database as it will be (deleting a copy and its
+item together was possible with `exists`). Data the app never deletes
+(terminology-meta's other documents, practice questions, quiz results, faces,
+the caches, the watcher's memory, the old glossary blob) is now an owner's to
+delete; notification lines are their own phone's. SVG is refused in any
+letter case. Still open: the domain list swapped for a same-length one
+(`docs/PLAN.md`, Later).
+
+Still possible, by design: a teammate can edit a term to junk, or recreate a
+deleted term and then replace its bin copy (the copy is overwritable once
+the item exists). Both are the same as editing, which stays open. A phone
+whose domain list is behind can't save a domain until it reloads (the app
+says so).
+
 ## Checks
 
 `tests/suites/delete-safety.cjs` covers the app side: the named copy, no
 copy no delete, offline order and replay, attachment restore, and the
-buttons for a teammate and an owner. The rules get their own emulator suite
-in change 2.
+buttons for a teammate and an owner. The rules: `tests/rules/` (86 cases,
+its own GitHub check).

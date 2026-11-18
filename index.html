@@ -2574,7 +2574,11 @@ function removeFailedMessage(err){
 }
 
 async function dropFromTrash(id, behind){
+  const e = TRASH.find(t => t.id === id);
   TRASH = TRASH.filter(t => t.id !== id);
+  // An old domain entry has no item the database can check: only an owner's
+  // phone (or the 30-day clean) removes it, so a teammate leaves it be.
+  if(e && e.type === 'domain' && !isHubOwner()) return;
   // Through the outbox, behind the restore's own write: the database lets a
   // bin entry go once its item is back.
   try{ if(db) await queuedWrite({ collection: 'deleted-items', docId: id, op: 'delete' }, { behind }); }catch(err){ console.error(err); }
@@ -2680,7 +2684,11 @@ async function saveCategoriesMeta(){
     await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
     return true;
   }catch(err){
-    showToast('Could not save. Check connection and retry.');
+    // The database refuses a domain list shorter than the one it holds: this
+    // phone's copy is behind (someone added a domain), and saving would drop it.
+    showToast(err && err.code === 'permission-denied'
+      ? 'Someone just added a domain. Close and reopen the Hub, then try again.'
+      : 'Could not save. Check connection and retry.');
     return false;
   }
 }
@@ -5355,7 +5363,7 @@ async function saveEvent(){
   // A tag, not a filter: everyone still sees it (regions.md).
   const evRegion = document.getElementById('fEvRegion').value;
   if(isRegion(evRegion)) record.region = evRegion;
-  record.uid = myUid();   // who may remove it (theirs, or an owner's)
+  if(myUid()) record.uid = myUid();   // who may remove it (theirs, or an owner's)
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('ce-events').add(record);
@@ -10861,7 +10869,7 @@ async function shareResultToChat(correct, total){
   try{
     const ref = db.collection('team-chat').doc();
     const state = await queuedWrite({ collection:'team-chat', docId:ref.id, op:'set',
-      data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null, uid: myUid() } });
+      data:{ text, author:who, attachment:null, timestamp:Date.now(), replyTo:null, ...(myUid() ? { uid: myUid() } : {}) } });
     showToast(state === 'queued' ? queuedNotice('Shared') : 'Shared to Team Chat.');
   }catch(err){
     const stored = outboxErrorMessage(err, 'Not shared', 'Your result is still here.');
