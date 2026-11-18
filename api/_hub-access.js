@@ -40,7 +40,10 @@ export async function underDailyLimit(uid, { env = process.env, fetchImpl = fetc
     const r = await fetchImpl(`${FS}:commit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ writes: [{ transform: { document: name, fieldTransforms: [{ fieldPath: 'n', increment: { integerValue: '1' } }] } }] })
+      // An update with an empty mask makes the document if it isn't there
+      // yet (a phone's first request of the day) and changes nothing else.
+      body: JSON.stringify({ writes: [{ update: { name, fields: {} }, updateMask: { fieldPaths: [] },
+        updateTransforms: [{ fieldPath: 'n', increment: { integerValue: '1' } }] }] })
     });
     if (!r.ok) return true;
     const d = await r.json();

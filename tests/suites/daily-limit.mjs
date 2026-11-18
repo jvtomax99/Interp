@@ -17,10 +17,12 @@ const fetchImpl = async (url, opts = {}) => {
   if (url.endsWith('/documents:commit')) {
     if (mode === 'down') return J(500, {});
     if (mode === 'throw') throw new Error('network');
-    const w = JSON.parse(opts.body).writes[0].transform;
-    seen.push({ doc: w.document, auth: opts.headers.Authorization });
-    counts[w.document] = (counts[w.document] || 0) + 1;
-    return J(200, { writeResults: [{ transformResults: [{ integerValue: String(counts[w.document]) }] }] });
+    const w = JSON.parse(opts.body).writes[0], doc = w.update.name;
+    // The create-or-merge form: an update with an empty mask, plus the count.
+    if (!w.updateMask || w.updateMask.fieldPaths.length || w.updateTransforms[0].fieldPath !== 'n') return J(400, {});
+    seen.push({ doc, auth: opts.headers.Authorization });
+    counts[doc] = (counts[doc] || 0) + 1;
+    return J(200, { writeResults: [{ transformResults: [{ integerValue: String(counts[doc]) }] }] });
   }
   return J(404, {});
 };

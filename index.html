@@ -3118,7 +3118,9 @@ async function addAnnouncement(){
   if(!db){ showToast('Not connected — check your connection and retry.'); return; }
   try{
     // Pinned in a region's channel: that channel's pin (no channel = Everyone's).
-    const rec = { text, author: whoAmI(), createdAt: Date.now(), uid: myUid() };
+    // The sender's id only when there is one (the database refuses an empty one).
+    const rec = { text, author: whoAmI(), createdAt: Date.now() };
+    const pinUid = myUid(); if(pinUid) rec.uid = pinUid;
     if(isRegion(chatChannel)) rec.channel = chatChannel;
     await db.collection('announcements').add(rec);
     input.value = '';

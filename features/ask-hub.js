@@ -603,6 +603,7 @@ async function submitAsk(preset, force, opts){
     if(stale()) return;
     if(res.status === 401){ out.status = 'error'; out.error = 'Ask the Hub is for the team. Open the Hub with the team code and try again.'; }
     else if(res.status === 503){ out.status = 'error'; out.error = "Ask the Hub isn't switched on yet: the AI key is missing on the server."; }
+    else if(res.status === 429){ out.status = 'error'; out.error = "This phone has reached today's limit for the AI tools. They work again tomorrow."; }
     else if(!res.ok){ out.status = 'error'; out.error = "Couldn't get an answer just now. Try again in a moment."; }
     else{
       const data = await res.json();
