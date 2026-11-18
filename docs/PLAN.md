@@ -218,6 +218,16 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
 
+- **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
+  am: the sun is left of the middle" reads the real date; by mid-November
+  the 8 am sun sits at x -19 against a limit of -20, so every pull request
+  goes red on that one check until spring. Pinning the date failed both
+  ways tried: `page.clock.setFixedTime` mid-run freezes the sun's own
+  animation, and `page.clock.install` before boot stops the app's timers.
+  The fix belongs in the campus code: let the slider take a date, or compare
+  against the sun's real azimuth for the date instead of a pixel limit.
+  Trigger: next change to the campus, or Jose asks.
+
 - **The domain list can be swapped for a same-length one** (found by the
   rules review, 2026-11-18). Rules can't compare two lists item by item; a
   member could replace every domain at once. Options for Jose: Google's
