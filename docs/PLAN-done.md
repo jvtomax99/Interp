@@ -5,6 +5,12 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-18 Database lock-down (Jose's plan, 2026-11-15). Change 1 (#278): every delete of a term, doctor, provider or
+  attachment writes its copy to Recently deleted first (`<collection>__<id>`, through the outbox); you edit and remove your own
+  posts, owner phones anyone's. Change 2 (#280): the rules enforce it (bin copy required, judged with `existsAfter`; Updates and
+  events own-or-owner; the domain list can't shrink; files never overwritten, deleted by uploader or owner; data the app never
+  deletes is an owner's), on top of the other chat's #279. tests/rules: 86 cases in Firebase's emulators, its own GitHub check.
+  Jose pasted both rules files into the console on 2026-11-18. Still open: a same-length domain-list swap (Later).
 - 2026-11-15 Security pass, the two serious holes (Jose's pick, after an audit of all his projects). (1) Hidden values from the
   database (a document's id, a colour, a picture size, an address) were drawn unchecked, so any phone with the team code could make
   script run on every phone (chat, Home, updates, events, recently deleted, attachments, Link Directory, domains). Helpers after

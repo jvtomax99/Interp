@@ -112,14 +112,6 @@ a phase finishes but the next phase continues here.
 
 ## Next (in order)
 
-1. **Database rules, change 2 of 2: written and tested, waiting for Jose to
-   paste them** (2026-11-18; `docs/features/deleted-items.md`, "The rules").
-   Once its pull request is merged, Jose copies the rules live in the Firebase
-   console into a note (the undo), then pastes `firestore.rules` and
-   `storage.rules`. After that: a teammate's phone tries the everyday actions
-   (send, edit and delete its own message, react, add, delete and restore a
-   term), and this item moves to `docs/PLAN-done.md`.
-
 Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 
 Nothing else is queued. The cleanup audit ran on 2026-11-11: its list is
@@ -137,8 +129,8 @@ with buttons.
 - **Security audit, 2026-11-15: the rest of what it found** (the two serious
   holes were fixed, `docs/PLAN-done.md`). Each needs Jose's pick; the first
   two need a plan he OKs, because tightening them can lock teammates out.
-  1. *(Planned and OK'd, 2026-11-15: change 1 shipped as the app side, change
-     2 is Next item 1.)* *The database trusts every member completely.* `firestore.rules` lets
+  1. *(Done 2026-11-18: #278 and #280, rules pasted by Jose.)* *The database
+     trusts every member completely.* `firestore.rules` lets
      any joined phone delete or rewrite every term, doctor, provider and
      the deleted-items bin, edit or delete anyone's chat message, and post
      under any author name (omit `uid`). The app hides those buttons; the
@@ -217,16 +209,6 @@ the page, or something on top of it like Dr. Smiley's lean or the tab bar.
 The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
-
-- **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
-  am: the sun is left of the middle" reads the real date; by mid-November
-  the 8 am sun sits at x -19 against a limit of -20, so every pull request
-  goes red on that one check until spring. Pinning the date failed both
-  ways tried: `page.clock.setFixedTime` mid-run freezes the sun's own
-  animation, and `page.clock.install` before boot stops the app's timers.
-  The fix belongs in the campus code: let the slider take a date, or compare
-  against the sun's real azimuth for the date instead of a pixel limit.
-  Trigger: next change to the campus, or Jose asks.
 
 - **The domain list can be swapped for a same-length one** (found by the
   rules review, 2026-11-18). Rules can't compare two lists item by item; a
