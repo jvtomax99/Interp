@@ -22,8 +22,9 @@ const MASTERY = () => { window.domainMastery = () => { const out = {};
     let body = fs.readFileSync(f);
     // The campus draws the real sun for today's date, so the "8 am sun is left of the middle" check below failed
     // with the calendar once late autumn moved the sun south. The page under test gets a set date instead (27
-    // October 2026, the day the sky was built and measured); time still runs, so the sun still glides and Now ticks.
-    if (/campus3d\/index\.html$/.test(f)) body = String(body).replace(/<head[^>]*>/i, m => m + `<script>(() => { const D = Date, off = D.UTC(2026, 9, 27, 16) - D.now();
+    // October 2026, the day the sky was built and measured), moved by whole days so the clock keeps its real time
+    // and Now still ticks. (Anchoring it to 12:00:00 made Now's minute roll over mid-check on a slow runner.)
+    if (/campus3d\/index\.html$/.test(f)) body = String(body).replace(/<head[^>]*>/i, m => m + `<script>(() => { const D = Date, off = Math.round((D.UTC(2026, 9, 27) - D.now()) / 864e5) * 864e5;   // whole days: the time of day stays the real one
       window.Date = class extends D { constructor(...a){ if (a.length) super(...a); else super(D.now() + off); } static now(){ return D.now() + off; } }; })();</script>`);
     r.fulfill({ status: 200, contentType: TYPES[f.split('.').pop()] || 'text/plain', body });
   });
