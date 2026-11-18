@@ -19,7 +19,13 @@ const MASTERY = () => { window.domainMastery = () => { const out = {};
   await page.route('**/campus3d/**', r => {
     const f = L.ROOT + new URL(r.request().url()).pathname.replace(/^\//, '');
     if (!fs.existsSync(f)) return r.fulfill({ status: 404, body: '' });
-    r.fulfill({ status: 200, contentType: TYPES[f.split('.').pop()] || 'text/plain', body: fs.readFileSync(f) });
+    let body = fs.readFileSync(f);
+    // The campus draws the real sun for today's date, so the "8 am sun is left of the middle" check below failed
+    // with the calendar once late autumn moved the sun south. The page under test gets a set date instead (27
+    // October 2026, the day the sky was built and measured); time still runs, so the sun still glides and Now ticks.
+    if (/campus3d\/index\.html$/.test(f)) body = String(body).replace(/<head[^>]*>/i, m => m + `<script>(() => { const D = Date, off = D.UTC(2026, 9, 27, 16) - D.now();
+      window.Date = class extends D { constructor(...a){ if (a.length) super(...a); else super(D.now() + off); } static now(){ return D.now() + off; } }; })();</script>`);
+    r.fulfill({ status: 200, contentType: TYPES[f.split('.').pop()] || 'text/plain', body });
   });
   await page.evaluate(m => new Function(m)(), `(${MASTERY})()`);
   await L.go(page, 'practice', 1800);
