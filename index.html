@@ -45,6 +45,25 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="description" content="Shared terminology, provider directory, notes, chat, and CoreCHI practice for the HUMC interpreter team.">
+<!-- The address search engines keep, and the card a pasted link shows in
+     WhatsApp, iMessage, Teams and the rest (og:* and twitter:*). The picture
+     is og-image.jpg, 1200 x 630. Addresses here are absolute on purpose: link
+     previews do not resolve relative ones. -->
+<link rel="canonical" href="https://interp-six.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Interpreter Hub">
+<meta property="og:title" content="Interpreter Hub, Hackensack University Medical Center">
+<meta property="og:description" content="Spanish and English medical terms, doctor prep and CoreCHI practice for the HUMC interpreter team.">
+<meta property="og:url" content="https://interp-six.vercel.app/">
+<meta property="og:image" content="https://interp-six.vercel.app/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Interpreter Hub: the cherry tree outside Hackensack University Medical Center.">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Interpreter Hub, Hackensack University Medical Center">
+<meta name="twitter:description" content="Spanish and English medical terms, doctor prep and CoreCHI practice for the HUMC interpreter team.">
+<meta name="twitter:image" content="https://interp-six.vercel.app/og-image.jpg">
 
 <title>Hackensack University Medical Center Interpreter Hub</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
@@ -6891,13 +6910,13 @@ function renderDoctorResearch(){
     <div class="doc-research">
       <div class="section-head"><h2>Doctor Prep</h2></div>
       <div class="doc-research-search">
-        <input id="doctorResearchInput" type="text" placeholder="Doctor's name — e.g. Dr. Andre Goy" value="${escapeHtml(s.doctorName || '')}"
+        <input id="doctorResearchInput" type="text" placeholder="Doctor's name, e.g. Dr. Andre Goy" aria-label="Doctor's name" value="${escapeHtml(s.doctorName || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
       </div>
       <div class="doc-research-filters">
-        <input id="doctorResearchSpecialty" type="text" placeholder="Specialty (optional) — e.g. Oncology" value="${escapeHtml(s.specialty || '')}"
+        <input id="doctorResearchSpecialty" type="text" placeholder="Specialty" aria-label="Specialty (optional)" value="${escapeHtml(s.specialty || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
-        <input id="doctorResearchLocation" type="text" placeholder="Hospital / location (optional)" value="${escapeHtml(s.location || '')}"
+        <input id="doctorResearchLocation" type="text" placeholder="Location" aria-label="Hospital or location (optional)" value="${escapeHtml(s.location || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
       </div>
       ${/hackensack/i.test(s.location || '') ? `<p class="doc-research-fastpath">${ICON_SPARK} Searching Hackensack Meridian's own directory directly \u2014 faster and more accurate than a general web search.</p>` : ''}
@@ -7535,9 +7554,26 @@ function domainMenuKeys(e){ if(e.key === 'Escape') closeDomainMenu(); }
    fly home to (Screen morph). Direct render() calls keep their old way:
    some change mode on purpose and expect the top. */
 let renderedCategory = null;
+/* ---------- The tab's title follows the screen ----------
+   "Team Chat · Interpreter Hub" in a browser tab, the history list and a
+   bookmark, instead of the same line on every screen. A glossary domain
+   shows its own name; Home keeps the full title from the page's <title>. */
+const HOME_DOC_TITLE = document.title;
+const SCREEN_TITLES = { ask: 'Ask the Hub', doctors: 'Doctors', 'doctor-research': 'Doctor Prep', providers: 'Provider Pictures',
+  directory: 'Link Directory', updates: 'Recent Updates', events: 'Training & Events', resources: 'Professional Resources',
+  ethics: 'Code of Ethics', soundalikes: 'Sound-Alikes', memory: 'Memory trainer', 'team-access': 'Team access',
+  notifications: 'Notifications', trash: 'Recently deleted' };
+function syncDocTitle(){
+  const id = activeCategory, cat = DATA && DATA.categories.find(c => c.id === id);
+  const name = id === 'home' ? '' : cat ? cat.name : (SCREEN_TITLES[id] || (typeof ASK_SCREEN_NAMES !== 'undefined' && ASK_SCREEN_NAMES[id]) || '');
+  const title = name ? name + ' \u00b7 Interpreter Hub' : HOME_DOC_TITLE;
+  if(document.title !== title) document.title = title;
+}
+
 function render(opts){
   if(!DATA) return;
   fmNote('render');
+  syncDocTitle();
   const inPlace = !!(opts && opts.inPlace) && renderedCategory === activeCategory;
   renderedCategory = activeCategory;
   const app = document.getElementById('app');

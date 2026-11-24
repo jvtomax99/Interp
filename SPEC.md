@@ -120,6 +120,9 @@ tool banners, idea credits, HUMC Brain, dark mode, offline with a saved
 copy.
 - Done when: the app opens on a phone to a usable Home in a few seconds,
   even offline. TO FILL: Jose's target time.
+- Done when: a pasted link to the Hub shows a card with its name, a line
+  about it and a picture; a wrong address shows the Hub's own "Page not
+  found" with a way Home; and a browser tab names the screen it is on.
 
 **Screen morph.** A domain tile's pin and name travel into the banner of
 the page that opens; the Back button sends them home (2026-11-14, Jose's

@@ -661,3 +661,26 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   that chat only: `mkdir -p /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux && ln -sf /opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell /opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`;
   the full suite then passed. Never `playwright install` here. A lasting
   fix is Jose's call (`docs/PLAN.md`, Waiting on Jose).
+
+## The 2026-11-24 "does it look thrown together" audit
+
+- Measured clean, so don't re-check without a reason: no sideways scroll
+  on any of 28 screens at 320, 360, 390, 820, 1180, 844x390 and 1440 wide;
+  no broken pictures; no picture without `alt`; all 361 functions named in
+  `onclick=` and the other inline handlers exist once the app is up; no
+  `href="#"` or empty links; one `console.log` in the app (the build line,
+  on purpose); no TODO, placeholder or "coming soon" text.
+- The only way to open a screen by address is `?open=`, and it accepts four
+  names (`chat`, `events`, `notifications`, `updates`), so there is no
+  in-app "unknown screen" a link can reach. `setCategory` with a made-up
+  name draws an empty glossary ("Nothing here yet").
+- The app follows only its own dark switch (`ih_theme`), never the phone's
+  `prefers-color-scheme`; `404.html` does the same.
+- The tab title is set in `render()` (`syncDocTitle`): a domain's own name,
+  `SCREEN_TITLES` in `index.html`, then `ASK_SCREEN_NAMES` in
+  `features/ask-hub.js`. A new screen needs a name in one of the two.
+- Vercel serves a root `404.html` for unknown addresses on a site with no
+  build step. Not confirmed on the live site from a cloud session (it is
+  blocked): after the merge, open a made-up address on a phone.
+- `campus3d/index.html` is generated (`docs/mockups/cchi-city/live/gen.py`),
+  so its head was left alone; it has a title but no description or icon.

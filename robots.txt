@@ -1,0 +1,13 @@
+# Interpreter Hub: a team tool behind a team code. The front door may be
+# listed; the screens inside it, the server endpoints and the 3D viewers are
+# not pages of their own.
+User-agent: *
+Allow: /$
+Disallow: /api/
+Disallow: /atlas/
+Disallow: /brain/
+Disallow: /campus3d/
+Disallow: /memory/
+Disallow: /media/
+
+Sitemap: https://interp-six.vercel.app/sitemap.xml

@@ -166,6 +166,9 @@ Moved here from CLAUDE.md on 2026-11-10. `index.html` measured 18,407 lines that
 | `api/push.js` | — | Notifications that reach a closed phone (Web Push): Team Chat, owners' sends, a test; the key phones sign up with. `_push-team.js` (who gets what, gone phones) and `_webpush.js` (encryption + VAPID signing, Node crypto) beside it. `docs/features/notifications.md` |
 | `firestore.rules`, `storage.rules` | 213 / 33 | Firebase rules, applied by hand in the console |
 | `hero.jpg`, `hmh-*.png`, `icon-*.png` | — | Image assets |
+| `og-image.jpg` | — | The picture a pasted link shows (1200 x 630; `og:image` in `index.html`'s head). Made from `hero.jpg` and `hmh-mark.png` |
+| `404.html` | 65 | The page Vercel serves for an address that isn't in the Hub. Stands alone: its own small styles, no `app.css`, no app script |
+| `robots.txt`, `sitemap.xml` | — | For search engines: the front page may be listed; `/api/`, the 3D viewers and the brain pages are not |
 | `medical-pins.png.PNG`, `specialty-pins.png.PNG`, `pin-icons-source-hd-upload.png` | — | Jose's original sheets. Not loaded by the app any more and not deployed (`.vercelignore`); the files above were cut from them |
 
 Line counts are `wc -l` on 2026-10-20. They drift with every PR; the names
