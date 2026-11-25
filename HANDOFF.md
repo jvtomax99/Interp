@@ -1,8 +1,8 @@
-# HANDOFF, 2026-11-25 (third of the day)
+# HANDOFF, 2026-11-25 (fourth of the day)
 
 ## Paste this into a new chat
 
-Read HANDOFF.md, then carry on the consistency pass (item 2 under Next in docs/PLAN.md): heading levels. Show me before and after at phone size before applying.
+Read HANDOFF.md, then carry on the consistency pass (item 2 under Next in docs/PLAN.md): the "while there" stress checks. Show me each failure as a phone screenshot before fixing anything.
 
 ## The goal and the exact next step
 
@@ -10,18 +10,12 @@ The consistency pass is the list of small things that make the Hub look
 thrown together. Corners, the top bar's buttons and the search hints are
 live. One part is left, and it is the biggest:
 
-1. **Next: heading levels** (`h1` / `h2` / none, per screen). A screen's
-   title is an `h1` on six screens (the tool banners), an `h2` on about
-   twelve (`.section-head h2`), missing on five (All domains, the
-   briefing, Appointment, Doctor Directory, Link Directory); Home goes
-   from `h1` to `h3`. Touches `.section-head`, `home-polish.css` and the
-   suites that find titles by tag. Start by listing every screen's title
-   and tag (a scout job), then bring Jose the rule to pick (one `h1` per
-   screen is the usual one) with before and after phone screens: the look
-   should not change, so the "after" is mostly proof that nothing moved.
-2. Then the "while there" stress checks in the plan (a 60-character doctor
-   name, a very long term, a long chat message with no spaces; each
-   failure forced and its message read).
+1. Done and live: heading levels (#290, build b1125.2025). One title
+   per screen; the rule is in `DESIGN.md`, `heading-levels.cjs` holds it.
+2. **Next: the "while there" stress checks** in the plan (a 60-character
+   doctor name, a very long term, a long chat message with no spaces;
+   each failure forced, offline, AI down, storage refused, and its
+   message read). Find first, show Jose phone screenshots, fix after.
 
 After the pass: item 3 under Next, **Check link**, whose plan Jose has
 OK'd (`docs/features/link-check.md`); then item 4, the plan for smaller
@@ -33,8 +27,8 @@ files (no code first).
   36px, build b1125.1430. Undo: revert #287.
 - Live: #288, shorter search hints on every search box and Home's search
   pill, build b1125.1811. Undo: revert #288.
-- Open: only the pull request that carries this file and the Check link
-  notes (notes only, nothing goes live).
+- Live: #290, heading levels, build b1125.2025. Undo: revert #290.
+- Open: only the pull request that carries this file (notes only).
 
 ## Open questions for Jose
 
@@ -50,6 +44,8 @@ files (no code first).
     on a phone).
   - Check link: show the plan to two or three interpreters before
     building?
+  - A Term Review session has no banner, and a doctor's page leaves two
+    titles for a screen reader (it sits over the list).
 - Buy a name to replace `interp-six.vercel.app`? Not asked this chat.
 
 ## Decisions from this chat
@@ -64,6 +60,15 @@ files (no code first).
   saved; build after the consistency pass.
 
 ## Learned, not in the notes yet
+
+- A before and after with nothing to see: keep the live version in a
+  second folder (`git worktree add <folder> origin/main`), run the same
+  capture with `ROOT=<folder>`, and compare each heading's box and
+  computed style as numbers. Screenshots differ between two runs of the
+  same code on Home (random quote) and CoreCHI Practice, so bytes alone
+  prove nothing there.
+- The machine restarted twice mid-task. Commit early, and have a helper
+  write its results to a file under `tests/out/` as it goes.
 
 - The full local run (`node run.cjs`) took over 25 minutes on this
   machine and was stopped at the limit; it is 8 minutes on GitHub. Run
