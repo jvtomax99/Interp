@@ -716,6 +716,12 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   "Search doctors, specialties, locations…" 296, "Search providers,
   specialties, places…" 291, "Search Heart Failure & Cardiac" 232, "Search
   All domains" 145. All are clipped (`text-overflow:clip`), none fits.
+  Fixed the same day (Jose's picks: the "two things" style, the same
+  wording on a computer): the longest hint is now 206px ("Search a name or
+  specialty"), a domain and All domains say only "Search" (54px; the
+  domain's name stays in the label a screen reader hears), and search
+  boxes end in "..." if one ever runs out. `search-hints.cjs` holds it. A
+  new hint has about 24 characters to work with.
 - The top bar's four round buttons (`tgBack`, `tgTheme`, `tgBell`,
   `tgAvatar`) are drawn 36 x 36 on a phone and tapped across 44 x 44
   (2026-11-25, Jose's pick over drawing them at 44: that made the bar 53px

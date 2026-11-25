@@ -126,16 +126,17 @@ a phase finishes but the next phase continues here.
    OK'd them from three before and after screens; `corner-scale.cjs`
    holds them). The top bar's round buttons are done too (2026-11-25:
    still drawn 36px, tapped across 44, Jose's pick from before and after
-   screens; `topbar-name.cjs` holds it). Left, each a change he can see,
+   screens; `topbar-name.cjs` holds it). So are the search hints
+   (2026-11-25: shorter "two things" wording that fits a 360-wide phone,
+   the same on a computer, his picks; `search-hints.cjs`). Left, each a change he can see,
    so screenshots first:
    - Found on the way, for Jose's pick: at 360 wide, Back plus a sync
      badge cuts "Interpreter Hub" (`docs/FACTS.md`, under "Search hints").
-   - Search hints are cut off on a phone on every screen with a search
-     box, not two (measured 2026-11-25, `docs/FACTS.md`, "Search hints"):
-     the box has 243px at 393 wide and 210px at 360, and only 111px / 78px
-     beside "+ Add" on a domain. Needs shorter phone wording (about 24
-     characters) and a clean ending (`text-overflow:ellipsis`), and the
-     User Guide checked for the old wording.
+   - Found on the way, for Jose's pick: False Friends and Recent Updates
+     show a second search box at the top ("Search terms or Spanish", with
+     "+ Add term" and "+ New domain") that searches nothing there
+     (`index.html`, `searchPlaceholder`; those two screens are missing
+     from the `showTopbar = false` list). Not checked on a phone yet.
    - Heading levels: a screen's title is an `h1` on six screens (the tool
      banners), an `h2` on about twelve (`.section-head h2`), missing on
      five (All domains, the briefing, Appointment, Doctor Directory, Link

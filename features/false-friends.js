@@ -130,7 +130,7 @@ function renderFFStudy(){
     </div>
     <div class="ff-filters">${chips}</div>
     <div class="search ff-search" style="margin-bottom:17px;">
-      <input type="text" id="ffSearch" placeholder="Search a word, a meaning, or a specialty…"
+      <input type="text" id="ffSearch" placeholder="Search a word or meaning"
              value="${escapeHtml(ffQuery)}" oninput="ffSearch(this.value)" aria-label="Search false friends">
     </div>
     <div class="ff-list" id="ffList">${renderFFCards()}</div>`;

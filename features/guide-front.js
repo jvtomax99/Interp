@@ -171,7 +171,7 @@ function renderUserGuide(){
         <div class="gd-search">
           ${ICON_SEARCH}
           <label class="sr-only" for="guideSearchInput">Search help</label>
-          <input id="guideSearchInput" type="search" placeholder="Search help, or ask Dr. Smiley" value="${escapeAttr(guideQuery)}"
+          <input id="guideSearchInput" type="search" placeholder="Search or ask Dr. Smiley" value="${escapeAttr(guideQuery)}"
                  autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
           <button type="button" class="gd-clear ${guideQuery.trim() ? '' : 'is-hidden'}" id="guideSearchClear" onclick="clearGuideSearch()" aria-label="Clear the search">${ICON_X_TC}</button>
           <button type="button" class="gd-face-btn" onclick="guideAsk(guideQuery)" aria-label="Ask Dr. Smiley"><span class="ask-face gd-face" aria-hidden="true">${askFaceSvg()}</span></button>
