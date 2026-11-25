@@ -85,9 +85,13 @@ the moment the link is being added, and the new address is one tap away.
   local and reserved ranges, IPv4 and IPv6); the visit then goes to
   exactly the address that was checked (`fetchOnce` pins the look-up), so
   a site cannot answer "public" to the check and "internal" to the visit.
-  At most 5 redirects, 8 seconds in all (Vercel stops at 10), the first
-  64 KB only, no cookies or sign-in sent, a generic browser name that
-  does not mention the Hub. The title comes back as plain text, 120
+  At most 5 redirects; 8 seconds in all, the name look-ups included (the
+  function's own stop is set to 10, `maxDuration`); the first 64 KB
+  only, asked for unpacked, and if a site packs the page anyway only its
+  first 16 KB is unpacked, to 512 KB at most (a page built to unpack to
+  gigabytes just gets no title); no cookies or sign-in sent; a generic
+  browser name that does not mention the Hub. A site with both kinds of
+  address is visited at its IPv4 one. The title comes back as plain text, 120
   characters at most, control and direction-flipping characters removed.
   The address is never written to a log.
 - **`features/link-check.js`**, the Hub's side: `linkCheckRun` (the call,
@@ -115,6 +119,11 @@ the moment the link is being added, and the new address is one tap away.
   loads fine). The title is shown so a person can spot it.
 - A site that only speaks IPv6 while the server has none shows "Couldn't
   tell".
+- A Link Directory row redrawn while its check is running (a teammate's
+  edit arriving) drops that answer; tap Check again.
+- Not tested: the real name look-up (`resolveHost`), the 12 second
+  give-up on the phone, and a real site. Jose's two taps after the
+  deploy cover the last.
 
 ## Checks
 

@@ -108,6 +108,30 @@ r = await check('https://trick.example/port');
 ok(r.result === 'unknown' && r.reason === 'bad_redirect' && visits.length === 1, 'a redirect to an unusual port: refused', r);
 ok(visits.every(v => v.address === PUB), 'every visit went to the address that was checked', visits);
 
+r = await check('http://[::127.0.0.1]/');
+ok(r.result !== 'opens' && visits.length === 0, 'this machine written as an IPv4 address inside an IPv6 one: refused, nothing visited', { r, visits });
+NAMES['both.example'] = ['2606:4700::1111', PUB]; PAGES['https://both.example/'] = { status: 200, headers: H, body: html('Both') };
+r = await check('https://both.example/');
+ok(r.result === 'opens' && visits[0].address === PUB, 'a site with both kinds of address is visited at its IPv4 one', visits);
+
+console.log('== the time limit');
+let t1 = Date.now();
+r = await checkLink('https://good.example/a', { resolve: () => new Promise(d => setTimeout(() => d([{ address: PUB, family: 4 }]), 3000)), visit, limitMs: 400 });
+ok(r.result === 'unknown' && r.reason === 'too_slow' && Date.now() - t1 < 1500, `a slow name look-up counts against the limit (gave up after ${Date.now() - t1} ms of a 400 ms limit)`, r);
+const lefts = [];
+r = await checkLink('https://loop.example/0', { resolve, visit: async (u, a, o) => { lefts.push(o.timeoutMs); await new Promise(d => setTimeout(d, 60)); return PAGES[u.href]; }, limitMs: 5000 });
+ok(lefts.length > 2 && lefts.every((v, i) => !i || v < lefts[i - 1]) && lefts[lefts.length - 1] <= 5000 - 60 * (lefts.length - 1) + 20, 'each redirect gets only the time that is left', lefts);
+r = await checkLink('https://loop.example/0', { resolve, visit: async (u) => { await new Promise(d => setTimeout(d, 200)); return PAGES[u.href]; }, limitMs: 500 });
+ok(r.result === 'unknown' && r.reason === 'too_slow', 'redirects that together run past the limit: "couldn\'t tell"', r);
+
+console.log('== nothing about the address is logged');
+const logged = []; const real = { log: console.log, error: console.error, warn: console.warn, info: console.info };
+console.error = console.warn = console.info = (...a) => logged.push(a.join(' '));
+console.log = (...a) => logged.push(a.join(' '));
+for (const raw of ['https://secret-path.example/patient?id=123', 'https://good.example/a?token=abc', 'https://broken.example/x?y=secret', 'https://trick.example/', 'ftp://secret.example/']) await checkLink(raw, { resolve, visit });
+Object.assign(console, real);
+ok(logged.length === 0, 'the check itself writes nothing to the log', logged);
+
 console.log('== not a web address');
 for (const raw of ['', '   ', 'ftp://ftp.example/a', 'javascript:alert(1)', 'mailto:a@good.example', 'file:///etc/passwd', 'data:text/html,hi', 'https://user:pw@good.example/', 'https://good.example:22/', 'http://localhost/', 'https://' + 'a'.repeat(2100) + '.example/']) {
   r = await check(raw);
@@ -117,7 +141,7 @@ ok(webAddress('https://good.example/a#part').href === 'https://good.example/a', 
 
 console.log('== public or not');
 ok(['8.8.8.8', '93.184.216.34', '2606:4700::1111', '172.32.0.1', '100.128.0.1'].every(isPublicAddress), 'public addresses pass');
-const priv = ['10.0.0.1', '172.16.0.1', '172.31.255.255', '192.168.1.1', '127.0.0.1', '169.254.169.254', '100.64.0.1', '0.0.0.0', '224.0.0.1', '255.255.255.255', '198.18.0.1',
+const priv = ['::7f00:1', '::a00:1', '::127.0.0.1', '::ffff:a00:1', 'fec0::1', '3fff::1', '5f00::1', '10.0.0.1', '172.16.0.1', '172.31.255.255', '192.168.1.1', '127.0.0.1', '169.254.169.254', '100.64.0.1', '0.0.0.0', '224.0.0.1', '255.255.255.255', '198.18.0.1',
   '::1', '::', 'fc00::1', 'fd12:3456::1', 'fe80::1', 'ff02::1', '::ffff:127.0.0.1', '::ffff:7f00:1', '64:ff9b::a00:1', '2001:db8::1', 'not-an-address', ''];
 ok(priv.every(a => !isPublicAddress(a)), 'private, local and reserved addresses do not', priv.filter(isPublicAddress));
 
@@ -131,6 +155,16 @@ ok(pageTitle({ 'content-type': 'application/json' }, Buffer.from('<title>x</titl
 const big = html('Compressed title ' + 'z'.repeat(50));
 ok(pageTitle({ ...H, 'content-encoding': 'gzip' }, zlib.gzipSync(Buffer.concat([big, Buffer.alloc(200000, 97)])).subarray(0, 400)) .startsWith('Compressed title'), 'a compressed page cut short still gives its title');
 ok(pageTitle({ ...H, 'content-encoding': 'br' }, zlib.brotliCompressSync(big)).startsWith('Compressed title'), 'a brotli page gives its title');
+{ // A page made to unpack to something enormous costs little and gives no title.
+  const bomb = zlib.brotliCompressSync(Buffer.alloc(256 * 1024 * 1024, 97));
+  const gz = zlib.gzipSync(Buffer.alloc(64 * 1024 * 1024, 97));
+  const m0 = process.memoryUsage().rss, t = Date.now();
+  const b1 = pageTitle({ ...H, 'content-encoding': 'br' }, bomb), b2 = pageTitle({ ...H, 'content-encoding': 'gzip' }, gz);
+  const grew = (process.memoryUsage().rss - m0) / 1048576, took = Date.now() - t;
+  ok(b1 === '' && b2 === '' && took < 500 && grew < 40, `a ${bomb.length}-byte page that unpacks to 256 MB is not unpacked (${took} ms, ${Math.round(grew)} MB)`, { b1, b2, took, grew });
+  const t2 = Date.now(); const slowTitle = pageTitle(H, Buffer.from('<title '.repeat(9300)));
+  ok(slowTitle === '' && Date.now() - t2 < 150, `a page written to make the title search slow is not slow (${Date.now() - t2} ms)`);
+}
 ok(pageTitle({ ...H, 'content-encoding': 'gzip' }, Buffer.from('not gzip at all')) === '', 'a page that cannot be unpacked gives no title, no error');
 ok(pageTitle({ 'content-type': 'text/html; charset=iso-8859-1' }, Buffer.from('<title>Espa\xf1ol</title>', 'latin1')) === 'Español', 'an older Spanish page (latin-1) reads correctly');
 
@@ -148,6 +182,7 @@ const port = server.address().port;
 const U = p => new URL('http://pinned.example' + p);
 let page = await fetchOnce(U('/ok'), '127.0.0.1', { port });
 ok(page.status === 200 && pageTitle(page.headers, page.body) === 'Local page', 'the visit goes to the address it was given, whatever the name says (pinned)', { status: page.status });
+ok(sawHeaders['accept-encoding'] === 'identity', 'the page is asked for unpacked');
 ok(sawHeaders.host.startsWith('pinned.example') && !sawHeaders.cookie && !sawHeaders.authorization && !sawHeaders.referer, 'the site is sent its own name, and no cookie, sign-in or referrer', sawHeaders);
 ok(!/interp|hackensack|humc|vercel/i.test(JSON.stringify(sawHeaders)), 'nothing in the request names the Hub or the hospital', sawHeaders);
 page = await fetchOnce(U('/big'), '127.0.0.1', { port });
