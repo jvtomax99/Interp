@@ -731,3 +731,29 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   showing) with a sync badge in the bar ("3 unsent" or offline),
   "Interpreter Hub" is cut: 84 of 108px before the tap-area change, 78
   after (the 2px wider gaps). At 393 wide it fits.
+
+## Stress checks (2026-11-25)
+
+- How to force each failure in the tests, and what was fair: `tests/tools/stress-fail.cjs`.
+  `ctx.setOffline(true)` alone does not stop a routed request, so "offline"
+  also aborts `/api/` and MyMemory; a database write that never answers is
+  `window.__gate = () => new Promise(() => {})` (what Firestore does with no
+  offline cache); the stand-in's `.add()` is not gated, so a new provider
+  "saves" in any fault: test a refused write on a `.set()` path. An action
+  fired from `page.evaluate` must not be awaited, or a hanging write hangs
+  the tool.
+- An inline `<span>` ignores `overflow`, `text-overflow` and so its
+  `white-space:nowrap` just runs off the box: that was Home's activity
+  line and the search panel's second line. Turning one into
+  `inline-block` with `overflow:hidden` moves its row by 1 to 1.5px
+  (the baseline changes); wrapping, or `inline-block` without
+  `overflow`, moves nothing for text that fits (measured against the
+  live version at 393, 360 and 1440).
+- A "stays inside its card" check must not clamp to the card itself: a
+  card with `overflow:hidden` then passes with the word cut off. And a
+  searched word is split by its highlight, so measure the tail.
+- Already good, no need to re-test: chat and terms offline (kept on the
+  phone, the badge counts them), phone storage full, Ask the Hub's five
+  failure messages, Translate (falls back to the machine translation),
+  email sign-in, long text in chat, Ask, a doctor's card and page, the
+  briefing, Recently deleted and the edit sheets.

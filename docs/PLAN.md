@@ -171,8 +171,8 @@ a phase finishes but the next phase continues here.
      Good as they are: chat and terms offline (saved on the phone, the
      badge counts them), phone storage full, Ask the Hub's five messages,
      Translate, sign-in. Not tested: "my photo" when the upload fails.
-     Fixed the same day (the stress-checks pull request, `stress.cjs`
-     holds all twelve): the five cards wrap the long text; the seven
+     Fixed and live the same day (#292, build b1125.2244; `stress.cjs`
+     holds all twelve; undo: revert #292): the five cards wrap the long text; the seven
      failures say what happened in plain words. Left for later, Jose's
      call: doctors, providers and chat deletes still need a connection
      (they now say so, as do a doctor's tip and team term, an event, a
