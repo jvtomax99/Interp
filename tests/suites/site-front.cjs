@@ -43,6 +43,36 @@ const read = f => fs.readFileSync(R + f, 'utf8');
       f + ' has its own title, description and icon, and stays out of search');
   }
 
+  /* No long dash in what the app says (Jose, 2026-11-25). Every string in
+     the app's files is read, comments left out; the few the code uses as a
+     separator of its own are named here (docs/FACTS.md, "Long dashes"). */
+  console.log('== long dashes');
+  const acorn = require('acorn');
+  const DASH = /\u2014|\\u2014|&mdash;/g;
+  const ALLOWED = [/HMH_NETWORK_LABEL = /, /\\u201d \\u2014 [A-Z]/, /quote\.(includes|split)\(' \\u2014 '\)/, /text\.match\(\/\^\(\.\{1,60\}/, /Duffy-null/,
+    /term\.es \|\| '\u2014'/, /x\.answer\.details\]\.filter\(Boolean\)\.join/, /title\.replace\(\/\\s\*\\u2014/];
+  const inJs = (src, base) => { const com = [], out = []; let done = false;
+    for (const sourceType of ['script', 'module']) { try { com.length = 0; acorn.parse(src, { ecmaVersion: 'latest', sourceType, onComment: (bl, t, st, en) => com.push([st, en]) }); done = true; break; } catch (e) {} }
+    if (!done) return null;
+    for (const m of src.matchAll(DASH)) if (!com.some(([st, en]) => m.index >= st && m.index < en)) out.push(base + m.index);
+    return out; };
+  const shown = ['index.html', '404.html', 'guide/topics.js', 'falsefriends/list.js', 'soundalikes/list.js', 'practice/questions.js', 'home-polish.js', 'pin-icons.js', 'sw.js',
+    'brain/index.html', 'brain/you.html', ...fs.readdirSync(R + 'features').filter(f => f.endsWith('.js')).map(f => 'features/' + f)];
+  const left = []; let unread = [];
+  for (const f of shown) {
+    const src = read(f); let hits = [];
+    if (f.endsWith('.html')) {
+      const scripts = [...src.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m => { const st = m.index + m[0].indexOf('>') + 1; return [st, st + m[1].length, m[1]]; });
+      const notes = [...src.matchAll(/<!--[\s\S]*?-->/g)].map(m => [m.index, m.index + m[0].length]);
+      for (const [st, , body] of scripts) { const h = inJs(body, st); if (h) hits.push(...h); else unread.push(f); }
+      for (const m of src.matchAll(DASH)) if (![...scripts, ...notes].some(([st, en]) => m.index >= st && m.index < en)) hits.push(m.index);
+    } else { const h = inJs(src, 0); if (h) hits = h; else unread.push(f); }
+    const lines = src.split('\n');
+    for (const n of new Set(hits.map(h => src.slice(0, h).split('\n').length))) if (!ALLOWED.some(re => re.test(lines[n - 1]))) left.push(f + ':' + n + ' ' + lines[n - 1].trim().slice(0, 70));
+  }
+  ok(!unread.length && shown.length > 25, 'every file of on-screen wording was read (' + shown.length + ')', unread);
+  ok(!left.length, 'no long dash in what the app says', left.slice(0, 8));
+
   const b = await L.chromium.launch();
   for (const [name, vp] of [['phone', { width: 390, height: 780 }], ['narrow', { width: 320, height: 568 }], ['desktop', { width: 1440, height: 900 }]]) {
     console.log('== 404.html, ' + name);
