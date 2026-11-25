@@ -254,8 +254,8 @@
      hospital's own name to "Hackensack University Medical Cent...".
 
      The 20px this frees goes straight into the hero below, so nothing on the
-     page moves down. The buttons stay 36px -- they are already under the 44px
-     tap minimum and must not shrink further. */
+     page moves down. The buttons are drawn 36px and must not shrink; their
+     tap area is 44px (the ::before rule below). */
   .topbar-global{height:auto;min-height:calc(44px + env(safe-area-inset-top,0px));padding-top:calc(4px + env(safe-area-inset-top,0px));padding-bottom:4px;}
   .tg-brand-name{font-size:var(--fs-sub);line-height:1.15;}
   .tg-brand-sub{font-size:var(--fs-cap2);line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;}
@@ -266,7 +266,17 @@
      screen, so the bar is the buttons' 45px. Never ellipsis: a cut-off
      hospital name was rejected before. Computers keep the full name. */
   .tg-icon-btn,.tg-avatar{width:36px;height:36px;}
-  .tg-right{gap:6px;}
+  /* A 44 x 44 tap area behind each 36px circle (Jose's pick, 2026-11-25:
+     same look, bigger target). Drawn at 44 the bar grew to 53px and
+     "Interpreter Hub" was cut at 360 wide with Back showing. The bordered
+     buttons need -5px (the inset counts from inside the 1px border), the
+     avatar -4px. A square, not a circle, so the corners answer too. The
+     8px between the buttons (.tg-right in app.css; it was 6px here) keeps
+     two tap areas from overlapping: do not narrow it.
+     ::after is taken on the avatar (its alert dot), so this is ::before. */
+  .tg-back{position:relative;}
+  .tg-back::before,.tg-icon-btn::before,.tg-avatar::before{content:'';position:absolute;inset:-5px;}
+  .tg-avatar::before{inset:-4px;}
   /* ---------- Split dock ----------
      Five tabs in one glass capsule, Dr. Smiley in his own round button to its
      right (.dock-smiley, drawn by smileyRider in index.html). A glass lens

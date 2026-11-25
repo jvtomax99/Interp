@@ -717,5 +717,11 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   specialties, places…" 291, "Search Heart Failure & Cardiac" 232, "Search
   All domains" 145. All are clipped (`text-overflow:clip`), none fits.
 - The top bar's four round buttons (`tgBack`, `tgTheme`, `tgBell`,
-  `tgAvatar`) measure 36 x 36 on a phone; `.tg-brand` (the Home link) is
-  32 tall.
+  `tgAvatar`) are drawn 36 x 36 on a phone and tapped across 44 x 44
+  (2026-11-25, Jose's pick over drawing them at 44: that made the bar 53px
+  and cut "Interpreter Hub" to 88 of its 108px at 360 wide with Back
+  showing). `.tg-brand` (the Home link) is 32 tall.
+- Not fixed, found the same day: at 360 wide, inside a screen (Back
+  showing) with a sync badge in the bar ("3 unsent" or offline),
+  "Interpreter Hub" is cut: 84 of 108px before the tap-area change, 78
+  after (the 2px wider gaps). At 393 wide it fits.

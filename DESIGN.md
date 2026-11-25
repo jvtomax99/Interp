@@ -130,7 +130,7 @@ badge to begin", "Welcome in") are Inter on the tokens.
 - **Icons:** rows and tab bar 24px (`--ic-row`), list rows 28 (`--ic-list`), tiles and cards 32 (`--ic-tile`), banner 44 (`--ic-hero`).
 - **Card rails:** 4 columns, 13px gap, content left-aligned. Centering only for the four `.qa-tile` buttons.
 - **Sidebar and tab bar switch at 900px.** Desktop: dark navy sidebar. Phone: a floating capsule tab bar with a pill indicator.
-- **Tap targets:** 44 × 44px at least. A gap you can see is not a gap a finger respects; check with `document.elementFromPoint`.
+- **Tap targets:** 44 × 44px at least. A gap you can see is not a gap a finger respects; check with `document.elementFromPoint`. A control may be drawn smaller when its tap area is still 44: the top bar's round buttons on a phone are 36px circles with a 44px tap area (`::before`, 8px apart; `home-polish.css`, held by `topbar-name.cjs`).
 
 ### Border radius
 
