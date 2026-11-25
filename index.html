@@ -7667,6 +7667,10 @@ function render(opts){
     showTopbar = false;
   } else if(activeCategory === 'appt'){
     showTopbar = false;
+  } else if(activeCategory === 'falsefriends' || activeCategory === 'updates'){
+    // Neither screen reads the glossary search (False Friends has its own
+    // box), so the bar would be a search that finds nothing (2026-11-25).
+    showTopbar = false;
   }
 
   // Glossary screens (one domain, or All domains) get the colored banner:
@@ -18664,6 +18668,15 @@ document.addEventListener('focusout', (e)=>{
       const isOpen = layer.classList.contains('show');
       if(isOpen === wasOpen) return;      // class changes for other reasons too
       wasOpen = isOpen;
+      // A doctor's page fills the screen over Doctor Directory: while it is
+      // open the screen behind (its title, its cards, the tab bar) is taken
+      // from the screen reader and the Tab key, so there is one title and
+      // nothing hidden to wander into. Set before focus moves, and lifted
+      // before focus goes back to the card that opened the page.
+      if(layer.id === 'doctorDirDetailOverlay'){
+        const app = document.getElementById('app');
+        if(app) app.inert = isOpen;
+      }
       if(isOpen){
         returnFocus.set(layer, lastPageFocus);
         if(!panel.contains(document.activeElement)) panel.focus({ preventScroll:true });
