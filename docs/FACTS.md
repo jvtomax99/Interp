@@ -731,6 +731,14 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   showing) with a sync badge in the bar ("3 unsent" or offline),
   "Interpreter Hub" is cut: 84 of 108px before the tap-area change, 78
   after (the 2px wider gaps). At 393 wide it fits.
+  Fixed 2026-11-25 (Jose's pick from two pictures): the badge there is
+  already only a 23px dot (30px for a count) and the title was short by
+  exactly that, so the badge could not shrink; at 380 wide and under,
+  with Back showing and a badge that stays (`has-sync-held` on the bar:
+  offline or a problem), the logo (`.tg-mark`) steps aside. Not while
+  "Syncing" (about 3 seconds): the title would jump 44px on every save,
+  so there it is still cut for those seconds. Back also shows on Home
+  once there is somewhere to go back to, so the rule applies there too.
 
 ## Stress checks (2026-11-25)
 

@@ -132,21 +132,19 @@ a phase finishes but the next phase continues here.
    heading levels (2026-11-25: one title per screen, his pick; every
    screen's title is its `h1`, no level skipped, nothing moved on 39
    phone screens; `heading-levels.cjs`, the rule is in `DESIGN.md`).
-   Left:
-   - Found on the way, for Jose's pick: at 360 wide, Back plus a sync
-     badge cuts "Interpreter Hub" (`docs/FACTS.md`, under "Search hints").
-   - Found on the way, for Jose's pick: False Friends and Recent Updates
-     show a second search box at the top ("Search terms or Spanish", with
-     "+ Add term" and "+ New domain") that searches nothing there
-     (`index.html`, `searchPlaceholder`; those two screens are missing
-     from the `showTopbar = false` list). Seen at phone size on False
-     Friends, 2026-11-25 (the heading-levels "before" screen).
-   - Found on the way, for Jose's pick: a Term Review session shows no
-     banner, only the small "Term Review" line (now its title); and a
-     doctor's page sits over Doctor Directory, so a screen reader finds
-     two titles there until the list is hidden from it while the page is
-     open (`aria-hidden` or `inert` on the list; not done, it changes
-     focus behaviour and wants its own test).
+   The small things found on the way are picked and done (Jose,
+   2026-11-25; `small-picks.cjs` and `topbar-name.cjs` hold them): at 360
+   wide, inside a screen with a badge that stays (offline, unsent
+   changes), the logo steps aside so "Interpreter Hub" is whole (the
+   badge was already only a dot, so it could not shrink; not during the
+   few seconds of "Syncing", where the title would jump on every save);
+   False Friends and Recent Updates lost the glossary search bar that
+   searched nothing there; while a doctor's page is open the screen
+   behind it is `inert`, so a screen reader finds one title. A Term
+   Review session stays without a banner (his pick: the card is the
+   screen). Asked the same day: buy a name to replace
+   `interp-six.vercel.app`? "Not now" (41 phones would re-install).
+   The stress checks:
    - While there, on every screen: a 60-character doctor name, a very long
      term, a long chat message with no spaces; each failure forced (offline,
      AI down, storage refused) and its message read.
@@ -182,13 +180,17 @@ a phase finishes but the next phase continues here.
      online) those saves still wait with no message: they have no
      timeout, and one can't be added safely to a write that may still
      go through later (found by the cold review, not fixed).
+     Jose, 2026-11-25: write that plan (no code) once Check link is
+     live; he decides then.
 3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
    to be built once the consistency pass is finished). A Check button
    beside a term's source link that says whether the address still opens.
    The whole plan, what it will not do and how it is tested:
    `docs/features/link-check.md`. One pull request; a new endpoint
    (`api/link-check.js`) and a new feature file (`features/link-check.js`).
-   Worth showing two or three interpreters the plan before building.
+   Jose, 2026-11-25: build now and show the team the working button
+   (cheap to move or remove); and yes to the one `AGENTS.md` line for the
+   new feature file.
 4. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has

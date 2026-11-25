@@ -8345,6 +8345,10 @@ function updateSyncStatus(justSynced){
   const problem = outboxProblem();
   const bar = el.closest('.topbar-global');
   if(bar) bar.classList.toggle('has-sync-problem', !!problem);
+  // A badge that stays (offline, or changes that didn't sync), as opposed to
+  // the few seconds of "Syncing": the narrowest phones let the logo step
+  // aside for it so "Interpreter Hub" stays whole (app.css, by .tg-sync).
+  if(bar) bar.classList.toggle('has-sync-held', !!problem || offline);
   if(problem){
     el.classList.add('is-visible','is-problem');
     // No short phone label means the phone shows only the mark (count or !).
