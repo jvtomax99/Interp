@@ -24,9 +24,10 @@ const inside = (page, mark, sel) => page.evaluate(([mark, sel]) => {
   for (let n = w.nextNode(); n; n = w.nextNode()) {
     if (!n.nodeValue.includes(mark)) continue;
     const box = n.parentElement.closest(sel); if (!box || !box.checkVisibility()) continue;
-    // what can be seen of the text: its own box, cut by any ancestor that hides overflow
+    // where the text ends: its own box, cut by an ancestor inside the card that hides overflow.
+    // Never by the card itself: a card that hides its overflow would pass with the word cut off.
     const r = document.createRange(); r.selectNodeContents(n); let right = r.getBoundingClientRect().right;
-    for (let a = n.parentElement; a && a !== box.parentElement; a = a.parentElement) { const s = getComputedStyle(a); if (s.display !== 'inline' && /hidden|clip/.test(s.overflowX)) right = Math.min(right, a.getBoundingClientRect().right); }
+    for (let a = n.parentElement; a && a !== box; a = a.parentElement) { const s = getComputedStyle(a); if (s.display !== 'inline' && /hidden|clip/.test(s.overflowX)) right = Math.min(right, a.getBoundingClientRect().right); }
     out.push({ over: Math.round(right - box.getBoundingClientRect().right), offScreen: Math.round(right - innerWidth) });
   }
   return out;
@@ -53,10 +54,11 @@ const fire = (page, code) => page.evaluate(`(() => { try { Promise.resolve((() =
           const span = card.querySelector('.term-en > span'), btn = [...card.querySelectorAll('button')].find(b => /more|menu|options/i.test(b.getAttribute('aria-label') || b.title || '') || b.textContent.trim() === '⋯');
           if (!span || !btn) return { span: !!span, btn: !!btn }; const a = span.getBoundingClientRect(), b = btn.getBoundingClientRect();
           return { overlap: a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1 && a.left < b.right }; });
-        if (more && more.overlap !== undefined) ok(!more.overlap, 'a term card: the word does not run under the ⋯ button', more);
+        ok(more && more.overlap === false, 'a term card: the word does not run under the ⋯ button', more);
         await page.evaluate(`searchQuery = '';`); await go(page, 'updates'); await check('Recent Updates', 'silicovolcano', '.activity-row');
         await go(page, 'home'); await page.evaluate(`openGlobalSearch(); const i = document.getElementById('gsInput'); i.value = 'silicovolcano'; i.dispatchEvent(new Event('input', { bubbles: true }));`); await page.waitForTimeout(900);
-        await check('the search panel', 'silicovolcano', '.gs-item');
+        // the word's tail: the typed part is highlighted, which splits the word into pieces
+        await check('the search panel', 'coniosis', '.gs-item');
         ok(await page.evaluate(() => { const g = document.getElementById('gsResults'); return g.scrollWidth <= g.clientWidth + 1; }), 'the search panel: its results do not scroll sideways');
         await page.evaluate(`closeGlobalSearch()`); await go(page, 'providers'); await check('a provider card', 'Montenegro', '.card');
         const prov = await page.evaluate(() => { const n = [...document.querySelectorAll('.provider-name')].find(e => e.textContent.includes('Montenegro')); const b = n.closest('.card').querySelector('.actions');
@@ -90,6 +92,8 @@ const fire = (page, code) => page.evaluate(`(() => { try { Promise.resolve((() =
     const lookErr = p => p.evaluate(() => (document.querySelector('.lookup-empty') || {}).textContent || '');
     const look = p => fire(p, `const t = Object.values(__DB.terms).find(t => t.categoryId === 'onco'); setCategory('onco'); openTermLookup('onco', t.id);`);
     await run('Term lookup at the daily limit', api(429, { error: 'daily_limit' }), look, lookErr, t => /tomorrow/.test(t) && !/temporary/.test(t));
+    await run('Term lookup for a phone outside the team', api(401, { error: 'members_only' }), look, lookErr, t => /team code/.test(t) && !/temporary/.test(t));
+    await run('adding a tip for a doctor offline', off, p => fire(p, `doctorTipWrite('d0', { add: { text: 'Speaks fast', by: 'Jose', at: 1 } })`), null, t => /offline/i.test(t));
     const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAFklEQVR4nGP8z8DAwMDAxAADNGEMdkUAHDABD0Gc3lQAAAAASUVORK5CYII=', 'base64');
     await run('a provider photo that fails to upload', p => p.evaluate(() => { window.__UPLOADS = window.__UPLOADS || { puts: [], deletes: [], ms: 600, fail: false }; window.__UPLOADS.fail = true; }),
       async p => { await go(p, 'providers'); await fire(p, `openAddProviderModal()`); await p.setInputFiles('#fPPhoto', { name: 'face.png', mimeType: 'image/png', buffer: PNG }); }, null, t => /didn.t upload/.test(t) && !/upload failed/.test(t));

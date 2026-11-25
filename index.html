@@ -3570,6 +3570,7 @@ async function handleTermAttachSelected(event){
   const termId = pendingAttachTermId;
   pendingAttachTermId = null;
   if(!file || !termId) return;
+  if(offlineBlocked('Attaching a file')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
 
   try{
@@ -3581,7 +3582,7 @@ async function handleTermAttachSelected(event){
     showToast('File attached.');
     render();
   }catch(err){
-    showToast(uploadErrorMessage(err, 'Could not attach that file.'));
+    showToast(uploadErrorMessage(err, 'Could not attach that file.', 'The file'));
   }
 }
 
@@ -4243,6 +4244,7 @@ async function deleteChatMessage(id){
 }
 
 async function deleteActivity(id){
+  if(offlineBlocked('Removing an update')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('activity-log').doc(id).delete();
@@ -4253,6 +4255,7 @@ async function deleteActivity(id){
 
 async function clearAllActivity(){
   if(!ACTIVITY.length) return;
+  if(offlineBlocked('Clearing the updates')) return;
   if(!confirm(`Clear all ${ACTIVITY.length} updates? This only clears the activity list. Your terms, notes, providers, and messages are not affected.`)) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   const ids = ACTIVITY.map(a=>a.id);
@@ -5386,6 +5389,7 @@ async function saveEvent(){
   const evRegion = document.getElementById('fEvRegion').value;
   if(isRegion(evRegion)) record.region = evRegion;
   if(myUid()) record.uid = myUid();   // who may remove it (theirs, or an owner's)
+  if(offlineBlocked('Adding an event')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('ce-events').add(record);
@@ -5414,7 +5418,7 @@ async function deleteCeEvent(id){
 function saveErrorMessage(err, collection){
   const code = (err && (err.code || err.message) || '').toString().toLowerCase();
   // Said to an interpreter, not a developer: the same words as the unsent-changes sheet (outboxReasonText).
-  if(code.includes('permission') || code.includes('insufficient')){
+  if(code.includes('permission') || code.includes('insufficient') || code.includes('unauthenticated')){
     return 'Not saved: the database refused it. This phone may need to rejoin the team on Team access, then try again.';
   }
   if(code.includes('unavailable') || code.includes('network') || code.includes('offline')){
@@ -5432,10 +5436,12 @@ function offlineBlocked(what){
   return true;
 }
 // A failed upload used to show the storage service's own error text.
-function uploadErrorMessage(err, fallback){
+function uploadErrorMessage(err, fallback, what){
   const code = String(err && err.code || '');
-  if(code === 'storage/unauthorized' || code === 'storage/unauthenticated') return 'The photo was refused. This phone may need to rejoin the team on Team access.';
-  if(code.startsWith('storage/')) return 'The photo didn\u2019t upload. Check your connection and try again.';
+  what = what || 'The photo';   // a term takes a PDF too: 'The file'
+  if(code === 'storage/unauthorized' || code === 'storage/unauthenticated' || /permission|insufficient|unauthenticated/i.test(code + ' ' + (err && err.message || '')))
+    return `${what} was refused. This phone may need to rejoin the team on Team access.`;
+  if(code.startsWith('storage/')) return `${what} didn\u2019t upload. Check your connection and try again.`;
   return (err && err.message) || fallback;
 }
 
@@ -13474,6 +13480,7 @@ function closeDoctorTermModal(){
 async function saveDoctorTerm(){
   const en = document.getElementById('fDTEn').value.trim();
   if(!en){ showToast('English term is required.'); return; }
+  if(offlineBlocked('Saving a doctor\u2019s term')) return;
   const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorTermTargetId);
   if(!d){ showToast('Could not find that doctor.'); return; }
 
@@ -13754,6 +13761,7 @@ function isMyTip(t){
   return !!me && (t.by || '').trim().toLowerCase() === me;
 }
 async function doctorTipWrite(id, { add, remove, dropNotes }){
+  if(offlineBlocked(add ? 'Saving a tip' : 'Changing a tip')) return false;
   if(!db){ showToast('Not connected to the database.'); return false; }
   const FV = firebase.firestore.FieldValue;
   const ref = db.collection('doctor-directory').doc(id);

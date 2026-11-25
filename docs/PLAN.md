@@ -172,11 +172,16 @@ a phase finishes but the next phase continues here.
      badge counts them), phone storage full, Ask the Hub's five messages,
      Translate, sign-in. Not tested: "my photo" when the upload fails.
      Fixed the same day (the stress-checks pull request, `stress.cjs`
-     holds all twelve): the five cards wrap or end in "..."; the seven
+     holds all twelve): the five cards wrap the long text; the seven
      failures say what happened in plain words. Left for later, Jose's
      call: doctors, providers and chat deletes still need a connection
-     (they now say so); putting them in the outbox like terms is a
-     data change with its own plan.
+     (they now say so, as do a doctor's tip and team term, an event, a
+     file on a term and removing an update); putting them in the outbox
+     like terms is a data change with its own plan. Until then, on
+     Wi-Fi that is connected but dead (the phone still says it is
+     online) those saves still wait with no message: they have no
+     timeout, and one can't be added safely to a write that may still
+     go through later (found by the cold review, not fixed).
 3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
    to be built once the consistency pass is finished). A Check button
    beside a term's source link that says whether the address still opens.
