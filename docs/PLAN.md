@@ -218,6 +218,30 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
 
+- **Left by the 2026-11-24 audit** (each is Jose's call; none is a bug a
+  user hits).
+  1. *The address is Vercel's free one* (`interp-six.vercel.app`). A name of
+     his own costs about $12 to $20 a year and is his to buy. The address
+     is then changed in five places: `index.html`'s head (canonical,
+     `og:url`, both image tags), `robots.txt` and `sitemap.xml`
+     (`site-front.cjs` checks they agree). Not checked yet: whether the
+     email sign-in (Firebase's allowed domains) and the notification
+     links also name the old address.
+  2. *Long dashes in what the app says.* About 100 lines on screen use
+     " — " (Doctor Prep's notes, the Code of Ethics summaries, CoreCHI
+     Practice, the False Friends list). Rewriting them is a wording
+     change to checked material, so it needs him to read the result.
+  3. *Heading levels.* A screen's title is an `h1` on six screens (the
+     tool banners), an `h2` on about twelve (`.section-head h2`) and
+     missing on five (All domains, the briefing, Appointment, Doctor
+     Directory, Link Directory); Home goes from `h1` to `h3`. Nobody sees
+     it; a screen reader's outline does. The fix touches `.section-head`
+     styles, `home-polish.css` and the suites that find titles by tag.
+  4. *`.btn-primary`'s first shadow is green* (`rgba(92,131,116,…)`,
+     `app.css` about line 2088) under a blue button, left from an older
+     palette; check whether the later rule fully replaces it before
+     touching it.
+
 - **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
   am: the sun is left of the middle" reads the real date; by mid-November
   the 8 am sun sits at x -19 against a limit of -20, so every pull request

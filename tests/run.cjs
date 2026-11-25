@@ -42,6 +42,7 @@ const SUITES = [
   ['chat-keyboard.cjs',   'Team Chat while typing: the box sits on the keyboard'],
   ['dock-tuck.cjs',       'Tab bar tuck: transform only, same at rest, turns around'],
   ['frame-meter.cjs',     'Smoothness meter: More, timer, stalls, results, saved runs'],
+  ['site-front.cjs',      'The front door: link-preview card, canonical address, robots and sitemap, the 404 page, notes not served, a title per screen, Doctor Prep at 16px'],
   ['sound-alikes.cjs',    'Sound-Alikes: Home and tile, a speaker on every word, es-US voice, search, the drill heard not read, the lure counted'],
   ['voice-check.cjs',     'Voice and mic check: voices, record, speech to text, copy, mic released'],
   ['memory-trainer.cjs',  'Memory trainer: way in, a round with the words hidden, chunks, longer/shorter, notes, flags, leaving'],

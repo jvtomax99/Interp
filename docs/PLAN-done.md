@@ -5,6 +5,14 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-24 The front door (Jose: "find what makes it look thrown together, and fix it"). An audit of every screen at six sizes
+  (320 to 1440 wide), every handler named in the markup, the pages' heads and what the live site serves. Fixed: a pasted link had
+  no card (added `og:*` / `twitter:*`, a canonical address and `og-image.jpg`); a wrong address showed Vercel's own 404 (new
+  `404.html`); no `robots.txt` or `sitemap.xml`; `SPEC.md` and `DESIGN.md` were served to anyone (now in `.vercelignore`, with
+  `HANDOFF.md`); every screen had the same tab title (`syncDocTitle`, called from `render`); Doctor Prep's three boxes were 15px and
+  13px, so an iPhone zoomed on every tap, and two of their hints were cut off; the two brain pages had no description or icon. New
+  suite `site-front.cjs` (75 checks). What the audit found clean is in `docs/FACTS.md`; what it left is under Later in `docs/PLAN.md`.
+
 - 2026-11-15 Security pass, the two serious holes (Jose's pick, after an audit of all his projects). (1) Hidden values from the
   database (a document's id, a colour, a picture size, an address) were drawn unchecked, so any phone with the team code could make
   script run on every phone (chat, Home, updates, events, recently deleted, attachments, Link Directory, domains). Helpers after

@@ -1,0 +1,12 @@
+# Interpreter Hub: a team tool behind a team code. The front page may be
+# listed. The server endpoints and the 3D viewers are not pages of their
+# own. (The brain pages say "noindex" themselves, so they are not listed
+# here: a crawler has to be able to read a page to see that.)
+User-agent: *
+Disallow: /api/
+Disallow: /atlas/
+Disallow: /campus3d/
+Disallow: /memory/
+Disallow: /media/
+
+Sitemap: https://interp-six.vercel.app/sitemap.xml

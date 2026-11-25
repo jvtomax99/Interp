@@ -8,6 +8,9 @@ tests
 # so not served either.
 CLAUDE.md
 AGENTS.md
+SPEC.md
+DESIGN.md
+HANDOFF.md
 .claude
 firestore.rules
 storage.rules

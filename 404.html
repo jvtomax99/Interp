@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#252E6D">
+<title>Page not found · Interpreter Hub</title>
+<meta name="description" content="That address isn't part of the Interpreter Hub. Go back to Home.">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..700&display=swap" rel="stylesheet">
+<!-- The page Vercel serves for an address that isn't in the Hub (a mistyped
+     or out-of-date link). It stands alone on purpose: it must not depend on
+     app.css or the app's script, which a wrong address may not reach. The
+     colours, radii and type sizes are DESIGN.md's (--bg, --ink, --navy,
+     --accent, the 12px button radius, --fs-t1 / --fs-head / --fs-sub). -->
+<style>
+  :root{ --bg:#F4F6FA; --ink:#151C2C; --ink-soft:#5A6478; --navy:#252E6D; --accent:#0F5FA6; --accent-2:#2E8BD0; }
+  :root[data-theme="dark"]{ --bg:#0E1420; --ink:#EBEFF7; --ink-soft:#AEB7C9; --navy:#7C93E8; --accent:#4C9FE0; --accent-2:#6BB4EA; }
+  *{ box-sizing:border-box; margin:0; }
+  html, body{ height:100%; }
+  body{
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink);
+    background:radial-gradient(900px 520px at 0% 0%, rgba(46,139,208,.16), rgba(46,139,208,0) 70%), var(--bg);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+    -webkit-font-smoothing:antialiased;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; text-align:left; margin-bottom:40px; }
+  .brand img{ width:44px; height:auto; }
+  .brand b{ display:block; font-size:17px; font-weight:650; letter-spacing:-.01em; color:var(--navy); }
+  .brand span{ display:block; font-size:13px; color:var(--ink-soft); margin-top:1px; }
+  .code{ font-size:13px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  h1{ font-size:28px; line-height:1.15; font-weight:680; letter-spacing:-.02em; max-width:18ch; margin-inline:auto; }
+  p{ font-size:17px; line-height:1.5; color:var(--ink-soft); max-width:34ch; margin:12px auto 0; overflow-wrap:anywhere; }
+  .go{
+    display:inline-flex; align-items:center; justify-content:center; min-height:48px; margin-top:28px; padding:0 26px;
+    border-radius:12px; background:linear-gradient(140deg, #1F74BC, #0F5FA6); color:#fff;   /* fixed blues: white on the dark palette's lighter ones is under 3:1 */ font-size:16px; font-weight:650;
+    text-decoration:none; box-shadow:0 6px 18px rgba(15,95,166,.28); transition:transform .18s ease, filter .18s ease;
+  }
+  .go:active{ transform:scale(.97); filter:brightness(.96); }
+  .go:focus-visible{ outline:3px solid var(--accent-2); outline-offset:3px; }
+  @media (prefers-reduced-motion: reduce){ .go{ transition:none; } }
+</style>
+<script>
+  // The Hub's own dark-mode choice, when this browser has one saved.
+  try{ var t = localStorage.getItem('ih_theme'); if(t === 'dark') document.documentElement.setAttribute('data-theme', t); }catch(e){}
+</script>
+</head>
+<body>
+  <div class="brand">
+    <img src="/hmh-mark.png" alt="">
+    <div><b>Interpreter Hub</b><span>Hackensack University Medical Center</span></div>
+  </div>
+  <main>
+    <div class="code">Page not found</div>
+    <h1>That address isn't part of the Hub.</h1>
+    <p>The link may be mistyped or out of date. Everything in the Hub opens from Home.</p>
+    <a class="go" href="/">Go to Home</a>
+  </main>
+</body>
+</html>

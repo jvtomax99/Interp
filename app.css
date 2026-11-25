@@ -5621,7 +5621,8 @@
      rule it has to beat carries one too, so plain `.tr-row input` would be
      less specific and quietly lose — the same trap described above. */
   @media (max-width:900px), (pointer: coarse){
-    .search input, .chat-input-row input, .field input, .field textarea, .field select, .tr-row input[type=text], .tr-row select, .quiz-setup select{ font-size:var(--fs-call); }
+    .search input, .chat-input-row input, .field input, .field textarea, .field select, .tr-row input[type=text], .tr-row select, .quiz-setup select,
+    .doc-research-search input, .doc-research-filters input{ font-size:var(--fs-call); }   /* Doctor Prep: its three boxes were 15px and 13px, so every tap zoomed an iPhone */
   }
 
 /* Illustrated icons are the artwork itself: no chip, bubble, plate or frame. */
