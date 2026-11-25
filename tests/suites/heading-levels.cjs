@@ -4,7 +4,8 @@
    reads, and the rule the next screen follows. Before this a title was an
    h1 on about 13 screens, an h2 on about 15 and missing on two, and Home
    went from h1 to h3. Pop-up sheets keep their own titles and are not
-   opened here. The look did not change: the styles select both tags. */
+   opened here; a doctor's page, which sits over the list, is not either
+   (docs/PLAN.md). Phone and computer width. The look did not change: the styles select both tags. */
 const { chromium, boot, go } = require('../support/harness.cjs');
 let passed = 0, failed = 0;
 function ok(c, m, d) { if (c) { passed++; console.log('  PASS', m); } else { failed++; process.exitCode = 1; console.log('  FAIL', m, d === undefined ? '' : JSON.stringify(d).slice(0, 500)); } }
@@ -14,28 +15,41 @@ const outline = page => page.evaluate(() => [...document.querySelectorAll('h1,h2
 const SCREENS = ['home', 'all', 'genetics', 'translate', 'falsefriends', 'soundalikes', 'review', 'practice', 'memory',
   'doctor-research', 'doctors', 'doctor-directory', 'directory', 'chat', 'updates', 'events', 'notifications',
   'team-access', 'userguide', 'ask', 'ethics', 'providers', 'trash', 'resources', 'anatomy'];
+// Screens reached by a step, each with the title it must show (so a step
+// that did nothing can't pass on the screen before it), then the empty
+// states, which return early and once had no title at all.
 const STATES = [
-  ['a Sound-Alikes group', p => p.evaluate(() => { setCategory('soundalikes'); saOpenList('all'); })],
-  ['a quiz', p => p.evaluate(() => { setCategory('practice'); startQuiz(); })],
-  ['quiz results', p => p.evaluate(() => { quizAnswers = quizQuestions.map(q => q.a); quizIndex = quizQuestions.length; finishQuiz(); })],
-  ['the briefing', p => p.evaluate(() => { PREP.domainId = 'onco'; PREP.doctor = ''; setCategory('prep'); })],
-  ['an appointment', p => p.evaluate(() => startAppt())],
+  ['a Sound-Alikes group', 'Sound-Alikes', p => p.evaluate(() => { setCategory('soundalikes'); saOpenList('all'); })],
+  ['False Friends drill', 'False Friends', p => p.evaluate(() => { setCategory('falsefriends'); setFFMode('drill'); })],
+  ['a quiz', 'CoreCHI Practice', p => p.evaluate(() => { setCategory('practice'); startQuiz(); })],
+  ['quiz results', 'Practice Results', p => p.evaluate(() => { quizAnswers = quizQuestions.map(q => q.a); quizIndex = quizQuestions.length; finishQuiz(); })],
+  ['exam results', 'Practice Results', p => p.evaluate(() => { setCategory('practice'); startQuiz(); quizMode = 'exam'; quizAnswers = quizQuestions.map(q => q.a); quizIndex = quizQuestions.length; finishQuiz(); })],
+  ['a Term Review session', 'Term Review', p => p.evaluate(async () => { setCategory('review'); await startReview(); })],
+  ['the briefing', 'Oncology', p => p.evaluate(() => { PREP.domainId = 'onco'; PREP.doctor = ''; setCategory('prep'); })],
+  ['an appointment', 'Oncology', p => p.evaluate(() => startAppt())],
+  ['no appointment running', 'Appointment', p => p.evaluate(() => { APPT = null; renderContent(); })],
+  ['no briefing picked', 'Your briefing', p => p.evaluate(() => { PREP.domainId = null; setCategory('prep'); })],
+  ['no providers', 'Provider Pictures', p => p.evaluate(() => { setCategory('providers'); PROVIDERS.length = 0; renderContent(); })],
 ];
 (async () => {
   const browser = await chromium.launch();
   try {
-    const { ctx, page } = await boot(browser, { device: 'iphone' });
+    for (const device of ['iphone', 'desktop']) {
+    console.log('== ' + device);
+    const { ctx, page } = await boot(browser, { device });
     try {
-      const check = async name => {
+      const check = async (name, want) => {
         const o = await outline(page), h1 = o.filter(h => h.level === 1);
+        if (want !== undefined) ok(h1[0] && h1[0].text === want, `${name}: it is the "${want}" screen`, h1);
         const skip = o.find((h, i) => i && h.level > o[i - 1].level + 1);
         ok(h1.length === 1 && o[0].level === 1 && h1[0].text.length > 0 && !skip,
           `${name}: one title ("${h1[0] && h1[0].text}"), first, no level skipped (${o.map(h => h.level).join('').slice(0, 24)})`, { h1, skip, first: o[0] });
       };
       for (const cat of SCREENS) { await go(page, cat, 700); await check(cat); }
-      for (const [name, fn] of STATES) { await fn(page); await page.waitForTimeout(900); await check(name); }
+      for (const [name, want, fn] of STATES) { await fn(page); await page.waitForTimeout(900); await check(name, want); }
       ok(!page.__errors.length, 'no page errors', page.__errors);
     } finally { await ctx.close(); }
+    }
   } finally { await browser.close(); }
   console.log(`\n${passed} passed, ${failed} failed`);
 })();

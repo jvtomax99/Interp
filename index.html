@@ -12929,7 +12929,7 @@ function renderProviders(q){
     const msg = PROVIDERS.length===0
       ? '🩺 No providers here yet.<br>Add the first one your team works with.'
       : 'No providers match your search.';
-    return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
+    return `<h1 class="sr-only">Provider Pictures</h1><div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
   }
 
   // Same location grouping as the Doctor Directory — the facility field is
@@ -16781,7 +16781,7 @@ function startAppt(){
 }
 function apptClockText(){ const m = apptMinutes(); return m < 1 ? 'just started' : m + (m === 1 ? ' minute' : ' minutes'); }
 function renderAppt(){
-  if(!APPT) return `<div class="appt"><p class="appt-none">No appointment running.</p></div>`;
+  if(!APPT) return `<h1 class="sr-only">Appointment</h1><div class="appt"><p class="appt-none">No appointment running.</p></div>`;
   const dom = DATA.categories.find(c => c.id === APPT.domainId);
   const entry = prepDoctorEntry(APPT.doctor), doc = entry ? entry.name : APPT.doctor;
   return `<div class="appt">
@@ -17670,7 +17670,7 @@ function prepTraps(dom){
 }
 function renderPrep(){
   const dom = DATA.categories.find(c => c.id === PREP.domainId);
-  if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
+  if(!dom) return `<h1 class="sr-only">Your briefing</h1><div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
   firstWeekMark('brief');
   // Your practice record, loaded once; the screen repaints when it arrives.
   if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }

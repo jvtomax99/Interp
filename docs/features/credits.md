@@ -44,7 +44,7 @@ the only way in: a credit nobody finds isn't much of a credit.
   rules file had to be pasted again. A parent's credit is not its
   subgroups', nor the other way round. Not on All domains.
 - **Which screen.** The title is the first heading in `#content`, when it
-  sits in the screen's own head: `#content > .section-head h2` or the
+  sits in the screen's own head: `#content > .section-head h1` or the
   Doctors list's `.hub-head h1`. That covers Sound-Alikes, False Friends,
   CoreCHI Practice, Term Review, Translate, the Memory trainer, Provider
   Pictures, Training & Events, Code of Ethics, Recent Updates, Doctors.
