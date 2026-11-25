@@ -121,19 +121,17 @@ a phase finishes but the next phase continues here.
    term), and this item moves to `docs/PLAN-done.md`.
 
 2. **Consistency pass** (Jose, 2026-11-25: "All", after the 2026-11-24
-   audit). The visible tells left. Show Jose the corner scale on three
-   screens (phone first) before applying it everywhere; `DESIGN.md` changes
-   in the same commit.
-   - Corners: `app.css` and `home-polish.css` use 27 different
-     `border-radius` values in px (9, 10, 11, 12, 13 and 14 side by side;
-     counts in `docs/FACTS.md`). Put them on a short `--r-*` scale in the
-     "Visual refinement" block, as type and spacing already are.
-   - `.btn-primary`'s first shadow is green (`rgba(92,131,116,…)`, about
-     line 2088 of `app.css`) under a blue button.
+   audit). The visible tells left. Corners and the button shadow are done
+   (the corner-scale pull request, 2026-11-25: five `--r-*` sizes, Jose
+   OK'd them from three before and after screens; `corner-scale.cjs`
+   holds them). Left, each a change he can see, so screenshots first:
    - The top bar's round buttons are 36px; the rule is 44px for a tap.
-   - Two search hints are cut off mid-word on a phone ("Search terms,
-     definitions, Spanish equiv…", "Search a word, a meaning, or a
-     specialt…").
+   - Search hints are cut off on a phone on every screen with a search
+     box, not two (measured 2026-11-25, `docs/FACTS.md`, "Search hints"):
+     the box has 243px at 393 wide and 210px at 360, and only 111px / 78px
+     beside "+ Add" on a domain. Needs shorter phone wording (about 24
+     characters) and a clean ending (`text-overflow:ellipsis`), and the
+     User Guide checked for the old wording.
    - Heading levels: a screen's title is an `h1` on six screens (the tool
      banners), an `h2` on about twelve (`.section-head h2`), missing on
      five (All domains, the briefing, Appointment, Doctor Directory, Link

@@ -134,8 +134,9 @@ badge to begin", "Welcome in") are Inter on the tokens.
 
 ### Border radius
 
-- `--r-sm` 10px, `--r-md` 14px, `--r-lg` 20px.
-- **A rounded child inside a rounded parent takes the smaller radius:** `.qa-tile` 17px holds `.qa-tile-icon` 12px; `.qa-card` 19px holds `.qa-icon` 12px. No equal parent and child pair exists.
+- **Five sizes, and nothing between them:** `--r-xs` 6px (tags, small chips), `--r-sm` 10px (buttons, inputs, icon squares), `--r-md` 14px (cards, tiles), `--r-lg` 20px (big cards, banners), `--r-xl` 26px (sheets, the largest panels). Defined once, in `:root` at the top of `app.css`.
+- **Written by hand only:** `0`, circles (`50%`), pills (`999px`) and hairlines of 1 to 3px (progress bars, ticks, carets). `tests/suites/corner-scale.cjs` fails on any other value, in the stylesheets, in the page's code or measured on screen.
+- **A rounded child inside a rounded parent takes the smaller radius:** `.qa-tile` `--r-lg` holds `.qa-tile-icon` `--r-md`; `.qa-card` `--r-lg` holds `.qa-icon` `--r-md`. No equal parent and child pair exists (a child flush with its parent's edge shares the corner).
 
 ## Elevation
 
