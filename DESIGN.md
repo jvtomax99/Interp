@@ -54,6 +54,7 @@ variable font, weights 100 to 700 only (`index.html`, the fonts `<link>`):
 anything asked above 700 renders as 700.
 - **Weights:** 400, 500 (body text, set on `body`), 550 (medium), 650 (strong). No others; `tests/suites/type-tokens.cjs` fails on any other.
 - **Bold inside text:** `b`, `strong` and bare `h1`-`h6`, `th` are 650 (an element rule in `app.css`), not the browser's 700, or 900 from "bolder" inside a 650 parent.
+- **Heading levels: one title per screen** (Jose's pick, 2026-11-25). A screen's title is its one `h1`, the headings straight under it are `h2`, cards under a section `h3`: never skip a level. The tag says the level and a class or its container says the look, so a retag never changes the size (the styles select both tags: `.section-head :is(h1,h2)`, `.home-sec-head :is(h2,h3)`). A screen with no visible title of its own (Link Directory, 3D Body) carries `<h1 class="sr-only">`. Pop-up sheets keep their own title (`h2` or `h3`). `tests/suites/heading-levels.cjs` holds it.
 - **Letter spacing goes with the size.** One token per band of sizes, never a value picked per element:
 
 | Token | Value | Sizes |
@@ -199,7 +200,7 @@ box-shadow:
 
 - **Sizes set from script:** 8 inline `font-size` values in `index.html`, `features/csv.js` and `features/translate.js` are still plain pixels; the stylesheets are all on the scale (2026-11-03).
 - **Spacing:** the look is tokenized (69 `:root` variables); the rhythm mostly is not. Padding, margin and gap use a token about 99 times against about 1,737 pixel values (measured 2026-10-20), 12 of them crowding into 6 to 17px: 9px (251 uses), 13px (195), 6px (191), 8px (77), 14px (74), 10px and 17px (69 each), then 12, 11, 16, 7 and 15. The scale 6 / 9 / 13 / 17 / 26 covers 42% of those uses as they stand. When you touch a component, move it onto the scale rather than adding to the tail.
-- **Leftover serif-era headings** set at weight 400 (`.section-head h2`, `.modal h3`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
+- **Leftover serif-era headings** set at weight 400 (`.section-head :is(h1,h2)`, `.modal h3`); a later sans rule overrides most of them. Whether any should be 650 is Jose's call.
 
 ## The Home banner photo, per mode (moved here from `CLAUDE.md`, 2026-11-11)
 
