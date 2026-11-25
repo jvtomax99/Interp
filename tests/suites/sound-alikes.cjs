@@ -123,7 +123,7 @@ function standIns(){
     const grp = await page.evaluate(() => { const r = [...document.querySelectorAll('.sa-group')].find(x => /Sound close/.test(x.textContent));
       [...r.querySelectorAll('.mastery-go')].find(b => b.textContent === 'Practise').click();
       return { n: saQuestions.length, all: saQuestions.every(q => { const s = SOUND_ALIKES.find(x => x.id === q.id); return s.kind === 'near' && s.lang === 'en'; }),
-        head: document.querySelector('.section-head h2').textContent, sub: document.querySelector('.section-head .sub').textContent }; });
+        head: document.querySelector('.section-head h1').textContent, sub: document.querySelector('.section-head .sub').textContent }; });
     ok(grp.n === 10 && grp.all && grp.head === 'Sound close' && grp.sub === '1 of 10', 'Practise on Sound close: ten questions, all from it, CoreCHI\u2019s header', grp);
     const es = await page.evaluate(() => { saHome(); const r = [...document.querySelectorAll('.sa-group')].find(x => /Heard in Spanish/.test(x.textContent));
       [...r.querySelectorAll('.mastery-go')].find(b => b.textContent === 'Practise').click();

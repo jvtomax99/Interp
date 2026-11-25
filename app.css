@@ -758,7 +758,7 @@
   .home-sec-head{
     display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:12px;
   }
-  .home-sec-head h3{
+  .home-sec-head :is(h2,h3){
     font-family:var(--sans); font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head);
     color:var(--ink); margin:0;
   }
@@ -2098,7 +2098,7 @@
 
   .section-head{display:flex; align-items:baseline; gap:11px; margin:36px 0 18px 0; scroll-margin-top:132px;}
   .section-head:first-child{ margin-top:4px; }
-  .section-head h2{font-family:var(--serif); font-weight:400; font-size:var(--fs-t2); margin:0; letter-spacing:-.01em;}
+  .section-head :is(h1,h2){font-family:var(--serif); font-weight:400; font-size:var(--fs-t2); margin:0; letter-spacing:-.01em;}
   /* Plex Sans, per the design system: serif is for quoted speech and the
      interface is sans. 12/500 is the documented meta token, and it is also
      the size that keeps the caption's footprint where mono 11 had it, so no
@@ -2656,7 +2656,7 @@
   html[data-theme="dark"] .user-guide, html[data-theme="dark"] .gd-sheet{ --gd-mix:50%; }
   .user-guide{ max-width:660px; margin:0 auto; }
   .gd-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:13px; margin:0 0 9px; }
-  .gd-head h2{ font:650 var(--fs-t1)/1.1 var(--sans); letter-spacing:var(--tr-big); margin:0; color:var(--ink); }
+  .gd-head h1{ font:650 var(--fs-t1)/1.1 var(--sans); letter-spacing:var(--tr-big); margin:0; color:var(--ink); }
   .gd-head p{ margin:4px 0 0; font-size:var(--fs-foot); line-height:1.4; color:var(--ink-soft); }
   .gd-tour{ flex:none; min-height:44px; padding:0 15px; border-radius:999px; border:1px solid var(--line); background:var(--paper);
     font:650 var(--fs-sub) var(--sans); color:var(--ink); cursor:pointer; box-shadow:var(--sh-1); }
@@ -2769,7 +2769,7 @@
   .gd-week{ display:flex; flex-direction:column; padding:15px 15px 6px; border-radius:var(--r-lg); background:var(--paper);
     box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); }
   .gd-week-top{ display:flex; align-items:center; gap:13px; margin-bottom:6px; }
-  .gd-week-top h3{ margin:0; font:650 var(--fs-head)/1.2 var(--sans); letter-spacing:var(--tr-head); color:var(--ink); }
+  .gd-week-top h2{ margin:0; font:650 var(--fs-head)/1.2 var(--sans); letter-spacing:var(--tr-head); color:var(--ink); }
   .gd-week-top p{ margin:2px 0 0; font-size:var(--fs-foot); color:var(--ink-soft); }
   .gd-week-hide{ margin-left:auto; align-self:flex-start; width:44px; height:44px; margin-top:-9px; margin-right:-9px; border:0; background:none;
     border-radius:50%; color:var(--ink-faint); cursor:pointer; display:grid; place-items:center; }
@@ -2830,7 +2830,7 @@
   .gd-all svg{ width:18px; height:18px; }
   .gd-sec-title{ display:flex; align-items:center; gap:13px; }
   .gd-sec-title img{ width:56px; height:56px; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(20,40,80,.2)); }
-  .gd-sec-title h3{ margin:0; font:650 var(--fs-t2)/1.15 var(--sans); letter-spacing:var(--tr-title); color:var(--ink); text-wrap:balance; }
+  .gd-sec-title h2{ margin:0; font:650 var(--fs-t2)/1.15 var(--sans); letter-spacing:var(--tr-title); color:var(--ink); text-wrap:balance; }
   .gd-sec-title p{ margin:3px 0 0; font-size:var(--fs-foot); color:color-mix(in srgb, var(--c) var(--gd-mix), var(--ink)); font-weight:650; }
 
   .gd-install{ display:flex; align-items:center; gap:11px; width:100%; margin-top:22px; min-height:52px; padding:9px 13px; border-radius:var(--r-md);
@@ -3007,7 +3007,7 @@
   .score-pct{ font-family:var(--sans); font-size:var(--fs-t1); font-weight:650; letter-spacing:var(--tr-big); color:var(--ink); line-height:1; }
   .score-label{ font-family:var(--mono); font-size:var(--fs-cap2); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin-top:4px; }
   .results-head{ display:flex; align-items:center; gap:24px; flex-wrap:wrap; margin-bottom:26px; }
-  .results-summary h3{ font-family:var(--serif); font-weight:400; font-size:var(--fs-t2); margin:0 0 6px 0; }
+  .results-summary h2{ font-family:var(--serif); font-weight:400; font-size:var(--fs-t2); margin:0 0 6px 0; }
   .results-summary p{ font-size:var(--fs-foot); color:var(--ink-soft); margin:0; line-height:1.6; max-width:420px; }
   .practice-mark{ margin-left:auto; display:flex; align-items:center; padding-right:2px; }
 
@@ -3061,7 +3061,7 @@
   .exam-seal-ring::after{ content:''; position:absolute; inset:5px; border-radius:50%; background:var(--paper); }
   .exam-seal-mark{ position:relative; z-index:2; width:52px; }
   .exam-seal-mark img{ width:100%; display:block; }
-  .exam-seal h4{ font-family:var(--sans); font-size:var(--fs-sub); font-weight:650; letter-spacing:var(--tr-body); margin:0; }
+  .exam-seal h2{ font-family:var(--sans); font-size:var(--fs-sub); font-weight:650; letter-spacing:var(--tr-body); margin:0; }
   .exam-seal p{ font-family:var(--sans); font-size:var(--fs-cap); line-height:1.5; color:var(--ink-soft); margin:0; }
   .exam-seal .seal-score{ font-family:var(--sans); font-size:var(--fs-t1); font-weight:650; letter-spacing:var(--tr-big); line-height:1.1; }
   /* Motif corners, echoing the mark without repeating it. */
@@ -5100,7 +5100,7 @@
   /* A rule that runs out from the heading in the section's own colour, with
      the "view all" control as a pill at the end of it. */
   .home-sec-head{ display:flex; align-items:center; gap:14px; margin-bottom:15px; }
-  .home-sec-head h3{ font-size:var(--fs-t3); font-weight:650; letter-spacing:var(--tr-title); line-height:1.3; }
+  .home-sec-head :is(h2,h3){ font-size:var(--fs-t3); font-weight:650; letter-spacing:var(--tr-title); line-height:1.3; }
   .home-sec-head::after{
     content:''; height:1px; flex:1; min-width:0; order:1;
     background:linear-gradient(90deg,
@@ -5235,7 +5235,7 @@
     .home-search{ height:55px; border-radius:var(--r-md); font-size:var(--fs-sub); gap:10px; }
     .home-search > svg{ width:20px; height:20px; }
     .home-sec-head{ gap:9px; margin-bottom:13px; }
-    .home-sec-head h3{ font-size:var(--fs-head); line-height:1.35; }
+    .home-sec-head :is(h2,h3){ font-size:var(--fs-head); line-height:1.35; }
     .home-sec-more{ font-size:var(--fs-cap); padding:7px 10px; }
     .domain-family, .home-rail > .qa-card{ border-radius:var(--r-lg); }
     .domain-family-head, .home-rail > .qa-card{ min-height:126px; padding:14px; gap:9px; }
@@ -5643,7 +5643,7 @@
   .tg-brand-sub{font-size:var(--fs-cap);}
   .tg-icon-btn svg{width:20px;height:20px;}
   .main{width:100%;max-width:1700px;margin-inline:auto;padding:40px 38px 80px;}
-  .section-head h2{font-size:var(--fs-t1);}
+  .section-head :is(h1,h2){font-size:var(--fs-t1);}
   .section-head .sub{font-size:var(--fs-sub);}
   .btn{font-size:var(--fs-sub);}
   .search input{font-size:var(--fs-call);}
@@ -5726,7 +5726,7 @@ body.access-locked{ overflow:hidden; }
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22);
   display:flex; flex-direction:column; gap:9px; margin-bottom:13px;
 }
-.ta-card h3{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
+.ta-card h2{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
 .ta-card p{ margin:0; font-size:var(--fs-sub); line-height:1.45; color:var(--ink-soft); }
 .ta-label{ font-size:var(--fs-cap); font-weight:650; letter-spacing:var(--tr-caps); text-transform:uppercase; color:var(--ink-faint); }
 .ta-state{ display:flex; align-items:flex-start; gap:13px; }
@@ -6156,7 +6156,7 @@ html[data-theme="dark"] .ask-chip.prep-chip{ color:var(--ink); }
 .prep-ready b{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font:650 var(--fs-call)/1 var(--sans); letter-spacing:var(--tr-body); }
 .prep-ready b span{ font:650 var(--fs-cap2)/1 var(--sans); letter-spacing:var(--tr-caps); text-transform:uppercase; opacity:.82; margin-top:3px; }
 .prep-sec{ display:flex; align-items:baseline; gap:9px; margin:9px 2px -4px; }
-.prep-sec h3{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
+.prep-sec h2{ margin:0; font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); color:var(--ink); }
 .prep-sec span{ margin-left:auto; font-size:var(--fs-cap); font-weight:550; color:var(--ink-faint); }
 .prep-link{ margin-left:auto; min-height:32px; border:0; background:none; padding:0 2px; font:650 var(--fs-foot) var(--sans); color:var(--navy); cursor:pointer; }
 html[data-theme="dark"] .prep-link{ color:var(--ink); }
@@ -7061,14 +7061,14 @@ b, strong, h1, h2, h3, h4, h5, h6, th{ font-weight:650; }
   .domain-banner.is-longer .domain-banner-name{ font-size:var(--fs-t3); }
   .domain-banner.is-longer .domain-banner-pin, .domain-banner.is-longer .domain-banner-pin > *{ width:56px; height:56px; }
 }
-.section-head h2{ font-family:var(--sans); font-weight:650; font-size:var(--fs-t3); letter-spacing:var(--tr-title); }
+.section-head :is(h1,h2){ font-family:var(--sans); font-weight:650; font-size:var(--fs-t3); letter-spacing:var(--tr-title); }
 .section-head .sub{ font-size:var(--fs-foot); font-weight:500; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
 .hub-head h1{ font-family:var(--sans); font-weight:650; letter-spacing:var(--tr-big); }
-.modal h3, .onboarding-modal h3, .results-summary h3{ font-family:var(--sans); font-weight:650; letter-spacing:var(--tr-title); }
+.modal h3, .onboarding-modal h3, .results-summary h2{ font-family:var(--sans); font-weight:650; letter-spacing:var(--tr-title); }
 .doc-research-specialty{ font-family:var(--sans); font-weight:650; letter-spacing:var(--tr-head); }
 @media (min-width:901px){
   .domain-banner-name{ font-size:var(--fs-large); }
-  .section-head h2{ font-size:var(--fs-t2); }
+  .section-head :is(h1,h2){ font-size:var(--fs-t2); }
 }
 
 /* All domains as tiles (the bold glossary, 2026-11-03): two columns on a
@@ -7199,7 +7199,7 @@ html[data-theme="dark"] .tc{ --tc-recv:#26304A; }
 }
 .tc-faces .chat-avatar:first-child{ margin-left:0; }
 .tc-title{ display:flex; flex-direction:column; min-width:0; flex:1; }
-.tc-title h2{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); margin:0; line-height:1.2; }
+.tc-title h1{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; letter-spacing:var(--tr-head); margin:0; line-height:1.2; }
 .tc-sub{ font-size:var(--fs-cap); color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tc-icon-btn{
   width:44px; height:44px; flex-shrink:0; border-radius:50%; border:none;
@@ -7513,7 +7513,7 @@ html[data-theme="dark"] .tc-menu-scrim{ background:rgba(0,0,0,.4); }
 .tc-empty{ margin:auto; text-align:center; padding:var(--sp-5) var(--sp-4); display:flex; flex-direction:column; align-items:center; gap:var(--sp-2); }
 .tc-empty-wave{ font-size:46px; line-height:1; animation:tcWave 2.4s ease-in-out 2; transform-origin:70% 80%; }
 @keyframes tcWave{ 0%,60%,100%{ transform:rotate(0); } 10%,30%{ transform:rotate(14deg); } 20%,40%{ transform:rotate(-8deg); } }
-.tc-empty h3{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; margin:var(--sp-1) 0 0; color:var(--ink); }
+.tc-empty h2{ font-family:var(--sans); font-size:var(--fs-head); font-weight:650; margin:var(--sp-1) 0 0; color:var(--ink); }
 .tc-empty p{ font-size:var(--fs-foot); color:var(--ink-soft); margin:0; max-width:30ch; line-height:1.5; }
 .tc-starters{ display:flex; flex-wrap:wrap; justify-content:center; gap:var(--sp-1); margin-top:var(--sp-2); }
 .tc-starter{ min-height:44px; padding:0 var(--sp-3); border-radius:999px; border:1px solid var(--line); background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:var(--fs-foot); cursor:pointer; }

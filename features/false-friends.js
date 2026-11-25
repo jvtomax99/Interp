@@ -98,7 +98,7 @@ function renderFFCards(){
     return `
       <article class="ff-card" style="--ff-color:${risk.color};">
         <div class="ff-head">
-          <h3 class="ff-es">${escapeHtml(f.es)}</h3>
+          <h2 class="ff-es">${escapeHtml(f.es)}</h2>
           <span class="ff-badge">${escapeHtml(risk.label)}</span>
           <span class="ff-tag">${escapeHtml(f.tag)}</span>
         </div>
@@ -156,7 +156,7 @@ function renderFFDrill(){
         ${missed.length ? `<div class="ff-list" style="margin-top:17px;">${missed.map(q => {
           const risk = FF_RISKS[q.f.risk] || FF_RISKS.everyday;
           return `<article class="ff-card" style="--ff-color:${risk.color};">
-            <div class="ff-head"><h3 class="ff-es">${escapeHtml(q.f.es)}</h3><span class="ff-badge">${escapeHtml(risk.label)}</span></div>
+            <div class="ff-head"><h2 class="ff-es">${escapeHtml(q.f.es)}</h2><span class="ff-badge">${escapeHtml(risk.label)}</span></div>
             <p class="ff-gloss">Looks like <span class="ff-looks">${escapeHtml(q.f.looks)}</span>. Actually means <span class="ff-means">${escapeHtml(q.f.means)}</span>.</p>
           </article>`;
         }).join('')}</div>` : ''}
@@ -218,7 +218,7 @@ function renderFFDrill(){
 function renderFalseFriends(){
   const n = FALSE_FRIENDS.length;
   return `
-    <div class="section-head"><h2>False Friends</h2><span class="sub">${n} traps</span></div>
+    <div class="section-head"><h1>False Friends</h1><span class="sub">${n} traps</span></div>
     <div class="ff-modes">
       <button type="button" class="ff-mode${ffMode==='study'?' is-active':''}" onclick="setFFMode('study')">Study</button>
       <button type="button" class="ff-mode${ffMode==='drill'?' is-active':''}" onclick="setFFMode('drill')">Drill</button>

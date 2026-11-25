@@ -22,7 +22,7 @@ async function open(b, { device = 'narrow', perm = 'default', ios = false, owner
   return { page, posts };
 }
 const read = page => page.evaluate(() => ({
-  state: pushState(), status: (document.querySelector('.nt-status h3') || {}).textContent || '',
+  state: pushState(), status: (document.querySelector('.nt-status h2') || {}).textContent || '',
   turnOn: !!document.querySelector('.nt-status .btn-primary'), send: !!document.querySelector('.nt-send'),
   switches: [...document.querySelectorAll('.nt-kinds .ta-switch')].map(s => s.getAttribute('aria-checked')),
   log: [...document.querySelectorAll('.nt-item b')].map(x => x.textContent),
@@ -63,7 +63,7 @@ const read = page => page.evaluate(() => ({
     ok(r.state === 'blocked' && /Blocked/.test(r.status) && !r.turnOn, 'blocked: says where to allow them', r); await page.context().close(); }
   { const { page } = await open(b, { perm: 'granted' });
     await page.evaluate(() => { PUSH.ready = true; PUSH.docId = 'a'.repeat(40); window.pushSync = async () => {}; renderContent(); });
-    const r = await page.evaluate(() => ({ status: document.querySelector('.nt-status h3').textContent, btns: [...document.querySelectorAll('.nt-status .btn')].map(b => b.textContent) }));
+    const r = await page.evaluate(() => ({ status: document.querySelector('.nt-status h2').textContent, btns: [...document.querySelectorAll('.nt-status .btn')].map(b => b.textContent) }));
     ok(r.status === 'On for this phone' && r.btns.join('|') === 'Send me a test|Turn off', 'on: Send me a test, Turn off', r); await page.context().close(); }
 
   console.log('== Opened from a notification');

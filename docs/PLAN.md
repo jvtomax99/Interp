@@ -128,20 +128,25 @@ a phase finishes but the next phase continues here.
    still drawn 36px, tapped across 44, Jose's pick from before and after
    screens; `topbar-name.cjs` holds it). So are the search hints
    (2026-11-25: shorter "two things" wording that fits a 360-wide phone,
-   the same on a computer, his picks; `search-hints.cjs`). Left, each a change he can see,
-   so screenshots first:
+   the same on a computer, his picks; `search-hints.cjs`). So are the
+   heading levels (2026-11-25: one title per screen, his pick; every
+   screen's title is its `h1`, no level skipped, nothing moved on 39
+   phone screens; `heading-levels.cjs`, the rule is in `DESIGN.md`).
+   Left:
    - Found on the way, for Jose's pick: at 360 wide, Back plus a sync
      badge cuts "Interpreter Hub" (`docs/FACTS.md`, under "Search hints").
    - Found on the way, for Jose's pick: False Friends and Recent Updates
      show a second search box at the top ("Search terms or Spanish", with
      "+ Add term" and "+ New domain") that searches nothing there
      (`index.html`, `searchPlaceholder`; those two screens are missing
-     from the `showTopbar = false` list). Not checked on a phone yet.
-   - Heading levels: a screen's title is an `h1` on six screens (the tool
-     banners), an `h2` on about twelve (`.section-head h2`), missing on
-     five (All domains, the briefing, Appointment, Doctor Directory, Link
-     Directory); Home goes from `h1` to `h3`. Touches `.section-head`
-     styles, `home-polish.css` and the suites that find titles by tag.
+     from the `showTopbar = false` list). Seen at phone size on False
+     Friends, 2026-11-25 (the heading-levels "before" screen).
+   - Found on the way, for Jose's pick: a Term Review session shows no
+     banner, only the small "Term Review" line (now its title); and a
+     doctor's page sits over Doctor Directory, so a screen reader finds
+     two titles there until the list is hidden from it while the page is
+     open (`aria-hidden` or `inert` on the list; not done, it changes
+     focus behaviour and wants its own test).
    - While there, on every screen: a 60-character doctor name, a very long
      term, a long chat message with no spaces; each failure forced (offline,
      AI down, storage refused) and its message read.

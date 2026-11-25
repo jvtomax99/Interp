@@ -182,7 +182,7 @@ function saCard(s){
   return `
     <article class="ff-card sa-card" style="--ff-color:${saColor(s)};">
       <div class="ff-head">
-        <h3 class="ff-es">${s.words.map(w => escapeHtml(w.w)).join('<span class="sa-dot"> · </span>')}</h3>
+        <h2 class="ff-es">${s.words.map(w => escapeHtml(w.w)).join('<span class="sa-dot"> · </span>')}</h2>
         <span class="ff-badge">${escapeHtml(kind.label)}</span>
         ${s.lang === 'es' ? '<span class="ff-badge sa-es">Heard in Spanish</span>' : ''}
         <span class="ff-tag">${escapeHtml(s.tag)}</span>
@@ -341,7 +341,7 @@ function renderSAHome(){
       </div>`;
   }).join('');
   return `
-    <div class="section-head"><h2>Sound-Alikes</h2><span class="sub">${SOUND_ALIKES.length} sets</span></div>
+    <div class="section-head"><h1>Sound-Alikes</h1><span class="sub">${SOUND_ALIKES.length} sets</span></div>
     <div class="cp-card sa-hero${din}" style="--i:0">
       <div class="cp-hud"><small>Train your ear</small></div>
       <div class="sa-pair">
@@ -366,11 +366,11 @@ function renderSoundAlikes(){
   const title = g ? g.name : 'Sound-Alikes';
   if(saMode === 'drill'){
     const sub = saIndex < saQuestions.length ? `${saIndex + 1} of ${saQuestions.length}` : 'results';
-    return `<div class="section-head"><h2>${escapeHtml(title)}</h2><span class="sub">${sub}</span>
+    return `<div class="section-head"><h1>${escapeHtml(title)}</h1><span class="sub">${sub}</span>
         <button class="head-action" onclick="saHome()">Exit</button></div>
       ${renderSADrill()}`;
   }
-  return `<div class="section-head"><h2>${escapeHtml(title)}</h2><span class="sub">${SOUND_ALIKES.filter(s => saInGroup(s, saFilter)).length} sets</span>
+  return `<div class="section-head"><h1>${escapeHtml(title)}</h1><span class="sub">${SOUND_ALIKES.filter(s => saInGroup(s, saFilter)).length} sets</span>
       <button class="head-action" onclick="saHome()">All groups</button></div>
     ${renderSAStudy()}`;
 }

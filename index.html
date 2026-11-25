@@ -4781,7 +4781,7 @@ function renderNotifications(){
   }[st];
   let html = head + `
     <div class="ta-card nt-status">
-      <div class="ta-state"><span class="ta-state-dot ${status.dot}"></span><div><h3>${status.h}</h3><p>${status.p}</p></div></div>
+      <div class="ta-state"><span class="ta-state-dot ${status.dot}"></span><div><h2>${status.h}</h2><p>${status.p}</p></div></div>
       ${st === 'off' ? `<div class="ta-row2"><button class="btn btn-primary" onclick="pushTurnOn()" ${PUSH.busy ? 'disabled' : ''}>${PUSH.busy ? 'Turning on…' : 'Turn on notifications'}</button></div>` : ''}
       ${st === 'on' ? `<div class="ta-row2"><button class="btn btn-ghost" onclick="pushTest()">Send me a test</button><button class="btn btn-ghost" onclick="pushTurnOff()" ${PUSH.busy ? 'disabled' : ''}>Turn off</button></div>` : ''}
     </div>`;
@@ -4793,7 +4793,7 @@ function renderNotifications(){
     const region = myRegion();
     html += `
     <div class="ta-card nt-kinds">
-      <h3>What you hear about</h3>
+      <h2>What you hear about</h2>
       ${sw('chat', notifyEnabled, 'Team Chat', region ? `Everyone and ${escapeHtml(regionName(region))}, and any message that @mentions you` : 'Every channel, and any message that @mentions you')}
       ${sw('ce', notifyCeEnabled, 'Training &amp; Events', 'When the daily check finds new CE or webinars')}
       ${sw('activity', notifyActivityEnabled, 'Team updates', 'Terms added or edited. Only while the Hub is open')}
@@ -4805,7 +4805,7 @@ function renderNotifications(){
     const phones = PUSH.phones == null ? '' : `Reaches ${PUSH.phones} phone${PUSH.phones === 1 ? '' : 's'} with notifications on.`;
     html += `
     <div class="ta-card nt-send">
-      <h3>Send to the team</h3>
+      <h2>Send to the team</h2>
       <p>Shows on every teammate’s phone that has notifications on, like a text. Only phones with the owner code see this. ${phones}</p>
       <label class="ta-label" for="ntTitle">Title</label>
       <input class="ta-field" id="ntTitle" type="text" maxlength="80" placeholder="Staff meeting moved" value="${escapeAttr(PUSH.draft.title)}" oninput="PUSH.draft.title=this.value">
@@ -4817,7 +4817,7 @@ function renderNotifications(){
   }
 
   if(PUSH.log.length){
-    html += `<div class="ta-card nt-log"><h3>From the team</h3><div class="ta-people">` + PUSH.log.map(n => `
+    html += `<div class="ta-card nt-log"><h2>From the team</h2><div class="ta-people">` + PUSH.log.map(n => `
       <div class="ta-person nt-item"><div class="ta-who"><b>${escapeHtml(n.title || 'Interpreter Hub')}</b>${n.body ? `<span class="nt-body">${escapeHtml(n.body)}</span>` : ''}<span>${escapeHtml([n.from, pushAgo(n.at)].filter(Boolean).join(' · '))}</span></div></div>`).join('') + `</div></div>`;
   }
   return html;
@@ -5316,7 +5316,7 @@ async function showCeNotification(ev){
 function renderEvents(){
   const sorted = CE_EVENTS.slice().sort((a,b)=> (b.timestamp||0) - (a.timestamp||0));
 
-  let html = `<div class="section-head"><h2>Training &amp; Events</h2><span class="sub">${sorted.length} item${sorted.length===1?'':'s'}</span>${
+  let html = `<div class="section-head"><h1>Training &amp; Events</h1><span class="sub">${sorted.length} item${sorted.length===1?'':'s'}</span>${
     notificationsSupported()
       ? `<button class="head-action ${notifyCeEnabled?'on':''}" onclick="toggleCeNotifications()">${ICON_BELL_SM} ${notifyCeEnabled?'Alerts on':'Alert me'}</button>`
       : ''
@@ -5934,7 +5934,7 @@ function reviewMistakesHtml(){
 
 function renderReviewCard(){
   const term = reviewQueue[reviewIndex], why = RS.why[term.id] || reviewWhy(term), c = RS.check;
-  let html = `<div class="section-head"><h2>Term Review</h2><span class="sub">${reviewIndex + 1} of ${reviewQueue.length}</span></div>`;
+  let html = `<div class="section-head"><h1>Term Review</h1><span class="sub">${reviewIndex + 1} of ${reviewQueue.length}</span></div>`;
   html += `<div class="review-card rv-card">
     <div class="rv-top"><span class="rv-why is-${why.k}">${escapeHtml(why.text)}</span>
       <span class="tag" style="--tag-color:${term.categoryColor};">${escapeHtml(term.categoryName.split(',')[0].split('&')[0].trim())}</span></div>
@@ -6014,7 +6014,7 @@ function renderReviewSummary(){
   // Each term missed, unless a later try in this session got it right.
   const last = id => rs.filter(x => x.id === id).pop(), left = [], seenM = new Set();
   rs.forEach(r => { if(!r.ok && !seenM.has(r.id) && !last(r.id).ok){ seenM.add(r.id); left.push(r); } });
-  let html = `<div class="section-head"><h2>Session done</h2><span class="sub">${right.length} of ${n} right</span></div>`;
+  let html = `<div class="section-head"><h1>Session done</h1><span class="sub">${right.length} of ${n} right</span></div>`;
   html += `<div class="rv-sum">
     <p class="rv-sum-line">${n ? `${right.length} right, ${n - right.length} to practise again.` : 'No answers were saved in this session.'}</p>
     ${up.length ? `<p><b>Moved up a step:</b> ${up.map(r => escapeHtml(r.term.en)).join(', ')}. They come back later than before.</p>` : ''}
@@ -6908,7 +6908,7 @@ function renderDoctorResearch(){
 
   return `
     <div class="doc-research">
-      <div class="section-head"><h2>Doctor Prep</h2></div>
+      <div class="section-head"><h1>Doctor Prep</h1></div>
       <div class="doc-research-search">
         <input id="doctorResearchInput" type="text" placeholder="Doctor's name, e.g. Dr. Andre Goy" aria-label="Doctor's name" value="${escapeHtml(s.doctorName || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
@@ -8649,7 +8649,8 @@ function renderContent(){
   }
 
   if(activeCategory === 'anatomy'){
-    content.innerHTML = '';
+    // The viewer is a frame laid over the page; this is the screen's one title, for a screen reader.
+    content.innerHTML = '<h1 class="sr-only">3D Body</h1>';
     return;
   }
 
@@ -8660,7 +8661,7 @@ function renderContent(){
 
   if(activeCategory === 'updates'){
     content.innerHTML = `
-      <div class="section-head"><h2>Recent Updates</h2><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span>${
+      <div class="section-head"><h1>Recent Updates</h1><span class="sub">${ACTIVITY.length} update${ACTIVITY.length===1?'':'s'}</span>${
         notificationsSupported()
           ? `<button class="head-action ${notifyActivityEnabled?'on':''}" onclick="toggleActivityNotifications()" title="${notifyActivityEnabled?'Turn off update notifications':'Get notified when your team adds or edits something'}">${ICON_BELL_SM} ${notifyActivityEnabled?'Notifications on':'Notify me'}</button>`
           : ''
@@ -8741,7 +8742,7 @@ function renderContent(){
         <div class="tc-head">
           <button type="button" class="tc-back" onclick="goBack()" aria-label="Go back" title="Back"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <div class="tc-faces" id="tcFaces" aria-hidden="true"></div>
-          <div class="tc-title"><h2>Team Chat</h2><span class="tc-sub" id="chatCount"></span></div>
+          <div class="tc-title"><h1>Team Chat</h1><span class="tc-sub" id="chatCount"></span></div>
           <button type="button" class="tc-icon-btn" id="tcPinBtn" onclick="openAnnouncementModal()" aria-label="Pin an update for the team" title="Pin an update for the team">${ICON_PIN}</button>
           ${notificationsSupported() ? `<button type="button" class="tc-icon-btn" id="chatNotifyBtn" onclick="toggleNotifications()"></button>` : ''}
         </div>
@@ -9854,7 +9855,7 @@ function renderPractice(){
   const todayCount = (st.on === dayStamp()) ? (st.answered||0) : 0;
   const goalPct = Math.min(100, Math.round((todayCount / DAILY_GOAL) * 100));
 
-  let html = `<div class="section-head"><h2>CoreCHI Practice</h2><span class="sub">${pool.length} questions</span>
+  let html = `<div class="section-head"><h1>CoreCHI Practice</h1><span class="sub">${pool.length} questions</span>
     <span class="practice-mark">${hmhDiamonds({ building:true, idle:true, size:10, gap:3 })}</span></div>`;
 
   html += `<details class="tool-note">
@@ -10481,7 +10482,7 @@ function renderQuiz(){
   const exam = quizMode === 'exam';
   const stat = practiceStatOf(q);
 
-  let html = `<div class="section-head"><h2>${exam ? 'Exam Simulation' : quizMode==='review' ? 'Review Session' : 'CoreCHI Practice'}</h2>
+  let html = `<div class="section-head"><h1>${exam ? 'Exam Simulation' : quizMode==='review' ? 'Review Session' : 'CoreCHI Practice'}</h1>
     <span class="sub">${quizIndex+1} of ${quizQuestions.length}</span>
     <button class="head-action" onclick="exitQuiz()">Exit</button></div>`;
 
@@ -10775,7 +10776,7 @@ function renderQuizResults(){
       ? '👍 A solid base. Focus your next sessions on the weakest domains below.'
       : '📘 Worth slowing down and reading the explanations before retrying. That\u2019s where the learning happens.';
 
-  let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
+  let html = `<div class="section-head"><h1>Practice Results</h1><span class="sub">${correct} of ${total} correct</span></div>`;
 
   // A stamp, and only for a full simulation -- if every session earned one it
   // would stop meaning anything by Thursday.
@@ -10788,7 +10789,7 @@ function renderQuizResults(){
         <span class="exam-seal-mark logo-shine"><img src="./hmh-mark.png" alt=""></span>
       </div>
       <span class="seal-score">${pct}%</span>
-      <h4>Exam simulation completed</h4>
+      <h2>Exam simulation completed</h2>
       <p>${escapeHtml(whoAmI() || 'Interpreter')} \u00b7 ${total} questions \u00b7 ${when}<br>
          ${regionOrgName(false)} \u00b7 Interpreter Services</p>
     </div>`;
@@ -10800,7 +10801,7 @@ function renderQuizResults(){
   html += quizMode === 'exam'
     ? `<div class="results-head is-sealed">
         <div class="results-summary">
-          <h3>${correct} of ${total} correct</h3>
+          <h2>${correct} of ${total} correct</h2>
           <p>${verdict}</p>
         </div>
       </div>`
@@ -10810,7 +10811,7 @@ function renderQuizResults(){
           <div class="score-ring-inner"><span class="score-pct">0%</span><span class="score-label">Score</span></div>
         </div>
         <div class="results-summary">
-          <h3>${correct} of ${total} correct</h3>
+          <h2>${correct} of ${total} correct</h2>
           <p>${verdict}</p>
         </div>
       </div>`;
@@ -11965,7 +11966,7 @@ function memRingHtml(kind){
 
 function renderMemTrainer(){
   const p = memProg(), kind = p.notes ? 'notes' : 'mem', span = p.best[kind] || 0;
-  let html = `<div class="section-head"><h2>Memory trainer</h2><span class="sub">Consecutive</span></div>`;
+  let html = `<div class="section-head"><h1>Memory trainer</h1><span class="sub">Consecutive</span></div>`;
   const L = MEM.line;
   if(MEM.stage === 'home' || !L){
     if(!MEM.lines && !MEM.loading && !MEM.err) memLoad().then(() => { if(activeCategory === 'memory') renderContent(); }, () => { if(activeCategory === 'memory') renderContent(); });
@@ -12729,7 +12730,7 @@ function renderHomeSection(title, moreLabel, moreAction, cardsHtml, addAction, a
   return `
     <section class="home-sec" data-home-section="${key}" style="--section-color:${sectionColor}">
       <div class="home-sec-head">
-        <h3>${escapeHtml(title)}</h3>
+        <h2>${escapeHtml(title)}</h2>
         ${addAction ? `<button type="button" class="home-sec-add" onclick="${addAction}" aria-label="${escapeAttr(addLabel || 'Add')}"><span class="home-sec-add-pill">${ICON_PLUS}<span>New</span></span></button>` : ''}
         ${moreAction ? `<button type="button" class="home-sec-more" onclick="${moreAction}" aria-label="${escapeAttr(moreLabel + ' ' + title)}">${escapeHtml(moreLabel)} ${ICON_CHEVRON_RIGHT}</button>` : ''}
       </div>
@@ -12895,7 +12896,7 @@ function renderHome(){
 
     <section class="home-sec">
       <div class="home-sec-head">
-        <h3>Recent Team Activity</h3>
+        <h2>Recent Team Activity</h2>
         ${ACTIVITY.length ? `<button class="home-sec-more" onclick="setCategory('updates')">View all \u2192</button>` : ''}
       </div>
       <div class="home-two-col">
@@ -12928,7 +12929,7 @@ function renderProviders(q){
     const msg = PROVIDERS.length===0
       ? '🩺 No providers here yet.<br>Add the first one your team works with.'
       : 'No providers match your search.';
-    return `<div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
+    return `<h1 class="sr-only">Provider Pictures</h1><div class="empty"><div class="glyph">${ICON_PERSON}</div>${msg}</div>`;
   }
 
   // Same location grouping as the Doctor Directory — the facility field is
@@ -12936,7 +12937,7 @@ function renderProviders(q){
   const groups = groupByLocation(list, p => p.facility);
   const searching = !!q;
 
-  let html = `<div class="section-head"><h2>Provider Pictures</h2><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
+  let html = `<div class="section-head"><h1>Provider Pictures</h1><span class="sub">${list.length} provider${list.length===1?'':'s'}</span></div>`;
   html += groupControlsHtml('providers', groups, searching);
   let cardIdx = -1;
   groups.forEach(group=>{
@@ -12982,11 +12983,11 @@ function renderProviders(q){
 
 function renderTrash(){
   if(!TRASH.length){
-    return `<div class="section-head"><h2>Recently deleted</h2></div>
+    return `<div class="section-head"><h1>Recently deleted</h1></div>
       <div class="empty">Nothing has been deleted in the last ${TRASH_RETENTION_DAYS} days.</div>`;
   }
   const typeLabel = { term:'Term', doctor:'Doctor', provider:'Provider', domain:'Domain' };
-  return `<div class="section-head"><h2>Recently deleted</h2><span class="sub">${TRASH.length}</span></div>
+  return `<div class="section-head"><h1>Recently deleted</h1><span class="sub">${TRASH.length}</span></div>
     <p class="doc-research-intro">Anything removed in the last ${TRASH_RETENTION_DAYS} days can be put back. After that it clears itself.</p>
     <div class="doc-research-terms">
       ${TRASH.map(t => `
@@ -13172,7 +13173,7 @@ function doctorRecentHtml(){
     return `<button type="button" class="dl-recent-btn" style="--dp-sp:${specialtyColor(d.specialty)}" onclick="openDoctorDirDetail(${jsArg(d.id)})"
       aria-label="${escapeAttr(d.name)}"><span class="dl-recent-ph" aria-hidden="true">${art}</span><span>${escapeHtml(label)}</span></button>`;
   }).join('');
-  return `<div class="dl-recent"><h3 class="dl-recent-h">Recent</h3><div class="dl-recent-row">${items}</div></div>`;
+  return `<div class="dl-recent"><h2 class="dl-recent-h">Recent</h2><div class="dl-recent-row">${items}</div></div>`;
 }
 
 // One group's heading in the Specialty view, and Place's "Other places"
@@ -13301,7 +13302,7 @@ function renderDoctorDirectory(q){
   html += `<div class="dl-list is-${sort}">`;
   groups.forEach(group=>{
     if(sort === 'az'){
-      html += `<h3 class="dl-letter-head" id="dl-letter-${group.name === '#' ? 'num' : group.name}">${group.name}</h3>`;
+      html += `<h2 class="dl-letter-head" id="dl-letter-${group.name === '#' ? 'num' : group.name}">${group.name}</h2>`;
     } else if(sort === 'specialty'){
       html += doctorSpecHeadHtml(group, searching);
       if(!searching && doctorGroupFolds(group) && isGroupCollapsed('doctors-spec', group.name)) return;
@@ -13933,7 +13934,7 @@ function renderDoctorDirDetail(d){
   return `
     <div class="dp-top">
       <button type="button" class="dp-ib" aria-label="Back to all doctors" onclick="morphCloseDoctor()">${ICON_CHEVRON_LEFT}</button>
-      <h2 class="dp-top-title">Doctor</h2>
+      <div class="dp-top-title">Doctor</div>
       <button type="button" class="dp-ib is-edit" aria-label="Edit ${escapeAttr(d.name)}" onclick="doctorPageEdit('${id}')">${ICON_EDIT}</button>
     </div>
     <div class="dp-body" style="--dp-sp:${sp}">
@@ -14042,7 +14043,7 @@ function renderEthics(q){
     CCHI: ETHICS_CONTENT.filter(e=>e.org==='CCHI').length,
   };
 
-  let html = `<div class="section-head"><h2>Code of Ethics</h2><span class="sub">${list.length} ${list.length===1?'entry':'entries'}</span></div>`;
+  let html = `<div class="section-head"><h1>Code of Ethics</h1><span class="sub">${list.length} ${list.length===1?'entry':'entries'}</span></div>`;
   html += `<div class="ethics-filter-row">
     <button class="ethics-filter-pill ${ethicsFilter==='all'?'is-active':''}" onclick="setEthicsFilter('all')">All (${counts.all})</button>
     <button class="ethics-filter-pill ${ethicsFilter==='NCIHC'?'is-active':''}" onclick="setEthicsFilter('NCIHC')">NCIHC Principles (${counts.NCIHC})</button>
@@ -14515,7 +14516,7 @@ function renderChatMessages(){
     const rn = regionName(chatChannel);
     container.innerHTML = `<div class="tc-empty">
         <div class="tc-empty-wave" aria-hidden="true">👋</div>
-        <h3>Nothing in ${escapeHtml(rn)} yet</h3>
+        <h2>Nothing in ${escapeHtml(rn)} yet</h2>
         <p>This channel is for the ${escapeHtml(rn)} region. Everyone can read it; ${chatFollowed(chatChannel) ? 'it notifies you.' : 'it doesn’t notify you, Everyone and your region do.'}</p>
       </div>`;
     renderedChatIds = new Set();
@@ -14526,7 +14527,7 @@ function renderChatMessages(){
     container.innerHTML = tc
       ? `<div class="tc-empty">
           <div class="tc-empty-wave" aria-hidden="true">👋</div>
-          <h3>Say hi to the team</h3>
+          <h2>Say hi to the team</h2>
           <p>Ask about a term, share a photo of new signage, or flag what’s busy on your floor.</p>
           <div class="tc-starters">${CHAT_STARTERS.map(t => `<button type="button" class="tc-starter" onclick="useChatStarter(${jsArg(t)})">${escapeHtml(t)}</button>`).join('')}</div>
         </div>`
@@ -15334,14 +15335,15 @@ function renderDirectory(q){
   });
 
   if(totalRows===0){
-    return `<div class="empty"><div class="glyph">${ICON_CHAIN}</div>No links match your search.</div>`;
+    return `<h1 class="sr-only">Link Directory</h1><div class="empty"><div class="glyph">${ICON_CHAIN}</div>No links match your search.</div>`;
   }
 
   const intro = `<p style="font-size:12.5px; color:var(--ink-soft); max-width:640px; margin:-6px 0 26px 0; line-height:1.6;">
     Every source link your team has pasted in, in one place. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain. To find reading for a term that has no source yet, open the term and tap "Look up".
   </p>`;
 
-  return intro + sectionsHtml;
+  // The visible name is in the tab and sidebar; this is the title a screen reader hears.
+  return `<h1 class="sr-only">Link Directory</h1>` + intro + sectionsHtml;
 }
 
 /* ============ Add / Edit / Delete ============ */
@@ -16513,7 +16515,7 @@ function renderTeamAccess(){
     if(ACCESS.state === 'none' || ACCESS.state === 'unknown'){
       return head + `
         <div class="ta-card">
-          <h3>Set up the team code</h3>
+          <h2>Set up the team code</h2>
           <p>You become the owner: you share one code with the team and can change it any time. Nothing locks yet. The Hub starts in practice mode, and you lock it when everyone has the code.</p>
           <p>Before this works, Anonymous sign-in has to be on in Firebase and the new rules published.</p>
           <label class="ta-label" for="taOwnerName">Your name</label>
@@ -16523,7 +16525,7 @@ function renderTeamAccess(){
     }
     return head + `
       <div class="ta-card">
-        <h3>${accessOwnerFirst() ? escapeHtml(accessOwnerFirst()) + ' manages the team code' : 'Only the owner manages the team code'}</h3>
+        <h2>${accessOwnerFirst() ? escapeHtml(accessOwnerFirst()) + ' manages the team code' : 'Only the owner manages the team code'}</h2>
         ${isHubMember()
           ? `<p>This phone is signed in. For a new phone, ask ${escapeHtml(accessOwnerFirst() || 'the owner')} or a teammate for the current code.</p>`
           : `<p>Ask ${escapeHtml(accessOwnerFirst() || 'the owner')} or a teammate for the team code.</p>
@@ -16547,7 +16549,7 @@ function renderTeamAccess(){
   const status = `
     <div class="ta-card ${locked ? 'is-locked' : ''}">
       <div class="ta-state"><span class="ta-state-dot" aria-hidden="true"></span><div>
-        <h3>${locked ? 'The Hub is locked' : 'Practice mode is on'}</h3>
+        <h2>${locked ? 'The Hub is locked' : 'Practice mode is on'}</h2>
         <p>${locked
           ? 'Only phones that entered the code get in. The database, photos and AI tools turn everyone else away.'
           : 'People see the lock screen but can still skip it, and nothing is enforced yet. Lock the Hub once your team has the code.'}</p>
@@ -16779,7 +16781,7 @@ function startAppt(){
 }
 function apptClockText(){ const m = apptMinutes(); return m < 1 ? 'just started' : m + (m === 1 ? ' minute' : ' minutes'); }
 function renderAppt(){
-  if(!APPT) return `<div class="appt"><p class="appt-none">No appointment running.</p></div>`;
+  if(!APPT) return `<h1 class="sr-only">Appointment</h1><div class="appt"><p class="appt-none">No appointment running.</p></div>`;
   const dom = DATA.categories.find(c => c.id === APPT.domainId);
   const entry = prepDoctorEntry(APPT.doctor), doc = entry ? entry.name : APPT.doctor;
   return `<div class="appt">
@@ -17668,7 +17670,7 @@ function prepTraps(dom){
 }
 function renderPrep(){
   const dom = DATA.categories.find(c => c.id === PREP.domainId);
-  if(!dom) return `<div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
+  if(!dom) return `<h1 class="sr-only">Your briefing</h1><div class="prep"><div class="prep-card"><p class="prep-note">Pick a specialty to get a briefing.</p><button type="button" class="prep-act" onclick="openPrep()">Choose a specialty</button></div></div>`;
   firstWeekMark('brief');
   // Your practice record, loaded once; the screen repaints when it arrives.
   if(!prepReviewsAsked){ prepReviewsAsked = true; ensureLoaded('termReviews', loadTermReviews).then(() => { if(activeCategory === 'prep') renderContent(); }).catch(() => {}); }
@@ -17685,16 +17687,16 @@ function renderPrep(){
       <div class="prep-hero-text"><small>Your briefing</small><h1>${escapeHtml(dom.name)}</h1>
         <p>${docName ? 'with ' + escapeHtml(docName) : 'Any doctor'}<button type="button" class="prep-change" onclick="openPrep()">Change</button></p></div>
       <span id="prepReady">${prepReadyHtml(dom)}</span></div>
-    <div class="prep-sec"><h3>Words to have ready</h3><span>About 2 minutes</span></div>
+    <div class="prep-sec"><h2>Words to have ready</h2><span>About 2 minutes</span></div>
     <div id="prepDeck">${prepDeckHtml(dom)}</div>
     <div class="prep-startbar">${apptActive()
       ? `<button type="button" class="prep-start" onclick="setCategory('appt')">${ICON_CLOCK_APPT}<span>Back to the appointment</span></button>`
       : `<button type="button" class="prep-start" onclick="startAppt()">${ICON_CLOCK_APPT}<span>Start the appointment</span></button>`}</div>
-    ${likely.length ? `<div class="prep-sec"><h3>Likely with ${escapeHtml(docName)}</h3><span>from Doctor Prep</span></div>
+    ${likely.length ? `<div class="prep-sec"><h2>Likely with ${escapeHtml(docName)}</h2><span>from Doctor Prep</span></div>
       <div class="prep-card">${likely.map(t => `<div class="prep-row"><span class="prep-row-text"><b>${escapeHtml(t.en || '')}</b><em>${escapeHtml(t.es || '')}</em></span></div>`).join('')}</div>` : ''}
-    ${traps.length ? `<div class="prep-sec"><h3>Traps to watch</h3><button type="button" class="prep-link" onclick="setCategory('falsefriends')">All False Friends</button></div>
+    ${traps.length ? `<div class="prep-sec"><h2>Traps to watch</h2><button type="button" class="prep-link" onclick="setCategory('falsefriends')">All False Friends</button></div>
       <div class="prep-traps">${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b><p>Looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(/[;:] /)[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</p></div>`).join('')}</div>` : ''}
-    ${docName ? `<div class="prep-sec"><h3>Your doctor</h3></div>
+    ${docName ? `<div class="prep-sec"><h2>Your doctor</h2></div>
       <div class="prep-card prep-doc"><span class="prep-av" aria-hidden="true">${escapeHtml(initials || 'Dr')}</span>
         <div><b>${escapeHtml(docName)}</b><small>${research ? 'Doctor Prep has looked them up' + (entry && entry.lastResearchedBy ? ' (' + escapeHtml(entry.lastResearchedBy) + ')' : '')
           : escapeHtml([entry && entry.specialty, 'Not looked up yet · about 20 seconds'].filter(Boolean).join(' · '))}</small></div>
