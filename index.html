@@ -172,7 +172,7 @@
   <div class="modal">
     <h3>Pin an announcement</h3>
     <p class="rg-where" id="fAnnouncementWhere"></p>
-    <div class="field"><label>Announcement</label><textarea id="fAnnouncementText" placeholder="e.g. New CE requirement this quarter — see Training &amp; Events for the link" style="min-height:90px;"></textarea></div>
+    <div class="field"><label>Announcement</label><textarea id="fAnnouncementText" placeholder="e.g. New CE requirement this quarter. See Training &amp; Events for the link" style="min-height:90px;"></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeAnnouncementModal()">Cancel</button>
       <button class="btn btn-primary" onclick="addAnnouncement()">Pin it</button>
@@ -215,8 +215,8 @@
     <div class="field"><label>Domain name</label><input id="fDomainName" type="text" placeholder="e.g. Psychiatry &amp; Behavioral Health"></div>
     <div class="field">
       <label>Parent domain (optional)</label>
-      <select id="fDomainParent"><option value="">None — top-level domain</option></select>
-      <p class="field-hint" id="fDomainParentHint">Nesting under a parent keeps this domain's terms completely separate — it's just grouped visually, like "Breast Oncology" under "Oncology, Hematology &amp; Leukemia."</p>
+      <select id="fDomainParent"><option value="">None (top-level domain)</option></select>
+      <p class="field-hint" id="fDomainParentHint">Nesting under a parent keeps this domain's terms completely separate. It's just grouped visually, like "Breast Oncology" under "Oncology, Hematology &amp; Leukemia."</p>
     </div>
     <div class="field"><label>Color</label><div class="swatch-row" id="swatchRow"></div></div>
     <div class="field">
@@ -263,7 +263,7 @@
   <div class="modal">
     <h3 id="doctorDirModalTitle">Add doctor</h3>
     <div class="field"><label>Name</label><input id="fDDName" type="text" placeholder="e.g. Dr. Lori A. Leslie"></div>
-    <div class="field"><label>Specialty (optional)</label><input id="fDDSpecialty" type="text" placeholder="e.g. Lymphoma \u2014 John Theurer Cancer Center"></div>
+    <div class="field"><label>Specialty (optional)</label><input id="fDDSpecialty" type="text" placeholder="e.g. Lymphoma, John Theurer Cancer Center"></div>
     <div class="field">
       <label id="fDDPlaceLab">Where</label>
       <button type="button" class="place-field" id="fDDPlace" aria-labelledby="fDDPlaceLab fDDPlace" onclick="openPlacePicker()"></button>
@@ -329,7 +329,7 @@
 <div class="overlay" id="termCheckOverlay" onclick="if(event.target===this) closeTermCheck()">
   <div class="modal">
     <h3>A second look</h3>
-    <p class="tc-intro">Saved <span class="tc-term" id="tcTermName"></span>. A quick review turned up something worth a glance — you know the work, so treat these as suggestions.</p>
+    <p class="tc-intro">Saved <span class="tc-term" id="tcTermName"></span>. A quick review turned up something worth a glance. You know the work, so treat these as suggestions.</p>
     <div class="tc-list" id="tcList"></div>
     <p class="tc-foot">The term is already saved. Nothing here changes it unless you do.</p>
     <div class="modal-actions">
@@ -439,7 +439,7 @@
         <div class="name-photo-actions" id="namePhotoActions"></div>
       </div>
     </div>
-    <p class="name-photo-hint">A photo is optional \u2014 your team sees it beside your messages in Team Chat.</p>
+    <p class="name-photo-hint">A photo is optional. Your team sees it beside your messages in Team Chat.</p>
     <!-- The owner's way in to Team access, or a way to enter the code. Filled by renderNameAccess(). -->
     <div class="name-access" id="nameAccess" hidden></div>
     <!-- Region (setMyRegion, ih_region): what the Doctor Directory opens on
@@ -668,7 +668,7 @@
     // the network again, which is the behaviour the app shipped with for
     // months. Don't re-enable without testing on a real iPhone first.
   }catch(e){
-    console.error('Firebase failed to initialize — check firebaseConfig above.', e);
+    console.error('Firebase failed to initialize. Check firebaseConfig above.', e);
   }
   }
 </script>
@@ -1587,7 +1587,7 @@ function examReadiness(){
     note  = worst ? `Most of the ground left is in ${worst.d.name}, which is ${worst.d.weight}% of the exam.` : 'Keep going.';
   } else if(pct < 70){
     title = 'Coming together';
-    note  = worst ? `${worst.d.name} is the biggest gap left — ${worst.d.weight}% of the exam.` : 'Keep going.';
+    note  = worst ? `${worst.d.name} is the biggest gap left: ${worst.d.weight}% of the exam.` : 'Keep going.';
   } else if(pct < 85){
     title = 'Nearly there';
     note  = worst ? `Tighten ${worst.d.name} and sit a full simulation.` : 'Sit a full simulation.';
@@ -1912,7 +1912,7 @@ let onboardingStep = 0;
 const ONBOARDING_STEPS = [
   {
     title: 'Welcome to Interpreter Hub',
-    body: 'A shared home base for HUMC\u2019s interpreter team \u2014 the glossary, appointment briefings, doctor lists, team chat and CoreCHI study tools, all in one place.'
+    body: 'A shared home base for HUMC\u2019s interpreter team: the glossary, appointment briefings, doctor lists, team chat and CoreCHI study tools, all in one place.'
   },
   {
     title: 'Five buttons at the bottom',
@@ -2499,7 +2499,7 @@ function startCategoriesMetaListener(){
 }
 
 async function saveTermDoc(term){
-  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  if(!db){ showToast('Not connected. Check your connection and retry.'); return false; }
   try{
     const state = await queuedWrite({
       collection: 'terms', docId: term.id, op: 'set', data: stripUndefined(term)
@@ -2589,7 +2589,7 @@ function queuedDelete(collection, docId){
 function removeFailedMessage(err){
   return err && (err.code === 'permission-denied' || /permission/i.test(String(err.message || '')))
     ? 'Only the person who posted it, or the Hub\u2019s owner, can remove that.'
-    : 'Could not remove \u2014 check your connection.';
+    : 'Could not remove. Check your connection.';
 }
 
 async function dropFromTrash(id, behind){
@@ -2625,7 +2625,7 @@ async function restoreTrashItem(id, quiet){
     if(entry.type === 'term'){
       const categoryId = (entry.extra && entry.extra.categoryId) || p.categoryId;
       const cat = DATA.categories.find(c => c.id === categoryId);
-      if(!cat){ showToast('That domain no longer exists \u2014 restore it first.'); return false; }
+      if(!cat){ showToast('That domain no longer exists. Restore it first.'); return false; }
       ok = await saveTermDoc({ ...p, id: p.id, categoryId });
       if(ok === 'queued') state = 'queued';
       if(ok && !cat.terms.some(t => t.id === p.id)) cat.terms.push({ ...p });
@@ -2651,7 +2651,7 @@ async function restoreTrashItem(id, quiet){
 
   // Never drop the bin copy unless the item really went back.
   if(!ok){
-    if(!quiet) showToast('Could not restore \u2014 check your connection.');
+    if(!quiet) showToast('Could not restore. Check your connection.');
     return false;
   }
   await dropFromTrash(id, state);
@@ -2697,7 +2697,7 @@ async function deleteTermDoc(id){
 }
 
 async function saveCategoriesMeta(){
-  if(!db){ showToast('Not connected — check your connection and retry.'); return false; }
+  if(!db){ showToast('Not connected. Check your connection and retry.'); return false; }
   try{
     const categoriesMeta = DATA.categories.map(categoryMeta);
     await db.collection('terminology-meta').doc('categories').set({ categories: categoriesMeta, updatedAt: Date.now() });
@@ -3142,7 +3142,7 @@ async function addAnnouncement(){
   const input = document.getElementById('fAnnouncementText');
   const text = input.value.trim();
   if(!text){ showToast('Write something to pin first.'); return; }
-  if(!db){ showToast('Not connected — check your connection and retry.'); return; }
+  if(!db){ showToast('Not connected. Check your connection and retry.'); return; }
   try{
     // Pinned in a region's channel: that channel's pin (no channel = Everyone's).
     // The sender's id only when there is one (the database refuses an empty one).
@@ -3510,8 +3510,8 @@ async function readFileAsAttachment(file){
   const isImage = file.type.startsWith('image/');
   const isPdf = file.type === 'application/pdf';
   if(!isImage && !isPdf) throw new Error('Only images and PDF files are supported.');
-  if(isPdf && file.size > MAX_PDF_BYTES) throw new Error('That PDF is larger than 25MB — try compressing it or splitting it up.');
-  if(!storage) throw new Error('File storage isn\'t set up yet — check the Firebase Storage setup.');
+  if(isPdf && file.size > MAX_PDF_BYTES) throw new Error('That PDF is larger than 25MB. Try compressing it or splitting it up.');
+  if(!storage) throw new Error('File storage isn\'t set up yet. Check the Firebase Storage setup.');
 
   const blobToUpload = isImage ? await compressImageToBlob(file) : file;
   const mimeType = isImage ? 'image/jpeg' : file.type;
@@ -3597,7 +3597,7 @@ async function deleteAttachment(id){
     showUndoToast('Attachment removed.', trashId);
     render();
   }catch(err){
-    showToast('Could not remove — check your connection.');
+    showToast('Could not remove. Check your connection.');
   }
 }
 
@@ -3839,7 +3839,7 @@ async function copyText(btn, text){
     ok = false;
   }
 
-  if(!ok){ showToast('Could not copy — try selecting the text manually.'); return; }
+  if(!ok){ showToast('Could not copy. Try selecting the text manually.'); return; }
 
   const original = btn.innerHTML;
   btn.innerHTML = ICON_CHECK;
@@ -4250,14 +4250,14 @@ async function deleteActivity(id){
 
 async function clearAllActivity(){
   if(!ACTIVITY.length) return;
-  if(!confirm(`Clear all ${ACTIVITY.length} updates? This only clears the activity list — your terms, notes, providers, and messages are not affected.`)) return;
+  if(!confirm(`Clear all ${ACTIVITY.length} updates? This only clears the activity list. Your terms, notes, providers, and messages are not affected.`)) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   const ids = ACTIVITY.map(a=>a.id);
   try{
     await Promise.all(ids.map(id => db.collection('activity-log').doc(id).delete()));
     showToast('Activity cleared.');
   }catch(err){
-    showToast('Could not clear everything — check your connection.');
+    showToast('Could not clear everything. Check your connection.');
   }
 }
 
@@ -4352,7 +4352,7 @@ async function saveQuestion(){
 
   if(!q){ showToast('Enter the question text.'); return; }
   if(opts.some(o=>!o)){ showToast('All four options are required.'); return; }
-  if(!e){ showToast('Add an explanation \u2014 it\u2019s what makes the question useful to study from.'); return; }
+  if(!e){ showToast('Add an explanation. It\u2019s what makes the question useful to study from.'); return; }
   if(!db){ showToast('Not connected to the database.'); return; }
 
   const record = { d, q, o:opts, a, e, addedBy: whoAmI() || '', createdAt: Date.now() };
@@ -4365,7 +4365,7 @@ async function saveQuestion(){
     showToast('Question added.');
     render();
   }catch(err){
-    showToast('Could not save \u2014 check your connection.');
+    showToast('Could not save. Check your connection.');
   }
 }
 
@@ -4514,7 +4514,7 @@ async function showChatNotification(msg){
     : files.length ? 'Sent an attachment' : 'New message';
   const ch = chatChannelOf(msg);
   const where = ch === 'all' ? 'Interpreter Hub' : `${regionName(ch)} · Interpreter Hub`;
-  const title = mentionsMe ? `${author} mentioned you — ${where}` : `${author} — ${where}`;
+  const title = mentionsMe ? `${author} mentioned you · ${where}` : `${author} · ${where}`;
   await sendNotification(title, body, 'chat', 'interpreter-hub-chat');
 }
 
@@ -5310,7 +5310,7 @@ function updateCeBadge(){
 async function showCeNotification(ev){
   if(!notifyCeEnabled || pushCovers('ce')) return;
   const body = ev.title || ev.summary || 'New training opportunity';
-  await sendNotification(`${ev.source || 'Training'} \u2014 Interpreter Hub`, body, 'events', 'interpreter-hub-events');
+  await sendNotification(`${ev.source || 'Training'} \u00b7 Interpreter Hub`, body, 'events', 'interpreter-hub-events');
 }
 
 function renderEvents(){
@@ -5322,7 +5322,7 @@ function renderEvents(){
       : ''
   }<button class="head-action" onclick="openAddEventModal()">+ Add</button></div>`;
 
-  html += `<p class="practice-intro">Checked daily across CHIA, CCHI and NCIHC. Cross-Cultural Communications blocks automated checks, so add their trainings yourself, along with anything you spot elsewhere \u2014 an in-service, a conference, a newsletter item.</p>`;
+  html += `<p class="practice-intro">Checked daily across CHIA, CCHI and NCIHC. Cross-Cultural Communications blocks automated checks, so add their trainings yourself, along with anything you spot elsewhere: an in-service, a conference, a newsletter item.</p>`;
 
   if(!sorted.length){
     html += `<div class="empty"><div class="glyph">${ICON_CALENDAR}</div>Nothing yet.<br>The watcher checks once a day, or add something manually.</div>`;
@@ -5414,7 +5414,7 @@ function saveErrorMessage(err, collection){
     return `Saving was blocked by the database rules${collection ? ` for "${collection}"` : ''}. Add the matching Firestore rule, then try again.`;
   }
   if(code.includes('unavailable') || code.includes('network') || code.includes('offline')){
-    return 'Could not reach the database — check your connection.';
+    return 'Could not reach the database. Check your connection.';
   }
   return 'Could not save. Please try again.';
 }
@@ -6689,7 +6689,7 @@ async function addSuggestedTermToGlossary(en, es, def, btn, specialtyOverride){
     ? specialtyOverride
     : (doctorResearchState.result ? doctorResearchState.result.specialty : null);
   const domain = findBestDomainMatch(specialty);
-  if(!domain){ showToast('No matching domain found — add this one manually.'); return; }
+  if(!domain){ showToast('No matching domain found. Add this one manually.'); return; }
   const id = genId();
   const editor = whoAmI();
   const ok = await saveTermDoc({ id, categoryId: domain.id, en, es, def, editedBy: editor, editedOn: timeAgoLabel() });
@@ -6714,7 +6714,7 @@ const RESEARCH_TIER_LABELS = {
 
 const RESEARCH_TIER_BLURBS = {
   core: 'Highest frequency in this specialty.',
-  procedures: 'What gets ordered or performed — consent language shows up here.',
+  procedures: 'What gets ordered or performed. Consent language shows up here.',
   drugs: 'Generic with the US brand name. Most renderings break here.',
   anatomy: 'Structures and function specific to this specialty.',
   falsefriends: 'Where the obvious rendering is the wrong one.',
@@ -6793,7 +6793,7 @@ async function addAllInTier(scope, tierKey, specialtyOverride){
 
   const specialty = specialtyOverride || (result && result.specialty) || '';
   const domain = findBestDomainMatch(specialty);
-  if(!domain){ showToast('No matching domain found \u2014 add these one at a time.'); return; }
+  if(!domain){ showToast('No matching domain found. Add these one at a time.'); return; }
 
   showToast(`Adding ${missing.length} term${missing.length === 1 ? '' : 's'} to ${domain.name}\u2026`);
   let added = 0;
@@ -6890,7 +6890,7 @@ function renderDoctorResearch(){
       <div class="doc-research-cache-banner">
         <div class="doc-research-cache-banner-text">
           ${ICON_CLOCK}
-          <span>Cached \u2014 researched by ${escapeHtml(cache.cachedBy || 'a teammate')}${cache.cachedAt ? ` on ${new Date(cache.cachedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</span>
+          <span>Cached \u00b7 researched by ${escapeHtml(cache.cachedBy || 'a teammate')}${cache.cachedAt ? ` on ${new Date(cache.cachedAt).toLocaleDateString(undefined,{month:'short', day:'numeric'})}` : ''}</span>
         </div>
         <button class="doc-research-cache-refresh" onclick="runDoctorResearch(true)">Refresh</button>
       </div>` : '';
@@ -6900,7 +6900,7 @@ function renderDoctorResearch(){
         <div class="doc-research-specialty">${r.specialty ? escapeHtml(r.specialty) : 'Specialty not confidently identified'}</div>
         <p>${escapeHtml(r.note || '')}</p>
       </div>
-      <div class="doc-research-terms-label">Suggested terminology (${researchTermCount(r)})${domainMatch ? ` \u2014 new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
+      <div class="doc-research-terms-label">Suggested terminology (${researchTermCount(r)})${domainMatch ? `: new terms would be added to <b>${escapeHtml(domainMatch.name)}</b>` : ''}</div>
       ${renderResearchTierBlocks(researchTiers(r), undefined, 'prep')}`;
   } else {
     body = `<p class="doc-research-intro">Type a doctor's name to look up their specialty and get a head start on the terminology likely to come up in that appointment. Adding a specialty or location narrows the search and finds the right person faster.</p>`;
@@ -6919,10 +6919,10 @@ function renderDoctorResearch(){
         <input id="doctorResearchLocation" type="text" placeholder="Location" aria-label="Hospital or location (optional)" value="${escapeHtml(s.location || '')}"
           onkeydown="if(event.key==='Enter') runDoctorResearch()">
       </div>
-      ${/hackensack/i.test(s.location || '') ? `<p class="doc-research-fastpath">${ICON_SPARK} Searching Hackensack Meridian's own directory directly \u2014 faster and more accurate than a general web search.</p>` : ''}
+      ${/hackensack/i.test(s.location || '') ? `<p class="doc-research-fastpath">${ICON_SPARK} Searching Hackensack Meridian's own directory directly, which is faster and more accurate than a general web search.</p>` : ''}
       <button class="btn btn-primary doc-research-submit" onclick="runDoctorResearch()" ${s.status==='loading'?'disabled':''}>Research</button>
       ${body}
-      <p class="doc-research-disclaimer">Based on publicly available information — always confirm specialty and terminology with the care team before the appointment.</p>
+      <p class="doc-research-disclaimer">Based on publicly available information. Always confirm specialty and terminology with the care team before the appointment.</p>
     </div>
   `;
 }
@@ -7095,10 +7095,10 @@ const ICON_REVIEW = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.o
 
 const ETHICS_CONTENT = [
   { id:'e-confidentiality', org:'NCIHC', tag:'Principle', title:'Confidentiality',
-    summary:`Keep everything you hear or read during an assignment private. Share it only when the law or your facility's policy specifically requires it (like mandatory abuse reporting) — never out of habit or convenience.`,
-    practice:`Don't discuss patient details in the break room, in Team Chat, or with friends and family — even to vent about a hard day.` },
+    summary:`Keep everything you hear or read during an assignment private. Share it only when the law or your facility's policy specifically requires it (like mandatory abuse reporting), never out of habit or convenience.`,
+    practice:`Don't discuss patient details in the break room, in Team Chat, or with friends and family, even to vent about a hard day.` },
   { id:'e-accuracy', org:'NCIHC', tag:'Principle', title:'Accuracy & Fidelity',
-    summary:`Render the message completely and precisely — tone, register, and intent included — without adding, omitting, or softening anything either party said.`,
+    summary:`Render the message completely and precisely (tone, register, and intent included) without adding, omitting, or softening anything either party said.`,
     practice:`If a patient swears or a provider is blunt, interpret that tone too. If you don't understand a term, say so out loud instead of guessing.` },
   { id:'e-impartiality', org:'NCIHC', tag:'Principle', title:'Impartiality',
     summary:`Stay neutral. Don't let your own opinions, relationships, or reactions to what's being said change how you interpret it.`,
@@ -7108,27 +7108,27 @@ const ETHICS_CONTENT = [
     practice:`Use the language and pronouns the patient prefers. Interpret their choices to the provider without editorializing them.` },
   { id:'e-cultural', org:'NCIHC', tag:'Principle', title:'Cultural Awareness',
     summary:`Language and culture are intertwined. Part of the job is noticing when a literal translation would lose or distort the intended meaning.`,
-    practice:`Flag a culturally-loaded phrase — a folk illness term, a family decision-making norm — rather than translating it word-for-word and letting the meaning get lost.` },
+    practice:`Flag a culturally-loaded phrase (a folk illness term, a family decision-making norm) rather than translating it word-for-word and letting the meaning get lost.` },
   { id:'e-role', org:'NCIHC', tag:'Principle', title:'Role Boundaries',
-    summary:`Interpret — don't counsel, diagnose, give personal opinions, or fill in for other staff roles unless you're specifically asked and qualified to.`,
+    summary:`Interpret. Don't counsel, diagnose, give personal opinions, or fill in for other staff roles unless you're specifically asked and qualified to.`,
     practice:`If a patient asks "what would you do?", interpret the question to the provider rather than answering it yourself.` },
   { id:'e-professionalism', org:'NCIHC', tag:'Principle', title:'Professionalism',
     summary:`Show up prepared and on time, and conduct yourself the way any other clinical professional would.`,
     practice:`Keep personal phone use out of the encounter. Dress and behave consistently with the clinical setting you're in.` },
   { id:'e-development', org:'NCIHC', tag:'Principle', title:'Professional Development',
-    summary:`Certification is a starting point, not a finish line — terminology, technique, and cultural competence all keep evolving.`,
+    summary:`Certification is a starting point, not a finish line: terminology, technique, and cultural competence all keep evolving.`,
     practice:`This is exactly what Term Review, CoreCHI Practice, and the CE events feed in this app are for.` },
   { id:'e-advocacy', org:'NCIHC', tag:'Principle', title:'Advocacy',
-    summary:`When you see a real risk of harm, unfairness, or a communication breakdown, you can speak up for the patient — but only after the interpreting task itself is finished, and by clearly stepping outside the interpreter role to do it.`,
-    practice:`If a patient clearly didn't understand a discharge instruction, you can flag that concern to the provider afterward — explicitly, not silently blended into the interpretation.` },
+    summary:`When you see a real risk of harm, unfairness, or a communication breakdown, you can speak up for the patient, but only after the interpreting task itself is finished, and by clearly stepping outside the interpreter role to do it.`,
+    practice:`If a patient clearly didn't understand a discharge instruction, you can flag that concern to the provider afterward: explicitly, not silently blended into the interpretation.` },
   { id:'c-boundaries', org:'CCHI', tag:'Prohibited conduct', title:'Crossing personal boundaries',
     summary:`Entering into a personal, romantic, or financial relationship with a patient tied to an assignment is a conduct violation, not just bad judgment.`,
     practice:null },
   { id:'c-gifts', org:'CCHI', tag:'Prohibited conduct', title:'Accepting unauthorized fees or gifts',
-    summary:`Taking payment, commissions, or gifts beyond what your employer authorizes — including from a patient or vendor — is prohibited.`,
+    summary:`Taking payment, commissions, or gifts beyond what your employer authorizes (including from a patient or vendor) is prohibited.`,
     practice:null },
   { id:'c-scope', org:'CCHI', tag:'Prohibited conduct', title:'Practicing outside your scope',
-    summary:`Accepting an assignment that requires certification or skills you don't have — a legal proceeding, a different language pair, sign language — without disclosing that gap.`,
+    summary:`Accepting an assignment that requires certification or skills you don't have (a legal proceeding, a different language pair, sign language) without disclosing that gap.`,
     practice:null },
   { id:'c-conflict', org:'CCHI', tag:'Prohibited conduct', title:'Undisclosed conflicts of interest',
     summary:`Not disclosing a personal or financial connection to a patient, provider, or case that could compromise impartiality.`,
@@ -7960,8 +7960,8 @@ async function queuedWrite(entry, opts){
 // What the person is told after a change was stored rather than sent.
 function queuedNotice(done){
   return navigator.onLine
-    ? `${done} on this device — sending now.`
-    : `${done} on this device — it will sync when you’re back online.`;
+    ? `${done} on this device. Sending now.`
+    : `${done} on this device. It will sync when you’re back online.`;
 }
 
 /* Sends what is waiting, oldest first. Each operation addresses an explicit
@@ -8069,7 +8069,7 @@ function describeOutboxEntry(e){
       return { title: `Delete term${name ? `: ${name}` : ''}`, detail: '' };
     }
     return { title: `Term: ${d.en || '(no English term)'}`,
-             detail: [d.es, d.def].filter(Boolean).join(' — ') };
+             detail: [d.es, d.def].filter(Boolean).join(' · ') };
   }
   if(e.collection === 'team-chat'){
     if(e.op === 'update' && d.reactions) return { title: 'Reaction on a chat message', detail: '' };
@@ -8088,7 +8088,7 @@ function outboxReasonText(reason){
     return 'The database refused it. This phone may need to rejoin the team on Team access, then send it again.';
   }
   if(r.includes('not-found') || r.includes('no document')){
-    return 'It changes something that no longer exists — someone may have deleted it.';
+    return 'It changes something that no longer exists. Someone may have deleted it.';
   }
   if(r.includes('resource-exhausted')) return 'The database is over its limit right now. Send it again later.';
   return 'The database couldn’t accept it as written.';
@@ -8118,7 +8118,7 @@ function renderOutboxSheet(){
     </div>`);
   }
   if(OUTBOX.length >= OUTBOX_MAX){
-    parts.push(`<div class="outbox-note is-problem"><p><b>The offline queue is full.</b> ${OUTBOX_MAX} changes are waiting. New changes can’t be saved offline until these send — reconnect to send them. Nothing waiting has been removed.</p></div>`);
+    parts.push(`<div class="outbox-note is-problem"><p><b>The offline queue is full.</b> ${OUTBOX_MAX} changes are waiting. New changes can’t be saved offline until these send. Reconnect to send them. Nothing waiting has been removed.</p></div>`);
   }
   if(OUTBOX_HELD.length){
     parts.push(`<h4 class="outbox-head">Didn’t sync <span>${OUTBOX_HELD.length}</span></h4>
@@ -8241,7 +8241,7 @@ function discardHeldChange(qid){
   try{
     saveOutboxHeld(next);
   }catch(err){
-    showToast('Couldn’t discard it — this phone’s storage isn’t responding.');
+    showToast('Couldn’t discard it. This phone’s storage isn’t responding.');
     return;
   }
   OUTBOX_HELD = next;
@@ -8280,13 +8280,13 @@ let syncedFlashTimer = null;
 function outboxProblem(){
   const n = OUTBOX_HELD.length;
   if(outboxStorageProblem === 'ih/storage-full'){
-    return { label: 'Phone storage full \u2014 new changes can\u2019t be kept offline', mark: '!', short: '' };
+    return { label: 'Phone storage full: new changes can\u2019t be kept offline', mark: '!', short: '' };
   }
   if(outboxStorageProblem){
     return { label: 'This browser isn\u2019t letting the Hub save changes offline', mark: '!', short: '' };
   }
   if(OUTBOX.length >= OUTBOX_MAX){
-    return { label: `${OUTBOX.length} changes waiting \u2014 the offline queue is full`, mark: '!', short: '' };
+    return { label: `${OUTBOX.length} changes waiting: the offline queue is full`, mark: '!', short: '' };
   }
   if(n){
     return { label: `${n} change${n === 1 ? '' : 's'} didn\u2019t sync`, mark: String(n), short: `${n} unsent` };
@@ -8329,8 +8329,8 @@ function updateSyncStatus(justSynced){
     el.classList.add('is-visible','is-offline');
     // Only claim something is saved when something actually is.
     const label = waiting
-      ? `Offline \u2014 ${waiting} change${waiting === 1 ? '' : 's'} waiting`
-      : 'Offline \u2014 showing the saved copy';
+      ? `Offline: ${waiting} change${waiting === 1 ? '' : 's'} waiting`
+      : 'Offline: showing the saved copy';
     el.innerHTML = `<span class="tg-sync-dot"></span><span>${label}</span>`;
     setSyncAnnouncement(label);
     el.title = waiting
@@ -8432,7 +8432,7 @@ function updateTopbarAvatar(unseen){
   avatar.textContent = who ? initialsOf(who) : '?';
   avatar.style.backgroundImage = photo ? `url("${photo.replace(/"/g,'%22')}")` : '';
   avatar.classList.toggle('has-photo', !!photo);
-  avatar.title = who ? `${who} \u2014 tap to change` : 'Add your name';
+  avatar.title = who ? `${who} (tap to change)` : 'Add your name';
   avatar.classList.toggle('has-alert', unseen > 0);
 }
 
@@ -8858,7 +8858,7 @@ function renderContent(){
   }
   // Export and import live in the banner's ⋯ menu (openDomainMenu).
   html += `<div class="print-only-title">
-    <h1>Interpreter Hub — ${escapeHtml(printLabel)}</h1>
+    <h1>Interpreter Hub: ${escapeHtml(printLabel)}</h1>
     <p>HUMC Language Services · Generated ${new Date().toLocaleDateString()}</p>
   </div>`;
   // A domain with no terms yet — or none matching the current search — used
@@ -9632,7 +9632,7 @@ function renderNamePhoto(){
     hint.textContent = membersBlocked && photo
       ? 'Saved on this device. Your team won\'t see it until the team-members rule is published in Firebase.'
       : (photo ? 'Tap your photo to pick it again and adjust it. Your team sees it beside your messages in Team Chat.'
-               : 'A photo is optional \u2014 your team sees it beside your messages in Team Chat.');
+               : 'A photo is optional. Your team sees it beside your messages in Team Chat.');
     hint.classList.toggle('is-warn', membersBlocked && !!photo);
   }
   actions.innerHTML = uploadingMyPhoto
@@ -9713,7 +9713,7 @@ async function persistMyPhoto(name){
     // fix is one line in the Firebase console and the message should say so.
     showToast(code.includes('permission')
       ? 'Photo saved on this device. Your team can\'t see it until the team-members rule is published in Firebase.'
-      : 'Photo saved on this device \u2014 it will reach your team when the connection is back.');
+      : 'Photo saved on this device. It will reach your team when the connection is back.');
     renderNamePhoto();
   }
 }
@@ -9726,7 +9726,7 @@ function cancelNameModal(){
 }
 
 function saveMyName(){
-  if(uploadingMyPhoto){ showToast('Still adding your photo \u2014 one moment.'); return; }
+  if(uploadingMyPhoto){ showToast('Still adding your photo. One moment.'); return; }
   const name = document.getElementById('fMyName').value.trim();
   const before = whoAmI();
   window.__lastWho = name;
@@ -9859,7 +9859,7 @@ function renderPractice(){
 
   html += `<details class="tool-note">
     <summary>${ICON_SHIELD}<span>Original questions, not real exam items</span><em>Read more</em></summary>
-    <p>Written to match CCHI's published domain structure — not real exam items, and not
+    <p>Written to match CCHI's published domain structure. These are not real exam items, and not
        affiliated with or endorsed by CCHI. Study the official CCHI materials too.</p>
   </details>`;
 
@@ -9907,7 +9907,7 @@ function renderPractice(){
   const MODES = [
     { key:'review', name:'Due for review', n:due,    color:'#0F5FA6', icon:ICON_CLOCK,
       on:'Questions your memory is about to drop. The highest-value thing you can do today.',
-      off:'Nothing due right now — come back tomorrow.' },
+      off:'Nothing due right now. Come back tomorrow.' },
     { key:'weak',   name:'My mistakes',    n:shaky,  color:'#C2485C', icon:ICON_ALERT,
       on:'Only what you have got wrong and not yet nailed twice.',
       off:'No mistakes on record yet.' },
@@ -9936,7 +9936,7 @@ function renderPractice(){
   html += `<button class="study-mode is-exam" onclick="requireName(()=>startStudy('exam'))">
       <span class="sm-icon">${ICON_EXAM}</span>
       <span class="sm-head"><b>Exam simulation</b>
-        <span class="sm-note">Full length, exam-weighted, on the clock — the closest thing here to the real sitting.</span>
+        <span class="sm-note">Full length, exam-weighted, on the clock: the closest thing here to the real sitting.</span>
       </span>
       <span class="sm-count">100</span>
     </button>`;
@@ -9974,7 +9974,7 @@ function renderPractice(){
         <option value="20">20 questions</option>
         <option value="30">30 questions</option>
         <option value="50">50 questions</option>
-        <option value="100">100 \u2014 full length</option>
+        <option value="100">100 (full length)</option>
       </select>
       <select id="quizDomainSel">
         <option value="all">All domains (exam-weighted)</option>
@@ -10038,7 +10038,7 @@ function startExamTimer(){
     const left = examEndsAt - Date.now();
     if(left <= 0){
       clearInterval(examTimer); examTimer = null;
-      showToast('Time is up \u2014 scoring what you have.');
+      showToast('Time is up. Scoring what you have.');
       finishQuiz();
       return;
     }
@@ -10463,7 +10463,7 @@ function startQuiz(){
   ).map(shuffleOptions);
 
   if(quizQuestions.length < quizLength){
-    showToast(`Only ${quizQuestions.length} questions available \u2014 starting with those.`);
+    showToast(`Only ${quizQuestions.length} questions available. Starting with those.`);
   }
   quizIndex = 0;
   quizAnswers = [];
@@ -10488,7 +10488,7 @@ function renderQuiz(){
   if(exam){
     html += `<div class="exam-bar">
       <span class="exam-clock" id="examClock">${formatClock(examEndsAt - Date.now())}</span>
-      <span class="exam-note">No answers until the end \u2014 flag anything you want to come back to.</span>
+      <span class="exam-note">No answers until the end. Flag anything you want to come back to.</span>
       <button class="btn btn-ghost" onclick="finishQuiz()">Finish now</button>
     </div>`;
   }
@@ -10770,10 +10770,10 @@ function renderQuizResults(){
 
   const ringColor = pct >= 80 ? '#4E9E74' : pct >= 60 ? '#BFA05E' : '#B5707D';
   const verdict = pct >= 80
-    ? '🎉 Strong result — you\u2019re tracking well. Keep cycling through the domains to stay sharp.'
+    ? '🎉 Strong result. You\u2019re tracking well. Keep cycling through the domains to stay sharp.'
     : pct >= 60
       ? '👍 A solid base. Focus your next sessions on the weakest domains below.'
-      : '📘 Worth slowing down and reading the explanations before retrying — that\u2019s where the learning happens.';
+      : '📘 Worth slowing down and reading the explanations before retrying. That\u2019s where the learning happens.';
 
   let html = `<div class="section-head"><h2>Practice Results</h2><span class="sub">${correct} of ${total} correct</span></div>`;
 
@@ -10790,7 +10790,7 @@ function renderQuizResults(){
       <span class="seal-score">${pct}%</span>
       <h4>Exam simulation completed</h4>
       <p>${escapeHtml(whoAmI() || 'Interpreter')} \u00b7 ${total} questions \u00b7 ${when}<br>
-         ${regionOrgName(false)} \u2014 Interpreter Services</p>
+         ${regionOrgName(false)} \u00b7 Interpreter Services</p>
     </div>`;
   }
   // The seal already carries the score, in brand colours, at the top of the
@@ -10895,12 +10895,12 @@ function renderQuizResults(){
 async function shareResultToChat(correct, total){
   const who = whoAmI();
   if(!who){ requireName(()=> shareResultToChat(correct, total)); return; }
-  if(!db){ showToast('Not connected \u2014 try again when you are back online.'); return; }
+  if(!db){ showToast('Not connected. Try again when you are back online.'); return; }
   const pct = total ? Math.round((correct/total)*100) : 0;
   const mode = quizMode === 'exam' ? 'exam simulation' : 'practice session';
   const line = pct >= 80 ? 'Feeling good about that one.'
              : pct >= 60 ? 'Getting there.'
-             : 'Plenty to work on \u2014 back at it.';
+             : 'Plenty to work on. Back at it.';
   const text = `\ud83d\udcda Just finished a ${total}-question ${mode}: ${correct}/${total} (${pct}%). ${line}`;
   try{
     const ref = db.collection('team-chat').doc();
@@ -10910,7 +10910,7 @@ async function shareResultToChat(correct, total){
   }catch(err){
     const stored = outboxErrorMessage(err, 'Not shared', 'Your result is still here.');
     if(stored){ showOutboxActionToast(stored); return; }
-    showToast('Could not share that \u2014 check your connection.');
+    showToast('Could not share that. Check your connection.');
   }
 }
 
@@ -12703,7 +12703,7 @@ function closeMoreSheet(){
 
 /* ---------- Home screen ---------- */
 const INTERPRETER_TIPS = [
-  { body:`If a patient clearly didn't understand a discharge instruction, you can — and should — let the provider know after the encounter.`, foot:`Advocacy within your role matters.` },
+  { body:`If a patient clearly didn't understand a discharge instruction, you can, and should, let the provider know after the encounter.`, foot:`Advocacy within your role matters.` },
   { body:`Interpret tone as well as words. If a provider is blunt or a patient is frightened, softening it changes the message.`, foot:`Accuracy includes register.` },
   { body:`If you don't know a term mid-encounter, say so and ask for clarification. Guessing is the riskier choice.`, foot:`Transparency beats fluency.` },
   { body:`When a patient asks "what would you do?", interpret the question to the provider rather than answering it yourself.`, foot:`Stay in role.` },
@@ -13011,11 +13011,11 @@ function renderDoctorsHub(){
     </div>
     <div class="hub-grid">
       ${qaCard('#B08D2A', DOMAIN_ICONS.doctor, 'Doctor Prep',
-        'Research a provider by name — specialty, location, and the terminology likely to come up',
+        'Research a provider by name: specialty, location, and the terminology likely to come up',
         `setCategory('doctor-research')`)}
       ${qaCard('#7C6A9C', DOMAIN_ICONS.grid, 'Doctor Directory',
         n ? `${n} ${n===1?'doctor':'doctors'} saved by the team, with notes, photos and their term lists`
-          : 'Nothing saved yet — every Doctor Prep search adds an entry here',
+          : 'Nothing saved yet. Every Doctor Prep search adds an entry here',
         `setCategory('doctor-directory')`)}
     </div>`;
 }
@@ -13493,7 +13493,7 @@ async function deleteDoctorTerm(doctorId, termId){
     render();
     openDoctorDirDetail(d.id, 'team');
   }catch(err){
-    showToast('Could not remove — check your connection.');
+    showToast('Could not remove. Check your connection.');
   }
 }
 
@@ -14071,7 +14071,7 @@ function renderEthics(q){
     `;
   });
   html += `</div>`;
-  html += `<p class="user-guide-note" style="margin-top:20px;">Plain-language summaries for quick reference \u2014 not a substitute for reading NCIHC's National Code of Ethics or CCHI's official Code of Ethics in full.</p>`;
+  html += `<p class="user-guide-note" style="margin-top:20px;">Plain-language summaries for quick reference, not a substitute for reading NCIHC's National Code of Ethics or CCHI's official Code of Ethics in full.</p>`;
   return html;
 }
 
@@ -15261,7 +15261,7 @@ async function sendChatMessageOnce(){
   }catch(err){
     const stored = outboxErrorMessage(err, 'Not sent', 'Your message is back in the box.');
     if(stored) showOutboxActionToast(stored);
-    else showToast('Could not send — check your connection.');
+    else showToast('Could not send. Check your connection.');
     setChatNote('Didn\u2019t send. Your message is back in the box. Tap send to try again.');
     const back = document.getElementById('chatInput') || input;
     back.value = sentText; // give the message back so it isn't lost
@@ -15428,7 +15428,7 @@ function restoreHistoryVersion(categoryId, termId, historyIndex){
   document.getElementById('fSource').value = version.source || '';
   document.getElementById('fSourceUrl').value = version.url || '';
   closeHistoryModal();
-  showToast('Version loaded into the form — review, then Save to restore it.');
+  showToast('Version loaded into the form. Review, then Save to restore it.');
 }
 
 function populateCategorySelect(){
@@ -15710,7 +15710,7 @@ function _openAddDomainModal(){
   document.getElementById('fDomainName').value = '';
   populateDomainParentSelect(null);
   document.getElementById('fDomainParent').disabled = false;
-  document.getElementById('fDomainParentHint').textContent = 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
+  document.getElementById('fDomainParentHint').textContent = 'Nesting under a parent keeps this domain\u2019s terms completely separate. It\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
   selectedSwatch = DOMAIN_COLORS[Math.floor(Math.random()*DOMAIN_COLORS.length)];
   // A new domain starts on Automatic. The stored icon is only the fallback for
   // a name that matches no pin; it used to be a random icon, which is how
@@ -15742,7 +15742,7 @@ function _openEditDomainModal(id){
   parentSelect.disabled = hasChildren;
   document.getElementById('fDomainParentHint').textContent = hasChildren
     ? 'This domain already has its own subgroups, so it must stay top-level.'
-    : 'Nesting under a parent keeps this domain\u2019s terms completely separate — it\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
+    : 'Nesting under a parent keeps this domain\u2019s terms completely separate. It\u2019s just grouped visually, like "Breast Oncology" under "Oncology, Hematology & Leukemia."';
   selectedSwatch = cat.color;
   selectedIcon = cat.icon;
   selectedPin = cat.pin || null;
@@ -15759,7 +15759,7 @@ function _openEditDomainModal(id){
 function populateDomainParentSelect(excludeId){
   const sel = document.getElementById('fDomainParent');
   const options = DATA.categories.filter(c=>!c.parentId && c.id!==excludeId);
-  sel.innerHTML = '<option value="">None — top-level domain</option>' +
+  sel.innerHTML = '<option value="">None (top-level domain)</option>' +
     options.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
 }
 
@@ -16040,7 +16040,7 @@ async function deleteProvider(id){
     showUndoToast('Provider deleted.', trashId);
     render();
   }catch(err){
-    showToast('Could not delete — check your connection.');
+    showToast('Could not delete. Check your connection.');
   }
 }
 
@@ -16815,7 +16815,7 @@ function apptResultsHtml(q){
   });
   hits.sort((a, b) => a.score - b.score || (a.t.en || '').length - (b.t.en || '').length);
   const traps = FALSE_FRIENDS.filter(x => foldText(x.es).toLowerCase().includes(f) || foldText(x.looks).toLowerCase().includes(f)).slice(0, 2);
-  const html = traps.map(x => apptHit(`means ${String(x.means).split(' —')[0]}, not “${x.looks}” · say ${x.say}`, x.es, true)).join('')
+  const html = traps.map(x => apptHit(`means ${String(x.means).split(/[;:] /)[0]}, not “${x.looks}” · say ${x.say}`, x.es, true)).join('')
     + hits.slice(0, 8).map(h => apptHit(h.t.en, h.t.es)).join('');
   return html || `<p class="appt-none">Not in the Hub yet. Note it, and add it after the appointment.</p>`;
 }
@@ -17693,7 +17693,7 @@ function renderPrep(){
     ${likely.length ? `<div class="prep-sec"><h3>Likely with ${escapeHtml(docName)}</h3><span>from Doctor Prep</span></div>
       <div class="prep-card">${likely.map(t => `<div class="prep-row"><span class="prep-row-text"><b>${escapeHtml(t.en || '')}</b><em>${escapeHtml(t.es || '')}</em></span></div>`).join('')}</div>` : ''}
     ${traps.length ? `<div class="prep-sec"><h3>Traps to watch</h3><button type="button" class="prep-link" onclick="setCategory('falsefriends')">All False Friends</button></div>
-      <div class="prep-traps">${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b><p>Looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(' —')[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</p></div>`).join('')}</div>` : ''}
+      <div class="prep-traps">${traps.map(f => `<div class="prep-ff"><b>${escapeHtml(f.es)}</b><p>Looks like “${escapeHtml(f.looks)}” but means <strong>${escapeHtml(String(f.means).split(/[;:] /)[0])}</strong>. Say <strong>${escapeHtml(f.say)}</strong>.</p></div>`).join('')}</div>` : ''}
     ${docName ? `<div class="prep-sec"><h3>Your doctor</h3></div>
       <div class="prep-card prep-doc"><span class="prep-av" aria-hidden="true">${escapeHtml(initials || 'Dr')}</span>
         <div><b>${escapeHtml(docName)}</b><small>${research ? 'Doctor Prep has looked them up' + (entry && entry.lastResearchedBy ? ' (' + escapeHtml(entry.lastResearchedBy) + ')' : '')

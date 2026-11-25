@@ -360,6 +360,6 @@ async function deleteDoctorDirEntry(id){
     render();
     return true;
   }catch(err){
-    showToast('Could not delete — check your connection.');
+    showToast('Could not delete. Check your connection.');
   }
 }

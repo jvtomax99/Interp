@@ -35,7 +35,7 @@ function updateBackfillProgress(){
   const el = document.getElementById('backfillProgress');
   if(!el) return;
   el.textContent = tierBackfill.current
-    ? `${tierBackfill.done} of ${tierBackfill.total} \u2014 ${tierBackfill.current}`
+    ? `${tierBackfill.done} of ${tierBackfill.total} \u00b7 ${tierBackfill.current}`
     : `${tierBackfill.done} of ${tierBackfill.total}`;
 }
 
@@ -51,7 +51,7 @@ async function runTierBackfill(){
   if(!targets.length){ showToast('Everything is already up to date.'); return; }
   // Without a database connection the write is a silent no-op — the results
   // would look updated until the next reload. Better to not start.
-  if(!hasDbConnection()){ showToast('Not connected \u2014 updates could not be saved. Check your connection.'); return; }
+  if(!hasDbConnection()){ showToast('Not connected. Updates could not be saved. Check your connection.'); return; }
 
   tierBackfill = { running:true, done:0, total:targets.length, failed:0, cancel:false, current:'' };
   renderContent();

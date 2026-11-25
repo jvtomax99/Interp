@@ -102,7 +102,7 @@ const LOOKUP_STAGES = [
   [0,     'Searching trusted medical sources…'],
   [4500,  'Reading what came back…'],
   [10000, 'Choosing the best pages…'],
-  [18000, 'Still going — an unusual term can take a moment.'],
+  [18000, 'Still going. An unusual term can take a moment.'],
 ];
 
 function startLookupProgress(){
@@ -166,7 +166,7 @@ async function openTermLookup(categoryId, termId){
     stopProgress();
     renderTermLookupMessage(
       'You are offline',
-      'Looking a term up needs a connection. The glossary itself works offline — this is the one part that cannot.',
+      'Looking a term up needs a connection. The glossary itself works offline; this is the one part that cannot.',
       term);
     return;
   }
@@ -258,6 +258,6 @@ function renderTermLookup(rawSources, note, term, fromCache){
     <div class="lookup-grid">${cards}</div>
     <p class="lookup-foot">
       ${fromCache ? 'Saved from an earlier search by the team.' : 'Found just now.'}
-      Reference reading for your own preparation — not a rendering, and not for showing a patient.
+      Reference reading for your own preparation, not a rendering, and not for showing a patient.
     </p>`;
 }

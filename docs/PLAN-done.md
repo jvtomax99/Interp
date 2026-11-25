@@ -5,6 +5,11 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-25 Long dashes out of the app's wording (Jose: "do the long dashes"). 158 lines on screen reworded with a full stop, comma,
+  colon or brackets: toasts, Doctor Prep, the Code of Ethics summaries, CoreCHI Practice and its 17 explanations, Translate's badges,
+  the offline labels, the guide's one quote of them, and 37 lines of the False Friends list. A False Friend's short meaning used to be
+  cut at its dash; it is now cut at "; " or ": " (`split(/[;:] /)`, three places). `site-front.cjs` fails if one comes back.
+
 - 2026-11-24 The front door (Jose: "find what makes it look thrown together, and fix it"). An audit of every screen at six sizes
   (320 to 1440 wide), every handler named in the markup, the pages' heads and what the live site serves. Fixed: a pasted link had
   no card (added `og:*` / `twitter:*`, a canonical address and `og-image.jpg`); a wrong address showed Vercel's own 404 (new

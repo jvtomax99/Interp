@@ -36,15 +36,15 @@
  */
 const FALSE_FRIENDS = [
   {
-    es:"constipado", looks:"constipated", means:"congested — blocked up with a head cold",
+    es:"constipado", looks:"constipated", means:"congested; blocked up with a head cold",
     say:"estreñido", risk:"critical", tag:"ENT / GI",
     heard:"Llevo tres días constipado.",
     trap:"I have been constipated for three days.",
     truth:"I have had a stuffy nose for three days.",
-    note:"The one most likely to send a patient toward the wrong workup. Usage is genuinely split: in Spain and much of Latin America it is nasal congestion, but some speakers do use constipación for the bowel sense. If context does not settle it, ask — do not pick."
+    note:"The one most likely to send a patient toward the wrong workup. Usage is genuinely split: in Spain and much of Latin America it is nasal congestion, but some speakers do use constipación for the bowel sense. If context does not settle it, ask. Do not pick."
   },
   {
-    es:"intoxicado", looks:"intoxicated", means:"poisoned — usually food, a chemical, or a medication",
+    es:"intoxicado", looks:"intoxicated", means:"poisoned; usually food, a chemical, or a medication",
     say:"ebrio, borracho", risk:"critical", tag:"Toxicology",
     heard:"Mi hijo está intoxicado, comió algo malo.",
     trap:"My son is intoxicated, he ate something bad.",
@@ -87,12 +87,12 @@ const FALSE_FRIENDS = [
     es:"droga", looks:"drug (medication)", means:"illicit drug",
     say:"medicamento, medicina", risk:"critical", tag:"Medications",
     heard:"No tomo ninguna droga.",
-    trap:"I do not take any drugs — heard as: I take no medications.",
+    trap:"I do not take any drugs. Heard as: I take no medications.",
     truth:"I do not use any illicit drugs.",
     note:"Asking a patient about sus drogas reads as an accusation and will shut the history down. Ask about medicamentos for the medication list, and drogas only when you mean substance use."
   },
   {
-    es:"ampolla", looks:"ampoule only", means:"blister — and also an ampoule",
+    es:"ampolla", looks:"ampoule only", means:"blister; also an ampoule",
     say:"depends on sense", risk:"critical", tag:"Dermatology / Meds",
     heard:"Me salió una ampolla en el pie.",
     trap:"An ampoule came out on my foot.",
@@ -104,14 +104,14 @@ const FALSE_FRIENDS = [
     say:"trastorno", risk:"high", tag:"Psych / Neuro",
     heard:"El doctor dice que tengo un desorden.",
     trap:"The doctor says I have a disorder.",
-    truth:"Usually: the doctor says I have a condition — but confirm which one.",
+    truth:"Usually: the doctor says I have a condition, but confirm which one.",
     note:"Going into Spanish, a bipolar disorder is trastorno bipolar, never desorden bipolar. Desorden is the state of a messy room. Eating disorder is trastorno alimentario."
   },
   {
     es:"condición", looks:"condition (illness)", means:"a stipulation, a term, a state",
     say:"afección, enfermedad, padecimiento", risk:"high", tag:"Clinical",
     heard:"¿Tiene alguna condición?",
-    trap:"Do you have any conditions? — heard as terms or requirements",
+    trap:"Do you have any conditions? Heard as terms or requirements",
     truth:"Do you have any medical conditions?",
     note:"Widely used in US Spanish under English influence, so many patients here will understand it. Afección or enfermedad is safer with a patient who has recently arrived."
   },
@@ -129,7 +129,7 @@ const FALSE_FRIENDS = [
     heard:"Injuria renal aguda.",
     trap:"Kidney insult.",
     truth:"Acute kidney injury.",
-    note:"The subtle one. In lay speech injuria is an insult. In clinical Spanish it is a real technical term — injuria renal, injuria pulmonar. Register decides. A patient describing a fall means lesión or herida."
+    note:"The subtle one. In lay speech injuria is an insult. In clinical Spanish it is a real technical term: injuria renal, injuria pulmonar. Register decides. A patient describing a fall means lesión or herida."
   },
   {
     es:"sano", looks:"sane", means:"healthy",
@@ -153,7 +153,7 @@ const FALSE_FRIENDS = [
     heard:"Estaba lívido.",
     trap:"He was livid.",
     truth:"He was pale.",
-    note:"A description of colour, not mood — and a clinically meaningful one. Reading it as anger loses a sign."
+    note:"A description of colour, not mood, and a clinically meaningful one. Reading it as anger loses a sign."
   },
   {
     es:"aborto", looks:"abortion only", means:"abortion, or miscarriage",
@@ -271,7 +271,7 @@ const FALSE_FRIENDS = [
     es:"compromiso", looks:"compromise", means:"commitment, obligation",
     say:"acuerdo, concesión", risk:"high", tag:"Clinical",
     heard:"Hay compromiso pulmonar.",
-    trap:"There is pulmonary compromise — which happens to be right here.",
+    trap:"There is pulmonary compromise, which happens to be right here.",
     truth:"There is lung involvement.",
     note:"Clinically comprometido does mean involved or impaired, so the cognate can work. Socially it means a commitment: tengo un compromiso is I have a prior engagement, not I have a compromise."
   },
@@ -327,7 +327,7 @@ const FALSE_FRIENDS = [
     es:"argumento", looks:"argument (quarrel)", means:"reasoning, plot, storyline",
     say:"discusión, pelea", risk:"everyday", tag:"Communication",
     heard:"Tuvieron un argumento.",
-    trap:"They had an argument — in the sense of a fight.",
+    trap:"They had an argument, in the sense of a fight.",
     truth:"They had a line of reasoning. A quarrel is una discusión.",
     note:"The quarrel sense is discusión or pelea."
   },
@@ -348,7 +348,7 @@ const FALSE_FRIENDS = [
     note:"Size is grande. Length is largo. On a wound description the two say different things."
   },
   {
-    es:"vaso", looks:"vase", means:"drinking glass — and, in anatomy, a vessel",
+    es:"vaso", looks:"vase", means:"drinking glass; in anatomy, a vessel",
     say:"florero", risk:"everyday", tag:"Anatomy",
     heard:"Tome un vaso de agua.",
     trap:"Drink a vase of water.",
@@ -412,7 +412,7 @@ const FALSE_FRIENDS = [
     note:"Turns up in diet instructions, where it matters."
   },
   {
-    es:"crudo", looks:"crude", means:"raw — and, in Mexico, hungover",
+    es:"crudo", looks:"crude", means:"raw; in Mexico, hungover",
     say:"grosero (for crude speech)", risk:"everyday", tag:"Diet",
     heard:"Lo comí crudo.",
     trap:"I ate it crude.",
@@ -425,7 +425,7 @@ const FALSE_FRIENDS = [
     heard:"No quiero molestar a la enfermera.",
     trap:"I do not want to molest the nurse.",
     truth:"I do not want to bother the nurse.",
-    note:"The verb behind molestia, and the same warning applies. Molestar is ordinary politeness — perdone la molestia is sorry to trouble you."
+    note:"The verb behind molestia, and the same warning applies. Molestar is ordinary politeness: perdone la molestia is sorry to trouble you."
   },
   {
     es:"actual", looks:"actual", means:"current, present-day",
@@ -468,18 +468,18 @@ const FALSE_FRIENDS = [
     note:"Receta is both, and the kitchen sense is the one an English ear reaches for. In a pharmacy conversation it is always the prescription."
   },
   {
-    es:"seno", looks:"sinus only", means:"breast — and also a sinus",
+    es:"seno", looks:"sinus only", means:"breast; also a sinus",
     say:"depends on sense", risk:"critical", tag:"Imaging / OB",
     heard:"Me duelen los senos.",
     trap:"My sinuses hurt.",
-    truth:"My breasts hurt — unless she means senos paranasales.",
+    truth:"My breasts hurt, unless she means senos paranasales.",
     note:"Genuinely both, and they order completely different imaging. Senos paranasales is explicit for sinuses. If the sentence does not settle it, ask before it reaches a requisition."
   },
   {
     es:"accidente cerebrovascular", looks:"an accident", means:"a stroke",
     say:"accidente (for a mishap)", risk:"critical", tag:"Neuro",
     heard:"Mi esposo tuvo un accidente cerebrovascular.",
-    trap:"My husband had an accident — heard as a fall or a crash.",
+    trap:"My husband had an accident. Heard as a fall or a crash.",
     truth:"My husband had a stroke.",
     note:"Often shortened to ACV. Dropping cerebrovascular turns a stroke history into a trauma history, and the two send triage in opposite directions."
   },
@@ -488,7 +488,7 @@ const FALSE_FRIENDS = [
     say:"drenaje", risk:"critical", tag:"Neuro / Pulm",
     heard:"Tuvo un derrame.",
     trap:"He had some drainage.",
-    truth:"He had a stroke — derrame cerebral. Confirm which kind.",
+    truth:"He had a stroke (derrame cerebral). Confirm which kind.",
     note:"Derrame cerebral is a stroke or brain bleed; derrame pleural is a pleural effusion. Alone it means a spill. Never render it as drainage."
   },
   {
@@ -513,7 +513,7 @@ const FALSE_FRIENDS = [
     heard:"Quiero denunciar lo que pasó.",
     trap:"I want to denounce what happened.",
     truth:"I want to report what happened.",
-    note:"Carries no sense of grandstanding — it is the ordinary word for filing a report about abuse, violence or a crime. Rendering it as denounce makes a safeguarding disclosure sound like a complaint."
+    note:"Carries no sense of grandstanding. It is the ordinary word for filing a report about abuse, violence or a crime. Rendering it as denounce makes a safeguarding disclosure sound like a complaint."
   },
   {
     es:"intervención", looks:"intervention", means:"an operation, a procedure",
@@ -535,7 +535,7 @@ const FALSE_FRIENDS = [
     es:"inflamado", looks:"inflamed", means:"swollen",
     say:"con inflamación (for true inflammation)", risk:"critical", tag:"Exam",
     heard:"Tengo el pie inflamado.",
-    trap:"My foot is inflamed — heard as an inflammatory process.",
+    trap:"My foot is inflamed. Heard as an inflammatory process.",
     truth:"My foot is swollen.",
     note:"Most patients mean swelling, not inflammation. Rendering it as inflamed can suggest infection or an inflammatory condition that nobody described."
   },
@@ -548,12 +548,12 @@ const FALSE_FRIENDS = [
     note:"Dar de alta is to discharge; darse de alta is to register. The adjective alta meaning high is a different word doing a different job in the sentence."
   },
   {
-    es:"ingreso", looks:"income", means:"hospital admission — and also income",
+    es:"ingreso", looks:"income", means:"hospital admission; also income",
     say:"depends on sense", risk:"critical", tag:"Admin",
     heard:"Fue un ingreso de urgencia.",
     trap:"It was an emergency income.",
     truth:"It was an emergency admission.",
-    note:"Both senses are real and both come up in the same interview — admissions history and financial screening. Let the surrounding sentence decide."
+    note:"Both senses are real and both come up in the same interview: admissions history and financial screening. Let the surrounding sentence decide."
   },
   {
     es:"ardor", looks:"ardour, passion", means:"burning",
@@ -577,13 +577,13 @@ const FALSE_FRIENDS = [
     heard:"Tengo la mano entumecida.",
     trap:"My hand is entombed.",
     truth:"My hand is numb.",
-    note:"Adormecido is the other common word for the same sensation — literally the limb has fallen asleep."
+    note:"Adormecido is the other common word for the same sensation: literally the limb has fallen asleep."
   },
   {
     es:"estómago", looks:"stomach (the organ)", means:"the whole belly, in patient speech",
     say:"el estómago (organ) vs el abdomen", risk:"high", tag:"GI",
     heard:"Me duele el estómago.",
-    trap:"My stomach hurts — heard as epigastric.",
+    trap:"My stomach hurts. Heard as epigastric.",
     truth:"My belly hurts. Ask where.",
     note:"Patients use estómago for anything between the ribs and the hips. Localising the pain is the interpreter's cue to let the clinician ask, not to guess."
   },
@@ -596,11 +596,11 @@ const FALSE_FRIENDS = [
     note:"Crisis convulsiva is a seizure, crisis hipertensiva is a hypertensive emergency. English crisis sounds more catastrophic than the Spanish word usually is."
   },
   {
-    es:"ataque", looks:"an attack (assault)", means:"an episode — cardiac, seizure, or panic",
+    es:"ataque", looks:"an attack (assault)", means:"an episode: cardiac, seizure, or panic",
     say:"agresión, asalto", risk:"high", tag:"Clinical",
     heard:"Le dio un ataque.",
     trap:"He was attacked.",
-    truth:"He had an attack — ask what kind.",
+    truth:"He had an attack. Ask what kind.",
     note:"On its own it is ambiguous even in Spanish: ataque al corazón, ataque epiléptico, ataque de nervios and ataque de ansiedad are four different events. Ask before choosing."
   },
   {
@@ -609,10 +609,10 @@ const FALSE_FRIENDS = [
     heard:"Tuvo pulmonía el invierno pasado.",
     trap:"He had something pulmonary last winter.",
     truth:"He had pneumonia last winter.",
-    note:"Pulmonía is the everyday word, neumonía the clinical one. Both mean pneumonia — a specific diagnosis, not a general chest problem."
+    note:"Pulmonía is the everyday word, neumonía the clinical one. Both mean pneumonia, a specific diagnosis, not a general chest problem."
   },
   {
-    es:"calentura", looks:"warmth", means:"fever — and in some regions, lust",
+    es:"calentura", looks:"warmth", means:"fever; in some regions, lust",
     say:"fiebre", risk:"high", tag:"Symptoms",
     heard:"El niño tiene calentura.",
     trap:"The child is warm.",
@@ -621,7 +621,7 @@ const FALSE_FRIENDS = [
   },
   {
     es:"seguro", looks:"sure, safe", means:"insurance",
-    say:"seguro also means safe — context decides", risk:"high", tag:"Admin",
+    say:"seguro also means safe; context decides", risk:"high", tag:"Admin",
     heard:"No tengo seguro.",
     trap:"I am not sure.",
     truth:"I do not have insurance.",
@@ -652,7 +652,7 @@ const FALSE_FRIENDS = [
     note:"Trabajo de parto is labour; sala de partos is the delivery room."
   },
   {
-    es:"vejiga", looks:"vesicle", means:"bladder — and also a blister",
+    es:"vejiga", looks:"vesicle", means:"bladder; also a blister",
     say:"depends on sense", risk:"high", tag:"Anatomy",
     heard:"Tengo una vejiga en el pie.",
     trap:"I have a bladder in my foot.",
@@ -660,11 +660,11 @@ const FALSE_FRIENDS = [
     note:"Overlaps with ampolla for the blister sense. In anatomy, vejiga on its own is the bladder."
   },
   {
-    es:"pecho", looks:"chest only", means:"chest — and also breast",
+    es:"pecho", looks:"chest only", means:"chest; also breast",
     say:"tórax, or seno / mama", risk:"high", tag:"Anatomy",
     heard:"Me duele el pecho.",
     trap:"Confidently rendering it either way.",
-    truth:"My chest hurts — or my breast hurts. Ask.",
+    truth:"My chest hurts, or my breast hurts. Ask.",
     note:"Dar el pecho is to breastfeed. Cardiac chest pain and breast pain are not the same complaint, and pecho does not distinguish them."
   },
   {
@@ -673,7 +673,7 @@ const FALSE_FRIENDS = [
     heard:"Me registraron en la entrada.",
     trap:"They registered me at the entrance.",
     truth:"They searched me at the entrance.",
-    note:"Registrarse (reflexive) is to sign in. Registrar a alguien is to search them — a different experience to describe."
+    note:"Registrarse (reflexive) is to sign in. Registrar a alguien is to search them, a different experience to describe."
   },
   {
     es:"resumir", looks:"to resume", means:"to summarize",
@@ -684,7 +684,7 @@ const FALSE_FRIENDS = [
     note:"To resume a treatment after a pause is reanudar."
   },
   {
-    es:"tratar", looks:"to treat only", means:"to treat — and, with de, to try",
+    es:"tratar", looks:"to treat only", means:"to treat; with de, to try",
     say:"intentar", risk:"high", tag:"Clinical",
     heard:"Traté de tomarlo.",
     trap:"I treated myself by taking it.",
@@ -753,7 +753,7 @@ const FALSE_FRIENDS = [
     heard:"Lo vi con un médico particular.",
     trap:"I saw a particular doctor.",
     truth:"I saw a private doctor.",
-    note:"Consulta particular is a private practice — relevant to where prior records live."
+    note:"Consulta particular is a private practice, relevant to where prior records live."
   },
   {
     es:"suceso", looks:"success", means:"an event, an occurrence",
@@ -812,7 +812,7 @@ const FALSE_FRIENDS = [
     note:"Insurance card is tarjeta de seguro. A letter from the hospital is what carta means."
   },
   {
-    es:"planta", looks:"plant", means:"floor of a building — and the sole of the foot",
+    es:"planta", looks:"plant", means:"floor of a building; also the sole of the foot",
     say:"fábrica (industrial plant)", risk:"everyday", tag:"Anatomy / Admin",
     heard:"Está en la tercera planta.",
     trap:"He is at the third plant.",
@@ -825,7 +825,7 @@ const FALSE_FRIENDS = [
     heard:"Está en la sala de espera.",
     trap:"He is in the waiting salon.",
     truth:"He is in the waiting room.",
-    note:"Sala de partos, sala de operaciones, sala de emergencias — the building blocks of hospital directions."
+    note:"Sala de partos, sala de operaciones, sala de emergencias: the building blocks of hospital directions."
   },
   {
     es:"ropa", looks:"rope", means:"clothing",
