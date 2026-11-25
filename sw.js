@@ -36,7 +36,7 @@ const PAGE_WAIT = 1000;
 // Pages that opened from the saved copy (their client ids), so their code
 // comes from the same saved version, never newer code under an older page.
 const fromSaved = new Set();
-const CACHE_VERSION = 'interpreter-hub-v391-b1125.0927';
+const CACHE_VERSION = 'interpreter-hub-v392-b1125.1043';
 const PRECACHE = [
   './',
   './index.html',
