@@ -119,17 +119,17 @@
 <div class="app" id="app">
   <div class="sk-shell" aria-busy="true" aria-label="Loading">
     <div class="sk-side">
-      <div class="skeleton" style="height:38px;width:38px;border-radius:11px;"></div>
+      <div class="skeleton" style="height:38px;width:38px;border-radius:var(--r-sm);"></div>
       <div class="skeleton sk-line" style="width:70%;"></div>
       <div class="skeleton sk-line" style="width:45%;"></div>
-      <div class="skeleton" style="height:52px;border-radius:12px;margin-top:8px;"></div>
-      <div class="skeleton" style="height:40px;border-radius:10px;"></div>
-      <div class="skeleton" style="height:40px;border-radius:10px;"></div>
-      <div class="skeleton" style="height:40px;border-radius:10px;"></div>
-      <div class="skeleton" style="height:40px;border-radius:10px;"></div>
+      <div class="skeleton" style="height:52px;border-radius:var(--r-md);margin-top:8px;"></div>
+      <div class="skeleton" style="height:40px;border-radius:var(--r-sm);"></div>
+      <div class="skeleton" style="height:40px;border-radius:var(--r-sm);"></div>
+      <div class="skeleton" style="height:40px;border-radius:var(--r-sm);"></div>
+      <div class="skeleton" style="height:40px;border-radius:var(--r-sm);"></div>
     </div>
     <div class="sk-main">
-      <div class="skeleton" style="height:96px;border-radius:20px;"></div>
+      <div class="skeleton" style="height:96px;border-radius:var(--r-lg);"></div>
       <div class="skeleton sk-line" style="width:150px;margin-top:10px;"></div>
       <div class="sk-grid">
         <div class="skeleton sk-tile"></div><div class="skeleton sk-tile"></div>
@@ -6511,7 +6511,7 @@ function guideCoachOpen(c, tries){
     spot.style.top = (r.top - pad) + 'px';
     spot.style.width = (r.width + pad * 2) + 'px';
     spot.style.height = (r.height + pad * 2) + 'px';
-    spot.style.borderRadius = c.round ? '999px' : '18px';
+    spot.style.borderRadius = c.round ? '999px' : 'var(--r-lg)';
     const below = r.top + r.height / 2 < vh / 2;
     const top = below ? r.bottom + pad + 16 : r.top - pad - 16 - th;
     tip.style.top = Math.max(12, Math.min(vh - th - 12, top)) + 'px';
@@ -8775,7 +8775,7 @@ function renderContent(){
             <div class="tc-composer" style="text-align:center;">
               <div class="tc-hipaa">${ICON_SHIELD}<span>HIPAA: no patient names or identifying details.</span></div>
               <div class="chat-join-hint">Set your name to join the conversation. Your team sees it next to your messages.</div>
-              <button class="btn btn-primary" style="border-radius:24px;" onclick="openNameModal()">Set your name</button>
+              <button class="btn btn-primary" style="border-radius:var(--r-xl);" onclick="openNameModal()">Set your name</button>
             </div>
           `}
         </div>
@@ -18295,7 +18295,7 @@ const drPanel = (() => {
       anims.push(el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 140, easing: 'linear' }));
     }else{
       const f = fromAnchor(a), start = from || { top: f.top, left: f.left, right: f.right, bottom: f.bottom, radius: f.radius, op: 0 };
-      const R = getComputedStyle(el).getPropertyValue('--drp-r').trim() || '22px';
+      const R = getComputedStyle(el).getPropertyValue('--drp-r').trim() || '26px';
       // The glass grows out of his disc...
       anims.push(bg.animate([
         { top: px(start.top), left: px(start.left), right: px(start.right), bottom: px(start.bottom), borderRadius: px(start.radius) },

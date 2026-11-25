@@ -697,8 +697,25 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   `HMH_NETWORK_LABEL` (saved doctor records may hold it word for word).
 - A False Friend's `means` puts its short form before "; " or ": ". The
   appointment briefing, Appointment and Ask show only that part.
-- Corner sizes, counted 2026-11-25 (`border-radius` in px across `app.css`
-  and `home-polish.css`): 999px x121, 12 x25, 10 x24, 20 x21, 14 x17,
-  16 x16, 9 x14, 8 x14, 2 x12, 11 x12, 18 x8, then 6, 4, 24, 22, 17 and
-  13 at 7 each, and ten more values used under 7 times. No `--r-*` scale
-  exists yet.
+- Corner sizes (2026-11-25): before the scale, `app.css` and
+  `home-polish.css` held 253 hand-typed corners in 27 px values next to
+  three `--r-*` names already used 148 times (an earlier line here said no
+  scale existed; it was wrong). All now sit on `--r-xs` 6, `--r-sm` 10,
+  `--r-md` 14, `--r-lg` 20, `--r-xl` 26; no corner moved more than 5px
+  (30 to 26). Dr. Smiley's face has no px corner in the stylesheets. Five
+  shapes were pills typed as a number (half their height) and are now
+  `999px`: `.op-reader`, `.op-ring`, `.op-lr`, `.dock-smiley-tag`,
+  `.doc-research-cache-refresh`. The `.gs-*` classes are the global
+  search, not the guide's steps. `corner-scale.cjs` measures ten screens
+  but does not open the opening, the "Show me" spotlight, Ask or the
+  briefing; those were checked by reading (review, 2026-11-25).
+- Search hints (2026-11-25, phone 393 and 360 wide, 16px Inter): the room
+  for a hint is 243px / 210px, and 111px / 78px on a domain or All domains
+  (beside "+ Add"). Needed: "Search terms, definitions, Spanish
+  equivalents…" 363px, "Search a word, a meaning, or a specialty…" 320,
+  "Search doctors, specialties, locations…" 296, "Search providers,
+  specialties, places…" 291, "Search Heart Failure & Cardiac" 232, "Search
+  All domains" 145. All are clipped (`text-overflow:clip`), none fits.
+- The top bar's four round buttons (`tgBack`, `tgTheme`, `tgBell`,
+  `tgAvatar`) measure 36 x 36 on a phone; `.tg-brand` (the Home link) is
+  32 tall.

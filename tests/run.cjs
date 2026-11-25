@@ -50,6 +50,7 @@ const SUITES = [
   ['spring-press.cjs',    'Springy press: Practice buttons squash, spring past, settle; flame flickers'],
   ['springs.cjs',         'S5 springs: plain taps settle with no overshoot (tab bar, section panel), the kept list'],
   ['type-tokens.cjs',     'Type tidy: sizes from the ten --fs-* steps, letter spacing from the --tr-* tokens (matching the size), Inter weights 400/500/550/650 (stylesheets read, eight screens measured)'],
+  ['corner-scale.cjs',    'Corner scale: every corner is one of the five --r-* sizes, 6 10 14 20 26 (stylesheets and page code read, ten screens measured, phone and desktop)'],
   ['campus-pick.cjs',     'Campus: named badges, tap to pick, card, second tap starts'],
   ['campus-life.cjs',     'Campus life 2: the ambulance and its doors, the lot car, sitters, the flock, pauses, reduced motion'],
   ['glossary-cv.cjs',     'Glossary taps: off-screen cards skip layout; same pixels; Back, a jump and a redraw land where they should'],
