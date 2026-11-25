@@ -268,7 +268,7 @@ async function handleDDPhotoSelect(event){
     pendingDDPhotoPath = att.storagePath || null;
     renderDDPhotoPreview();
   }catch(err){
-    showToast(err.message || 'Could not process that image.');
+    showToast(uploadErrorMessage(err, 'Could not process that image.'));
   }finally{
     if(label) label.textContent = originalLabel || 'Choose photo';
     event.target.value = '';
@@ -278,6 +278,7 @@ async function handleDDPhotoSelect(event){
 async function saveDoctorDirEntry(){
   const name = document.getElementById('fDDName').value.trim();
   if(!name){ showToast('Doctor\u2019s name is required.'); return; }
+  if(offlineBlocked('Saving a doctor')) return;
   const specialty = document.getElementById('fDDSpecialty').value.trim();
   const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
   const editor = whoAmI();

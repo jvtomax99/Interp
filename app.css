@@ -865,8 +865,10 @@
   }
   .home-feed-icon svg{ width:15px; height:15px; }
   .home-feed-main{ flex:1; min-width:0; }
+  /* inline-block, so the "..." applies: as a plain inline span a long line ran off the card */
   .home-feed-title{
     font-size:var(--fs-foot); font-weight:650; color:var(--ink); line-height:1.35;
+    display:inline-block; max-width:100%; vertical-align:bottom;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
   .home-feed-meta{ font-size:var(--fs-cap2); color:var(--ink-faint); margin-top:1px; }
@@ -1317,7 +1319,9 @@
     background:linear-gradient(140deg, var(--accent-2), var(--accent)); color:#fff;
     font-family:var(--sans); font-weight:650; font-size:var(--fs-sub);
   }
-  .provider-name{ font-family:var(--sans); font-weight:650; font-size:var(--fs-call); margin-bottom:4px; line-height:1.3; }
+  .provider-name{ font-family:var(--sans); font-weight:650; font-size:var(--fs-call); margin-bottom:4px; line-height:1.3; overflow-wrap:anywhere; }
+  /* the name's column stops short of the edit and delete buttons in the corner */
+  .provider-top > div:last-child{ min-width:0; padding-right:68px; }
   .provider-role-tag{ color:var(--accent); background:var(--accent-soft); }
   .provider-facility{ font-size:var(--fs-foot); color:var(--ink-soft); margin:0 0 9px 0; line-height:1.5; }
   .provider-phone{
@@ -1793,7 +1797,7 @@
     background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line-soft); margin-bottom:7px;
   }
   .activity-row .activity-author{ font-family:var(--sans); font-weight:650; font-size:var(--fs-foot); color:var(--ink); flex-shrink:0; }
-  .activity-row .activity-summary{ font-size:var(--fs-foot); color:var(--ink-soft); flex:1; min-width:0; }
+  .activity-row .activity-summary{ font-size:var(--fs-foot); color:var(--ink-soft); flex:1; min-width:0; overflow-wrap:anywhere; }
   .activity-row .activity-time{ font-family:var(--mono); font-size:var(--fs-cap2); color:var(--ink-faint); flex-shrink:0; white-space:nowrap; }
   .activity-delete{
     border:none; background:transparent; padding:2px 5px; border-radius:var(--r-xs); cursor:pointer;
@@ -2300,6 +2304,9 @@
     line-height:1.3; letter-spacing:var(--tr-body);
     display:flex; align-items:flex-start; gap:7px; color:var(--ink);
   }
+  /* a word longer than the card breaks instead of running under the ⋯ button and off the screen */
+  .card .term-en, .card .term-es{ overflow-wrap:anywhere; }
+  .card .term-en > span, .card .term-es > span{ min-width:0; }
   .card .term-es{
     font-family:var(--sans); font-weight:650; font-size:var(--fs-sub); margin:0 0 9px 0;
     line-height:1.3; letter-spacing:var(--tr-body);
@@ -4225,9 +4232,10 @@
   }
   .gs-ico svg{ width:14px; height:14px; }
   .gs-text{ min-width:0; flex:1; }
-  .gs-title{ font-size:var(--fs-foot); font-weight:650; color:var(--ink); line-height:1.35; }
+  .gs-title{ font-size:var(--fs-foot); font-weight:650; color:var(--ink); line-height:1.35; overflow-wrap:anywhere; }
   .gs-sub{
     font-size:var(--fs-cap); color:var(--ink-soft); line-height:1.4;
+    display:inline-block; max-width:100%; vertical-align:bottom;   /* so the "..." applies to a long line */
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .gs-empty{ padding:34px 20px; text-align:center; color:var(--ink-faint); font-size:var(--fs-foot); line-height:1.6; }
