@@ -188,6 +188,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - The companion panel from the dock (`drPanel`): `companion-panel.md`
 - How an answer is drawn (`askTurnHtml`, `askLayout`): `ask-answer-layout.md`
 - Term Review sessions (`reviewBuild`, `reviewCheck`, `saveTermReview`): `term-review.md`
+- Check link (planned 2026-11-25, not built; the approved plan): `link-check.md`
 - The Daily Drill, Home's warm-up (`openWarmupSheet`, `ih_warmup`): `daily-drill.md`
 - Integration rules from the journey audit (each has a check in the journey test): `journey-rules.md`
 - 3D Body cards and the frame bridge (`ATLAS`, `atlasOnMessage`): `3d-body.md`

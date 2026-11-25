@@ -134,6 +134,16 @@ travel into the doctor's page, and its back arrow sends them home.
   photo and name leave and return to the card on an iPhone, with the
   page's own slide-up never playing on top of the flight.
 
+**Check link (planned, not built; plan OK'd 2026-11-25).** A Check button
+beside a term's source link, in Add / Edit term and on each Link Directory
+row: the Hub's server (`api/link-check.js`) tries to open the address and
+answers Opens, Moved, Not found or Couldn't tell, with the page's title.
+It never says a page is safe, saves nothing and never changes a link by
+itself. `docs/features/link-check.md`.
+- Done when: an interpreter taps Check beside a source link and is told
+  within about 10 seconds whether it opens, has moved, is not found, or
+  could not be checked, with no claim that it is safe.
+
 ## Not in v1
 
 From `AGENTS.md` "Not building" (proposed 2026-10-29, Jose's OK

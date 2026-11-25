@@ -145,7 +145,14 @@ a phase finishes but the next phase continues here.
    - While there, on every screen: a 60-character doctor name, a very long
      term, a long chat message with no spaces; each failure forced (offline,
      AI down, storage refused) and its message read.
-3. **Smaller files: a plan for Jose to OK, no code first** (same ask).
+3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
+   to be built once the consistency pass is finished). A Check button
+   beside a term's source link that says whether the address still opens.
+   The whole plan, what it will not do and how it is tested:
+   `docs/features/link-check.md`. One pull request; a new endpoint
+   (`api/link-check.js`) and a new feature file (`features/link-check.js`).
+   Worth showing two or three interpreters the plan before building.
+4. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has
    avoided on purpose (`AGENTS.md`, Deploying: "There is no build step"),
