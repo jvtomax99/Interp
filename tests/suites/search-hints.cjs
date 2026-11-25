@@ -44,7 +44,12 @@ const SCREENS = [
         const d = await read(page, 'searchInput');
         check('a domain', d, 'Search');
         ok(d && /^Search .+/.test(d.label || ''), `a domain: a screen reader still hears the domain's name ("${d && d.label}")`, d);
+        const all = (await go(page, 'all'), await read(page, 'searchInput'));
+        ok(all && /^Search .+/.test(all.label || ''), `All domains: the label still says what is searched ("${all && all.label}")`, all);
         await go(page, 'home');
+        // Home's search pill is a button that opens "search everything": same words, whole.
+        const pill = await page.evaluate(() => { const e = document.querySelector('.home-search span'); return e && { text: e.textContent, cut: e.scrollWidth > e.clientWidth + 1 }; });
+        ok(pill && pill.text === 'Search terms, people, guides' && !pill.cut, `Home's search pill: "${pill && pill.text}", not cut`, pill);
         await page.evaluate(() => openGlobalSearch()); await page.waitForTimeout(600);
         check('search everything', await read(page, 'gsInput'), 'Search terms, people, guides');
         ok(!page.__errors.length, 'no page errors', page.__errors);

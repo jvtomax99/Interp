@@ -132,6 +132,11 @@ a phase finishes but the next phase continues here.
    so screenshots first:
    - Found on the way, for Jose's pick: at 360 wide, Back plus a sync
      badge cuts "Interpreter Hub" (`docs/FACTS.md`, under "Search hints").
+   - Found on the way, for Jose's pick: False Friends and Recent Updates
+     show a second search box at the top ("Search terms or Spanish", with
+     "+ Add term" and "+ New domain") that searches nothing there
+     (`index.html`, `searchPlaceholder`; those two screens are missing
+     from the `showTopbar = false` list). Not checked on a phone yet.
    - Heading levels: a screen's title is an `h1` on six screens (the tool
      banners), an `h2` on about twelve (`.section-head h2`), missing on
      five (All domains, the briefing, Appointment, Doctor Directory, Link
