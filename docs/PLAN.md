@@ -150,6 +150,27 @@ a phase finishes but the next phase continues here.
    - While there, on every screen: a 60-character doctor name, a very long
      term, a long chat message with no spaces; each failure forced (offline,
      AI down, storage refused) and its message read.
+     Found 2026-11-25 (`tests/tools/stress.cjs` and `stress-fail.cjs`, phone
+     393 and 360 wide; Jose has the screenshots, nothing fixed yet).
+     Long text, a 45-letter word with no space: it runs off the card on
+     Home's Recent Team Activity and on Recent Updates, runs under the
+     "..." button and off the screen on a term card, and is cut with no
+     "..." in the search panel; a 60-character name runs under the edit
+     and delete buttons on a Provider Pictures card. Fine: chat, Ask the
+     Hub, a doctor's card and page, the briefing, Recently deleted, the
+     edit sheets. Failures: Save doctor offline does nothing and says
+     nothing (a bare write, `persistDoctorDirectoryEntry`; providers,
+     chat delete and term attachments are written the same way, the
+     provider case read in the code only); Doctor Prep shows the raw
+     words "daily_limit" and "members_only"; a refused term or doctor
+     save shows the developer's sentence about Firestore rules and
+     "[permission-denied]"; a refused chat message says "Check your
+     connection"; a failed photo upload shows the raw error text (term
+     attachment, provider photo); Term lookup calls the daily limit
+     "usually temporary"; deleting a chat message offline says nothing.
+     Good as they are: chat and terms offline (saved on the phone, the
+     badge counts them), phone storage full, Ask the Hub's five messages,
+     Translate, sign-in. Not tested: "my photo" when the upload fails.
 3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
    to be built once the consistency pass is finished). A Check button
    beside a term's source link that says whether the address still opens.
