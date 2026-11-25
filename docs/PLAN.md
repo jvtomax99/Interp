@@ -124,8 +124,12 @@ a phase finishes but the next phase continues here.
    audit). The visible tells left. Corners and the button shadow are done
    (the corner-scale pull request, 2026-11-25: five `--r-*` sizes, Jose
    OK'd them from three before and after screens; `corner-scale.cjs`
-   holds them). Left, each a change he can see, so screenshots first:
-   - The top bar's round buttons are 36px; the rule is 44px for a tap.
+   holds them). The top bar's round buttons are done too (2026-11-25:
+   still drawn 36px, tapped across 44, Jose's pick from before and after
+   screens; `topbar-name.cjs` holds it). Left, each a change he can see,
+   so screenshots first:
+   - Found on the way, for Jose's pick: at 360 wide, Back plus a sync
+     badge cuts "Interpreter Hub" (`docs/FACTS.md`, under "Search hints").
    - Search hints are cut off on a phone on every screen with a search
      box, not two (measured 2026-11-25, `docs/FACTS.md`, "Search hints"):
      the box has 243px at 393 wide and 210px at 360, and only 111px / 78px
