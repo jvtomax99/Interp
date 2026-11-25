@@ -131,13 +131,13 @@ Jose's other tools edit `home-polish.css`, `home-polish.js` and
 | Your knowledge brain | `brain/you.html`; the Hub's side in `features/knowledge-brain.js` |
 | Everything else | `index.html` |
 
-**Features with their own file** in `features/` (22): `3d-body` (the Hub's
+**Features with their own file** in `features/` (23): `3d-body` (the Hub's
 side, the frame bridge), `account` (email sign-in; the server is
 `api/sign-in.js` with `api/_mail.js`), `account-sync`, `ask-hub` (Ask the
 Hub: Dr. Smiley's conversation, actions and memory), `backfill`, `campus`
 (its motion, `campusLife` and `campusDepth`, stays in `index.html`),
 `credits`, `csv`, `doctor-sheets`, `duplicate-doctors`, `false-friends`,
-`sound-alikes`, `guide-front`, `knowledge-brain`, `opening`,
+`sound-alikes`, `guide-front`, `knowledge-brain`, `link-check`, `opening`,
 `photo-adjust` (with the name sheet's `handleMyPhotoSelected`),
 `smiley-engine`, `smiley-performances`, `term-lookup`,
 `tool-banners`, `translate` (`renderTranslate`, `runTranslate`),

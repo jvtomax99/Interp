@@ -182,15 +182,11 @@ a phase finishes but the next phase continues here.
      go through later (found by the cold review, not fixed).
      Jose, 2026-11-25: write that plan (no code) once Check link is
      live; he decides then.
-3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
-   to be built once the consistency pass is finished). A Check button
-   beside a term's source link that says whether the address still opens.
-   The whole plan, what it will not do and how it is tested:
-   `docs/features/link-check.md`. One pull request; a new endpoint
-   (`api/link-check.js`) and a new feature file (`features/link-check.js`).
-   Jose, 2026-11-25: build now and show the team the working button
-   (cheap to move or remove); and yes to the one `AGENTS.md` line for the
-   new feature file.
+3. **Check link** (Jose's ask and OK, 2026-11-25). Built the same day:
+   `docs/features/link-check.md` now describes the code. Waiting for his
+   "push"; once live, his "try this" is one working link and one dead
+   one, and the entry moves to `docs/PLAN-done.md`. Then show the team
+   the working button (his pick over showing them the plan).
 4. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has

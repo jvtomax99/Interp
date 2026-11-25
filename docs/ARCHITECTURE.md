@@ -19,9 +19,9 @@ API, called only from `api/`, never from the phone.
 | `app.css` | Styles for every screen but Home |
 | `home-polish.css`, `home-polish.js` | Home's look and behaviour, loaded after `app.css` so they win |
 | `pin-icons.js`, `pins/` | Which pin each domain and tool gets; one pre-cut `.webp` per pin |
-| `features/` | 22 feature files moved out of `index.html` (Ask the Hub, Translate, campus, account, opening and more) |
+| `features/` | 23 feature files, 22 of them moved out of `index.html` (Ask the Hub, Translate, campus, account, opening and more) |
 | `guide/`, `practice/`, `falsefriends/`, `soundalikes/`, `memory/` | Plain data: User Guide answers, CoreCHI questions, word lists, memory lines |
-| `api/` | 14 files: the endpoints (`translate`, `term-lookup`, `term-check`, `doctor-research`, `ask`, `push`, `sign-in`, `check-events`) and shared helpers (names starting with `_`) |
+| `api/` | 15 files: the endpoints (`translate`, `term-lookup`, `term-check`, `link-check`, `doctor-research`, `ask`, `push`, `sign-in`, `check-events`) and shared helpers (names starting with `_`) |
 | `sw.js` | Service worker: offline copy, update rules, push notifications |
 | `atlas/`, `brain/`, `campus3d/` | Separate pages run in frames: 3D Body, the two brains, the 3D campus |
 | `city/`, `drsmiley/`, `opening/`, `figures/`, `media/` | Pictures, clips and the promo video |
@@ -33,7 +33,7 @@ API, called only from `api/`, never from the phone.
 ## Load order
 
 `index.html` links `app.css` then `home-polish.css`, loads `home-polish.js`
-in `<head>`, then the data files and the 22 `features/*.js` files with plain
+in `<head>`, then the data files and the 23 `features/*.js` files with plain
 `<script src>` tags, then its own inline script, then `pin-icons.js` just
 before `</body>`. The Firebase SDK (compat 10.12.2 from gstatic) loads in
 the background (`firebaseReady`); `db`, `storage` and `hubAuth` are `null`
@@ -143,6 +143,7 @@ Moved here from CLAUDE.md on 2026-11-10. `index.html` measured 18,407 lines that
 | `features/account.js` | 249 | Your account, email sign-in on the phone: More's "Your account" card (`accountMoreHtml`), the email then the 6-digit code (`accountSend`, `accountCheck`), signing in with the server's ticket (`signInWithCustomToken`, `accountAdopt`), the name following the account (`accountSaveName`, `accountBoot`), sign out back to a plain team phone (`accountSignOut`). The team-code screen's "Sign in with email" for an account already in the team (`accountLockToggle`, `accountLockSend`, `accountLockCheck`; `#accessEmail`). `ih_account`, `ih_accountPending`, `ih_accountNameAt`. 2026-11-06, phase E1; `docs/features/email-sign-in.md` |
 | `features/account-sync.js` | 257 | What follows your account (phase E2): practice, streak, badges, memory trainer, Daily Drill, campus, knowledge count and settings (never Dr. Smiley's memory of you, `AGENTS.md`), kept in `account-sync/{uid}` and joined between phones (`accountSync`, `syncDecide`, `ACCT_SYNC_MERGE`, fingerprints in `ih_syncBase`). When the app opens, at sign-in, when you leave it, every 2 min while changed. 2026-11-06; `docs/features/email-sign-in.md` |
 | `features/photo-adjust.js` | 190 | Adjust your photo: after you pick one in the name sheet, drag and zoom it in a square frame with Team Chat's ring, live previews round (chat) and tall (the badge), Save draws the 320 px square for `uploadAvatar` (`photoAdjust`, `paSave`, `paClamp`). 2026-11-06; `docs/features/photo-adjust.md` |
+| `features/link-check.js` | 155 | Check link: the Check button under a term's Source link and on Link Directory rows, the four answers (Opens, Moved, Not found, Couldn't tell), `linkCheckRun`, `linkCheckField`, `linkCheckUse`, `linkCheckRow`. `docs/features/link-check.md` |
 | `opening/` | — | The opening's pavilion in three lights by the clock (`openingLook`): `pavilion-1` midday, `pavilion-morning-1`, `pavilion-evening-1`, each an 8 s seamless loop (`.mp4` ~0.7 MB, `.webm`) and its still (`.webp`); rendered once from `docs/mockups/opening/`. `music-1.m4a` (0.34 MB), the opening's music, an original 28 s loop from `docs/mockups/opening/music/compose.py`. A new clip gets a new name (`sw.js` carries this one over between versions) |
 | `figures/*.webp` | 3 files | The doctor, nurse and visitor beside the memory trainer's ring (practice scenes), cut out of Jose's drawing. `docs/features/practice-scenes.md` |
 | `memory/lines.json` | — | The memory trainer's 60 practice lines in meaning chunks (`renderMemTrainer`; `docs/features/memory-trainer.md`). Precached by `sw.js` |
@@ -157,6 +158,7 @@ Moved here from CLAUDE.md on 2026-11-10. `index.html` measured 18,407 lines that
 | `api/check-events.js` | 276 | Cron job watching CE/training events (CHIA feed; CCHI, NCIHC pages; CCC off, its site answers 403) |
 | `api/term-lookup.js` | 307 | Term reference lookup — Claude API + web search |
 | `api/term-check.js` | 185 | Checks a glossary entry before it is saved — Haiku 5.5 first (`_routine.js`), then its backup model |
+| `api/link-check.js` | 253 | Check link: visits an address for a team member and says opens, moved, not found or couldn't tell. No AI; refuses private and internal addresses at every redirect |
 | `api/_hub-access.js` | — | Members-only check shared by the AI endpoints (not an endpoint itself) |
 | `api/_service-login.js` | — | The events watcher's own Firestore login: a service account key from Vercel's settings, no SDK (not an endpoint itself) |
 | `tests/` | — | The checks: suites, harness, stand-ins; run on GitHub on every push (`.github/workflows/tests.yml`). Kept out of the deploy by `.vercelignore` |
@@ -211,6 +213,7 @@ touch before changing it; update it in the same commit when the behaviour change
 - Tool banners on Translate, Term Review, Ask and Doctor Directory, and the pin's fly from Home (`toolBannerHtml`, `toolBannerMeta`, `tbFly`): `tool-banners.md`
 - The opening, Badge in: when it plays, the loop, More's card (`openingStart`, `ih_opening`, `opening/`): `opening.md`
 - Adjust your photo, the frame before it's saved (`photoAdjust`, `uploadAvatar`'s `ready`): `photo-adjust.md`
+- Check link, does a term's source still open (`linkCheckRun`, `api/link-check.js`): `link-check.md`
 - Email sign-in, one account on every phone: the code, the ticket, the owner carried over, what syncs and what doesn't yet (`api/sign-in.js`, `features/account.js`, `accounts/`): `email-sign-in.md`
 - Your knowledge brain, its small live copy atop Term Review (`kbMiniHtml`), the CoreCHI Practice tile, your record and the daily count (`knowledgeBrainData`, `ih_knowledgeLog`, `brain/you.html`): `knowledge-brain.md`
 - Screen morph, a tile's pin and name travelling into the domain banner and back, and a doctor card's photo and name into the doctor's page (`morphNav`, `morphFlush`, `morphOpenDomain`, `morphOpenDoctor`, `morphCloseDoctor`): `screen-morph.md`
