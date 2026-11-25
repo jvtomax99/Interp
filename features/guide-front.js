@@ -106,7 +106,7 @@ function guideHomeHtml(){
       <div class="gd-week">
         <div class="gd-week-top">
           <span class="gd-ring" role="img" aria-label="${done} of ${steps.length} done"><svg viewBox="0 0 54 54" aria-hidden="true"><circle class="bg" cx="27" cy="27" r="22"/><circle class="fg" cx="27" cy="27" r="22" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - done / steps.length)).toFixed(1)}"/></svg><b aria-hidden="true">${done}/${steps.length}</b></span>
-          <div><h3>Get to know the Hub</h3><p>${left === 1 ? '1 thing' : left + ' things'} left to try</p></div>
+          <div><h2>Get to know the Hub</h2><p>${left === 1 ? '1 thing' : left + ' things'} left to try</p></div>
           <button type="button" class="gd-week-hide" onclick="hideFirstWeek()" aria-label="Hide this list">${ICON_X_TC}</button>
         </div>
         ${steps.map(s => `<div class="gd-wk${s.done ? ' is-done' : ''}"><i aria-hidden="true">${s.done ? '✓' : ''}</i><span>${escapeHtml(s.label)}${s.done ? '<span class="sr-only"> (done)</span>' : ''}</span>${s.done ? ''
@@ -136,7 +136,7 @@ function guideSectionHtml(id){
   const list = GUIDE_TOPICS.filter(t => t.section === id);
   return `<div class="gd-sec-head" style="--c:${s.color}">
       <button type="button" class="gd-all" onclick="closeGuideSection()">${ICON_CHEVRON_LEFT}<span>All topics</span></button>
-      <div class="gd-sec-title"><img src="${GUIDE_SECTION_PINS[s.id] || 'pins/userguide.webp'}" alt=""><div><h3>${escapeHtml(s.name)}</h3><p>${list.length === 1 ? '1 answer' : list.length + ' answers'}</p></div></div>
+      <div class="gd-sec-title"><img src="${GUIDE_SECTION_PINS[s.id] || 'pins/userguide.webp'}" alt=""><div><h2>${escapeHtml(s.name)}</h2><p>${list.length === 1 ? '1 answer' : list.length + ' answers'}</p></div></div>
     </div>
     <div class="gd-rows">${list.map(t => guideRow(t)).join('')}</div>`;
 }
@@ -163,7 +163,7 @@ function renderUserGuide(){
   return `
     <div class="user-guide" id="userGuideRoot">
       <div class="gd-head">
-        <div><h2>Help</h2><p>${GUIDE_TOPICS.length} answers. Search, browse, or ask Dr. Smiley.</p></div>
+        <div><h1>Help</h1><p>${GUIDE_TOPICS.length} answers. Search, browse, or ask Dr. Smiley.</p></div>
         <button type="button" class="gd-tour" onclick="openOnboarding()">Take the tour</button>
       </div>
       <div class="gd-stick" id="guideStick" aria-hidden="true"></div>

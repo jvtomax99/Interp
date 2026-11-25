@@ -1847,7 +1847,7 @@
     if(!section || !overlay) return;
     const cards = key === 'medical' ? domainSheetCards(section) : section.querySelectorAll('.home-rail > .qa-card');
     if(!cards.length) return;
-    document.getElementById('homeSectionTitle').textContent = section.querySelector('h3').textContent;
+    document.getElementById('homeSectionTitle').textContent = section.querySelector('h2, h3').textContent;
     document.getElementById('homeSectionSub').textContent = key === 'medical'
       ? cards.length + (cards.length === 1 ? ' domain' : ' domains')
       : cards.length + ' tools';

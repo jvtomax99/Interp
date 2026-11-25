@@ -76,7 +76,7 @@ const open = page => page.evaluate(() => { const ov = document.getElementById('c
 
     // Not on a group's drill (its own title), and nothing on an uncredited screen.
     await page.evaluate(async () => { saStartDrill('same'); await new Promise(r => setTimeout(r, 400)); });
-    ok(await page.evaluate(() => !document.querySelector('#content .credit-tag') && /Sound the same/.test(document.querySelector('#content h2').textContent)), 'no tag on a group\'s drill');
+    ok(await page.evaluate(() => !document.querySelector('#content .credit-tag') && /Sound the same/.test(document.querySelector('#content h1').textContent)), 'no tag on a group\'s drill');
     await go(page, 'falsefriends');
     ok(await page.evaluate(() => !document.querySelector('#content .credit-tag')), 'no tag on False Friends');
     await doubleTap(page);

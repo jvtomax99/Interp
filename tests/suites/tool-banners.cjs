@@ -23,7 +23,7 @@ const banner = page => page.evaluate(() => {
     nameRight: Math.round(nr.right), pinLeft: Math.round(t.querySelector('.tool-banner-pin').getBoundingClientRect().left),
     meta: t.querySelector('.tool-banner-meta').textContent, inContent: !!t.closest('#content'),
     pinOk: !!pin && pin.complete && pin.naturalWidth > 0, over: document.documentElement.scrollWidth > innerWidth + 1,
-    color: getComputedStyle(n).color, smallTitle: !!document.querySelector('#content > .section-head h2') };
+    color: getComputedStyle(n).color, smallTitle: !!document.querySelector('#content > .section-head :is(h1,h2)') };
 });
 const owns = (page, sel) => page.evaluate(sel => { const el = document.querySelector(sel); if (!el) return null; const r = el.getBoundingClientRect(); const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { h: Math.round(r.height), own: !!h && (h === el || el.contains(h)) }; }, sel);
 
@@ -108,7 +108,7 @@ const owns = (page, sel) => page.evaluate(sel => { const el = document.querySele
     await L.go(page, 'review', 1300);
     await page.evaluate(() => { const btn = [...document.querySelectorAll('#content button')].find(x => /^Start/.test(x.textContent.trim())); btn && btn.click(); });
     await wait(900);
-    const r = await page.evaluate(() => ({ active: reviewActive, banner: !!document.querySelector('.tool-banner'), head: document.querySelector('#content > .section-head h2')?.textContent }));
+    const r = await page.evaluate(() => ({ active: reviewActive, banner: !!document.querySelector('.tool-banner'), head: document.querySelector('#content > .section-head h1')?.textContent }));
     ok(r.active && !r.banner && r.head === 'Term Review', 'a session: no banner, the small "Term Review" title', r);
     await ctx.close();
   }

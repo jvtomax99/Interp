@@ -42,7 +42,7 @@ const state = page => page.evaluate(() => ({
   cards: document.querySelectorAll('#content .card[data-term-id]').length
 }));
 async function checkResearch(page, label) {
-  const actual = await page.evaluate(() => ({ cat: activeCategory, title: document.querySelector('#content h2')?.textContent, input: !!document.getElementById('doctorResearchInput') }));
+  const actual = await page.evaluate(() => ({ cat: activeCategory, title: document.querySelector('#content h1')?.textContent, input: !!document.getElementById('doctorResearchInput') }));
   ok(actual.cat === 'doctor-research' && actual.title === 'Doctor Prep' && actual.input, label + ' opens the Doctor Prep research form', actual);
 }
 async function backTo(page, expected, label, native = false) {
@@ -123,7 +123,7 @@ async function search(page, query) {
         ok(await navRow(page, 'Provider Pictures', desktop).count() === 1, 'navigation uses Provider Pictures');
         if (!desktop) await page.locator('#moreSheetOverlay .dd-detail-close').click();
         await providerHome.click();
-        ok(await page.locator('#content h2').first().textContent() === 'Provider Pictures', 'Provider Pictures page keeps the same label');
+        ok(await page.locator('#content h1').first().textContent() === 'Provider Pictures', 'Provider Pictures page keeps the same label');
 
         await search(page, 'Provider 0');
         ok((await page.locator('#gsResults .gs-group').allTextContents()).includes('Provider Pictures'), 'provider search result group uses Provider Pictures');

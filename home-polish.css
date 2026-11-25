@@ -26,7 +26,7 @@
 #content.is-home .home-quick-section{margin-top:0;margin-bottom:21px;}
 #content.is-home .home-sec-head{align-items:center;gap:9px;min-height:37px;margin-bottom:7px;}
 #content.is-home .home-sec-head::after{display:none;}
-#content.is-home .home-sec-head h3{min-width:0;font-size:var(--fs-t3);font-weight:650;line-height:1.25;letter-spacing:var(--tr-title);}
+#content.is-home .home-sec-head :is(h2,h3){min-width:0;font-size:var(--fs-t3);font-weight:650;line-height:1.25;letter-spacing:var(--tr-title);}
 #content.is-home .home-sec-more{
   display:inline-flex;align-items:center;gap:4px;padding:9px 0 9px 7px;min-height:44px;
   background:transparent;box-shadow:none;border-radius:var(--r-sm);font-size:var(--fs-cap);font-weight:500;
@@ -506,7 +506,7 @@
     scroll-padding-left:0;
   }
   #content.is-home .home-rail-dots.has-overflow{display:flex;}
-  #content.is-home .home-sec-head h3{font-size:var(--fs-head);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-head);}
   #content.is-home .home-sec-more{font-size:var(--fs-cap);}
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:var(--fs-foot);}
   #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{min-height:132px;}
@@ -557,7 +557,7 @@
   #content.is-home .home-greeting-eyebrow{letter-spacing:.05em;}
   #content.is-home .qa-grid{gap:5px;}
   #content.is-home .qa-tile-label{font-size:var(--fs-cap2);}
-  #content.is-home .home-sec-head h3{font-size:var(--fs-call);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-call);}
   #content.is-home .home-rail{grid-auto-columns:calc((100% - 18px)/2.08);gap:9px;}
   #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{padding:12px 10px 11px;}
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:var(--fs-foot);}
@@ -853,7 +853,7 @@ html.is-app-hidden .home-petal, html.is-app-hidden .home-petal svg,
   }
   #content.is-home .home-greeting-eyebrow,#content.is-home .home-greeting-date{font-size:13px;}
   #content.is-home .home-search{font-size:var(--fs-sub);}
-  #content.is-home .home-sec-head h3{font-size:var(--fs-t2);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-t2);}
   #content.is-home .home-sec-more{font-size:var(--fs-sub);}
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:var(--fs-call);}
   #content.is-home .home-tile-count,#content.is-home .qa-desc{font-size:var(--fs-foot);}
@@ -1080,7 +1080,7 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
 #content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:32px;height:32px;}
 #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:var(--fs-sub);font-weight:650;line-height:1.25;letter-spacing:var(--tr-body);}
 #content.is-home .home-tile-count,#content.is-home .qa-desc,.home-section-grid .qa-desc{font-size:var(--fs-cap);}
-#content.is-home .home-sec-head h3{font-size:var(--fs-t3);font-weight:650;letter-spacing:var(--tr-title);}
+#content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-t3);font-weight:650;letter-spacing:var(--tr-title);}
 #content.is-home .home-sec-more{font-size:var(--fs-foot);font-weight:550;}
 /* Quick tools: the same tile everywhere, the label one step larger. */
 #content.is-home .qa-tile{min-height:84px;border-radius:var(--r-lg);}
@@ -1092,14 +1092,14 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .home-rail{grid-auto-columns:calc((100% - 22px)/2.35);}
   /* One line beside "+ New" and "View all" on a 390px phone (measured:
      18px was 4px too wide). "View all" stays 12px here for the same reason. */
-  #content.is-home .home-sec-head h3{font-size:var(--fs-head);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-head);}
   #content.is-home .home-sec-more{font-size:var(--fs-cap);}
 }
 @media(max-width:365px){
   #content.is-home .qa-tile-label{font-size:var(--fs-cap);}
   #content.is-home .home-tile-name,#content.is-home .qa-title{font-size:var(--fs-sub);}
   #content.is-home .home-rail{grid-auto-columns:calc((100% - 18px)/2.2);}
-  #content.is-home .home-sec-head h3{font-size:var(--fs-call);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-call);}
   /* "Medical Terminology" wrapped at 360px even before this pass; the row's
      gaps give back the few pixels it needs. */
   #content.is-home .home-sec-head{gap:5px;}
@@ -1123,7 +1123,7 @@ html[data-theme="dark"] #content.is-home .smw-dark{border-color:rgba(255,255,255
   #content.is-home .home-tile-icon .medical-pin,#content.is-home .qa-icon .medical-pin,
   #content.is-home .home-tile-icon .pin-sprite,#content.is-home .qa-icon .pin-sprite{width:36px;height:36px;}
   #content.is-home .domain-family-head,#content.is-home .home-rail>.qa-card{min-height:116px;}
-  #content.is-home .home-sec-head h3{font-size:var(--fs-t2);}
+  #content.is-home .home-sec-head :is(h2,h3){font-size:var(--fs-t2);}
 }
 
 /* Dr. Smiley breathes: a slow rise and fall and a slower drift, so he is

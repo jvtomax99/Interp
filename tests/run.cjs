@@ -61,6 +61,7 @@ const SUITES = [
   ['glossary-hero.cjs',   'Bold glossary: the colour hero, a long name never breaking a word, ••• tappable, the glass search sticking, cards in the domain colour'],
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['search-hints.cjs',    'Search hints: every search box\'s hint fits its box at 393 and 360 wide and would end in "..."'],
+  ['heading-levels.cjs',  'Heading levels: every screen has one title (h1), first, and no level skipped under it'],
   ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['lanyard-pins.cjs',    'Pins on your lanyard: one per badge, in order, all on screen above the clasp, a new one clicks on and is remembered, a skip keeps its moment, none without badges, Still, the list matches BADGES'],
   ['account.cjs',         'Your account (email sign-in, the phone): email, then the code, a wrong code, the code box after a restart, signed in as the account, the name follows, sign out back to the team, not joined yet'],

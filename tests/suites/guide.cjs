@@ -53,7 +53,7 @@ const coachState = p => p.evaluate(() => { const c = document.querySelector('.gd
   // tiles open in place, All topics returns
   for (const sid of ['ask', 'trouble']) {
     await page.evaluate(id => openGuideSection(id), sid); await wait(250);
-    const s = await page.evaluate(() => ({ title: document.querySelector('.gd-sec-title h3')?.textContent, rows: document.querySelectorAll('.gd-row').length, cat: activeCategory, stack: navStack.length }));
+    const s = await page.evaluate(() => ({ title: document.querySelector('.gd-sec-title h2')?.textContent, rows: document.querySelectorAll('.gd-row').length, cat: activeCategory, stack: navStack.length }));
     const want = await page.evaluate(id => GUIDE_TOPICS.filter(t => t.section === id).length, sid);
     ok(s.rows === want && s.cat === 'userguide', `tile "${s.title}" lists its ${want} answers in place`, s);
   }
