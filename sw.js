@@ -92,6 +92,7 @@ const PRECACHE = [
   './features/account.js',
   './features/account-sync.js',
   './features/photo-adjust.js',
+  './features/link-check.js',
   './home-polish.css',
   './home-polish.js',
   // Icon artwork, pre-cut (see pin-icons.js). About 0.9 MB in all; the

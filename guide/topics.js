@@ -393,6 +393,16 @@ const GUIDE_TOPICS = [
     <p>Tap <b>⋯</b> on the term's card, then <b>Edit term</b>. Make your change and tap <b>Save</b>. On a computer, the pencil on the card does the same.</p>
     <p>Anyone on the team can fix anything. Nothing is locked, and every change is kept in the term's history.</p>` },
 
+  { id:'checklink', section:'change', k:'check link source url address broken dead works still open opens moved not found 404 couldn\'t tell link directory page gone new address', q:'How do I check a link still works?', a:`
+    <p>Tap <b>Check link</b> under <b>Source link</b> when you add or edit a term, or <b>Check</b> on any row of the <b>Link Directory</b>. In a few seconds the Hub says one of four things:</p>
+    <ul>
+      <li><b>Opens</b>: the page loaded. It shows what the page calls itself, so you can see it is the page you meant.</li>
+      <li><b>Moved</b>: it opens, but at a different address. In Add or Edit term, <b>Use the new address</b> puts it in the box; you still tap <b>Save term</b>.</li>
+      <li><b>Not found</b>: the site says the page is gone, or there is no site there.</li>
+      <li><b>Couldn’t tell</b>: the site would not let the Hub in, or was too slow. Hospital and journal sites often do this. Open the link yourself to be sure.</li>
+    </ul>
+    <p>It only checks that the page opens, not that it is safe or correct. Nothing is saved and no link is ever changed for you. It needs a connection.</p>` },
+
   { id:'secondlook', section:'change', k:'second look warning popup box message appeared check suggestion false friend', q:'A box appeared after I saved. What is it?', a:`
     <p>It's called <b>A second look</b>. It only shows up when there might be something worth checking: a false friend, a word that already exists under another domain, or wording a patient wouldn't use.</p>
     <p><b>Your term is already saved.</b> The box cannot undo that and cannot change anything on its own.</p>

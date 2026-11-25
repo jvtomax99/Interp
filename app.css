@@ -8137,3 +8137,64 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
    that still runs out of room ends in "..." instead of a cut letter.
    tests/suites/search-hints.cjs holds both. */
 .search input, .gd-search input, .gs-inputrow input{ text-overflow:ellipsis; }
+
+/* ---------- Link check (features/link-check.js; docs/features/link-check.md) ----------
+   A Check button beside a term's Source link (Add / Edit term) and on each
+   Link Directory row, and the answer drawn under it: Opens (green), Moved
+   (amber), Not found (red), Couldn't tell (neutral). Every answer ends in
+   the same small line: it only says the page opens, never that it is safe.
+   Sizes from the shared tokens; the amber has no token yet, so it is the
+   offline badge's pair (.tg-sync.is-offline). */
+.lc-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-1);
+  min-height:44px; padding:0 var(--sp-4); margin-top:var(--sp-2);
+  border:0; border-radius:var(--r-sm); cursor:pointer; -webkit-tap-highlight-color:transparent;
+  font-family:var(--sans); font-size:var(--fs-call); font-weight:650; letter-spacing:var(--tr-body);
+  color:var(--ink); background:var(--paper); box-shadow:var(--sh-1), inset 0 0 0 1px var(--line);
+  transition:transform .16s var(--ease), filter .16s var(--ease), opacity .16s var(--ease);
+}
+.lc-btn:active, .lc-btn.is-pressed, .lc-use:active, .lc-use.is-pressed{ transform:scale(.96); filter:brightness(.96); }
+.lc-btn:focus-visible, .lc-use:focus-visible{ outline:3px solid var(--accent-2); outline-offset:2px; }
+.lc-btn:disabled{ opacity:.55; cursor:default; }
+.lc-row-btn{ margin-top:0; flex-shrink:0; padding:0 var(--sp-3); }
+@media (min-width:901px){
+  /* A mouse row: the button sits at the row's own size. */
+  .lc-row-btn{ min-height:32px; padding:0 var(--sp-3); font-size:var(--fs-foot); letter-spacing:var(--tr-sm); }
+}
+.lc-out[hidden]{ display:none; }
+.lc-out{ margin-top:var(--sp-2); }
+.lc-row-out{ margin:0 0 var(--sp-2); }
+.lc-ans{
+  display:flex; align-items:flex-start; gap:var(--sp-2); padding:11px var(--sp-3);
+  border-radius:var(--r-md); background:var(--bg-hi); box-shadow:inset 0 0 0 1px var(--line-soft);
+  color:var(--ink); animation:lcIn .2s var(--ease) backwards;
+}
+@keyframes lcIn{ from{ opacity:0; transform:translateY(3px); } to{ opacity:1; transform:translateY(0); } }
+.lc-ic{ display:flex; flex-shrink:0; margin-top:1px; }
+.lc-ic svg{ width:20px; height:20px; display:block; }
+.lc-txt{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
+.lc-head{ font-size:var(--fs-sub); font-weight:650; letter-spacing:var(--tr-body); line-height:1.3; }
+.lc-body{ font-size:var(--fs-foot); line-height:1.5; color:var(--ink); overflow-wrap:anywhere; }
+.lc-new{ font-family:var(--mono); font-size:var(--fs-cap); line-height:1.5; color:var(--ink); overflow-wrap:anywhere; }
+.lc-note{ font-size:var(--fs-cap); line-height:1.5; color:var(--ink-faint); margin-top:2px; }
+.lc-use{ align-self:flex-start; min-height:44px; margin-top:var(--sp-1); font-size:var(--fs-call); }
+.lc-opens{ background:var(--good-soft); box-shadow:none; }
+.lc-opens .lc-ic, .lc-opens .lc-head{ color:var(--good); }
+.lc-not_found{ background:var(--danger-soft); box-shadow:none; }
+.lc-not_found .lc-ic, .lc-not_found .lc-head{ color:var(--danger); }
+.lc-moved{ background:#FBEEDC; box-shadow:none; }
+.lc-moved .lc-ic, .lc-moved .lc-head{ color:#8A6420; }
+html[data-theme="dark"] .lc-moved{ background:#3A2F17; }
+html[data-theme="dark"] .lc-moved .lc-ic, html[data-theme="dark"] .lc-moved .lc-head{ color:#E3BC6A; }
+.lc-unknown .lc-ic{ color:var(--ink-faint); }
+.lc-opens .lc-note, .lc-not_found .lc-note, .lc-moved .lc-note{ color:var(--ink-soft); }
+.lc-spin{
+  width:17px; height:17px; flex-shrink:0; border-radius:50%; margin-top:1px;
+  border:2px solid var(--line); border-top-color:var(--accent);
+  animation:lookupSpin .7s linear infinite;
+}
+@media (prefers-reduced-motion:reduce){
+  .lc-ans{ animation:none; }
+  .lc-spin{ animation-duration:2s; }
+  .lc-btn{ transition:none; }
+}
