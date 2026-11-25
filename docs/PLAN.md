@@ -120,6 +120,37 @@ a phase finishes but the next phase continues here.
    (send, edit and delete its own message, react, add, delete and restore a
    term), and this item moves to `docs/PLAN-done.md`.
 
+2. **Consistency pass** (Jose, 2026-11-25: "All", after the 2026-11-24
+   audit). The visible tells left. Show Jose the corner scale on three
+   screens (phone first) before applying it everywhere; `DESIGN.md` changes
+   in the same commit.
+   - Corners: `app.css` and `home-polish.css` use 27 different
+     `border-radius` values in px (9, 10, 11, 12, 13 and 14 side by side;
+     counts in `docs/FACTS.md`). Put them on a short `--r-*` scale in the
+     "Visual refinement" block, as type and spacing already are.
+   - `.btn-primary`'s first shadow is green (`rgba(92,131,116,…)`, about
+     line 2088 of `app.css`) under a blue button.
+   - The top bar's round buttons are 36px; the rule is 44px for a tap.
+   - Two search hints are cut off mid-word on a phone ("Search terms,
+     definitions, Spanish equiv…", "Search a word, a meaning, or a
+     specialt…").
+   - Heading levels: a screen's title is an `h1` on six screens (the tool
+     banners), an `h2` on about twelve (`.section-head h2`), missing on
+     five (All domains, the briefing, Appointment, Doctor Directory, Link
+     Directory); Home goes from `h1` to `h3`. Touches `.section-head`
+     styles, `home-polish.css` and the suites that find titles by tag.
+   - While there, on every screen: a 60-character doctor name, a very long
+     term, a long chat message with no spaces; each failure forced (offline,
+     AI down, storage refused) and its message read.
+3. **Smaller files: a plan for Jose to OK, no code first** (same ask).
+   `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
+   and all. Shrinking them needs a build step, which this project has
+   avoided on purpose (`AGENTS.md`, Deploying: "There is no build step"),
+   and touches the version bump, the offline worker's file list and the
+   tests' harness. Write what would be built and how, the numbers before
+   (transfer size, time to Home on slow Wi-Fi from `slow-open.cjs`), the
+   assumptions, and what can go wrong; he decides.
+
 Waiting on Jose's pick: the repo scan's other picks (`docs/FACTS.md`).
 
 Nothing else is queued. The cleanup audit ran on 2026-11-11: its list is
@@ -218,8 +249,7 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
 
 ## Later (only when the trigger happens)
 
-- **Left by the 2026-11-24 audit** (each is Jose's call; none is a bug a
-  user hits).
+- **Left by the 2026-11-24 audit, for Jose** (the rest moved to Next).
   1. *The address is Vercel's free one* (`interp-six.vercel.app`). A name of
      his own costs about $12 to $20 a year and is his to buy. The address
      is then changed in five places: `index.html`'s head (canonical,
@@ -227,22 +257,15 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
      (`site-front.cjs` checks they agree). Not checked yet: whether the
      email sign-in (Firebase's allowed domains) and the notification
      links also name the old address.
-  2. *Long dashes the app still shows, on purpose.* The wording was
-     redone on 2026-11-25. What is left: answers the AI writes (Dr.
-     Smiley, Term lookup, Doctor Prep, Translate), which would need a
-     line in each `api/*.js` prompt; terms the team typed into the
-     glossary; and `HMH_NETWORK_LABEL`, which saved doctor records may
-     hold word for word.
-  3. *Heading levels.* A screen's title is an `h1` on six screens (the
-     tool banners), an `h2` on about twelve (`.section-head h2`) and
-     missing on five (All domains, the briefing, Appointment, Doctor
-     Directory, Link Directory); Home goes from `h1` to `h3`. Nobody sees
-     it; a screen reader's outline does. The fix touches `.section-head`
-     styles, `home-polish.css` and the suites that find titles by tag.
-  4. *`.btn-primary`'s first shadow is green* (`rgba(92,131,116,…)`,
-     `app.css` about line 2088) under a blue button, left from an older
-     palette; check whether the later rule fully replaces it before
-     touching it.
+  2. *The repository is public and says an AI wrote the code*
+     (`CLAUDE.md`, `AGENTS.md`, the commit trailers). Making it private
+     is a setting only he can change; he was given the steps on
+     2026-11-25.
+  3. *Long dashes still shown, on purpose:* terms the team typed into the
+     glossary, and `HMH_NETWORK_LABEL`, which saved doctor records may hold
+     word for word. The AI's answers are asked not to use them
+     (`PLAIN_PUNCTUATION` in `api/_routine.js`); that lowers how often,
+     it can't promise none.
 
 - **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
   am: the sun is left of the middle" reads the real date; by mid-November

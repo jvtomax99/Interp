@@ -318,7 +318,7 @@ export default async function handler(req, res) {
 ${TIER_BRIEF}
 
 ${RESPONSE_SHAPE}
-Set "found" to true, "specialty" to "${directoryMatch.division} — John Theurer Cancer Center", and "note" to mention this was matched directly against the confirmed building directory.`;
+Set "found" to true, "specialty" to "${directoryMatch.division}, John Theurer Cancer Center", and "note" to mention this was matched directly against the confirmed building directory.`;
 
       const parsed = await research(apiKey, systemPrompt, `Division: ${directoryMatch.division}`, null);
       res.status(200).json(normalizeResult(parsed));
