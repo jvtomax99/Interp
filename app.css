@@ -8113,3 +8113,9 @@ html[data-theme="dark"] .tool-banner .dl-add{ color:#fff; }
 @media (prefers-reduced-motion: reduce){
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
 }
+
+/* Search hints (2026-11-25). Every hint is short enough for a phone's box
+   (210px at 360 wide; the wording is Jose's pick, "two things"), and one
+   that still runs out of room ends in "..." instead of a cut letter.
+   tests/suites/search-hints.cjs holds both. */
+.search input, .gd-search input, .gs-inputrow input{ text-overflow:ellipsis; }

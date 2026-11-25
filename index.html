@@ -584,7 +584,7 @@
   <div class="gs-panel">
     <div class="gs-inputrow">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input id="gsInput" type="text" placeholder="Search terms, providers, guides, chat, practice…"
+      <input id="gsInput" type="text" placeholder="Search terms, people, guides"
              oninput="scheduleGlobalSearch()" onkeydown="handleGsKeys(event)" autocomplete="off"
              autocapitalize="none" spellcheck="false" enterkeyhint="search"
              aria-label="Search terms, providers, guides, chat and practice">
@@ -7426,7 +7426,7 @@ function domainBannerHtml(cat){
       </div>
     </section>
     <div class="domain-dock" id="domainDock" style="--dom:${color};">
-      <div class="search"><input id="searchInput" type="text" placeholder="Search ${escapeAttr(name)}" value="${escapeHtml(searchQuery)}"
+      <div class="search"><input id="searchInput" type="text" placeholder="Search" value="${escapeHtml(searchQuery)}"
         aria-label="Search ${escapeAttr(name)}" enterkeyhint="search" autocomplete="off" spellcheck="false"></div>
       <button class="domain-add" type="button" onclick="openAddModal()" aria-label="Add a term">${ICON_PLUS}<span>Add</span></button>
     </div>`;
@@ -7587,17 +7587,17 @@ function render(opts){
   // where domains are what you're looking at.
   let addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal()">+ Add term</button>`
     + `<button class="btn btn-ghost" onclick="openAddDomainModal()">+ New domain</button>`;
-  let searchPlaceholder = 'Search terms, definitions, Spanish equivalents…';
+  let searchPlaceholder = 'Search terms or Spanish';
   let showTopbar = true;
   if(activeCategory === 'providers'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddProviderModal()">+ Add provider</button>`;
-    searchPlaceholder = 'Search providers, specialties, places…';
+    searchPlaceholder = 'Search providers or places';
   } else if(activeCategory === 'doctor-directory'){
     addBtnHtml = '';   // "+ Add" sits on the banner, by the count (below)
-    searchPlaceholder = 'Search doctors, specialties, locations…';
+    searchPlaceholder = 'Search a name or specialty';
   } else if(activeCategory === 'ethics'){
     addBtnHtml = '';
-    searchPlaceholder = 'Search principles, conduct…';
+    searchPlaceholder = 'Search principles';
   } else if(activeCategory === 'directory'){
     addBtnHtml = `<button class="btn btn-primary" onclick="openAddModal(true)">+ Add link</button>`;
     searchPlaceholder = 'Search links…';

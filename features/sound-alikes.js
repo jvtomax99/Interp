@@ -225,7 +225,7 @@ function renderSAStudy(){
       ${chip('all', 'All', SOUND_ALIKES.length)}${chip('same', 'Sound the same', n('same'))}${chip('near', 'Sound close', n('near'))}${chip('es', 'Heard in Spanish', n('es'))}
     </div>
     <div class="search ff-search" style="margin-bottom:17px;">
-      <input type="text" id="saSearch" placeholder="Search a word, a meaning, or a specialty…"
+      <input type="text" id="saSearch" placeholder="Search a word or meaning"
              value="${escapeHtml(saQuery)}" oninput="saSearch(this.value)" aria-label="Search sound-alikes">
     </div>
     <div class="ff-list" id="saList">${renderSACards()}</div>`;
