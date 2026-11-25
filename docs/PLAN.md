@@ -171,6 +171,12 @@ a phase finishes but the next phase continues here.
      Good as they are: chat and terms offline (saved on the phone, the
      badge counts them), phone storage full, Ask the Hub's five messages,
      Translate, sign-in. Not tested: "my photo" when the upload fails.
+     Fixed the same day (the stress-checks pull request, `stress.cjs`
+     holds all twelve): the five cards wrap or end in "..."; the seven
+     failures say what happened in plain words. Left for later, Jose's
+     call: doctors, providers and chat deletes still need a connection
+     (they now say so); putting them in the outbox like terms is a
+     data change with its own plan.
 3. **Check link** (Jose's ask, 2026-11-25; he OK'd the plan the same day,
    to be built once the consistency pass is finished). A Check button
    beside a term's source link that says whether the address still opens.

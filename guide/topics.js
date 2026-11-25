@@ -557,9 +557,9 @@ const GUIDE_TOPICS = [
 
   { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
     <p><b>Looking things up: yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
-    <p><b>Adding or changing something: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
+    <p><b>Adding or changing a term, or sending a chat message: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
     <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New</b> on Ask's banner (a new conversation) drops the ones still waiting.</p>
-    <p>Translate, Doctor Prep and Look up need a connection.</p>` },
+    <p>Translate, Doctor Prep and Look up need a connection. So do saving a doctor or a provider and deleting a chat message: offline the Hub says so, and what you typed stays in the form until you're back.</p>` },
 
   { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline: 1 change waiting”', a:`
     <p>That's the app being honest with you. Your change is <b>saved on this phone</b> and is waiting for a connection.</p>
