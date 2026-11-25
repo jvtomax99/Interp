@@ -1,63 +1,71 @@
-# HANDOFF, 2026-11-25
+# HANDOFF, 2026-11-25 (second of the day)
 
 ## Paste this into a new chat
 
-Read HANDOFF.md, then do the consistency pass: item 2 under Next in docs/PLAN.md. Start by showing me the corner scale on three screens at phone size, before applying it anywhere.
+Read HANDOFF.md, then carry on the consistency pass (item 2 under Next in docs/PLAN.md): the top bar's round buttons from 36px to 44px. Show me before and after at phone size before applying.
 
 ## The goal and the exact next step
 
-Jose asked for an audit of everything that makes the Hub look thrown
-together, then said "All" to the four things left. Two are done or
-handed to him; two are queued in `docs/PLAN.md` under Next:
+The consistency pass is the list of small things that make the Hub look
+thrown together. Part 1, the corners, is live. Three parts are left, each
+one visible, so each gets before and after screenshots (phone first) and
+Jose's OK before it is applied:
 
-1. **Next, the pick: the consistency pass** (Next, item 2). First step:
-   read `DESIGN.md` and `docs/design-rules.md`, propose a short `--r-*`
-   corner scale from the counts in `docs/FACTS.md` ("Corner sizes"), and
-   send Jose before and after screenshots of three screens at phone size
-   (Home, a glossary domain, Doctor Prep). Apply it everywhere only after
-   his OK. It is a visual change on most screens.
-2. **Then: the plan for smaller files** (Next, item 3). A plan for him to
-   OK, no code first.
+1. **Next, the pick: the top bar's four round buttons** (`tgBack`,
+   `tgTheme`, `tgBell`, `tgAvatar`) measure 36 x 36 on a phone; the rule
+   is 44. They live in `home-polish.css` (the `max-width:900px` block).
+   Smallest of the three and a real fix for thumbs. Watch the bar's
+   height and the title's room at 360 wide.
+2. **Search hints**: every search box on a phone cuts its hint, not two
+   (numbers in `docs/FACTS.md`, "Search hints"). Needs shorter phone
+   wording, about 24 characters, and about 10 beside "+ Add" on a
+   domain. The wording is Jose's call: offer options with buttons. Check
+   the User Guide for the old wording.
+3. **Heading levels** (`h1` / `h2` / none, per screen): the biggest;
+   touches `.section-head`, `home-polish.css` and suites that find
+   titles by tag. Then the "while there" stress checks in the plan.
+
+After the pass: item 3 under Next, a plan for smaller files, for his OK,
+no code first.
 
 ## What is merged, what is open
 
-- Merged and live: #282 the front door (build b1125.0024), #283 the long
-  dashes (build b1125.0927).
-- Open: #284, the AI is asked not to write long dashes. Waiting on
-  GitHub's checks, then Jose's "push". If this file is on `main`, it was
-  merged: confirm the bump commit and Vercel's status as `CLAUDE.md` says.
+- Merged and live: #285, every rounded corner on five sizes, build
+  b1125.1318 (Vercel: deploy completed). Undo: revert #285.
+- Open: only the pull request that carries this file (notes only).
 
 ## Open questions for Jose
 
-- **Make the repository private?** He was given the steps on 2026-11-25
-  (Settings, General, Danger Zone, Change visibility). Only he can do it.
-  Ask whether he did; nothing in the code depends on it.
-- **Buy a name** to replace `interp-six.vercel.app`? The five places to
-  change are listed under Later in `docs/PLAN.md`.
-- **Read the reworded False Friends and Code of Ethics lines** on his
-  phone. He pushed #283 without saying he had read them.
-- Not confirmed from a cloud session: that a made-up address on the live
-  site shows `404.html`.
+- **Make the repository private?** Asked 2026-11-25: "Not yet".
+- **Read the reworded False Friends and Code of Ethics lines?** Asked
+  2026-11-25: "Not yet".
+- Buy a name to replace `interp-six.vercel.app`? Not asked this chat.
+- Not confirmed from a cloud session: a made-up address on the live site
+  shows `404.html`.
 
 ## Decisions from this chat
 
-- No long dash in on-screen wording, enforced by `site-front.cjs`. The
-  allowed exceptions are in `docs/FACTS.md`, "Long dashes".
-- A False Friend's `means` puts its short form before "; " or ": ".
-- The link card's tagline, "The right word, between assignments.", was
-  written by the AI, not Jose. He has seen it and not objected.
+- Corners: five sizes only, `--r-xs` 6, `--r-sm` 10, `--r-md` 14,
+  `--r-lg` 20, `--r-xl` 26 (Jose picked "Apply it" over keeping a 12px
+  size). A pill is written `999px`. `pin-icons.js` is outside the scale.
+  All in `DESIGN.md`, "Border radius"; held by `corner-scale.cjs`.
 
 ## Learned, not in the notes yet
 
-- The full check run takes about 40 minutes on the cloud machine, not 8.
-  Run it in the background with a 60 to 70 minute limit, or it is cut off.
-- The tests' Playwright needs the link in `docs/FACTS.md` ("The cloud
-  machine's Chromium...") made once per machine before any browser suite.
-- GitHub's own run of the checks takes about 9 minutes and is the faster
-  proof for a small change.
+- The audit's "green shadow under the blue button" never showed: another
+  rule covers `.btn-primary`'s shadow on every button measured. It is
+  blue in the code now; nothing visible changed.
+- `feel.cjs`'s Home timing fails when other browsers run at the same
+  time (133.7 against 120; alone 61.2 and 25.1). Run it alone.
+- A before and after without touching the branch: write changed copies of
+  the stylesheets to a folder and run with `POLISH_DIR=<folder>`; compare
+  against a `git worktree` of `main` with `ROOT=<worktree>`.
+- A cold reviewer helper caught five real mistakes in the corner sweep.
+  Keep doing that before every pull request.
 
 ## Files to look at first
 
-`docs/PLAN.md` (Next, items 2 and 3), `DESIGN.md`, `docs/design-rules.md`,
-the "Visual refinement" block at the end of `app.css`, and
-`tests/suites/type-tokens.cjs` as the model for a corner-scale check.
+`docs/PLAN.md` (Next, item 2), `docs/FACTS.md` ("Search hints", the top
+bar line under it), `DESIGN.md` (Tap targets), `home-polish.css` (the
+`max-width:900px` block), `tests/suites/corner-scale.cjs` as the newest
+model for a check.
