@@ -13,12 +13,16 @@ screen up to 760px wide (the page itself scrolls); above that a 640px sheet
 (the overlay scrolls). Top bar and bottom bar are `position:sticky` in
 whichever of the two scrolls.
 
-**The screen behind it.** While the page is open, `#app` (Doctor
-Directory's title and cards, the tab bar) is `inert`: a screen reader
-finds one title and the Tab key stays in the page. It is set in the
-dialogs' own watcher in `index.html` ("Dialogs", the observer per panel),
-before focus moves in, and lifted before focus goes back to the card. The
-top bar (Back) sits outside `#app` and stays in reach. `small-picks.cjs`.
+**The screen behind it.** While the page is open, `#app` (the screen it
+was opened from, usually Doctor Directory: its title and cards, and the
+tab bar) is `inert`: a screen reader finds one title and nothing behind
+the page takes focus. `syncAppBehind()` in `index.html` decides it, for
+the page and the team-code lock together, so neither closing hands the
+app back while the other is up; the dialogs' watcher ("Dialogs", the
+observer per panel) calls it before focus moves in, and again before
+focus goes back to the card. A sheet opened from the page (tips, edit)
+gives focus back to the page when it closes. The top bar (Back) sits
+outside `#app` and stays in reach. `small-picks.cjs`.
 
 **What it shows.**
 - Header: the photo (tap = photo viewer), else the specialty's pin in a soft

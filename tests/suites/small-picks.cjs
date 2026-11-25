@@ -63,12 +63,37 @@ const titles = page => page.evaluate(() => [...document.querySelectorAll('h1')]
         let escaped = 0;
         for (let i = 0; i < 12; i++) { await page.keyboard.press('Tab'); if (!await page.evaluate(() => !!document.activeElement.closest('#doctorDirDetailModal'))) escaped++; }
         ok(escaped === 0, 'page open: twelve Tab presses stay inside the page', escaped);
+        // What `inert` itself does: nothing behind the page can take focus.
+        const behind = await page.evaluate(() => { const b = document.querySelector('#app button, #app a, #app input'); if (!b) return 'none'; b.focus(); return document.activeElement === b; });
+        ok(behind === false, 'page open: a control behind the page cannot take focus', behind);
+        // A sheet opened from the page (Team tips) and closed again: the
+        // screen behind stays out of reach and focus goes back into the page.
+        await page.evaluate(() => openDoctorTips('sp1')); await page.waitForTimeout(400);
+        const tips = await page.evaluate(() => ({ show: document.getElementById('doctorTipsOverlay').classList.contains('show'), inert: document.getElementById('app').inert }));
+        await page.evaluate(() => closeDoctorTips()); await page.waitForTimeout(400);
+        const afterTips = await page.evaluate(() => ({ inert: document.getElementById('app').inert, inPage: !!document.activeElement.closest('#doctorDirDetailModal'), active: document.activeElement.tagName }));
+        ok(tips.show && tips.inert && afterTips.inert && afterTips.inPage, 'a sheet over the page, closed: focus is back inside the page, the screen behind still out of reach', { tips, afterTips });
+        // The team-code lock and the page share the screen behind: neither
+        // closing hands it back while the other is still up.
+        await page.evaluate(() => { showAccessLock('join'); hideAccessLock(true); });
+        ok(await page.evaluate(() => document.getElementById('app').inert), 'the lock coming and going over an open page leaves the screen behind out of reach');
+        await page.evaluate(() => { showAccessLock('join'); closeDoctorDirDetail(); }); await page.waitForTimeout(300);
+        ok(await page.evaluate(() => document.getElementById('app').inert), 'the page closing under the lock leaves the app out of reach');
+        await page.evaluate(() => hideAccessLock(true));
+        ok(await page.evaluate(() => !document.getElementById('app').inert), 'the lock gone and no page: the app is back');
+        // The lock redraws the screen, so the card is found again before the page reopens from it.
+        const again = await page.evaluate(() => { const card = document.querySelector('.dl-card[data-doc="sp1"]');
+          const f = card && (card.matches('button,a,[tabindex]') ? card : card.querySelector('button,a,[tabindex]'));
+          if (f) { f.setAttribute('data-sp-opener', '1'); f.focus(); }
+          const had = !!f && document.activeElement === f; openDoctorDirDetail('sp1'); return had; });
+        ok(again, 'the card takes focus again and reopens the page');
+        await page.waitForTimeout(400);
         await page.evaluate(() => closeDoctorDirDetail());
         await page.waitForTimeout(400);
         const shut = await page.evaluate(() => ({ inert: document.getElementById('app').inert, back: !!document.activeElement.closest('[data-sp-opener]') || document.activeElement.hasAttribute('data-sp-opener'),
           openerHere: !!document.querySelector('[data-sp-opener]'), active: document.activeElement.tagName + '.' + document.activeElement.className }));
         ok(!shut.inert, 'page closed: the screen behind is back', shut);
-        ok(shut.back || !shut.openerHere, 'page closed: focus is back on the card that opened it', shut);
+        ok(shut.openerHere && shut.back, 'page closed: focus is back on the card that opened it', shut);
         const after = await titles(page);
         ok(after.length === 1 && after[0] === 'Doctor Directory', 'page closed: one title again, Doctor Directory', after);
         // Back (the app's own) closes it the same way.

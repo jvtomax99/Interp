@@ -94,8 +94,9 @@ const TEXT = () => (document.querySelector('.modal.show, .overlay.show, .gs-over
   await press('home', '.tg-icon-btn', 'the top bar\'s dark-mode button');
   await press(null, '.domain-family', 'a domain card on Home (the family carries the glow, not the tile inside)');
   await press(null, '.qa-tile', 'a quick tile');
+  // On the Link Directory ("+ Add link"): Recent Updates lost the glossary bar that held one (2026-11-25).
+  await press('directory', '.btn.btn-primary', 'a primary button');
   await press('updates', '.tg-back', 'the top bar\'s Back');
-  await press(null, '.btn.btn-primary', 'a primary button');
   // Only owner phones see Updates' ✕ (docs/features/deleted-items.md): check its press as one.
   await page.evaluate(() => { writeAccessMe({ ...(readAccessMe() || {}), member: true, role: 'owner' }); });
   await press('updates', '.activity-delete', 'a list action (the ✕, on an owner phone)');
