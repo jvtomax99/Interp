@@ -181,7 +181,10 @@ async function openTermLookup(categoryId, termId){
 
     if(!res.ok){
       stopProgress();
-      renderTermLookupMessage(
+      // The daily limit and the team gate get their own words: "usually temporary" was wrong for both.
+      if(res.status === 429) renderTermLookupMessage('Today\u2019s limit is reached', 'This phone has reached today\u2019s limit for the AI tools. They work again tomorrow.', term);
+      else if(res.status === 401) renderTermLookupMessage('Lookup is for the team', 'Open the Hub with the team code and try again.', term);
+      else renderTermLookupMessage(
         'Lookup is unavailable right now',
         res.status === 503
           ? 'The lookup service is not switched on for this deployment.'

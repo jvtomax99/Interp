@@ -2513,7 +2513,9 @@ async function saveTermDoc(term){
     // Surface the real reason. The generic message sent people (and me)
     // chasing connection problems when the actual cause was something else
     // entirely, and the console isn't reachable on a phone.
-    showToast(saveErrorMessage(err, 'terms') + (err && err.code ? ` [${err.code}]` : ''));
+    // The code is added only when the message can't name the cause itself.
+    const said = saveErrorMessage(err, 'terms');
+    showToast(said + (said === SAVE_FAILED_GENERIC && err && err.code ? ` [${err.code}]` : ''));
     return false;
   }
 }
@@ -3568,6 +3570,7 @@ async function handleTermAttachSelected(event){
   const termId = pendingAttachTermId;
   pendingAttachTermId = null;
   if(!file || !termId) return;
+  if(offlineBlocked('Attaching a file')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
 
   try{
@@ -3579,7 +3582,7 @@ async function handleTermAttachSelected(event){
     showToast('File attached.');
     render();
   }catch(err){
-    showToast(err.message || 'Could not attach that file.');
+    showToast(uploadErrorMessage(err, 'Could not attach that file.', 'The file'));
   }
 }
 
@@ -4225,6 +4228,7 @@ document.addEventListener('keydown', (e)=>{
    patching needed, and no full render() that could disturb other work. */
 async function deleteChatMessage(id){
   const msg = CHAT_MESSAGES.find(m=>m.id===id);
+  if(offlineBlocked('Deleting a message')) return;
   if(!confirm('Delete this message for everyone? This can\'t be undone.')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
@@ -4240,6 +4244,7 @@ async function deleteChatMessage(id){
 }
 
 async function deleteActivity(id){
+  if(offlineBlocked('Removing an update')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('activity-log').doc(id).delete();
@@ -4250,6 +4255,7 @@ async function deleteActivity(id){
 
 async function clearAllActivity(){
   if(!ACTIVITY.length) return;
+  if(offlineBlocked('Clearing the updates')) return;
   if(!confirm(`Clear all ${ACTIVITY.length} updates? This only clears the activity list. Your terms, notes, providers, and messages are not affected.`)) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   const ids = ACTIVITY.map(a=>a.id);
@@ -5383,6 +5389,7 @@ async function saveEvent(){
   const evRegion = document.getElementById('fEvRegion').value;
   if(isRegion(evRegion)) record.region = evRegion;
   if(myUid()) record.uid = myUid();   // who may remove it (theirs, or an owner's)
+  if(offlineBlocked('Adding an event')) return;
   if(!db){ showToast('Not connected to the database.'); return; }
   try{
     await db.collection('ce-events').add(record);
@@ -5410,13 +5417,32 @@ async function deleteCeEvent(id){
    network problem that didn't exist. This names the real cause. */
 function saveErrorMessage(err, collection){
   const code = (err && (err.code || err.message) || '').toString().toLowerCase();
-  if(code.includes('permission') || code.includes('insufficient')){
-    return `Saving was blocked by the database rules${collection ? ` for "${collection}"` : ''}. Add the matching Firestore rule, then try again.`;
+  // Said to an interpreter, not a developer: the same words as the unsent-changes sheet (outboxReasonText).
+  if(code.includes('permission') || code.includes('insufficient') || code.includes('unauthenticated')){
+    return 'Not saved: the database refused it. This phone may need to rejoin the team on Team access, then try again.';
   }
   if(code.includes('unavailable') || code.includes('network') || code.includes('offline')){
     return 'Could not reach the database. Check your connection.';
   }
-  return 'Could not save. Please try again.';
+  return SAVE_FAILED_GENERIC;
+}
+const SAVE_FAILED_GENERIC = 'Could not save. Please try again.';
+// A write the outbox doesn't carry (a doctor, a provider, deleting a chat
+// message) never answers while the phone is offline: the sheet just sat
+// there. Say so before trying.
+function offlineBlocked(what){
+  if(navigator.onLine !== false) return false;
+  showToast(`You\u2019re offline. ${what} needs a connection. Nothing was lost.`);
+  return true;
+}
+// A failed upload used to show the storage service's own error text.
+function uploadErrorMessage(err, fallback, what){
+  const code = String(err && err.code || '');
+  what = what || 'The photo';   // a term takes a PDF too: 'The file'
+  if(code === 'storage/unauthorized' || code === 'storage/unauthenticated' || /permission|insufficient|unauthenticated/i.test(code + ' ' + (err && err.message || '')))
+    return `${what} was refused. This phone may need to rejoin the team on Team access.`;
+  if(code.startsWith('storage/')) return `${what} didn\u2019t upload. Check your connection and try again.`;
+  return (err && err.message) || fallback;
 }
 
 function prefersAutoFocus(){
@@ -6664,7 +6690,11 @@ async function runDoctorResearch(forceRefresh){
     });
     const data = await res.json();
     if(!res.ok){
-      doctorResearchState = { ...doctorResearchState, status: 'error', result: null, error: data.error || 'Something went wrong.' };
+      // The team gate answers with a code word ("daily_limit", "members_only"), which used to be shown as is.
+      const said = res.status === 429 ? (data.message || 'This phone has reached today\u2019s limit for the AI tools. They work again tomorrow.')
+        : res.status === 401 ? 'Doctor Prep is for the team. Open the Hub with the team code and try again.'
+        : (/\s/.test(String(data.error || '')) ? data.error : 'Something went wrong. Please try again.');
+      doctorResearchState = { ...doctorResearchState, status: 'error', result: null, error: said };
     } else {
       doctorResearchState = { ...doctorResearchState, status: 'done', result: data, error: null, cacheInfo: null };
       saveCachedDoctorResearch(cacheKey, { doctorName: name, specialty, location, result: data });
@@ -9676,7 +9706,7 @@ async function handleMyPhotoSelected(event){
     pendingMyPhoto = await uploadAvatar(file, key, ready);
     pendingMyPhotoRemove = false;
   }catch(err){
-    showToast(err && err.message ? err.message : 'Could not add that photo.');
+    showToast(uploadErrorMessage(err, 'Could not add that photo.'));
   }
   uploadingMyPhoto = false;
   renderNamePhoto();
@@ -13450,6 +13480,7 @@ function closeDoctorTermModal(){
 async function saveDoctorTerm(){
   const en = document.getElementById('fDTEn').value.trim();
   if(!en){ showToast('English term is required.'); return; }
+  if(offlineBlocked('Saving a doctor\u2019s term')) return;
   const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorTermTargetId);
   if(!d){ showToast('Could not find that doctor.'); return; }
 
@@ -13730,6 +13761,7 @@ function isMyTip(t){
   return !!me && (t.by || '').trim().toLowerCase() === me;
 }
 async function doctorTipWrite(id, { add, remove, dropNotes }){
+  if(offlineBlocked(add ? 'Saving a tip' : 'Changing a tip')) return false;
   if(!db){ showToast('Not connected to the database.'); return false; }
   const FV = firebase.firestore.FieldValue;
   const ref = db.collection('doctor-directory').doc(id);
@@ -15262,6 +15294,7 @@ async function sendChatMessageOnce(){
   }catch(err){
     const stored = outboxErrorMessage(err, 'Not sent', 'Your message is back in the box.');
     if(stored) showOutboxActionToast(stored);
+    else if(/permission|insufficient|unauthenticated/i.test(String(err && (err.code || err.message) || ''))) showToast('Not sent: the database refused it. This phone may need to rejoin the team on Team access.');
     else showToast('Could not send. Check your connection.');
     setChatNote('Didn\u2019t send. Your message is back in the box. Tap send to try again.');
     const back = document.getElementById('chatInput') || input;
@@ -15973,7 +16006,7 @@ async function handlePhotoSelect(event){
     pendingPhotoPath = att.storagePath || null;
     renderPhotoPreview();
   }catch(err){
-    showToast(err.message || 'Could not process that image.');
+    showToast(uploadErrorMessage(err, 'Could not process that image.'));
   }finally{
     if(label) label.textContent = originalLabel || 'Choose photo';
     event.target.value = '';
@@ -15983,6 +16016,7 @@ async function handlePhotoSelect(event){
 async function saveProvider(){
   const name = document.getElementById('fPName').value.trim();
   if(!name){ showToast('Provider name is required.'); return; }
+  if(offlineBlocked('Saving a provider')) return;
   const role = document.getElementById('fPRole').value.trim();
   const unit = document.getElementById('fPUnit').value.trim();
   const phone = document.getElementById('fPPhone').value.trim();
