@@ -697,3 +697,8 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   `HMH_NETWORK_LABEL` (saved doctor records may hold it word for word).
 - A False Friend's `means` puts its short form before "; " or ": ". The
   appointment briefing, Appointment and Ask show only that part.
+- Corner sizes, counted 2026-11-25 (`border-radius` in px across `app.css`
+  and `home-polish.css`): 999px x121, 12 x25, 10 x24, 20 x21, 14 x17,
+  16 x16, 9 x14, 8 x14, 2 x12, 11 x12, 18 x8, then 6, 4, 24, 22, 17 and
+  13 at 7 each, and ten more values used under 7 times. No `--r-*` scale
+  exists yet.

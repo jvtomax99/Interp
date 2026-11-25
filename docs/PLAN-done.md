@@ -5,6 +5,10 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-25 The AI's answers are asked not to write long dashes. One line (`PLAIN_PUNCTUATION`) is added to every system prompt
+  in `callClaude` (`api/_routine.js`), so Dr. Smiley, Term lookup, Doctor Prep, Translate and the term check all get it from one
+  place. Doctor Prep's fixed specialty line now reads "Division, John Theurer Cancer Center". `api-helper.mjs` checks the line is sent.
+
 - 2026-11-25 Long dashes out of the app's wording (Jose: "do the long dashes"). 158 lines on screen reworded with a full stop, comma,
   colon or brackets: toasts, Doctor Prep, the Code of Ethics summaries, CoreCHI Practice and its 17 explanations, Translate's badges,
   the offline labels, the guide's one quote of them, and 37 lines of the False Friends list. A False Friend's short meaning used to be

@@ -62,6 +62,13 @@ export function clipLine(v, max = 600) {
  *     otherwise the same as text.
  *   { ok: false, model, status, detail } for an error status. A refusal or
  *     a cut-off answer is ok: true with its stopReason; the caller decides. */
+/* One line added to every system prompt, here so it is written once: the
+ * app's own wording has no long dash (docs/FACTS.md, "Long dashes"), and the
+ * answers Claude writes are read on the same screens. It lowers how often
+ * one appears; it cannot promise none. */
+export const PLAIN_PUNCTUATION = '\n\nPunctuation: in everything you write for the reader, never use the long dash (the em dash) or a double hyphen as one. Use a full stop, a comma, a colon or brackets instead.';
+const withStyle = body => typeof body.system === 'string' ? { ...body, system: body.system + PLAIN_PUNCTUATION } : body;
+
 export async function callClaude(apiKey, { model, body, output, retryOutput, beta }) {
   let withBeta = !!beta, sending = output || null, outputTried = false;
   let usedSchema = !!(output && output.format);
@@ -69,7 +76,7 @@ export async function callClaude(apiKey, { model, body, output, retryOutput, bet
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01',
       ...(withBeta ? { 'anthropic-beta': beta.header } : {}) },
-    body: JSON.stringify({ model, ...body, ...(withBeta ? beta.body || {} : {}), ...(sending ? { output_config: sending } : {}) }),
+    body: JSON.stringify({ model, ...withStyle(body), ...(withBeta ? beta.body || {} : {}), ...(sending ? { output_config: sending } : {}) }),
   });
   let res = await send();
   for (let attempt = 0; attempt < 2 && res.status === 400 && (withBeta || (sending && !outputTried)); attempt++) {
