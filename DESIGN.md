@@ -136,7 +136,8 @@ badge to begin", "Welcome in") are Inter on the tokens.
 
 - **Five sizes, and nothing between them:** `--r-xs` 6px (tags, small chips), `--r-sm` 10px (buttons, inputs, icon squares), `--r-md` 14px (cards, tiles), `--r-lg` 20px (big cards, banners), `--r-xl` 26px (sheets, the largest panels). Defined once, in `:root` at the top of `app.css`.
 - **Written by hand only:** `0`, circles (`50%`), pills (`999px`) and hairlines of 1 to 3px (progress bars, ticks, carets). `tests/suites/corner-scale.cjs` fails on any other value, in the stylesheets, in the page's code or measured on screen.
-- **A rounded child inside a rounded parent takes the smaller radius:** `.qa-tile` `--r-lg` holds `.qa-tile-icon` `--r-md`; `.qa-card` `--r-lg` holds `.qa-icon` `--r-md`. No equal parent and child pair exists (a child flush with its parent's edge shares the corner).
+- **A rounded child inside a rounded parent takes the smaller radius:** the briefing's glass bar `.dp-bar` `--r-xl` (7px padding) holds `.dp-go` and `.dp-rb` at `--r-lg`; the Translate capsule `.tr-langs` `--r-md` holds its pickers at `--r-sm`. No equal parent and child pair exists (a child flush with its parent's edge shares the corner).
+- **A shape that is a pill is written `999px`,** never a number that happens to be half its height (the opening's badge reader, the "Ask" tag, the cached-result refresh chip). A box that is a pill on one line and a rounded box when it grows (Dr. Smiley's message box) takes `--r-xl`. `pin-icons.js` draws its own art and is outside the scale.
 
 ## Elevation
 

@@ -702,10 +702,13 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   three `--r-*` names already used 148 times (an earlier line here said no
   scale existed; it was wrong). All now sit on `--r-xs` 6, `--r-sm` 10,
   `--r-md` 14, `--r-lg` 20, `--r-xl` 26; no corner moved more than 5px
-  (31 to 26, once). Dr. Smiley has no px corner in the stylesheets, so
-  nothing of his changed. The `.gs-*` classes are the global search, not
-  the guide's steps. Measured on 12 phone screens: no inset child shares
-  its parent's corner size.
+  (30 to 26). Dr. Smiley's face has no px corner in the stylesheets. Five
+  shapes were pills typed as a number (half their height) and are now
+  `999px`: `.op-reader`, `.op-ring`, `.op-lr`, `.dock-smiley-tag`,
+  `.doc-research-cache-refresh`. The `.gs-*` classes are the global
+  search, not the guide's steps. `corner-scale.cjs` measures ten screens
+  but does not open the opening, the "Show me" spotlight, Ask or the
+  briefing; those were checked by reading (review, 2026-11-25).
 - Search hints (2026-11-25, phone 393 and 360 wide, 16px Inter): the room
   for a hint is 243px / 210px, and 111px / 78px on a domain or All domains
   (beside "+ Add"). Needed: "Search terms, definitions, Spanish

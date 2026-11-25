@@ -28,7 +28,7 @@ const SCALE = [6, 10, 14, 20, 26];
   ok(!stray.length, 'every corner is a --r-* size (0, 50%, 999px and 1 to 3px hairlines excepted)', stray.slice(0, 20));
   const inline = [];
   for (const f of ['index.html', 'home-polish.js', ...fs.readdirSync(L.ROOT + 'features').map(n => 'features/' + n)])
-    for (const z of fs.readFileSync(L.ROOT + f, 'utf8').matchAll(/border-radius\s*:\s*([\d.]+)px/g)) if (parseFloat(z[1]) > 3 && parseFloat(z[1]) < 999) inline.push(f + ' ' + z[0]);
+    for (const z of fs.readFileSync(L.ROOT + f, 'utf8').matchAll(/(?:border-radius\s*:\s*|[bB]order(?:Top|Bottom)?(?:Left|Right)?Radius\s*[:=][^;\n]*?['"])([\d.]+)px/g)) if (parseFloat(z[1]) > 3 && parseFloat(z[1]) < 999) inline.push(f + ' ' + z[0]);
   ok(!inline.length, 'no corner typed by hand in the page\'s code', inline);
 
   console.log('== the screens (measured)');

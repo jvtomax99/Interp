@@ -4438,7 +4438,7 @@
   .doc-research-cache-banner-text svg{ width:13px; height:13px; flex-shrink:0; color:var(--accent-2); }
   .doc-research-cache-refresh{
     flex-shrink:0; font-family:var(--sans); font-size:var(--fs-cap); font-weight:650;
-    padding:6px 12px; border-radius:var(--r-md); border:1px solid var(--line-soft); background:var(--paper);
+    padding:6px 12px; border-radius:999px; border:1px solid var(--line-soft); background:var(--paper);
     color:var(--accent-2); cursor:pointer; white-space:nowrap; transition:filter .15s var(--ease);
   }
   .doc-research-cache-refresh:hover{ filter:brightness(0.97); }
@@ -6487,7 +6487,7 @@ html[data-theme="dark"]{ --drp-glass:rgba(24,32,50,.9); --drp-ground:rgba(14,20,
 html[data-theme="dark"] .drp-earlier{ color:var(--accent-2); }
 .drp-compose{ display:flex; align-items:flex-end; gap:9px; }
 .drp-compose textarea{ flex:1; min-width:0; min-height:44px; max-height:112px; resize:none; overflow-y:auto; margin:0;
-  padding:11px 15px; border-radius:var(--r-lg); border:1px solid var(--line); background:var(--paper); color:var(--ink); font:var(--fs-call)/1.35 var(--sans); }
+  padding:11px 15px; border-radius:var(--r-xl); border:1px solid var(--line); background:var(--paper); color:var(--ink); font:var(--fs-call)/1.35 var(--sans); }
 .drp-compose textarea:focus{ outline:none; border-color:var(--accent-2); box-shadow:0 0 0 4px var(--accent-soft); }
 @media (prefers-reduced-motion:reduce){
   .drp[data-state="busy"] .drp-status::before, .drp[data-state="busy"] .drp-bg::after, .tg-smiley.is-busy{ animation:none; }
@@ -6870,10 +6870,10 @@ html[data-theme="dark"] .dp-gl:not(.is-have){ background:rgba(201,211,255,.12); 
   border-radius:var(--r-xl); background:var(--glass-bg); -webkit-backdrop-filter:var(--glass-blur); backdrop-filter:var(--glass-blur);
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 12px 30px -14px rgba(22,55,90,.4); }
 html[data-theme="dark"] .dp-bar{ background:rgba(26,34,51,.78); box-shadow:var(--sh-2); }
-.dp-go{ flex:1; min-width:0; height:56px; border:0; border-radius:var(--r-xl); background:#252E6D; color:#fff; cursor:pointer;
+.dp-go{ flex:1; min-width:0; height:56px; border:0; border-radius:var(--r-lg); background:#252E6D; color:#fff; cursor:pointer;
   font:650 var(--fs-call) var(--sans); display:flex; align-items:center; justify-content:center; gap:8px; }
 .dp-go svg{ width:16px; height:16px; flex:0 0 auto; }
-.dp-rb{ flex:0 0 64px; height:56px; border:0; border-radius:var(--r-xl); background:var(--paper); color:var(--ink-soft); cursor:pointer;
+.dp-rb{ flex:0 0 64px; height:56px; border:0; border-radius:var(--r-lg); background:var(--paper); color:var(--ink-soft); cursor:pointer;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font:650 var(--fs-cap2) var(--sans);
   box-shadow:0 1px 0 0 inset rgba(255,255,255,0.82), 0 1px 2px rgba(20,43,67,0.06), 0 8px 20px -12px rgba(22,55,90,0.22); }
 .dp-rb img{ width:28px; height:28px; object-fit:contain; }
@@ -7910,12 +7910,12 @@ html.op-cover[data-op-look="evening"]::after, .op.op-evening, .op.op-evening.is-
 .op-glint{ position:absolute; inset:0; border-radius:var(--r-md); background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.65) 44%,rgba(255,255,255,0) 54%); mix-blend-mode:screen; opacity:0; }
 .op-scan{ position:absolute; left:8px; right:8px; top:8px; height:3px; border-radius:2px; opacity:0; background:#9ff6ff; box-shadow:0 0 12px 4px rgba(120,240,255,.85),0 0 30px 10px rgba(120,240,255,.35); }
 /* the reader: a frosted glass puck with a ring of light */
-.op-reader{ left:135px; top:640px; width:120px; height:56px; border-radius:var(--r-xl); display:grid; place-items:center; opacity:0;
+.op-reader{ left:135px; top:640px; width:120px; height:56px; border-radius:999px; display:grid; place-items:center; opacity:0;
   background:rgba(255,255,255,.18); -webkit-backdrop-filter:blur(18px) saturate(170%); backdrop-filter:blur(18px) saturate(170%);
   border:1px solid rgba(255,255,255,.55); box-shadow:0 16px 30px -14px rgba(10,14,40,.7),inset 0 1px 0 rgba(255,255,255,.7); }
 .op-reader svg{ width:26px; height:26px; }
-.op-lr{ position:absolute; inset:-3px; border-radius:var(--r-xl); border:2px solid var(--lc,#ff8fa3); box-shadow:0 0 14px var(--lc,#ff8fa3); }
-.op-ring{ left:135px; top:640px; width:120px; height:56px; border-radius:var(--r-xl); border:2px solid #5de3a0; opacity:0; }
+.op-lr{ position:absolute; inset:-3px; border-radius:999px; border:2px solid var(--lc,#ff8fa3); box-shadow:0 0 14px var(--lc,#ff8fa3); }
+.op-ring{ left:135px; top:640px; width:120px; height:56px; border-radius:999px; border:2px solid #5de3a0; opacity:0; }
 .op-cta{ left:0; right:0; top:708px; text-align:center; font-size:var(--fs-foot); font-weight:550; letter-spacing:var(--tr-caps); color:#fff; text-shadow:0 1px 10px rgba(16,20,46,.7); opacity:0; }
 /* Log in or link your account (opening.js openingAccount): a small glass pill in the open space between the badge
    and the reader, only on a phone not signed in; its opacity and taps follow "Tap your badge" (opAcctFade). */
