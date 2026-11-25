@@ -27,21 +27,14 @@ fixed (#292, build b1125.2244).
 - **Make the repository private?** Asked 2026-11-25: "Not yet".
 - **Read the reworded False Friends and Code of Ethics lines?** Asked
   2026-11-25: "Not yet".
-- Found on the way, not asked yet (each in `docs/PLAN.md` under the
-  consistency pass):
-  - At 360 wide, Back plus a sync badge cuts "Interpreter Hub".
-  - False Friends and Recent Updates show a second search box that
-    searches nothing there.
-  - A Term Review session has no banner; a doctor's page leaves two
-    titles for a screen reader.
-  - **New from the stress checks:** saving a doctor, a provider, a
-    doctor's tip or team term, an event or a file on a term, and deleting
-    a chat message, still need a connection (they now say so). Should
-    they be kept on the phone and sent later, like terms? A data change
-    that needs its own plan. Until then, on Wi-Fi that is connected but
-    dead, those saves wait with no message.
-  - Check link: show the plan to two or three interpreters first?
-- Buy a name to replace `interp-six.vercel.app`? Not asked.
+- Answered 2026-11-25 (sixth chat): the cut title (the logo steps aside
+  at 360 wide), the dead search box (removed), the doctor's page's two
+  titles (fixed), a Term Review banner (no), all in the small-picks pull
+  request; Check link (build now, show the team the working button;
+  yes to its one `AGENTS.md` line); a name of his own (not now).
+- **Kept-on-the-phone saves for doctors, providers, tips, events, files
+  and chat deletes:** he wants the plan (no code) written once Check
+  link is live, then decides.
 
 ## Decisions from this chat
 
