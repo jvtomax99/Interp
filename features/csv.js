@@ -164,7 +164,7 @@ async function confirmCsvImport(){
     await loadAllTerms();
     render();
   }catch(err){
-    showToast('Import failed partway through \u2014 check your connection and try again.');
+    showToast('Import failed partway through. Check your connection and try again.');
   } finally {
     confirmBtn.disabled = false;
     confirmBtn.textContent = 'Import';

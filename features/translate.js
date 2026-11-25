@@ -67,7 +67,7 @@ function renderTranslate(){
                  onkeydown="if(event.key==='Enter'){event.preventDefault();runTranslate();}">
         </div>
         <p class="tr-note">Single words are the hardest case for any translation engine.
-          \u201cDischarge\u201d alone could be a hospital discharge or a bodily one \u2014 the
+          \u201cDischarge\u201d alone could be a hospital discharge or a bodily one; the
           sentence tells it which.</p>
       </details>
     </div>
@@ -176,7 +176,7 @@ async function runTranslate(){
     seenTraps.add(f.es);
     html += `
       <div class="tr-result trap">
-        <span class="tr-badge trap">${ICON_ALERT} False friend — check carefully</span>
+        <span class="tr-badge trap">${ICON_ALERT} False friend: check carefully</span>
         <p class="tr-target" style="font-size:18px;">${escapeHtml(f.es)}</p>
         <p class="tr-note"><b>Often mistaken for:</b> ${escapeHtml(f.looks)}<br>
         <b>Actually means:</b> ${escapeHtml(f.means)}</p>
@@ -204,7 +204,7 @@ async function runTranslate(){
   });
 
   if(!hits.length){
-    html += `<div class="tr-result"><p class="tr-note">Not in your team's glossary yet — a good candidate to add.</p></div>`;
+    html += `<div class="tr-result"><p class="tr-note">Not in your team's glossary yet, a good candidate to add.</p></div>`;
   }
 
   out.innerHTML = html + `<div class="tr-result"><span class="tr-badge ai">${ICON_SPARK} Looking up…</span><p class="tr-target"><span class="tr-spinner"></span></p></div>`;
@@ -214,7 +214,7 @@ async function runTranslate(){
   if(ai && (ai.primary || ai.notes)){
     html += `
       <div class="tr-result ai">
-        <span class="tr-badge ai">${ICON_SPARK} Interpreter reference — AI assisted</span>
+        <span class="tr-badge ai">${ICON_SPARK} Interpreter reference · AI assisted</span>
         <p class="tr-source">${escapeHtml(toTranslate)}</p>
         <p class="tr-target">${escapeHtml(ai.primary || '')}</p>
         ${ai.plain ? `<p class="tr-note"><b>Plain language:</b> ${escapeHtml(ai.plain)}</p>` : ''}
@@ -241,14 +241,14 @@ async function runTranslate(){
 
   html += `
     <div class="tr-result">
-      <span class="tr-badge machine">${ICON_GLOBE} Machine translation — unverified</span>
+      <span class="tr-badge machine">${ICON_GLOBE} Machine translation · unverified</span>
       ${mt
         ? `<p class="tr-source">${escapeHtml(toTranslate)}</p>
            <p class="tr-target">${escapeHtml(mt)}</p>
            ${back ? `<p class="tr-note"><b>Translated back:</b> "${escapeHtml(back)}"${
               drift
-                ? ` — <span style="color:var(--danger);font-weight:650;">this differs from what you typed, so treat the translation with caution.</span>`
-                : ` — round-trips cleanly, a reasonable sign it held its meaning.`
+                ? `. <span style="color:var(--danger);font-weight:650;">This differs from what you typed, so treat the translation with caution.</span>`
+                : `. It round-trips cleanly, a reasonable sign it held its meaning.`
             }</p>` : ''}
            <p class="tr-note">Automatically generated. Confirm before relying on it, and consider adding a verified entry to the glossary.</p>`
         : `<p class="tr-note">Automatic translation isn’t available right now. Use Google Translate below.</p>`}

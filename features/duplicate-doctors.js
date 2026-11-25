@@ -140,7 +140,7 @@ async function mergeDuplicateDoctors(keepId){
     render();
   }catch(err){
     console.error('merge failed:', err);
-    showToast('Could not merge \u2014 check your connection.');
+    showToast('Could not merge. Check your connection.');
   }
 }
 

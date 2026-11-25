@@ -351,7 +351,7 @@ function askFirstLine(s){
   const one = m ? m[0].trim() : s;
   return one.length > 150 ? one.slice(0, 147).replace(/\s+\S*$/, '') + '…' : one;
 }
-const askMeans = f => String(f.means || '').split(' —')[0];
+const askMeans = f => String(f.means || '').split(/[;:] /)[0];
 function askLayoutHtml(lay, t){
   if(lay.kind === 'term'){
     const { x } = lay;
@@ -1432,14 +1432,14 @@ function askLocalAnswer(intent, rec, t){
   }else{
     const x = t.sel && askTermById(t.sel.term);
     if(x){
-      a.headline = `${x.term.en}${x.term.es ? ' — ' + x.term.es : ''}`;
+      a.headline = `${x.term.en}${x.term.es ? ' · ' + x.term.es : ''}`;
       a.details = (x.term.def || '').slice(0, 220) + (x.term.def ? ' ' : '') + 'A plain Spanish version needs a connection.';
       a.sourceIds = ['t:' + x.term.id];
       t.labels['t:' + x.term.id] = `Glossary · ${x.term.en || x.term.es}`;
       t.go['t:' + x.term.id] = { cat: x.cat.id, term: x.term.id };
     }else if(t.anat && ATLAS.byId.get(t.anat)){
       const st = ATLAS.byId.get(t.anat), id = 'an:' + st.id;
-      a.headline = `${st.en}${st.es ? ' — ' + st.es : ''}`;
+      a.headline = `${st.en}${st.es ? ' · ' + st.es : ''}`;
       a.details = st.about + ' A plain Spanish version needs a connection.';
       a.sourceIds = [id];
       t.labels[id] = `3D Body · ${st.en}`;

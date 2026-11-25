@@ -561,7 +561,7 @@ const GUIDE_TOPICS = [
     <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New</b> on Ask's banner (a new conversation) drops the ones still waiting.</p>
     <p>Translate, Doctor Prep and Look up need a connection.</p>` },
 
-  { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline — 1 change waiting”', a:`
+  { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline: 1 change waiting”', a:`
     <p>That's the app being honest with you. Your change is <b>saved on this phone</b> and is waiting for a connection.</p>
     <p>You don't need to do anything. When you're back on wifi or data it sends by itself and the message disappears.</p>
     <p><b>Please don't retype it.</b> You'd end up with two copies.</p>` },

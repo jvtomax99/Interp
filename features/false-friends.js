@@ -151,7 +151,7 @@ function renderFFDrill(){
           <div class="ff-score"><b>${correct} / ${ffQuestions.length}</b><span>${pct}%</span></div>
         </div>
         <p class="results-summary">${lured
-          ? `The false cognate caught you ${lured === 1 ? 'once' : lured + ' times'}. That is the reflex this drill is for — those are the ones worth re-reading.`
+          ? `The false cognate caught you ${lured === 1 ? 'once' : lured + ' times'}. That is the reflex this drill is for. Those are the ones worth re-reading.`
           : `You did not take the false cognate once. That is the result that matters here.`}</p>
         ${missed.length ? `<div class="ff-list" style="margin-top:17px;">${missed.map(q => {
           const risk = FF_RISKS[q.f.risk] || FF_RISKS.everyday;

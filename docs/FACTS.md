@@ -684,3 +684,16 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   blocked): after the merge, open a made-up address on a phone.
 - `campus3d/index.html` is generated (`docs/mockups/cchi-city/live/gen.py`),
   so its head was left alone; it has a title but no description or icon.
+
+## Long dashes (2026-11-25)
+
+- On-screen wording has none; `site-front.cjs` reads every string in the
+  app's files (comments left out) and fails on a new one. Its short allow
+  list is the code's own uses: the Home quotes ("quote" \u2014 author, split
+  before drawing), the dash accepted when someone types "term \u2014 meaning",
+  the lone dash shown for a missing Spanish term in Ask, the join in the
+  history sent to `api/ask.js`, `brain/index.html`'s tidy-up of titles,
+  the seed term "Duffy-null" (the live copy is in the database) and
+  `HMH_NETWORK_LABEL` (saved doctor records may hold it word for word).
+- A False Friend's `means` puts its short form before "; " or ": ". The
+  appointment briefing, Appointment and Ask show only that part.

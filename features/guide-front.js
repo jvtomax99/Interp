@@ -37,8 +37,8 @@ function setGuidePlatform(p){
 
 const GUIDE_INSTALL_STEPS = {
   ios: [
-    'Open this page in <b>Safari</b> (not Chrome — only Safari can do this on an iPhone).',
-    'Tap the <b>Share</b> button at the bottom of the screen — the square with an arrow pointing up out of it.',
+    'Open this page in <b>Safari</b> (not Chrome: only Safari can do this on an iPhone).',
+    'Tap the <b>Share</b> button at the bottom of the screen, the square with an arrow pointing up out of it.',
     'Scroll down the list and tap <b>Add to Home Screen</b>.',
     'Tap <b>Add</b> in the top-right corner.',
   ],

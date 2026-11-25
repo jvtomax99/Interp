@@ -227,10 +227,12 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
      (`site-front.cjs` checks they agree). Not checked yet: whether the
      email sign-in (Firebase's allowed domains) and the notification
      links also name the old address.
-  2. *Long dashes in what the app says.* About 100 lines on screen use
-     " — " (Doctor Prep's notes, the Code of Ethics summaries, CoreCHI
-     Practice, the False Friends list). Rewriting them is a wording
-     change to checked material, so it needs him to read the result.
+  2. *Long dashes the app still shows, on purpose.* The wording was
+     redone on 2026-11-25. What is left: answers the AI writes (Dr.
+     Smiley, Term lookup, Doctor Prep, Translate), which would need a
+     line in each `api/*.js` prompt; terms the team typed into the
+     glossary; and `HMH_NETWORK_LABEL`, which saved doctor records may
+     hold word for word.
   3. *Heading levels.* A screen's title is an `h1` on six screens (the
      tool banners), an `h2` on about twelve (`.section-head h2`) and
      missing on five (All domains, the briefing, Appointment, Doctor
