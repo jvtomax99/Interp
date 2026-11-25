@@ -865,11 +865,12 @@
   }
   .home-feed-icon svg{ width:15px; height:15px; }
   .home-feed-main{ flex:1; min-width:0; }
-  /* inline-block, so the "..." applies: as a plain inline span a long line ran off the card */
+  /* It wraps. It used to be nowrap with an ellipsis that never applied (an
+     inline span), so a line longer than the card ran off it. A line that
+     fits sits exactly where it did. */
   .home-feed-title{
     font-size:var(--fs-foot); font-weight:650; color:var(--ink); line-height:1.35;
-    display:inline-block; max-width:100%; vertical-align:bottom;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    overflow-wrap:anywhere;
   }
   .home-feed-meta{ font-size:var(--fs-cap2); color:var(--ink-faint); margin-top:1px; }
   .home-feed-go{ color:var(--ink-faint); flex-shrink:0; }
@@ -4235,8 +4236,10 @@
   .gs-title{ font-size:var(--fs-foot); font-weight:650; color:var(--ink); line-height:1.35; overflow-wrap:anywhere; }
   .gs-sub{
     font-size:var(--fs-cap); color:var(--ink-soft); line-height:1.4;
-    display:inline-block; max-width:100%; vertical-align:bottom;   /* so the "..." applies to a long line */
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    /* One piece, as before (beside the title when it fits there, else on its
+       own line), but a line longer than the panel now wraps inside it. As an
+       inline span its nowrap "..." never applied and the line was cut at the edge. */
+    display:inline-block; max-width:100%; overflow-wrap:anywhere;
   }
   .gs-empty{ padding:34px 20px; text-align:center; color:var(--ink-faint); font-size:var(--fs-foot); line-height:1.6; }
   .gs-mark{ background:#FFF3C4; border-radius:3px; padding:0 2px; }
