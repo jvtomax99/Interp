@@ -1,7 +1,9 @@
-# Kept-on-the-phone saves: the plan (no code yet)
+# Kept-on-the-phone saves: the plan
 
-Written 2026-11-26 for Jose to decide. Nothing here is built. `docs/PLAN.md`,
-Next, item 4.
+Written 2026-11-26. Jose's decision the same day: **all four steps**
+("Order of work"), each its own change waiting for his push. Step 1 is
+built (`team-terms.cjs`); steps 2 to 4 are not. `docs/PLAN.md`, Next,
+item 4.
 
 ## The problem, in one paragraph
 
@@ -129,9 +131,13 @@ send that phone's whole copy of the doctor's team terms. The doctor list
 is read once when the Hub opens, not kept live. So a phone open since
 the morning that edits a doctor can erase a team term a teammate added
 at noon. Read in the code (`features/doctor-sheets.js` line 300,
-`index.html` `persistDoctorDirectoryEntry` and `saveDoctorTerm`); not
-reproduced on two phones. The fix is the "one at a time, like tips"
-change in the table, and I would do it first even if the rest waits.
+`index.html` `persistDoctorDirectoryEntry` and `saveDoctorTerm`) and
+reproduced against the tests' stand-in database (4 of 6 checks in
+`team-terms.cjs` fail on the old code); not reproduced on two real
+phones. Fixed in step 1. Found while fixing: merging duplicate doctors
+never moved the other doctor's team terms (it read a field no doctor
+has); they went to Recently deleted with the duplicate. Fixed in the
+same step.
 
 ## Order of work, one change each for your "push"
 

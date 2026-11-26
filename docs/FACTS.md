@@ -766,6 +766,21 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   email sign-in, long text in chat, Ask, a doctor's card and page, the
   briefing, Recently deleted and the edit sheets.
 
+## Kept-on-the-phone saves (2026-11-26)
+
+- The doctor list and the provider list are read once per opening
+  (`.get()`, no live listener); doctors are also kept on the phone
+  (`ih_doctorDirectory`). So any save that sends a list or a whole
+  record from the phone's copy can undo a teammate's later change.
+- The outbox stores plain text, so it can't hold the database's "add
+  to a list" marker as it is; an entry has to say "add this" and be
+  turned into the marker when it is sent.
+- A finished helper's report survives a machine restart in its
+  transcript file even when it was never delivered: the last entry's
+  `SubagentHandback` input holds it.
+- Firebase's upload page documents `pause()`, `resume()` and `cancel()`
+  and says nothing about retrying after a dropped connection.
+
 ## Check link (2026-11-26)
 
 - A test that clicks by a word (`text=Check`) takes the first match in

@@ -95,12 +95,13 @@ function mergeDoctorRecords(records, preferredId){
   // de-duplicated on the English side.
   const seen = new Set();
   const terms = [];
-  records.forEach(r => (Array.isArray(r.terms) ? r.terms : []).forEach(t => {
+  // The doctor kept goes first, so its own wording wins a tie.
+  sorted.forEach(r => (Array.isArray(r.customTerms) ? r.customTerms : []).forEach(t => {
     const k = (t.en || '').trim().toLowerCase();
     if(!k || seen.has(k)) return;
     seen.add(k); terms.push(t);
   }));
-  if(terms.length) keep.terms = terms;
+  if(terms.length) keep.customTerms = terms;
 
   return keep;
 }
@@ -124,6 +125,10 @@ async function mergeDuplicateDoctors(keepId){
       await trackWrite(db.collection('doctor-directory').doc(merged.id).update({ tips: firebase.firestore.FieldValue.arrayUnion(...moved) }));
       merged.tips = [...(Array.isArray(merged.tips) ? merged.tips : []), ...moved];
     }
+    // The others' team terms move the same way, added one by one to whatever
+    // the kept doctor holds in the database (a doctor save never sends the list).
+    const own = Array.isArray(target.customTerms) ? target.customTerms : [];
+    await doctorTermWrite(merged.id, { add: (merged.customTerms || []).filter(t => !own.includes(t)) });
     let kept = 0;
     for(const other of group){
       if(other.id === merged.id) continue;

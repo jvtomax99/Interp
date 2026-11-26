@@ -101,6 +101,14 @@ by, at, uid, editedAt?}]` on the doctor's document; `#doctorTipsOverlay`
   also keeps research that a copy without it would have erased). `whole`
   (restore from Recently deleted) writes everything. Merging duplicates
   moves the others' tips and old notes onto the kept doctor.
+- Team terms (`customTerms`) follow the same rule since 2026-11-26
+  (`doctorTermWrite`, one `arrayUnion` / `arrayRemove`; `mergeFields`
+  leaves `customTerms` out too). Before, the sheet, a new term and a
+  removed term each sent the phone's whole copy of the list, and the
+  doctor list is read once per opening, so an old copy erased a
+  teammate's later term. A merge now moves the others' team terms as
+  well (it read a field named `terms` that no doctor has, so they went
+  to Recently deleted with the duplicate). `team-terms.cjs` holds it.
 - The doctor's edit sheet has no Notes box any more (Jose, 2026-10-19).
 - Search, the list card and Ask the Hub read the tips (`doctorTipsText`).
 - Back closes the top overlay (the last `.overlay.show`), so it closes the
