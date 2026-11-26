@@ -2,20 +2,15 @@
 
 ## Paste this into a new chat
 
-Read HANDOFF.md, then ask me the open questions under "Open questions for Jose" one at a time with buttons, and after that start item 3 under Next in docs/PLAN.md (Check link; its plan is OK'd).
+Read HANDOFF.md, ask me what Check link answered on my two taps (one working link, one dead one), then start item 4 under Next in docs/PLAN.md: the plan, no code, for kept-on-the-phone saves.
 
 ## The goal and the exact next step
 
-The consistency pass (item 2 under Next in `docs/PLAN.md`) has no work
-left that doesn't need Jose's pick. Its last part, the stress checks, is
-live: twelve breaks found, shown to him as phone screenshots, all twelve
-fixed (#292, build b1125.2244).
-
-1. **Next: Jose's picks on what was found on the way** (below). Each is
-   small; ask, then do the ones he picks in one pull request.
-2. Then item 3, **Check link** (`docs/features/link-check.md`, plan OK'd).
-   Before editing `AGENTS.md`'s feature list for it, confirm with him.
-3. Then item 4, the plan for smaller files (no code first).
+1. **Jose's two taps on Check link** (live, never tried on a real site).
+   If an answer is wrong, ask him for the exact address and fix that
+   first.
+2. Then item 4, the plan (no code) for kept-on-the-phone saves.
+3. Then item 5, the plan for smaller files.
 
 ## What is merged, what is open
 
@@ -44,21 +39,19 @@ fixed (#292, build b1125.2244).
 
 ## Decisions from this chat
 
-- Stress checks: "All 12" fixed. Long text wraps (no "..."), so text that
-  fits sits exactly where it did; a long line makes its row taller.
-- A refused save now says "This phone may need to rejoin the team on
-  Team access" instead of the developer's sentence about Firestore
-  rules. If a new collection's rule was never pasted, that message is
-  what Jose will see too.
+- Check link: on a phone's Link Directory row the Check button leaves
+  little of the address showing; Jose saw the pictures and pushed as is.
+- "Moved" is offered only after permanent redirects; a temporary one is
+  "Opens". http to https, `www.` and a closing slash are not "Moved".
+- The logo steps aside only for a badge that stays (offline, unsent),
+  not during "Syncing".
 
-## Learned, not in the notes yet
+## Learned
 
-Everything from this chat is in `docs/FACTS.md`, "Stress checks".
-- "My photo" with a failed upload is still untested (the adjust sheet
-  needs a real tap sequence).
+All in `docs/FACTS.md`, "Check link" and the note under "Search hints".
 
 ## Files to look at first
 
-`docs/PLAN.md` (Next, items 2 and 3), `docs/features/link-check.md`,
-`tests/suites/stress.cjs`, `tests/tools/stress.cjs` and
-`stress-fail.cjs` (the finding tools, reusable for any new screen).
+`docs/PLAN.md` (Next, items 3 and 4), `docs/features/link-check.md`,
+`api/link-check.js`, and for item 4 `queuedWrite()` and the outbox in
+`index.html` with `tests/tools/stress-fail.cjs`.
