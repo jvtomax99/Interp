@@ -60,6 +60,29 @@ const names = list => (list || []).map(t => t.en).join(',');
         return mergeDoctorRecords([a, b], 'm1').customTerms.map(t => t.id);
       });
       ok(JSON.stringify(merged) === '["k1","k3"]', 'a merge keeps every team term once, the kept doctor\'s wording first', merged);
+
+      // 5. The real merge, from an old copy of the doctor kept.
+      const real = await page.evaluate(async () => {
+        const put = (id, d) => { window.__DB['doctor-directory'][id] = JSON.parse(JSON.stringify(d)); DOCTOR_DIRECTORY.push({ id, ...JSON.parse(JSON.stringify(d)) }); };
+        put('tt-k1', { name: 'Dr. Omar Twinley', specialty: 'Renal', source: 'manual', customTerms: [{ id: 'k1', en: 'bolus', es: 'bolo' }] });
+        put('tt-k2', { name: 'Dr. Omar Twinley', specialty: 'Renal', source: 'manual', customTerms: [{ id: 'k3', en: 'titrate', es: 'ajustar la dosis' }] });
+        window.__DB['doctor-directory']['tt-k1'].customTerms.push({ id: 'k9', en: 'dry weight', es: 'peso seco' });   // a teammate, later
+        const grouped = duplicateDoctorGroups().some(g => g.some(d => d.id === 'tt-k1') && g.some(d => d.id === 'tt-k2'));
+        await mergeDuplicateDoctors('tt-k1');
+        const kept = window.__DB['doctor-directory']['tt-k1'];
+        return { grouped, terms: kept && (kept.customTerms || []).map(t => t.id), otherGone: !window.__DB['doctor-directory']['tt-k2'] };
+      });
+      ok(real.grouped && JSON.stringify(real.terms) === '["k1","k9","k3"]' && real.otherGone, 'merging duplicates moves the other doctor\'s team term and leaves the teammate\'s later one', real);
+
+      // 6. A doctor removed on another phone: the message says so, not "try again".
+      const gone = await page.evaluate(async () => {
+        DOCTOR_DIRECTORY.push({ id: 'tt-gone', name: 'Dr. Left Already', customTerms: [] });
+        doctorTermTargetId = 'tt-gone';
+        document.getElementById('fDTEn').value = 'ghost';
+        await saveDoctorTerm();
+        return { toast: document.getElementById('toast').textContent, made: !!window.__DB['doctor-directory']['tt-gone'] };
+      });
+      ok(/no longer in the directory/.test(gone.toast) && !gone.made, 'a term for a doctor deleted elsewhere says the doctor is gone and creates nothing', gone);
     } finally { await ctx.close(); }
   } finally {
     await browser.close();

@@ -328,6 +328,16 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
      (`PLAIN_PUNCTUATION` in `api/_routine.js`); that lowers how often,
      it can't promise none.
 
+- **Merging duplicate doctors bins the duplicate from this phone's copy**
+  (found by the cold review, 2026-11-26; older than the team-terms fix).
+  A tip or team term a teammate added to the duplicate after this phone
+  opened is in neither the doctor kept nor the bin copy. Also: the merge
+  drops same-English team terms against this phone's copy only, so
+  "bolus" added to the kept doctor by a teammate meanwhile and "Bolus"
+  on the duplicate both stay. Fix: read both doctors fresh from the
+  database before a merge. Trigger: step 2 of kept-on-the-phone saves
+  touches the merge, or Jose asks.
+
 - **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
   am: the sun is left of the middle" reads the real date; by mid-November
   the 8 am sun sits at x -19 against a limit of -20, so every pull request

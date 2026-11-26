@@ -2978,8 +2978,8 @@ function doctorDirProblem(){
 // loaded an hour ago can't erase a tip a teammate just added. Tips are added
 // and removed one at a time (doctorTipWrite). The team's terms
 // (`customTerms`) are kept the same way and for the same reason
-// (doctorTermWrite). `whole` writes everything, for a restore, where the
-// document is gone.
+// (doctorTermWrite). `whole` writes everything; nothing calls it today (a
+// restore from Recently deleted sends the binned record through the outbox).
 async function persistDoctorDirectoryEntry(id, record, whole){
   if(!db){ showToast('Not connected to the database.'); return false; }
   const ref = db.collection('doctor-directory').doc(id);
@@ -2999,8 +2999,16 @@ async function doctorTermWrite(id, { add, remove }){
   const FV = firebase.firestore.FieldValue;
   const list = [].concat(add || remove || []);
   if(!list.length) return true;
-  await trackWrite(db.collection('doctor-directory').doc(id).update({ customTerms: add ? FV.arrayUnion(...list) : FV.arrayRemove(...list) }));
+  await trackWrite(db.collection('doctor-directory').doc(id).update({ customTerms: add ? FV.arrayUnion(...list.map(stripUndefined)) : FV.arrayRemove(...list) }));
   return true;
+}
+// The doctor was deleted or merged away on another phone since this one
+// opened: trying again can never work, so don't say "try again".
+function doctorGoneMessage(err, fallback){
+  const code = String(err && (err.code || err.message) || '').toLowerCase();
+  return code.includes('not-found') || code.includes('no document to update')
+    ? 'This doctor is no longer in the directory (removed or merged on another phone). Close and reopen the Hub to see the current list.'
+    : fallback;
 }
 
 async function deleteDoctorDirectoryEntryRemote(id){
@@ -13524,6 +13532,7 @@ async function saveDoctorTerm(){
     // This phone's copy gains the one term; whatever else it holds is left as it is.
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
     if(idx > -1) DOCTOR_DIRECTORY[idx] = { ...DOCTOR_DIRECTORY[idx], customTerms: [...(DOCTOR_DIRECTORY[idx].customTerms || []), term] };
+    doctorDirToCache(DOCTOR_DIRECTORY);
     logActivity(`added the term "${en}" to ${d.name}`);
     closeDoctorTermModal();
     successBurst();
@@ -13531,7 +13540,7 @@ async function saveDoctorTerm(){
     render();
     openDoctorDirDetail(d.id, 'team');   // keep the doctor page open, on the team's terms
   }catch(err){
-    showToast(saveErrorMessage(err, 'doctor-directory'));
+    showToast(doctorGoneMessage(err, saveErrorMessage(err, 'doctor-directory')));
   }
 }
 
@@ -13545,11 +13554,12 @@ async function deleteDoctorTerm(doctorId, termId){
     if(!(await doctorTermWrite(d.id, { remove: term }))) return;
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
     if(idx > -1) DOCTOR_DIRECTORY[idx] = { ...DOCTOR_DIRECTORY[idx], customTerms: (DOCTOR_DIRECTORY[idx].customTerms||[]).filter(t=>t.id!==termId) };
+    doctorDirToCache(DOCTOR_DIRECTORY);
     showToast('Term removed.');
     render();
     openDoctorDirDetail(d.id, 'team');
   }catch(err){
-    showToast('Could not remove. Check your connection.');
+    showToast(doctorGoneMessage(err, 'Could not remove. Check your connection.'));
   }
 }
 
