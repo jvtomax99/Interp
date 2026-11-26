@@ -190,13 +190,19 @@ a phase finishes but the next phase continues here.
    working button (his pick over showing them the plan). If the short
    address beside Check on a phone's row bothers them, Check moves to its
    own line (rows about 50px taller).
-4. **Kept-on-the-phone saves: a plan for Jose to OK, no code first**
-   (his pick, 2026-11-25). Saving a doctor, a provider, a doctor's tip or
-   team term, an event, a file on a term, and deleting a chat message,
-   still need a connection; on Wi-Fi that is connected but dead they wait
-   with no message (item 2, the stress checks). Write what would go
-   through the outbox like terms do, what can't (files), the assumptions
-   and what can go wrong; he decides.
+4. **Kept-on-the-phone saves: the plan is OK'd, four steps, one change
+   each** (`docs/features/kept-on-phone-saves.md`; Jose, 2026-11-26:
+   "All four steps"). Step 1, team terms added and removed one at a
+   time (a live bug: an old copy erased a teammate's term), is built
+   and waits for his push. Then: step 2, the outbox learns "only these
+   fields", "add to or take out of a list" and "delete these files
+   after", and doctors, tips and team terms go through it; step 3,
+   providers, events and chat delete (the wording for a delete that
+   teammates still see until the phone reconnects is in the plan, risk
+   2; worth asking the team); step 4, an upload that stalls says so.
+   Files themselves stay "needs a connection". Measure first in step 2:
+   how big a doctor record is in the outbox, and whether providers and
+   events show on a cold open with no signal.
 5. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has
@@ -321,6 +327,16 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
      word for word. The AI's answers are asked not to use them
      (`PLAIN_PUNCTUATION` in `api/_routine.js`); that lowers how often,
      it can't promise none.
+
+- **Merging duplicate doctors bins the duplicate from this phone's copy**
+  (found by the cold review, 2026-11-26; older than the team-terms fix).
+  A tip or team term a teammate added to the duplicate after this phone
+  opened is in neither the doctor kept nor the bin copy. Also: the merge
+  drops same-English team terms against this phone's copy only, so
+  "bolus" added to the kept doctor by a teammate meanwhile and "Bolus"
+  on the duplicate both stay. Fix: read both doctors fresh from the
+  database before a merge. Trigger: step 2 of kept-on-the-phone saves
+  touches the merge, or Jose asks.
 
 - **`campus-3d.cjs` fails by season, on main too** (found 2026-11-18). "8:00
   am: the sun is left of the middle" reads the real date; by mid-November
