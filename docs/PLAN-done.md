@@ -5,6 +5,14 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-26 Kept-on-the-phone saves, step 2 of 4 (#298; undo: revert #298, but first let waiting saves send: the older code would
+  send a waiting new-doctor save as the whole record). A doctor's sheet, tips and team terms saved with no signal or on dead Wi-Fi
+  are kept on the phone and sent later. The outbox learned `mergeFields`, `listAdd`, `listRemove`, `dropFields` and `filesAfter`
+  (`applyQueuedWrite`); an edit is kept as only its changed fields (232 bytes); the doctor list keeps waiting changes on top and is
+  read again after they go; waiting changes retry by themselves; a merge with no signal says it needs a connection.
+  `doctor-outbox.cjs` (31 checks). Full run 69 of 69 suites. The cold review found three problems, fixed (a refused change showing
+  as saved, Add doctor over a name deleted elsewhere, "Changed: photo" with no photo); its leftovers are under Later in
+  `docs/PLAN.md`. Jose confirmed Check link the same day ("Both answers were right").
 - 2026-11-26 Kept-on-the-phone saves, the plan and step 1 of 4 (#297, build b1126.1318; undo: revert #297). The plan
   (`docs/features/kept-on-phone-saves.md`, Jose: "All four steps"). Step 1: a doctor's team terms are added and removed one at a
   time (`doctorTermWrite`), and a doctor save no longer sends the list, so a phone holding an old copy can't erase a teammate's
