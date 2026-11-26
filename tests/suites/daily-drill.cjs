@@ -56,12 +56,12 @@ let fails = 0; const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ')
     if (lvl % 2 === 0 && !ace) {
       // fall for the trap
       const key = ff.looks.replace(/\([^)]*\)/g, '').replace(/\bonly\b/g, '').replace(/^\s*to\s+/, '').split(/[,\/;]/)[0].trim();
-      await page.fill('#ddAnswer', ff.trap); await page.click('text=Check');
+      await page.fill('#ddAnswer', ff.trap); await page.click('#warmupSheet >> text=Check');
       await page.waitForTimeout(300);
       const v = await page.$eval('#warmupSheet .rv-verdict', e => e.textContent);
       ok(/trap/i.test(v), 'using the trap word is caught: ' + key, v);
     } else {
-      await page.fill('#ddAnswer', ff.truth); await page.click('text=Check');
+      await page.fill('#ddAnswer', ff.truth); await page.click('#warmupSheet >> text=Check');
       await page.waitForTimeout(300);
       const v = await page.$eval('#warmupSheet .rv-verdict', e => e.textContent);
       ok(/Compare/.test(v), 'an answer without the trap goes to compare', v);
@@ -87,7 +87,7 @@ let fails = 0; const ok = (c, m, d) => { console.log((c ? '  PASS ' : '  FAIL ')
       ok(lvl >= 1 ? !!hidden2 : !hidden2, 'round 2 word hidden from Listening up');
       await page.screenshot({ path: `${OUT}/${tag}-r2-ask.png` });
       await geo('round 2 ask');
-      await page.fill('#ddAnswer', lvl === 1 && !ace ? 'xyzzy' : r[1].es.split('/')[0].replace(/\s*\([^)]*\)\s*$/, '')); await page.click('text=Check'); await page.waitForTimeout(300);
+      await page.fill('#ddAnswer', lvl === 1 && !ace ? 'xyzzy' : r[1].es.split('/')[0].replace(/\s*\([^)]*\)\s*$/, '')); await page.click('#warmupSheet >> text=Check'); await page.waitForTimeout(300);
       const v = await page.$eval('#warmupSheet .rv-verdict', e => e.textContent);
       if (lvl === 1 && !ace) { ok(/Compare/.test(v), 'an unknown answer goes to compare', v); await page.click('text=I missed it'); await page.waitForTimeout(300); ok(/Not this time/.test(await page.$eval('#warmupSheet .rv-verdict', e => e.textContent)), 'I missed it marks it missed'); }
       else ok(/Right/.test(v), 'the glossary Spanish is right', v);
