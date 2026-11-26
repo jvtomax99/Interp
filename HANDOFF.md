@@ -1,4 +1,4 @@
-# HANDOFF, 2026-11-25 (fifth of the day)
+# HANDOFF, 2026-11-26 (after the sixth chat of 2026-11-25)
 
 ## Paste this into a new chat
 
@@ -19,12 +19,14 @@ fixed (#292, build b1125.2244).
 
 ## What is merged, what is open
 
-- Live: #294, the small picks (the cut title, the dead search bar, a
-  doctor's page for a screen reader), build b1126.0026. Undo: revert #294.
-- Open: Check link's pull request (branch `link-check`), built and
-  reviewed, waiting for Jose's "push". After it is live he taps Check on
-  one working link and one dead one; then the entry moves to
-  `docs/PLAN-done.md`, and the plan for kept-on-the-phone saves is next.
+- Live: #294, the small picks, build b1126.0026 (undo: revert #294).
+- Live: #295, Check link, build b1126.0110 (undo: revert #295). Not yet
+  tried on a real site: Jose taps Check on one working link and one dead
+  one in the Link Directory and says what each answered.
+- Open: only the pull request that carries these notes.
+- Next (item 4 in `docs/PLAN.md`): the plan, no code, for
+  kept-on-the-phone saves of doctors, providers, tips, events, files and
+  chat deletes.
 
 ## Open questions for Jose
 
