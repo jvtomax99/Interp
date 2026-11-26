@@ -182,27 +182,26 @@ a phase finishes but the next phase continues here.
      go through later (found by the cold review, not fixed).
      Jose, 2026-11-25: write that plan (no code) once Check link is
      live; he decides then.
-3. **Check link: live, waiting for Jose's two taps** (#295, build
-   b1126.0110, 2026-11-26; undo: revert #295; the entry is in
-   `docs/PLAN-done.md`). The live site is blocked from a cloud session,
-   so he taps Check on one working link and one dead one in the Link
-   Directory and says what each answered. Then he shows the team the
-   working button (his pick over showing them the plan). If the short
+3. **Check link: live and confirmed by Jose** (#295, build b1126.0110;
+   2026-11-26: "Both answers were right" on a working link and a dead
+   one). Left: he shows the team the working button. If the short
    address beside Check on a phone's row bothers them, Check moves to its
    own line (rows about 50px taller).
 4. **Kept-on-the-phone saves: the plan is OK'd, four steps, one change
    each** (`docs/features/kept-on-phone-saves.md`; Jose, 2026-11-26:
    "All four steps"). Step 1, team terms added and removed one at a
    time (a live bug: an old copy erased a teammate's term), is live
-   (#297, build b1126.1318; undo: revert #297). Next: step 2, the outbox learns "only these
-   fields", "add to or take out of a list" and "delete these files
-   after", and doctors, tips and team terms go through it; step 3,
+   (#297, build b1126.1318; undo: revert #297). Step 2 is built (a
+   doctor, a tip and a doctor's team term are kept with no signal;
+   `docs/PLAN-done.md`). Next: step 3,
    providers, events and chat delete (the wording for a delete that
    teammates still see until the phone reconnects is in the plan, risk
-   2; worth asking the team); step 4, an upload that stalls says so.
-   Files themselves stay "needs a connection". Measure first in step 2:
-   how big a doctor record is in the outbox, and whether providers and
-   events show on a cold open with no signal.
+   2; worth asking the team). Measured in step 2: providers and events
+   are not kept on the phone, so they don't show on a cold open with no
+   signal; step 3 helps them when the signal drops mid-visit or the
+   Wi-Fi is dead. `filesAfter` is ready for the chat delete. Then step
+   4, an upload that stalls says so. Files themselves stay "needs a
+   connection".
 5. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has

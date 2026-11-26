@@ -341,6 +341,7 @@ const GUIDE_TOPICS = [
   { id:'teamtips', section:'prep', k:'team tips tip notes note doctor directory add edit delete my own quirks phrase before walking in', q:'How do team tips on a doctor work?', a:`
     <p>A tip is what a teammate should know before walking in with this doctor: how they phrase things, what they always explain, how they like the interpreter to stand. Open the doctor’s page and tap <b>Add tip</b> at the bottom, or the yellow <b>Team tip</b> card.</p>
     <p>The sheet shows every tip, oldest first, with who wrote it and when. Write yours in the box and tap <b>Add tip</b>. Your own tips have <b>Edit</b> and <b>Delete</b>; other people’s you can read but not change. If two of you add a tip at the same moment, both are kept.</p>
+    <p>No signal? Add, edit or delete your tip anyway. It’s kept on your phone and sent when the signal is back.</p>
     <p>A doctor’s old single note shows as the first tip. Anyone can edit or delete that one, as before. Notes are no longer on the doctor’s edit sheet; tips are where they live now.</p>
     <p>Tips are shared with the whole team. Never put patient details in one.</p>` },
 
@@ -568,8 +569,9 @@ const GUIDE_TOPICS = [
   { id:'offline', section:'trouble', k:'offline no signal wifi data connection basement elevator internet down airplane', q:'Can I use it where there is no signal?', a:`
     <p><b>Looking things up: yes.</b> The glossary is stored on your phone, so a basement or an older wing is fine.</p>
     <p><b>Adding or changing a term, or sending a chat message: also yes.</b> It's saved on your phone and sent up on its own the moment you have signal again. You don't have to remember to do anything.</p>
+    <p><b>Saving a doctor, a tip on a doctor or a doctor's team term: yes too.</b> It shows on your phone right away, the message at the top counts it as waiting, and it's sent when the Hub is next open with a signal. The same on Wi-Fi that is connected but not working: after about 12 seconds the Hub stops waiting and keeps it. If a teammate changed the same thing on the same doctor while yours was waiting, the one that arrives last stays. Tips and team terms are added one by one, so nobody's are lost.</p>
     <p><b>Dr. Smiley: partly.</b> He can still open your briefing, your practice and a term's glossary entry. Other questions wait on the phone and are asked by themselves once you're back online. Tapping <b>New</b> on Ask's banner (a new conversation) drops the ones still waiting.</p>
-    <p>Translate, Doctor Prep and Look up need a connection. So do a few things the Hub can't hold on the phone yet: saving a doctor, a provider, a doctor's tip or team term, an event or a file on a term, and deleting a chat message. Offline the Hub says so and leaves the form open with what you typed.</p>` },
+    <p>Translate, Doctor Prep and Look up need a connection. So do a few things the Hub can't hold on the phone yet: saving a provider, an event, a photo or a file, deleting a chat message, and joining duplicate doctors. Offline the Hub says so and leaves the form open with what you typed.</p>` },
 
   { id:'waiting', section:'trouble', k:'offline waiting sync unsent pending saved not sent stuck sending', q:'It says “Offline: 1 change waiting”', a:`
     <p>That's the app being honest with you. Your change is <b>saved on this phone</b> and is waiting for a connection.</p>

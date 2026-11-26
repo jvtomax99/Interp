@@ -780,6 +780,21 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   `SubagentHandback` input holds it.
 - Firebase's upload page documents `pause()`, `resume()` and `cancel()`
   and says nothing about retrying after a dropped connection.
+- Step 2 (2026-11-26). A doctor edit kept in the outbox is 232 bytes when
+  it holds only the changed fields, on a doctor with 50 KB of research
+  (`doctor-outbox.cjs`); whole, 200 of them would not fit the phone's
+  5 MB. Live records were not read.
+- Providers and events are not kept on the phone (no saved copy; read in
+  the code), so a cold open with no signal shows neither.
+- Wi-Fi that is connected but dead sends no "online" event when it
+  comes back: a flush that started while it was dead times out after
+  12 s and nothing starts another. Found when a test hung; the outbox
+  now retries every 30 s while changes wait and the phone says online.
+- In a test, let the stand-in database answer again before
+  `ctx.setOffline(false)`: the "online" event starts a flush at once.
+- `set` with `mergeFields` creates a missing record, `update` refuses
+  one ("not-found"). A late edit of a doctor deleted elsewhere is an
+  `update` for that reason.
 
 ## Check link (2026-11-26)
 
