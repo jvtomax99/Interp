@@ -82,7 +82,7 @@ const names = list => (list || []).map(t => t.en).join(',');
         await saveDoctorTerm();
         return { toast: document.getElementById('toast').textContent, made: !!window.__DB['doctor-directory']['tt-gone'] };
       });
-      ok(/no longer in the directory/.test(gone.toast) && !gone.made, 'a term for a doctor deleted elsewhere says the doctor is gone and creates nothing', gone);
+      ok(/removed or merged on another phone/.test(gone.toast) && !gone.made, 'a term for a doctor deleted elsewhere says the doctor is gone and creates nothing', gone);
     } finally { await ctx.close(); }
   } finally {
     await browser.close();

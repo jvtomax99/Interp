@@ -3007,7 +3007,7 @@ async function doctorTermWrite(id, { add, remove }){
 function doctorGoneMessage(err, fallback){
   const code = String(err && (err.code || err.message) || '').toLowerCase();
   return code.includes('not-found') || code.includes('no document to update')
-    ? 'This doctor is no longer in the directory (removed or merged on another phone). Close and reopen the Hub to see the current list.'
+    ? 'This doctor was removed or merged on another phone. Reopen the Hub to see the current list.'
     : fallback;
 }
 
