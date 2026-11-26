@@ -114,6 +114,19 @@ posts, owner phones remove anyone's (`docs/features/deleted-items.md`).
   bin, even from outside the app, and every deleted term, doctor, provider
   and attachment can be restored.
 
+**Kept-on-the-phone saves** (`docs/features/kept-on-phone-saves.md`; four
+steps, Jose's OK 2026-11-26; step 1 built, the rest planned).
+- Done when: with no signal, or on Wi-Fi that is connected but dead, saving
+  a doctor, a tip, a team term, a provider or an event, or deleting a chat
+  message, answers within 12 seconds, shows on this phone, is counted by
+  the unsent badge, and reaches the team when the Hub is next open with a
+  signal; a file that can't upload says so within about 20 seconds; and a
+  phone holding an old copy never erases a teammate's team term (step 1).
+- Not in this version: keeping files on the phone; queueing the domain
+  list, doctor merges, CSV imports or Team access; a warning when a
+  teammate changed the same doctor meanwhile; sending while the Hub is
+  closed.
+
 **3D Body.** Human Atlas in a walled-off frame, 30 bilingual cards.
 - Done when: a user taps a body part and reads its card in both languages.
 
