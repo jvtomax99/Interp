@@ -132,8 +132,8 @@ a phase finishes but the next phase continues here.
    heading levels (2026-11-25: one title per screen, his pick; every
    screen's title is its `h1`, no level skipped, nothing moved on 39
    phone screens; `heading-levels.cjs`, the rule is in `DESIGN.md`).
-   The small things found on the way are picked and done (Jose,
-   2026-11-25; `small-picks.cjs` and `topbar-name.cjs` hold them): at 360
+   The small things found on the way are picked, done and live (Jose,
+   2026-11-25; #294, build b1126.0026, undo: revert #294; `small-picks.cjs` and `topbar-name.cjs` hold them): at 360
    wide, inside a screen with a badge that stays (offline, unsent
    changes), the logo steps aside so "Interpreter Hub" is whole (the
    badge was already only a dot, so it could not shrink; not during the

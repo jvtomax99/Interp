@@ -19,8 +19,12 @@ fixed (#292, build b1125.2244).
 
 ## What is merged, what is open
 
-- Live: #292, the stress-check fixes, build b1125.2244. Undo: revert #292.
-- Open: only the pull request that carries this file (notes only).
+- Live: #294, the small picks (the cut title, the dead search bar, a
+  doctor's page for a screen reader), build b1126.0026. Undo: revert #294.
+- Open: Check link's pull request (branch `link-check`), built and
+  reviewed, waiting for Jose's "push". After it is live he taps Check on
+  one working link and one dead one; then the entry moves to
+  `docs/PLAN-done.md`, and the plan for kept-on-the-phone saves is next.
 
 ## Open questions for Jose
 
