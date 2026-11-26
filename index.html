@@ -7667,6 +7667,10 @@ function render(opts){
     showTopbar = false;
   } else if(activeCategory === 'appt'){
     showTopbar = false;
+  } else if(activeCategory === 'falsefriends' || activeCategory === 'updates'){
+    // Neither screen reads the glossary search (False Friends has its own
+    // box), so the bar would be a search that finds nothing (2026-11-25).
+    showTopbar = false;
   }
 
   // Glossary screens (one domain, or All domains) get the colored banner:
@@ -8341,6 +8345,10 @@ function updateSyncStatus(justSynced){
   const problem = outboxProblem();
   const bar = el.closest('.topbar-global');
   if(bar) bar.classList.toggle('has-sync-problem', !!problem);
+  // A badge that stays (offline, or changes that didn't sync), as opposed to
+  // the few seconds of "Syncing": the narrowest phones let the logo step
+  // aside for it so "Interpreter Hub" stays whole (app.css, by .tg-sync).
+  if(bar) bar.classList.toggle('has-sync-held', !!problem || offline);
   if(problem){
     el.classList.add('is-visible','is-problem');
     // No short phone label means the phone shows only the mark (count or !).
@@ -16345,13 +16353,23 @@ function renderAccessLock(mode){
   if(typeof accountLockResume === 'function') accountLockResume();
 }
 
+/* The app (#app: the screen, the sidebar, the tab bar) is taken from the
+   screen reader and the Tab key while something covers all of it: the
+   team-code lock, or a doctor's page. One place decides, so one closing
+   can't hand the app back while the other is still up. */
+function syncAppBehind(){
+  const app = document.getElementById('app');
+  if(!app) return;
+  const page = document.getElementById('doctorDirDetailOverlay');
+  const on = document.body.classList.contains('access-locked') || !!(page && page.classList.contains('show'));
+  if(app.inert !== on) app.inert = on;
+}
 function showAccessLock(mode){
   const lock = document.getElementById('accessLock');
   if(!lock) return;
   renderAccessLock(mode || 'join');
-  const app = document.getElementById('app');
-  if(app) app.inert = true;
   document.body.classList.add('access-locked');
+  syncAppBehind();
   // Not seen yet, so not marked as seen: it comes back after joining.
   const tour = document.getElementById('onboardingOverlay');
   if(tour && tour.classList.contains('show')){ tour.classList.remove('show'); onboardingAfterLock = true; }
@@ -16370,9 +16388,8 @@ function hideAccessLock(instant){
   const lock = document.getElementById('accessLock');
   if(!lock || lock.hidden) return;
   if(lockIdle){ lockIdle.stop(); lockIdle = null; }
-  const app = document.getElementById('app');
-  if(app) app.inert = false;
   document.body.classList.remove('access-locked');
+  syncAppBehind();
   lock.classList.remove('show');
   if(instant) lock.hidden = true;
   else setTimeout(()=>{ if(!lock.classList.contains('show')) lock.hidden = true; }, 380);
@@ -18664,6 +18681,13 @@ document.addEventListener('focusout', (e)=>{
       const isOpen = layer.classList.contains('show');
       if(isOpen === wasOpen) return;      // class changes for other reasons too
       wasOpen = isOpen;
+      // A doctor's page fills the screen over the list it was opened from:
+      // while it is open the screen behind (its title, its cards, the tab
+      // bar) is taken from the screen reader and the Tab key, so there is
+      // one title and nothing hidden to wander into. Set before focus
+      // moves, and lifted before focus goes back to the card that opened
+      // the page.
+      if(layer.id === 'doctorDirDetailOverlay') syncAppBehind();
       if(isOpen){
         returnFocus.set(layer, lastPageFocus);
         if(!panel.contains(document.activeElement)) panel.focus({ preventScroll:true });
@@ -18672,7 +18696,14 @@ document.addEventListener('focusout', (e)=>{
         const back = returnFocus.get(layer);
         // Put focus back on whatever opened this, so the next Tab carries on
         // from there rather than restarting at the top of the document.
-        if(back && back.isConnected && !panel.contains(back)) back.focus({ preventScroll:true });
+        if(back && back.isConnected && !panel.contains(back) && !back.closest('[inert]')) back.focus({ preventScroll:true });
+        else {
+          // What opened this can't take focus (it sits behind a doctor's
+          // page, or is gone): the sheet still open underneath gets it, so
+          // Tab carries on inside that sheet and not from the top bar.
+          const under = [...document.querySelectorAll('.overlay.show > .modal')].filter(m => m !== panel).pop();
+          if(under) under.focus({ preventScroll:true });
+        }
       }
     }).observe(layer, { attributes:true, attributeFilter:['class'] });
 

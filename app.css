@@ -272,6 +272,13 @@
     .tg-sync.is-problem span.tg-sync-mark{ display:inline; }
     .tg-sync.is-problem .tg-sync-dot{ display:none; }
     .tg-sync.is-problem{ min-width:30px; padding:0 9px; justify-content:center; } }
+  /* 360 wide, inside a screen (Back showing) with a badge that stays
+     (offline, or unsent changes): the badge is already only a dot or a
+     count and "Interpreter Hub" was still cut by its width (85 of 108px).
+     The logo steps aside until the badge clears (Jose's pick, 2026-11-25).
+     Not for the few seconds of "Syncing": the title would jump on every save. */
+  @media (max-width:380px){
+    .topbar-global.has-sync-held .tg-back.is-visible ~ .tg-brand .tg-mark{ display:none; } }
   .tg-sync-mark{ font-variant-numeric:tabular-nums; font-weight:650; }
   @media (max-width:900px){
     .topbar-global{

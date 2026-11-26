@@ -46,6 +46,35 @@ const taps = page => page.evaluate(() => {
               `${screen}: ${ids.length} round buttons drawn 36px, each tapped across 44, none overlapping`, t);
           }
         }
+        /* A badge that stays (offline, unsent changes) on a 360-wide phone
+           inside a screen: the logo steps aside and "Interpreter Hub" is
+           whole (it was 85 of 108px). At 393 it fits with the logo; on Home
+           (no Back) and during the few seconds of "Syncing" the logo stays. */
+        if (device !== 'desktop') {
+          const bar = () => page.evaluate(() => { const n = document.querySelector('.tg-brand-name'), m = document.querySelector('.tg-mark');
+            return { cut: n.scrollWidth > n.clientWidth, logo: m.getClientRects().length > 0, badge: document.getElementById('tgSync').getClientRects().length > 0,
+              back: document.getElementById('tgBack').getClientRects().length > 0,
+              bar: Math.round(document.querySelector('.topbar-global').getBoundingClientRect().height) }; });
+          const states = [
+            ['offline', () => { Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false }); updateSyncStatus(); }, true],
+            ['3 unsent', () => { Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true }); OUTBOX_HELD.push({}, {}, {}); updateSyncStatus(); }, true],
+            ['syncing', () => { OUTBOX_HELD.length = 0; pendingWriteCount = 1; updateSyncStatus(); }, false],
+            ['no badge', () => { pendingWriteCount = 0; updateSyncStatus(); }, false],
+          ];
+          for (const [name, set, held] of states) {
+            await page.evaluate(set); await page.waitForTimeout(150);
+            const b = await bar();
+            const wantLogo = !(device === 'narrow' && held);
+            if (name === 'no badge') ok(!b.badge && b.logo && !b.cut, `inside a screen, ${name}: the logo is back, the title whole`, b);
+            else if (name === 'syncing') ok(b.badge && b.logo, `inside a screen, ${name}: the logo stays (no jump on every save)`, b);
+            else ok(b.badge && !b.cut && b.logo === wantLogo && b.bar <= 46, `inside a screen, ${name}: "Interpreter Hub" whole, logo ${wantLogo ? 'showing' : 'stepped aside'}`, b);
+          }
+          await page.evaluate(() => { setCategory('home'); Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false }); updateSyncStatus(); });
+          await page.waitForTimeout(400);
+          const h = await bar();
+          ok(h.badge && !h.cut && h.logo === !(device === 'narrow' && h.back), `Home, offline: the title is whole; the logo steps aside only with Back showing at 360 (Back ${h.back ? 'showing' : 'hidden'})`, h);
+          await page.evaluate(() => { Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true }); updateSyncStatus(); });
+        }
         ok(!page.__errors.length, 'no page errors', page.__errors);
       } finally { await ctx.close(); }
     }

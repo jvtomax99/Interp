@@ -62,6 +62,7 @@ const SUITES = [
   ['topbar-name.cjs',     'Top bar: the hospital\'s full name on a computer, "Hackensack UMC" on one line on a phone, bar 45px'],
   ['search-hints.cjs',    'Search hints: every search box\'s hint fits its box at 393 and 360 wide and would end in "..."'],
   ['heading-levels.cjs',  'Heading levels: every screen has one title (h1), first, and no level skipped under it'],
+  ['small-picks.cjs',     'Small picks: no dead search bar on False Friends and Recent Updates; a doctor\'s page hides the screen behind it from a screen reader'],
   ['stress.cjs',          'Stress: a 45-letter word and a 60-character name stay inside their cards, and each forced failure says something useful'],
   ['opening.cjs',         'The opening (Badge in): a fresh start plays it over a drawn Home, a tap before the badge skips, the tap scans green into Home, nothing left over, not with ?open=, off, the update reload or a computer, Still, More\'s card'],
   ['lanyard-pins.cjs',    'Pins on your lanyard: one per badge, in order, all on screen above the clasp, a new one clicks on and is remembered, a skip keeps its moment, none without badges, Still, the list matches BADGES'],
