@@ -45,6 +45,13 @@ attachments, CSV export and import, print. One Firestore doc per term.
 - Done when: a user gets a sourced explanation of a term not yet in the
   glossary.
 
+**Check link.** A Check button beside a term's Source link (Add / Edit
+term, and each Link Directory row) that says whether the address still
+opens (`api/link-check.js`, `docs/features/link-check.md`). It never says
+a page is safe, stores nothing and never changes a link by itself.
+- Done when: an interpreter taps Check and within a few seconds reads
+  Opens, Moved (with the new address), Not found or Couldn't tell.
+
 **Doctor Prep and Doctor Directory.** Research on a doctor's specialty
 terms (`api/doctor-research.js`), the directory by region and place, a
 doctor's page with tabs, team tips, photos, duplicate merge, appointment

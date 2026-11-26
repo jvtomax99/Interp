@@ -148,7 +148,11 @@
     <div class="field"><label>Definition / context</label><textarea id="fDef" placeholder="Plain-language definition or clinical context"></textarea></div>
     <div class="field"><label>Team notes (optional)</label><textarea id="fNotes" placeholder="Usage tips, regional variants, what a provider actually says, pitfalls to avoid…"></textarea></div>
     <div class="field"><label>Source (optional)</label><input id="fSource" type="text" placeholder="e.g. NIH (Spanish)"></div>
-    <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it"></div>
+    <div class="field"><label>Source link (optional URL)</label><input id="fSourceUrl" type="text" placeholder="Paste the exact article/webinar link, if you have it" oninput="linkCheckClear()">
+      <!-- Check link (features/link-check.js): does the address still open? -->
+      <button type="button" class="lc-btn" id="lcFieldBtn" onclick="linkCheckField(this)">Check link</button>
+      <div class="lc-out" id="lcFieldOut" role="status" aria-live="polite" hidden></div>
+    </div>
     <div class="field"><label>Domain</label><select id="fCategory"></select></div>
     <div id="historyLinkSlot"></div>
     <div class="modal-actions">
@@ -699,6 +703,7 @@
 <script src="./features/account.js"></script>
 <script src="./features/account-sync.js"></script>
 <script src="./features/photo-adjust.js"></script>
+<script src="./features/link-check.js"></script>
 <script>
 /* The opening (features/opening.js), decided before the first paint (the first script). */
 if(window.__opPlay){ try{ openingStart(); }catch(e){ document.documentElement.classList.remove('op-cover', 'op-on'); } }
@@ -6123,9 +6128,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'deleted',     tone:'gd-n1', pin:'pins/trash.webp',            eyebrow:'Nothing lost by accident', title:'Deleting a term, doctor, provider or attachment always leaves a copy in Recently deleted for 30 days. You edit and remove your own chat messages, pins and events; only the owner removes other people\'s.' },
-  { id:'morph',       tone:'gd-n2', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
-  { id:'regions',     tone:'gd-n3', pin:'pins/locations.webp',         eyebrow:'North and South, clearer', title:'A pin in the North or South channel stays in that channel, events can carry a region tag, and South sees Hackensack Meridian Health at the top' },
+  { id:'checklink',   tone:'gd-n1', pin:'pins/directory.webp',        eyebrow:'Does that link still open?', title:'Check link, under Source link when you add or edit a term and on every Link Directory row, says if the page opens, moved, is gone, or it couldn\'t tell' },
+  { id:'deleted',     tone:'gd-n2', pin:'pins/trash.webp',            eyebrow:'Nothing lost by accident', title:'Deleting a term, doctor, provider or attachment always leaves a copy in Recently deleted for 30 days. You edit and remove your own chat messages, pins and events; only the owner removes other people\'s.' },
+  { id:'morph',       tone:'gd-n3', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -11168,7 +11173,7 @@ const MOTIVATIONAL_QUOTES = [
 // simple touch, without needing to press and hold. Pointer events cover touch
 // and stylus; mouse still uses :hover.
 (function(){
-  const LIFTS = '.more-sub-back, .acct-pick-opt, .tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
+  const LIFTS = '.lc-btn, .lc-use, .more-sub-back, .acct-pick-opt, .tg-back, .tg-brand, .tg-icon-btn, .tg-avatar, .link-pill, .ff-mode, .ff-chip, .sa-all, .ethics-filter-pill, .cp-tag, .activity-delete, .icon-btn, .dl-prep, .dd-detail-close, .home-sec-more, .home-sec-add, .gd-tour, .gd-face-btn, .gd-week-hide, .gd-show, .ask-mem-link, .ask-chip, .chat-reaction, .tc-attach, .sa-pair-say, .group-mark, .card-more, .domain-banner-more, .domain-add, .tr-swap, .home-feed-row, .tc-pinned-bar, .chat-quote, .head-action, .group-toggle, summary, .chat-link, ' + /* the small controls given press feedback 2026-11-04 (feel audit, phase 5; the rule is beside .tg-sync:active in app.css) */
     '.cp-play, .cp-3d, .cp-exam, .cp-key, .cp-folk, .cp-folk-no, .mastery-go, .study-mode, .quiz-option, .conf-btn, .mem-chunk, .mem-seg button, .mem-flag-chip, .home-tile, .qa-tile, .qa-card, .card, .domain-family, .folder-tile, .domain-chip, .home-search, .subgroup-pill, .subgroup-pill-all, .crumb-up, .smw, .sec-fold-toggle, .sec-fold-open, .dt-tile, .tg-sync, .tc-icon-btn, .tc-send, .tc-photo, .ask-do-btn, .ask-stop, .ds-mode-seg button, .mem-opts button, .tc-chan, .place-row, .place-row-edit, .place-field, .group-icon-pick, .dp-ib, .dp-go, .dp-rb, .dp-say, .dp-wide, .dp-navy-btn, .dp-tip, .home-promo-btn, .dt-act, .dl-card, .dl-add, .dl-tidy, .dl-need, .dl-sortmenu, .dl-recent-btn, .dl-mine button, .dp-gl, .kb-mini, .credit-tag, .credit-btn';
   const HOLD_MS = 260;
   document.addEventListener('pointerdown', (e) => {
@@ -15369,7 +15374,9 @@ function renderDirectory(q){
           <a class="dir-url" href="${escapeAttr(externalUrl(r.url))}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a>
           <button class="icon-btn" title="Edit this link" onclick="openEditModal('${cat.id}', '${r.termId}')">✎</button>
           <a class="dir-go" href="${escapeAttr(externalUrl(r.url))}" target="_blank" rel="noopener" title="Open link">${ICON_EXTERNAL}</a>
+          ${linkCheckRowButton(r.url)}
         </div>
+        ${linkCheckRowOut()}
       `;
     });
     sectionsHtml += `</div>`;
@@ -15380,7 +15387,7 @@ function renderDirectory(q){
   }
 
   const intro = `<p style="font-size:12.5px; color:var(--ink-soft); max-width:640px; margin:-6px 0 26px 0; line-height:1.6;">
-    Every source link your team has pasted in, in one place. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain. To find reading for a term that has no source yet, open the term and tap "Look up".
+    Every source link your team has pasted in, in one place. Tap Check on a row to see if its page still opens. Click the pencil on any row to edit a link, or use "+ Add link" above to add a new one to any domain. To find reading for a term that has no source yet, open the term and tap "Look up".
   </p>`;
 
   // The visible name is in the tab and sidebar; this is the title a screen reader hears.
@@ -15401,6 +15408,7 @@ function _openAddModal(fromDirectory){
   { const el = document.getElementById('fNotes'); if(el) el.value = ''; }
   document.getElementById('fSource').value = '';
   document.getElementById('fSourceUrl').value = '';
+  linkCheckClear();   // an answer belongs to the address it checked
   populateCategorySelect();
   const isRealDomain = DATA.categories.some(c=>c.id===activeCategory);
   document.getElementById('fCategory').value = isRealDomain ? activeCategory : DATA.categories[0].id;
@@ -15422,6 +15430,7 @@ function _openEditModal(categoryId, termId){
   { const el = document.getElementById('fNotes'); if(el) el.value = term.notes || ''; }
   document.getElementById('fSource').value = term.source || '';
   document.getElementById('fSourceUrl').value = term.url || '';
+  linkCheckClear();   // an answer belongs to the address it checked
   populateCategorySelect();
   document.getElementById('fCategory').value = categoryId;
   const historySlot = document.getElementById('historyLinkSlot');
@@ -15470,6 +15479,7 @@ function restoreHistoryVersion(categoryId, termId, historyIndex){
   document.getElementById('fDef').value = version.def || '';
   document.getElementById('fSource').value = version.source || '';
   document.getElementById('fSourceUrl').value = version.url || '';
+  linkCheckClear();   // an answer belongs to the address it checked
   closeHistoryModal();
   showToast('Version loaded into the form. Review, then Save to restore it.');
 }

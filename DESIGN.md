@@ -46,6 +46,8 @@ same names.
 Domain colors (one per glossary domain) feed the icons through `--ic-fill`
 and `--ic-line`. Every neutral is blue-shifted; there is no pure gray.
 
+- **Amber (caution) has no token yet.** Two places use the same pair by hand: the offline badge (`.tg-sync.is-offline`) and Check link's "Moved" (`.lc-moved`): `#8A6420` on `#FBEEDC`; in the dark theme "Moved" is `#E3BC6A` on `#3A2F17`. A third use should make it a token (`--warn`, `--warn-soft`).
+
 ## Typography
 
 ### Inter: the interface
