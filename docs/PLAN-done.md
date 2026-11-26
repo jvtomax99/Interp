@@ -5,6 +5,13 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-26 Kept-on-the-phone saves, the plan and step 1 of 4 (#297, build b1126.1318; undo: revert #297). The plan
+  (`docs/features/kept-on-phone-saves.md`, Jose: "All four steps"). Step 1: a doctor's team terms are added and removed one at a
+  time (`doctorTermWrite`), and a doctor save no longer sends the list, so a phone holding an old copy can't erase a teammate's
+  term; merging duplicates now moves the other doctor's team terms (it read a field no doctor has); a term for a doctor removed
+  on another phone says so. `team-terms.cjs` (8 checks, 4 fail on the old code). The cold review found no serious problem; its
+  leftover (a merge bins the duplicate from this phone's copy) is under Later in `docs/PLAN.md`. On the pull request,
+  `journey.cjs`'s Term Review step failed once on GitHub and passed on the one re-run and on five runs here.
 - 2026-11-26 Check link (#295, build b1126.0110; Jose's ask and OK of 2026-11-25). A Check button under a term's Source link and on
   every Link Directory row says Opens, Moved, Not found or Couldn't tell, and always "This only checks that the page opens, not that
   it is safe or correct." New endpoint `api/link-check.js` (team only, no AI, refuses private addresses at every redirect, visits

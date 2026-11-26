@@ -2,7 +2,8 @@
 
 Written 2026-11-26. Jose's decision the same day: **all four steps**
 ("Order of work"), each its own change waiting for his push. Step 1 is
-built (`team-terms.cjs`); steps 2 to 4 are not. `docs/PLAN.md`, Next,
+live (#297, build b1126.1318; `team-terms.cjs`); steps 2 to 4 are not
+built. `docs/PLAN.md`, Next,
 item 4.
 
 ## The problem, in one paragraph

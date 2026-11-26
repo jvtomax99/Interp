@@ -193,8 +193,8 @@ a phase finishes but the next phase continues here.
 4. **Kept-on-the-phone saves: the plan is OK'd, four steps, one change
    each** (`docs/features/kept-on-phone-saves.md`; Jose, 2026-11-26:
    "All four steps"). Step 1, team terms added and removed one at a
-   time (a live bug: an old copy erased a teammate's term), is built
-   and waits for his push. Then: step 2, the outbox learns "only these
+   time (a live bug: an old copy erased a teammate's term), is live
+   (#297, build b1126.1318; undo: revert #297). Next: step 2, the outbox learns "only these
    fields", "add to or take out of a list" and "delete these files
    after", and doctors, tips and team terms go through it; step 3,
    providers, events and chat delete (the wording for a delete that
