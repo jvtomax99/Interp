@@ -182,12 +182,22 @@ a phase finishes but the next phase continues here.
      go through later (found by the cold review, not fixed).
      Jose, 2026-11-25: write that plan (no code) once Check link is
      live; he decides then.
-3. **Check link** (Jose's ask and OK, 2026-11-25). Built the same day:
-   `docs/features/link-check.md` now describes the code. Waiting for his
-   "push"; once live, his "try this" is one working link and one dead
-   one, and the entry moves to `docs/PLAN-done.md`. Then show the team
-   the working button (his pick over showing them the plan).
-4. **Smaller files: a plan for Jose to OK, no code first** (same ask).
+3. **Check link: live, waiting for Jose's two taps** (#295, build
+   b1126.0110, 2026-11-26; undo: revert #295; the entry is in
+   `docs/PLAN-done.md`). The live site is blocked from a cloud session,
+   so he taps Check on one working link and one dead one in the Link
+   Directory and says what each answered. Then he shows the team the
+   working button (his pick over showing them the plan). If the short
+   address beside Check on a phone's row bothers them, Check moves to its
+   own line (rows about 50px taller).
+4. **Kept-on-the-phone saves: a plan for Jose to OK, no code first**
+   (his pick, 2026-11-25). Saving a doctor, a provider, a doctor's tip or
+   team term, an event, a file on a term, and deleting a chat message,
+   still need a connection; on Wi-Fi that is connected but dead they wait
+   with no message (item 2, the stress checks). Write what would go
+   through the outbox like terms do, what can't (files), the assumptions
+   and what can go wrong; he decides.
+5. **Smaller files: a plan for Jose to OK, no code first** (same ask).
    `index.html` is 1.0 MB and `app.css` 556 KB, sent as written, comments
    and all. Shrinking them needs a build step, which this project has
    avoided on purpose (`AGENTS.md`, Deploying: "There is no build step"),

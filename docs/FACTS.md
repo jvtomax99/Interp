@@ -765,3 +765,21 @@ Notes opened only when needed (`docs/assets.md`, `docs/design-rules.md`,
   failure messages, Translate (falls back to the machine translation),
   email sign-in, long text in chat, Ask, a doctor's card and page, the
   briefing, Recently deleted and the edit sheets.
+
+## Check link (2026-11-26)
+
+- A test that clicks by a word (`text=Check`) takes the first match in
+  the page, hidden or not: the new "Check link" button in the term form
+  broke `daily-drill.cjs` on GitHub only after the pull request went up.
+  Scope such a click to its sheet (`#warmupSheet >> text=Check`), and
+  before adding a button, search `tests/` for its word.
+- Node's `net.BlockList` judges an IPv4 address as its IPv6 spelling
+  too (`::ffff:a.b.c.d`), so `::/8` in the same list refuses every IPv4
+  address. `api/link-check.js` keeps two lists.
+- `zlib`'s sync unpacking has no size limit unless `maxOutputLength` is
+  given: 809 bytes of brotli unpacked to 512 MB.
+- Vercel shows "Building" for a branch for a few seconds before the
+  ignore step cancels it; the deployment list then reads CANCELED.
+- The cloud machine restarted twice in this chat, each time while a
+  button question was open; the answer still arrived. Branches pushed
+  early lost nothing.

@@ -5,6 +5,18 @@ the start. Newest first. Look things up here (search for the phase's name
 or its PR number); don't read it whole. A finished phase is added at the
 top, under this note: the date, a few lines, the PR number.
 
+- 2026-11-26 Check link (#295, build b1126.0110; Jose's ask and OK of 2026-11-25). A Check button under a term's Source link and on
+  every Link Directory row says Opens, Moved, Not found or Couldn't tell, and always "This only checks that the page opens, not that
+  it is safe or correct." New endpoint `api/link-check.js` (team only, no AI, refuses private addresses at every redirect, visits
+  exactly the address it checked), new file `features/link-check.js`, a guide answer and news card. A cold review found five
+  weaknesses in the server (the worst: 809 bytes that unpack to 512 MB), all fixed with a test each. `link-check.mjs`,
+  `link-check.cjs`; the note is `docs/features/link-check.md`. Not tested against a real site: Jose's two taps.
+
+- 2026-11-25 The small picks from the consistency pass (#294, build b1126.0026). At 360 wide, inside a screen with a badge that
+  stays, the logo steps aside so "Interpreter Hub" is whole; False Friends and Recent Updates lost the glossary search bar that
+  searched nothing; a doctor's page makes the screen behind it `inert` (`syncAppBehind`, shared with the team-code lock).
+  `small-picks.cjs`, `topbar-name.cjs`.
+
 - 2026-11-25 The AI's answers are asked not to write long dashes. One line (`PLAIN_PUNCTUATION`) is added to every system prompt
   in `callClaude` (`api/_routine.js`), so Dr. Smiley, Term lookup, Doctor Prep, Translate and the term check all get it from one
   place. Doctor Prep's fixed specialty line now reads "Division, John Theurer Cancer Center". `api-helper.mjs` checks the line is sent.
