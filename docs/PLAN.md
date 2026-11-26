@@ -327,6 +327,20 @@ The S-steps and their numbers are in `docs/PLAN-done.md`.
      (`PLAIN_PUNCTUATION` in `api/_routine.js`); that lowers how often,
      it can't promise none.
 
+- **A merge of duplicate doctors can still be half kept for later**
+  (cold review of step 2, 2026-11-26; older code). With no signal it
+  now refuses, but if the Wi-Fi dies in the middle, the bin copy and the
+  duplicate's delete time out after 12 s and wait in the outbox
+  (`trashItem`, `queuedDelete`), and the toast still says "Merged". Sent
+  late, the delete removes a tip a teammate added to the duplicate
+  meanwhile. Fix: send those two directly for a merge, and say what was
+  and wasn't done. Also: Doctor Prep's save after a search writes past
+  a waiting edit of the same doctor (the waiting edit then wins on the
+  fields it carries).
+- **No sign of work during the 12 seconds on dead Wi-Fi** for Delete
+  tip, Remove team term and the doctor sheet's Save (only the tip's
+  Save button is disabled). A second tap queues the same change again,
+  which is harmless. A busy state on those three buttons would fix it.
 - **Merging duplicate doctors bins the duplicate from this phone's copy**
   (found by the cold review, 2026-11-26; older than the team-terms fix).
   A tip or team term a teammate added to the duplicate after this phone

@@ -98,7 +98,7 @@ const stored = (page, id) => page.evaluate(id => JSON.parse(JSON.stringify(windo
         && /^Team term for Dr. Ana Queue: tumor board/.test(titles[3].title) && /^Doctor: Dr. Lori Basement/.test(titles[4].title),
         'the Unsent changes sheet names each one in plain words', titles);
       const badge = await page.evaluate(() => { const b = document.getElementById('tgSync'); return ((b && (b.getAttribute('aria-label') || b.title || b.textContent)) || ''); });
-      ok(/5/.test(badge), 'the unsent badge counts all five', badge);
+      ok(/\b5 changes\b/.test(badge), 'the unsent badge counts all five', badge);
 
       console.log('== signal back: sent, next to what a teammate changed meanwhile');
       await page.evaluate(() => {
@@ -185,6 +185,35 @@ const stored = (page, id) => page.evaluate(id => JSON.parse(JSON.stringify(windo
         'the phone says they could not sync and why, and Copy keeps the tip\'s words', refused);
       ok(!refused.listed, 'the doctor leaves this phone\'s list instead of showing as saved', refused.listed);
       await page.evaluate(() => { OUTBOX_HELD = []; saveOutboxHeld(); });
+
+      console.log('== refused while the list is being read; a name added again; no photo field');
+      const race = await page.evaluate(async () => {
+        const doc = { name: 'Dr. Race Read', specialty: 'Renal', source: 'ai', tips: [] };   // made by Doctor Prep: no photo field
+        window.__DB['doctor-directory']['ob-r'] = JSON.parse(JSON.stringify(doc));
+        DOCTOR_DIRECTORY.push({ id: 'ob-r', ...doc });
+        enqueueWrite({ collection: 'doctor-directory', docId: 'ob-r', op: 'update', listAdd: { tips: [{ id: 'tpr', text: 'Refused tip', by: 'Tester', at: 3 }] } });
+        const real = window.__gate;
+        window.__gate = (c, id, op) => op === 'update' ? Promise.reject(Object.assign(new Error('Quota exceeded.'), { code: 'resource-exhausted' })) : real(c, id, op);
+        DOCTOR_DIR_STATE = 'idle';
+        const reading = loadDoctorDirectory();   // the read starts with the tip waiting...
+        await flushOutbox();                     // ...and the refusal comes back first
+        await reading;
+        await new Promise(r => setTimeout(r, 1500));
+        window.__gate = real;
+        const d = DOCTOR_DIRECTORY.find(x => x.id === 'ob-r');
+        const out = { held: OUTBOX_HELD.length, shown: (d.tips || []).some(t => t.id === 'tpr'), state: DOCTOR_DIR_STATE };
+        OUTBOX_HELD = []; saveOutboxHeld();
+        // An edit of this doctor: nothing about the photo changed.
+        const e = doctorSheetEntry('ob-r', { ...d, specialty: 'Nephrology', photo: null, photoPath: null, region: null, updatedAt: 5 }, d, null, true);
+        // Adding the same name again after a teammate deleted the doctor.
+        delete window.__DB['doctor-directory']['ob-r'];
+        const again = doctorSheetEntry('ob-r', { ...d, researchResult: d.researchResult, specialty: 'Renal', updatedAt: 6 }, { ...d, researchResult: { summary: 'big' } }, null, false);
+        await applyQueuedWrite(again);
+        return { ...out, editKeys: Object.keys(e.data).sort(), title: describeOutboxEntry(e).detail, addOp: again.op, addKeys: again.mergeFields, made: (window.__DB['doctor-directory']['ob-r'] || {}).name };
+      });
+      ok(race.held === 1 && !race.shown && race.state === 'ok', 'a tip refused while the list was being read is held and does not show as saved', race);
+      ok(JSON.stringify(race.editKeys) === '["specialty","updatedAt"]' && !/photo/.test(race.title), 'an edit of a doctor with no photo on file does not claim the photo changed', race);
+      ok(race.addOp === 'set' && race.addKeys.includes('name') && !race.addKeys.includes('researchResult') && race.made === 'Dr. Race Read', 'adding a name this phone still lists, deleted elsewhere, makes the doctor again', race);
 
       console.log('== Wi-Fi that is connected but dead');
       await page.evaluate(() => {

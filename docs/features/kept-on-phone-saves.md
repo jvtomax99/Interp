@@ -185,7 +185,9 @@ updates in one batch. Sending any entry twice changes nothing more.
   deleted or merged away on another phone is refused ("removed or merged
   on another phone") instead of coming back as a record. That last part
   is a change: before, saving the sheet of a doctor deleted elsewhere
-  re-created the doctor. A new doctor is a `set` of the sheet's fields.
+  re-created the doctor. A new doctor is a `set` of the sheet's fields;
+  so is Add doctor with a name this phone already lists (the doctor may
+  have been deleted elsewhere, and adding should make them again).
 - **Tips and team terms**: `listAdd` / `listRemove`, as before but
   through the outbox.
 - **Doctor Prep's own save after a search** and **joining duplicate
@@ -203,8 +205,14 @@ with a readable title (`describeOutboxEntry`).
 
 **Dead Wi-Fi coming back.** The phone gets no "online" signal then, so
 while changes wait and the phone says it is online, the outbox tries
-again every 30 seconds (`scheduleOutboxRetry`). This also helps terms
-and chat.
+again after 30 seconds, then twice as long each time nothing went, up
+to 5 minutes (`scheduleOutboxRetry`). This also helps terms and chat.
+
+**The cold review (2026-11-26)** found three things, fixed before the
+pull request: a change refused while the doctor list was being read
+showed as saved; Add doctor over a name deleted elsewhere was refused;
+the Unsent sheet said "Changed: photo" for a doctor with no photo on
+file. Its leftovers are under Later in `docs/PLAN.md`.
 
 **Not done here:** a doctor's photo is still an upload, so choosing a
 new one needs a connection (the save around it is kept).

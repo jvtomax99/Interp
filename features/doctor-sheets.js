@@ -320,7 +320,7 @@ async function saveDoctorDirEntry(){
     // sent later. If the photo was swapped out, the old file goes once the
     // save is in, so Storage doesn't keep images nothing points at.
     const oldPhoto = existing && existing.photoPath && existing.photoPath !== pendingDDPhotoPath ? [existing.photoPath] : null;
-    const state = await queuedWrite(doctorSheetEntry(id, record, existing, oldPhoto));
+    const state = await queuedWrite(doctorSheetEntry(id, record, existing, oldPhoto, !!editingDoctorDirId));
     const idx = DOCTOR_DIRECTORY.findIndex(d=>d.id===id);
     if(idx>-1) DOCTOR_DIRECTORY[idx] = { id, ...record };
     else DOCTOR_DIRECTORY.push({ id, ...record });
