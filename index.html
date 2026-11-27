@@ -2925,7 +2925,7 @@ function doctorDirectoryKey(name){
    when the connection or the app comes back. Opening the screen before the
    database has started waits for it instead of giving up. */
 const DOCTOR_DIR_CACHE_KEY = 'ih_doctorDirectory';
-let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '', doctorDirRetries = 0;
+let DOCTOR_DIR_STATE = 'idle', DOCTOR_DIR_ERROR = '', doctorDirRetries = 0, doctorDirAgain = false;
 function doctorDirFromCache(){
   try{ const c = JSON.parse(localStorage.getItem(DOCTOR_DIR_CACHE_KEY) || 'null'); return Array.isArray(c) ? c.filter(d => d && safeId(d.id)) : null; }catch(e){ return null; }
 }
@@ -2938,14 +2938,22 @@ function doctorDirToCache(list){
     researchResult ? { ...d, _n: doctorResearchCounts(researchResult) } : d))); }catch(e){}
 }
 async function loadDoctorDirectory(){
-  if(DOCTOR_DIR_STATE === 'loading') return;
+  // Asked for while a read is on its way (waiting changes were just sent or
+  // refused): read once more when this one ends, or its answer may be stale.
+  if(DOCTOR_DIR_STATE === 'loading'){ doctorDirAgain = true; return; }
   if(!DOCTOR_DIRECTORY.length){ const c = doctorDirFromCache(); if(c) DOCTOR_DIRECTORY = c; }
   DOCTOR_DIR_STATE = 'loading';
   try{
     if(!db) await hubAuthReady;
     if(!db) throw Object.assign(new Error('The database did not start.'), { code: 'no-db' });
+    // Also the ones waiting when the read began: one sent while the answer
+    // was on its way may not be in it yet. Putting a change on twice is safe.
+    const before = waitingDoctorChanges();
     const snap = await db.collection('doctor-directory').get();
-    DOCTOR_DIRECTORY = hubRows(snap);
+    const waiting = waitingDoctorChanges();
+    // Not one the database refused meanwhile: that must not show as saved.
+    const sentMeanwhile = before.filter(e => !waiting.some(w => w.qid === e.qid) && !OUTBOX_HELD.some(h => h.qid === e.qid));
+    DOCTOR_DIRECTORY = doctorsWithWaiting(hubRows(snap), sentMeanwhile.concat(waiting));
     DOCTOR_DIR_STATE = 'ok'; DOCTOR_DIR_ERROR = '';
     doctorDirToCache(DOCTOR_DIRECTORY);
   }catch(err){
@@ -2957,6 +2965,7 @@ async function loadDoctorDirectory(){
     if(doctorDirRetries < 2) setTimeout(() => { if(DOCTOR_DIR_STATE === 'failed') loadDoctorDirectory(); }, [6000, 20000][doctorDirRetries++]);
   }
   if(DOCTOR_DIR_STATE === 'ok') doctorDirRetries = 0;
+  if(doctorDirAgain){ doctorDirAgain = false; if(DOCTOR_DIR_STATE === 'ok') return loadDoctorDirectory(); }
   scheduleRender();
   // An open doctor page was drawn from the saved copy, without research.
   if(DOCTOR_DIR_STATE === 'ok' && document.getElementById('doctorDirDetailOverlay')?.classList.contains('show')) refreshDoctorDirDetail();
@@ -2990,17 +2999,78 @@ async function persistDoctorDirectoryEntry(id, record, whole){
   await trackWrite(ref.set(data, { mergeFields: Object.keys(data) }));
   return true;
 }
+/* The doctor's sheet, as a change the outbox can keep with no signal.
+   An edit carries only the fields this save changed, as an update: a save
+   that arrives hours late then can't put back what a teammate changed
+   meanwhile in the fields nobody touched here, the entry stays small (the
+   research on a doctor can be tens of KB; the outbox shares about 5 MB
+   with the glossary), and a doctor deleted or merged away on another phone
+   is refused instead of coming back as a half-empty record. A new doctor is
+   a set of the sheet's fields only, so it can land on a record another
+   phone made under the same name without touching its tips or terms. */
+function doctorSheetEntry(id, record, existing, filesAfter, editing){
+  const data = stripUndefined(record);
+  ['id', '_n', 'tips', 'notes', 'customTerms'].forEach(k => delete data[k]);
+  const entry = { collection: 'doctor-directory', docId: id };
+  // "Nothing there" and "empty" are the same answer: a doctor made by Doctor
+  // Prep has no photo field at all, and that is not a changed photo.
+  const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  // Adding a name this phone already lists (the doctor may have been deleted
+  // on another phone since) is still a set, so it can make the record again;
+  // it keeps the sheet's own fields and leaves out the rest it didn't change.
+  const SHEET = ['name', 'specialty', 'locationDetails', 'hospitalLocation', 'locationGroup', 'source', 'updatedBy', 'updatedAt'];
+  if(existing) Object.keys(data).forEach(k => { if(same(data[k], existing[k]) && (editing || !SHEET.includes(k))) delete data[k]; });
+  if(existing && editing){
+    Object.assign(entry, { op: 'update', data });
+  } else {
+    Object.assign(entry, { op: 'set', data, mergeFields: Object.keys(data) });
+  }
+  if(filesAfter && filesAfter.length) entry.filesAfter = filesAfter;
+  return entry;
+}
+/* What a waiting change does to this phone's copy of a record: the same
+   outcome applyQueuedWrite asks the database for. */
+function entryOnCopy(doc, entry){
+  const out = { ...doc, ...(entry.data || {}) };
+  const same = (a, b) => (a && b && a.id && b.id) ? a.id === b.id : JSON.stringify(a) === JSON.stringify(b);
+  Object.keys(entry.listRemove || {}).forEach(f => {
+    const gone = [].concat(entry.listRemove[f] || []);
+    out[f] = (Array.isArray(out[f]) ? out[f] : []).filter(x => !gone.some(g => same(g, x)));
+  });
+  Object.keys(entry.listAdd || {}).forEach(f => {
+    const list = Array.isArray(out[f]) ? out[f].slice() : [];
+    [].concat(entry.listAdd[f] || []).forEach(x => { if(!list.some(y => same(x, y))) list.push(x); });
+    out[f] = list;
+  });
+  (entry.dropFields || []).forEach(f => { delete out[f]; });
+  return out;
+}
+// The list as the database has it, with this phone's waiting doctor changes
+// on top: reopening the Hub must not hide a save that is still in the outbox.
+function doctorsWithWaiting(rows, waiting){
+  let out = rows.slice();
+  waiting.forEach(e => {
+    const i = out.findIndex(d => d.id === e.docId);
+    if(e.op === 'delete'){ if(i > -1) out.splice(i, 1); return; }
+    if(i > -1) out[i] = entryOnCopy(out[i], e);
+    else if(e.op !== 'update') out.push(entryOnCopy({ id: e.docId }, e));
+  });
+  return out;
+}
+const waitingDoctorChanges = () => OUTBOX.filter(e => e.collection === 'doctor-directory');
 // One team term added to, or taken out of, the doctor's list by the database
 // itself. The list is never sent whole: the doctor list is read once when the
 // Hub opens, so a phone open since the morning would erase the term a
 // teammate added at noon.
-async function doctorTermWrite(id, { add, remove }){
-  if(!db){ showToast('Not connected to the database.'); return false; }
-  const FV = firebase.firestore.FieldValue;
-  const list = [].concat(add || remove || []);
-  if(!list.length) return true;
-  await trackWrite(db.collection('doctor-directory').doc(id).update({ customTerms: add ? FV.arrayUnion(...list.map(stripUndefined)) : FV.arrayRemove(...list) }));
-  return true;
+// Answers 'sent', or 'queued' when it is kept on this phone to send later
+// (the outbox). `direct` sends now or fails: a merge must never arrive late.
+async function doctorTermWrite(id, { add, remove }, direct){
+  if(!db && (direct || navigator.onLine !== false)){ showToast('Not connected to the database.'); return false; }
+  const list = [].concat(add || remove || []).map(stripUndefined);
+  if(!list.length) return 'sent';
+  const entry = { collection: 'doctor-directory', docId: id, op: 'update', [add ? 'listAdd' : 'listRemove']: { customTerms: list } };
+  if(direct){ await directWrite(entry); return 'sent'; }
+  return queuedWrite(entry);
 }
 // The doctor was deleted or merged away on another phone since this one
 // opened: trying again can never work, so don't say "try again".
@@ -3009,6 +3079,14 @@ function doctorGoneMessage(err, fallback){
   return code.includes('not-found') || code.includes('no document to update')
     ? 'This doctor was removed or merged on another phone. Reopen the Hub to see the current list.'
     : fallback;
+}
+
+// A doctor, tip or team-term save that failed: the phone couldn't keep it
+// (with a Review button), the doctor is gone, or the database's reason.
+function doctorSaveFailed(err, lead, kept, fallback){
+  const stored = outboxErrorMessage(err, lead, kept);
+  if(stored){ showOutboxActionToast(stored); return; }
+  showToast(doctorGoneMessage(err, fallback || saveErrorMessage(err, 'doctor-directory')));
 }
 
 async function deleteDoctorDirectoryEntryRemote(id){
@@ -5454,8 +5532,8 @@ function saveErrorMessage(err, collection){
   return SAVE_FAILED_GENERIC;
 }
 const SAVE_FAILED_GENERIC = 'Could not save. Please try again.';
-// A write the outbox doesn't carry (a doctor, a provider, deleting a chat
-// message) never answers while the phone is offline: the sheet just sat
+// A write the outbox doesn't carry (a provider, an event, deleting a chat
+// message, joining duplicate doctors) never answers while the phone is offline: the sheet just sat
 // there. Say so before trying.
 function offlineBlocked(what){
   if(navigator.onLine !== false) return false;
@@ -6150,9 +6228,9 @@ function closeGuideSection(){ guideSection = null; refreshGuideList(); }
 const GUIDE_POPULAR = ['name', 'notfound', 'offline', 'edit'];
 // Newest first. A new feature gets a card here; the oldest drops off (its answer stays).
 const GUIDE_NEWS = [
-  { id:'checklink',   tone:'gd-n1', pin:'pins/directory.webp',        eyebrow:'Does that link still open?', title:'Check link, under Source link when you add or edit a term and on every Link Directory row, says if the page opens, moved, is gone, or it couldn\'t tell' },
-  { id:'deleted',     tone:'gd-n2', pin:'pins/trash.webp',            eyebrow:'Nothing lost by accident', title:'Deleting a term, doctor, provider or attachment always leaves a copy in Recently deleted for 30 days. You edit and remove your own chat messages, pins and events; only the owner removes other people\'s.' },
-  { id:'morph',       tone:'gd-n3', pin:'pins/medical-terminology.webp', eyebrow:'Pages that open from what you tapped', title:'Tap a domain tile or a doctor\'s card and its picture and name fly into the page that opens; Back sends them home' },
+  { id:'offline',     tone:'gd-n1', pin:'pins/doctor-prep.webp',      eyebrow:'No signal by the bedside?', title:'A doctor, a tip or a doctor\'s team term saved with no signal is kept on your phone and sent when the signal is back' },
+  { id:'checklink',   tone:'gd-n2', pin:'pins/directory.webp',        eyebrow:'Does that link still open?', title:'Check link, under Source link when you add or edit a term and on every Link Directory row, says if the page opens, moved, is gone, or it couldn\'t tell' },
+  { id:'deleted',     tone:'gd-n3', pin:'pins/trash.webp',            eyebrow:'Nothing lost by accident', title:'Deleting a term, doctor, provider or attachment always leaves a copy in Recently deleted for 30 days. You edit and remove your own chat messages, pins and events; only the owner removes other people\'s.' },
 ];
 // The "Asking Dr. Smiley" tile shows the Hub's mark, not his face: one Dr.
 // Smiley at a time, and the one on this page is in the search box.
@@ -7808,8 +7886,12 @@ function render(opts){
    2. Writes race a timeout. Offline, the SDK leaves the promise pending
       forever rather than rejecting, so waiting on it is waiting on nothing.
 
-   Scope is deliberately the two things done in the field: terminology edits
-   and team chat. Everything else still reports failure honestly.
+   Scope is what is done in the field: terminology edits, team chat, and a
+   doctor's sheet, tips and team terms
+   (docs/features/kept-on-phone-saves.md). Everything else still reports
+   failure honestly. Never queue a save that rewrites a whole shared list
+   or many records from this phone's copy (the domain list, a doctor merge,
+   a CSV import, Team access): sent late, it would undo teammates' work.
 
    Nothing in here may lose a change without the person being told:
    - A change is only reported as queued once it is actually written to this
@@ -7934,7 +8016,22 @@ function enqueueWrite(entry){
   }
   OUTBOX = next;
   updateSyncStatus(false);
+  scheduleOutboxRetry();
   return queued;
+}
+
+/* Wi-Fi that is connected but dead never tells the phone "online" when it
+   comes back, so nothing would send what is waiting until the Hub was
+   reopened. While the phone says it is online and changes wait, try again:
+   after half a minute, then twice as long each time nothing went, up to
+   five minutes (each try hands the database another copy of the first
+   waiting change; harmless, but no reason to pile them up). With no signal
+   at all the 'online' event does it. */
+const OUTBOX_RETRY_MS = 30000, OUTBOX_RETRY_MAX_MS = 300000;
+let outboxRetryTimer = null, outboxRetryMs = OUTBOX_RETRY_MS;
+function scheduleOutboxRetry(){
+  if(outboxRetryTimer || !OUTBOX.length || navigator.onLine === false) return;
+  outboxRetryTimer = setTimeout(() => { outboxRetryTimer = null; flushOutbox(); }, outboxRetryMs);
 }
 
 function hasQueuedFor(entry){
@@ -7964,14 +8061,56 @@ function withWriteTimeout(promise){
   return Promise.race([promise, timeout]).finally(()=> clearTimeout(timer));
 }
 
+/* An entry is plain text (it waits in localStorage), so it can't hold the
+   database's own markers. It says what it wants in words, and they become
+   the markers here, at the moment of sending:
+     mergeFields: [names]         a set() that writes only those fields
+     listAdd: { field: [items] }  add each item to a list, by the database
+     listRemove: { field: [..] }  take each item out of a list
+     dropFields: [names]          remove those fields
+     filesAfter: [paths]          files to delete once the write is in
+                                  (deleteFilesAfter, not here)
+   A list is never sent whole, so a phone holding an old copy can't erase
+   what a teammate added. Sending any of these twice changes nothing more. */
 function applyQueuedWrite(entry){
   const ref = db.collection(entry.collection).doc(entry.docId);
   if(entry.op === 'delete') return ref.delete();
   // 'update' touches only the named fields. Reactions need it: a set() would
   // rewrite the whole message, so reacting to someone's note while they were
   // still being delivered could blank the text it is attached to.
-  if(entry.op === 'update') return ref.update(entry.data);
+  if(entry.op === 'update'){
+    const FV = firebase.firestore.FieldValue;
+    const lists = (map, make) => { const out = {};
+      Object.keys(map || {}).forEach(f => { const items = [].concat(map[f] || []); if(items.length) out[f] = make(...items); });
+      return out; };
+    const removes = lists(entry.listRemove, FV.arrayRemove);
+    const rest = { ...(entry.data || {}), ...lists(entry.listAdd, FV.arrayUnion) };
+    (entry.dropFields || []).forEach(f => { rest[f] = FV.delete(); });
+    if(!Object.keys(removes).length) return ref.update(rest);
+    // One field can't be added to and taken from in the same update (a tip
+    // edit is its old wording out and its new one in): two updates, sent
+    // together so both land or neither does.
+    const batch = db.batch();
+    batch.update(ref, removes);
+    if(Object.keys(rest).length) batch.update(ref, rest);
+    return batch.commit();
+  }
+  if(entry.mergeFields) return ref.set(entry.data, { mergeFields: entry.mergeFields });
   return ref.set(entry.data);
+}
+// Files a change leaves behind (a doctor's old photo) go once the change
+// itself is in the database, never before: until then the record still
+// points at them. A file already gone is not an error.
+function deleteFilesAfter(entry){
+  if(!entry.filesAfter || !storage) return;
+  [].concat(entry.filesAfter).forEach(path => {
+    try{ if(path) storage.ref().child(path).delete().catch(() => {}); }catch(e){}
+  });
+}
+// Sent now or not at all, for the saves that must never wait and arrive
+// late (joining duplicate doctors).
+function directWrite(entry){
+  return trackWrite(applyQueuedWrite(entry));
 }
 
 /* Returns 'sent' if it reached the server, 'queued' once it is safely stored
@@ -8011,6 +8150,7 @@ async function queuedWrite(entry, opts){
   }
   try{
     await trackWrite(withWriteTimeout(applyQueuedWrite(entry)));
+    deleteFilesAfter(entry);
     return 'sent';
   }catch(err){
     if(isOfflineError(err)){ enqueueWrite(entry); return 'queued'; }
@@ -8033,7 +8173,7 @@ async function flushOutbox(){
   if(outboxFlushing || !db || !OUTBOX.length || !navigator.onLine) return;
   outboxFlushing = true;
   updateSyncStatus(false);
-  let sent = 0, held = 0;
+  let sent = 0, held = 0, doctors = false;
   try{
     while(OUTBOX.length && navigator.onLine){
       const entry = OUTBOX[0];
@@ -8068,7 +8208,9 @@ async function flushOutbox(){
         held++;
       } else {
         sent++;
+        deleteFilesAfter(entry);
       }
+      if(entry.collection === 'doctor-directory') doctors = true;
       OUTBOX = rest;
       try{
         saveOutbox(rest);
@@ -8081,7 +8223,12 @@ async function flushOutbox(){
   }finally{
     outboxFlushing = false;
     updateSyncStatus(sent > 0 && !OUTBOX.length && !OUTBOX_HELD.length);
+    outboxRetryMs = (sent || held) ? OUTBOX_RETRY_MS : Math.min(outboxRetryMs * 2, OUTBOX_RETRY_MAX_MS);
+    scheduleOutboxRetry();
   }
+  // The doctor list is read once per opening, so read it again here: a
+  // refused change must not go on showing as if it were saved.
+  if(doctors) loadDoctorDirectory();
   if(held){
     showOutboxActionToast(`${held} change${held === 1 ? '' : 's'} couldn’t sync. Nothing was lost.`);
   } else if(sent && !OUTBOX.length){
@@ -8140,6 +8287,26 @@ function describeOutboxEntry(e){
     return { title: 'Chat message', detail: (d.text || '') + (nFiles ? ` (with ${nFiles === 1 ? 'an attachment' : nFiles + ' attachments'})` : '') };
   }
   if(e.collection === TEAM_MEMBER_COLL) return { title: 'Your profile photo', detail: '' };
+  if(e.collection === 'doctor-directory'){
+    const known = DOCTOR_DIRECTORY.find(x => x.id === e.docId);
+    const who = d.name || (known && known.name) || 'a doctor';
+    const first = map => { const k = Object.keys(map || {})[0]; return k ? { field: k, item: [].concat(map[k])[0] || {} } : null; };
+    const add = first(e.listAdd), gone = first(e.listRemove);
+    if((add || gone || {}).field === 'tips'){
+      return { title: `${add && gone ? 'Tip edit' : add ? 'Tip' : 'Delete a tip'} for ${who}`, detail: (add || gone).item.text || '' };
+    }
+    if((add || gone || {}).field === 'customTerms'){
+      const t = (add || gone).item;
+      return { title: `${add ? 'Team term' : 'Remove a team term'} for ${who}: ${t.en || '(no English term)'}`, detail: [t.es, t.def].filter(Boolean).join(' · ') };
+    }
+    if((e.dropFields || []).includes('notes')) return { title: `Delete a tip for ${who}`, detail: '' };
+    if(e.op === 'delete') return { title: `Delete doctor${who === 'a doctor' ? '' : `: ${who}`}`, detail: '' };
+    // A sheet save: an edit lists what it changed, in the sheet's own words.
+    const LABELS = { name: 'name', specialty: 'specialty', locationDetails: 'floor, suite or room', locationGroup: 'place', photo: 'photo' };
+    const changed = e.op === 'update' ? Object.keys(LABELS).filter(k => k in d).map(k => LABELS[k]) : [];
+    return { title: `${e.op === 'update' ? 'Doctor edit' : 'Doctor'}: ${who}`,
+             detail: e.op === 'update' ? (changed.length ? `Changed: ${changed.join(', ')}` : '') : [d.specialty, d.locationGroup, d.locationDetails].filter(Boolean).join(' · ') };
+  }
   return { title: `Change to ${e.collection}`, detail: '' };
 }
 
@@ -8157,7 +8324,8 @@ function outboxReasonText(reason){
 
 function outboxEntryText(e){
   const { title, detail } = describeOutboxEntry(e);
-  return `${title}${detail ? `\n${detail}` : ''}\n\n${JSON.stringify({ collection: e.collection, id: e.docId, op: e.op, data: e.data || null }, null, 2)}`;
+  return `${title}${detail ? `\n${detail}` : ''}\n\n${JSON.stringify({ collection: e.collection, id: e.docId, op: e.op, data: e.data || null,
+    ...['mergeFields', 'listAdd', 'listRemove', 'dropFields', 'filesAfter'].reduce((o, k) => (e[k] ? { ...o, [k]: e[k] } : o), {}) }, null, 2)}`;
 }
 
 function outboxWhen(ts){
@@ -8400,7 +8568,7 @@ function updateSyncStatus(justSynced){
     setSyncAnnouncement(label);
     el.title = waiting
       ? `You\u2019re offline. ${waiting} change${waiting === 1 ? ' is' : 's are'} saved on this device and will send automatically when you reconnect.`
-      : 'You\u2019re offline. The glossary shown is the last synced copy. Terms and chat messages you write will be saved here and sent when you reconnect.';
+      : 'You\u2019re offline. The glossary shown is the last synced copy. Terms, chat messages and what you add to a doctor will be saved here and sent when you reconnect.';
     return;
   }
   if(waiting){
@@ -13515,7 +13683,6 @@ function closeDoctorTermModal(){
 async function saveDoctorTerm(){
   const en = document.getElementById('fDTEn').value.trim();
   if(!en){ showToast('English term is required.'); return; }
-  if(offlineBlocked('Saving a doctor\u2019s term')) return;
   const d = DOCTOR_DIRECTORY.find(x=>x.id===doctorTermTargetId);
   if(!d){ showToast('Could not find that doctor.'); return; }
 
@@ -13528,7 +13695,8 @@ async function saveDoctorTerm(){
   };
 
   try{
-    if(!(await doctorTermWrite(d.id, { add: term }))) return;
+    const state = await doctorTermWrite(d.id, { add: term });
+    if(!state) return;
     // This phone's copy gains the one term; whatever else it holds is left as it is.
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
     if(idx > -1) DOCTOR_DIRECTORY[idx] = { ...DOCTOR_DIRECTORY[idx], customTerms: [...(DOCTOR_DIRECTORY[idx].customTerms || []), term] };
@@ -13536,11 +13704,11 @@ async function saveDoctorTerm(){
     logActivity(`added the term "${en}" to ${d.name}`);
     closeDoctorTermModal();
     successBurst();
-    showToast('Term added.');
+    showToast(state === 'queued' ? queuedNotice('Term added') : 'Term added.');
     render();
     openDoctorDirDetail(d.id, 'team');   // keep the doctor page open, on the team's terms
   }catch(err){
-    showToast(doctorGoneMessage(err, saveErrorMessage(err, 'doctor-directory')));
+    doctorSaveFailed(err, 'Not saved', 'Your draft is still in the form.');
   }
 }
 
@@ -13551,15 +13719,16 @@ async function deleteDoctorTerm(doctorId, termId){
   if(!term) return;
   if(!confirm(`Remove "${term.en}" from ${d.name}?`)) return;
   try{
-    if(!(await doctorTermWrite(d.id, { remove: term }))) return;
+    const state = await doctorTermWrite(d.id, { remove: term });
+    if(!state) return;
     const idx = DOCTOR_DIRECTORY.findIndex(x=>x.id===d.id);
     if(idx > -1) DOCTOR_DIRECTORY[idx] = { ...DOCTOR_DIRECTORY[idx], customTerms: (DOCTOR_DIRECTORY[idx].customTerms||[]).filter(t=>t.id!==termId) };
     doctorDirToCache(DOCTOR_DIRECTORY);
-    showToast('Term removed.');
+    showToast(state === 'queued' ? queuedNotice('Term removed') : 'Term removed.');
     render();
     openDoctorDirDetail(d.id, 'team');
   }catch(err){
-    showToast(doctorGoneMessage(err, 'Could not remove. Check your connection.'));
+    doctorSaveFailed(err, 'Not removed', 'The term is still there.', 'Could not remove. Check your connection.');
   }
 }
 
@@ -13794,19 +13963,16 @@ function isMyTip(t){
   const me = (whoAmI() || '').trim().toLowerCase();
   return !!me && (t.by || '').trim().toLowerCase() === me;
 }
+// Through the outbox: with no signal the tip is kept on this phone and sent
+// later. Answers 'sent' or 'queued'.
 async function doctorTipWrite(id, { add, remove, dropNotes }){
-  if(offlineBlocked(add ? 'Saving a tip' : 'Changing a tip')) return false;
-  if(!db){ showToast('Not connected to the database.'); return false; }
-  const FV = firebase.firestore.FieldValue;
-  const ref = db.collection('doctor-directory').doc(id);
-  const batch = db.batch();
-  if(remove) batch.update(ref, { tips: FV.arrayRemove(remove) });
-  const up = {};
-  if(add) up.tips = FV.arrayUnion(add);
-  if(dropNotes) up.notes = FV.delete();
-  if(Object.keys(up).length) batch.update(ref, up);
-  await trackWrite(batch.commit());
-  return true;
+  // With no signal the database may not have started; the outbox needs none.
+  if(!db && navigator.onLine !== false){ showToast('Not connected to the database.'); return false; }
+  const entry = { collection: 'doctor-directory', docId: id, op: 'update' };
+  if(remove) entry.listRemove = { tips: [stripUndefined(remove)] };
+  if(add) entry.listAdd = { tips: [stripUndefined(add)] };
+  if(dropNotes) entry.dropFields = ['notes'];
+  return queuedWrite(entry);
 }
 
 const DT = { id: null, editing: null };
@@ -13891,7 +14057,8 @@ async function saveDoctorTip(){
   const btn = document.getElementById('dtSave');
   btn.disabled = true;
   try{
-    if(!await doctorTipWrite(d.id, change)) return;
+    const state = await doctorTipWrite(d.id, change);
+    if(!state) return;
     doctorTipsApply(d, change);
     logActivity(old ? `edited a tip for ${d.name}` : `added a tip for ${d.name}`);
     DT.editing = null;
@@ -13899,9 +14066,9 @@ async function saveDoctorTip(){
     renderDoctorTips();
     const list = document.getElementById('dtList');
     if(!old) list.scrollTop = list.scrollHeight;
-    showToast(old ? 'Tip saved.' : 'Tip added.');
+    showToast(state === 'queued' ? queuedNotice(old ? 'Tip saved' : 'Tip added') : (old ? 'Tip saved.' : 'Tip added.'));
   }catch(err){
-    showToast(saveErrorMessage(err, 'doctor-directory'));
+    doctorSaveFailed(err, 'Not saved', 'Your tip is still in the box.');
   }finally{ btn.disabled = false; }
 }
 async function deleteDoctorTip(tipId){
@@ -13911,13 +14078,14 @@ async function deleteDoctorTip(tipId){
   if(!confirm('Delete this tip?')) return;
   const change = t.legacy ? { dropNotes: true } : { remove: t };
   try{
-    if(!await doctorTipWrite(d.id, change)) return;
+    const state = await doctorTipWrite(d.id, change);
+    if(!state) return;
     if(DT.editing === tipId){ DT.editing = null; document.getElementById('fDTip').value = ''; }
     doctorTipsApply(d, change);
     logActivity(`removed a tip for ${d.name}`);
-    showToast('Tip deleted.');
+    showToast(state === 'queued' ? queuedNotice('Tip deleted') : 'Tip deleted.');
   }catch(err){
-    showToast('Could not delete. Check your connection.');
+    doctorSaveFailed(err, 'Not deleted', 'The tip is still there.', 'Could not delete. Check your connection.');
   }
 }
 

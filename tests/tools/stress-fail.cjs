@@ -47,6 +47,8 @@ const A = {
     await p.setInputFiles('#termAttachInput', { name: 'scan.png', mimeType: 'image/png', buffer: PNG }); },
   translate: async p => { await go(p, 'translate'); await p.fill('#trInput', 'heart failure'); await ev(p, `runTranslate()`); },
   lookup: async p => { await go(p, 'onco'); await ev(p, `(() => { const t = Object.values(__DB.terms).find(t => t.categoryId === 'onco'); openTermLookup('onco', t.id); })()`); },
+  doctorTip: async p => { await go(p, 'doctor-directory'); await ev(p, `DT.id = 'd0'; document.getElementById('fDTip').value = 'Speaks fast'; saveDoctorTip()`); },
+  doctorTerm: async p => { await go(p, 'doctor-directory'); await ev(p, `doctorTermTargetId = 'd0'; document.getElementById('fDTEn').value = 'tumor board'; saveDoctorTerm()`); },
   doctorPrep: async p => { await go(p, 'doctor-research'); await p.fill('#doctorResearchInput', 'Dr. Andre Goy'); await ev(p, `runDoctorResearch()`); },
   ask: async p => { await go(p, 'ask'); await p.fill('#askInput', 'What is an ejection fraction?'); await ev(p, `submitAsk()`); },
   signIn: async p => { await ev(p, `typeof openMoreSheet === 'function' && openMoreSheet()`); await p.waitForTimeout(500); await ev(p, `accountSend(null, 'ana@example.org')`); },
@@ -56,11 +58,14 @@ const A = {
 
 const S = [];
 const add = (kind, name, faults, act, wait) => S.push({ kind, name, faults, act, wait: wait || 3500 });
-for (const k of ['chatSend', 'chatReact', 'chatDelete', 'chatPhoto', 'termAdd', 'termDelete', 'doctorAdd', 'providerAdd', 'translate', 'lookup', 'doctorPrep', 'ask', 'signIn', 'nothing'])
+for (const k of ['chatSend', 'chatReact', 'chatDelete', 'chatPhoto', 'termAdd', 'termDelete', 'doctorAdd', 'doctorTip', 'doctorTerm', 'providerAdd', 'translate', 'lookup', 'doctorPrep', 'ask', 'signIn', 'nothing'])
   add('offline', k, [offline], A[k], k === 'doctorAdd' || k === 'providerAdd' || k === 'chatDelete' ? 9000 : 3500);
 for (const [label, f] of [['503', api(503, { error: 'not_configured' })], ['500', api(500)], ['429 daily limit', api(429, LIMIT)], ['401 members only', api(401, { error: 'members_only' })], ['no answer', api('abort')]])
   for (const k of ['translate', 'lookup', 'doctorPrep', 'ask', 'termAdd', 'signIn']) add('ai down ' + label, k, [f], A[k]);
-for (const k of ['chatSend', 'chatReact', 'chatDelete', 'termAdd', 'termDelete', 'doctorAdd', 'providerAdd']) add('database refuses', k, [deny], A[k]);
+for (const k of ['chatSend', 'chatReact', 'chatDelete', 'termAdd', 'termDelete', 'doctorAdd', 'doctorTip', 'doctorTerm', 'providerAdd']) add('database refuses', k, [deny], A[k]);
+// Wi-Fi that is connected but dead: the phone says online and nothing answers.
+const deadWifi = page => page.evaluate(() => { window.__gate = () => new Promise(() => {}); });
+for (const k of ['termAdd', 'doctorAdd', 'doctorTip', 'doctorTerm']) add('dead wifi', k, [deadWifi], A[k], 14000);
 for (const k of ['chatPhoto', 'providerPhoto', 'myPhoto', 'termPhoto']) add('upload fails', k, [uploadFails], A[k], 5000);
 for (const k of ['chatSend', 'termAdd', 'nothing']) add('phone storage full', k, [storageFull], A[k]);
 for (const k of ['chatSend', 'termAdd']) add('phone storage full, offline', k, [storageFull, offline], A[k]);

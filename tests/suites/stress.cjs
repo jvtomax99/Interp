@@ -79,7 +79,7 @@ const fire = (page, code) => page.evaluate(`(() => { try { Promise.resolve((() =
     const deny = page => page.evaluate(() => { window.__gate = () => Promise.reject(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); });
     const api = (status, body) => page => page.route('**/api/**', r => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) }));
     const plain = t => t && !/firestore|rule\b|\[|permission-denied|_/i.test(t);
-    await run('saving a doctor offline', off, async p => { await go(p, 'doctor-directory'); await fire(p, `openAddDoctorDirModal()`); await p.fill('#fDDName', 'Dr. Lori Leslie'); await fire(p, `saveDoctorDirEntry()`); }, null, t => /offline/i.test(t) && /Nothing was lost/.test(t));
+    await run('saving a doctor offline', off, async p => { await go(p, 'doctor-directory'); await fire(p, `openAddDoctorDirModal()`); await p.fill('#fDDName', 'Dr. Lori Leslie'); await fire(p, `saveDoctorDirEntry()`); }, null, t => /Doctor saved on this device/.test(t) && /back online/.test(t));
     await run('saving a provider offline', off, async p => { await go(p, 'providers'); await fire(p, `openAddProviderModal()`); await p.fill('#fPName', 'Dr. Angela Waintrub'); await fire(p, `saveProvider()`); }, null, t => /offline/i.test(t) && !/saved\./i.test(t));
     await run('deleting a chat message offline', off, async p => { p.on('dialog', d => d.accept().catch(() => {})); await go(p, 'chat', 1200); await fire(p, `deleteChatMessage('c8')`); }, null, t => /offline/i.test(t));
     await run('a term the database refuses', deny, async p => { await go(p, 'onco'); await fire(p, `openAddModal()`); await p.fill('#fEn', 'Port-a-cath'); await fire(p, `saveTerm()`); }, null, t => plain(t) && /Team access/.test(t));
@@ -93,7 +93,8 @@ const fire = (page, code) => page.evaluate(`(() => { try { Promise.resolve((() =
     const look = p => fire(p, `const t = Object.values(__DB.terms).find(t => t.categoryId === 'onco'); setCategory('onco'); openTermLookup('onco', t.id);`);
     await run('Term lookup at the daily limit', api(429, { error: 'daily_limit' }), look, lookErr, t => /tomorrow/.test(t) && !/temporary/.test(t));
     await run('Term lookup for a phone outside the team', api(401, { error: 'members_only' }), look, lookErr, t => /team code/.test(t) && !/temporary/.test(t));
-    await run('adding a tip for a doctor offline', off, p => fire(p, `doctorTipWrite('d0', { add: { text: 'Speaks fast', by: 'Jose', at: 1 } })`), null, t => /offline/i.test(t));
+    await run('adding a tip for a doctor offline', off, p => fire(p, `DT.id = 'd0'; document.getElementById('fDTip').value = 'Speaks fast'; saveDoctorTip()`), null, t => /Tip added on this device/.test(t) && /back online/.test(t));
+    await run('joining duplicate doctors offline', off, p => fire(p, `['x1', 'x2'].forEach(id => DOCTOR_DIRECTORY.push({ id, name: 'Dr. Twin Offline', specialty: 'Renal' })); mergeDuplicateDoctors('x1')`), null, t => /offline/i.test(t) && /needs a connection/.test(t));
     const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAFklEQVR4nGP8z8DAwMDAxAADNGEMdkUAHDABD0Gc3lQAAAAASUVORK5CYII=', 'base64');
     await run('a provider photo that fails to upload', p => p.evaluate(() => { window.__UPLOADS = window.__UPLOADS || { puts: [], deletes: [], ms: 600, fail: false }; window.__UPLOADS.fail = true; }),
       async p => { await go(p, 'providers'); await fire(p, `openAddProviderModal()`); await p.setInputFiles('#fPPhoto', { name: 'face.png', mimeType: 'image/png', buffer: PNG }); }, null, t => /didn.t upload/.test(t) && !/upload failed/.test(t));

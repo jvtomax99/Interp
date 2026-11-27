@@ -278,7 +278,8 @@ async function handleDDPhotoSelect(event){
 async function saveDoctorDirEntry(){
   const name = document.getElementById('fDDName').value.trim();
   if(!name){ showToast('Doctor\u2019s name is required.'); return; }
-  if(offlineBlocked('Saving a doctor')) return;
+  // With no signal the database may not have started; the outbox needs none.
+  if(!db && navigator.onLine !== false){ showToast('Not connected to the database.'); return; }
   const specialty = document.getElementById('fDDSpecialty').value.trim();
   const locationDetails = document.getElementById('fDDLocationDetails').value.trim();
   const editor = whoAmI();
@@ -315,25 +316,25 @@ async function saveDoctorDirEntry(){
   };
 
   try{
-    await persistDoctorDirectoryEntry(id, record);
-    // If the photo was swapped out, remove the old file so Storage doesn't
-    // accumulate images nothing points at anymore.
-    if(existing && existing.photoPath && existing.photoPath !== pendingDDPhotoPath && storage){
-      storage.ref().child(existing.photoPath).delete().catch(()=>{});
-    }
+    // Through the outbox: with no signal the save is kept on this phone and
+    // sent later. If the photo was swapped out, the old file goes once the
+    // save is in, so Storage doesn't keep images nothing points at.
+    const oldPhoto = existing && existing.photoPath && existing.photoPath !== pendingDDPhotoPath ? [existing.photoPath] : null;
+    const state = await queuedWrite(doctorSheetEntry(id, record, existing, oldPhoto, !!editingDoctorDirId));
     const idx = DOCTOR_DIRECTORY.findIndex(d=>d.id===id);
     if(idx>-1) DOCTOR_DIRECTORY[idx] = { id, ...record };
     else DOCTOR_DIRECTORY.push({ id, ...record });
+    doctorDirToCache(DOCTOR_DIRECTORY);
     const photoChanged = pendingDDPhotoDataUrl && pendingDDPhotoDataUrl !== (existing && existing.photo);
     logActivity(editingDoctorDirId
       ? (photoChanged ? `added a photo for ${name} in the doctor directory` : `updated the doctor directory entry for ${name}`)
       : `added ${name} to the doctor directory`);
     closeDoctorDirModal();
     successBurst();
-    showToast('Doctor saved.');
+    showToast(state === 'queued' ? queuedNotice('Doctor saved') : 'Doctor saved.');
     render();
   }catch(err){
-    showToast(saveErrorMessage(err, 'doctor-directory'));
+    doctorSaveFailed(err, 'Not saved', 'Your draft is still in the form.');
   }
 }
 

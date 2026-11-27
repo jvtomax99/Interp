@@ -115,7 +115,9 @@ posts, owner phones remove anyone's (`docs/features/deleted-items.md`).
   and attachment can be restored.
 
 **Kept-on-the-phone saves** (`docs/features/kept-on-phone-saves.md`; four
-steps, Jose's OK 2026-11-26; step 1 built, the rest planned).
+steps, Jose's OK 2026-11-26; steps 1 and 2 built: a doctor, a tip and a
+doctor's team term; providers, events, chat delete and stalled uploads
+planned).
 - Done when: with no signal, or on Wi-Fi that is connected but dead, saving
   a doctor, a tip, a team term, a provider or an event, or deleting a chat
   message, answers within 12 seconds, shows on this phone, is counted by

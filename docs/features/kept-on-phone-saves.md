@@ -2,8 +2,12 @@
 
 Written 2026-11-26. Jose's decision the same day: **all four steps**
 ("Order of work"), each its own change waiting for his push. Step 1 is
-built (`team-terms.cjs`); steps 2 to 4 are not. `docs/PLAN.md`, Next,
-item 4.
+live (#297, build b1126.1318; `team-terms.cjs`); step 2 is built
+(`doctor-outbox.cjs`; "Step 2, as built" below); steps 3 and 4 are not.
+`docs/PLAN.md`, Next, item 4.
+
+The first table and "The problem" describe the Hub before step 2: a
+doctor, a tip and a doctor's team term are kept on the phone now.
 
 ## The problem, in one paragraph
 
@@ -138,6 +142,80 @@ phones. Fixed in step 1. Found while fixing: merging duplicate doctors
 never moved the other doctor's team terms (it read a field no doctor
 has); they went to Recently deleted with the duplicate. Fixed in the
 same step.
+
+## Step 2, as built (2026-11-26)
+
+**Measured first.**
+
+- A doctor's record is too big to keep whole. The research on one doctor
+  is up to 16,000 tokens of output (`api/doctor-research.js`), tens of KB
+  as text; 200 of those would be several times the phone's 5 MB. So an
+  edit is kept as **only the fields that save changed**: 232 bytes for a
+  changed specialty on a doctor carrying 50 KB of research
+  (`doctor-outbox.cjs`). Real records on the live database were not read
+  (a cloud session can't reach it).
+- Providers and events do **not** show on a cold open with no signal:
+  neither is kept on the phone (`loadProviders` is one read with nothing
+  saved; events are a live listener with nothing saved). Read in the
+  code, not run on a phone. So in step 3, keeping their saves helps when
+  the signal drops mid-visit or the Wi-Fi is dead, not when the Hub is
+  opened in a basement. Doctors are kept on the phone and do show.
+
+**What an outbox entry can say now** (`applyQueuedWrite`, `index.html`,
+"Offline outbox"). Plain text in the entry, turned into the database's
+own marker only when it is sent:
+
+| In the entry | Means | Used by |
+|---|---|---|
+| `mergeFields: [names]` on a `set` | write only these fields | a new doctor |
+| `listAdd: { field: [items] }` | add each to the list, by the database | tips, team terms |
+| `listRemove: { field: [items] }` | take each out of the list | tips, team terms |
+| `dropFields: [names]` | remove those fields | the old single note becoming a tip |
+| `filesAfter: [paths]` | delete these files once the write is in (`deleteFilesAfter`) | a doctor's replaced photo; step 3's chat delete |
+
+A list add and a list remove on the same field (a tip edit) go as two
+updates in one batch. Sending any entry twice changes nothing more.
+
+**How each save goes.**
+
+- **The doctor's sheet** (`doctorSheetEntry`). An edit is an `update` of
+  the fields that changed. Three reasons: the entry stays small; a save
+  that arrives late can only overwrite the fields it touched, not put
+  back what a teammate changed elsewhere on the sheet; and a doctor
+  deleted or merged away on another phone is refused ("removed or merged
+  on another phone") instead of coming back as a record. That last part
+  is a change: before, saving the sheet of a doctor deleted elsewhere
+  re-created the doctor. A new doctor is a `set` of the sheet's fields;
+  so is Add doctor with a name this phone already lists (the doctor may
+  have been deleted elsewhere, and adding should make them again).
+- **Tips and team terms**: `listAdd` / `listRemove`, as before but
+  through the outbox.
+- **Doctor Prep's own save after a search** and **joining duplicate
+  doctors** are not kept: the first only runs right after an online
+  search and carries the whole research, the second must never arrive
+  late. A merge with no signal now says "needs a connection" (it used to
+  wait for ever).
+
+**This phone's copy.** The doctor list is read once per opening, so
+`loadDoctorDirectory` puts the waiting doctor changes back on top of
+what the database answered (`doctorsWithWaiting`), and the list is read
+again after waiting doctor changes are sent or refused: a refused change
+stops showing as if it were saved, and is in the Unsent changes sheet
+with a readable title (`describeOutboxEntry`).
+
+**Dead Wi-Fi coming back.** The phone gets no "online" signal then, so
+while changes wait and the phone says it is online, the outbox tries
+again after 30 seconds, then twice as long each time nothing went, up
+to 5 minutes (`scheduleOutboxRetry`). This also helps terms and chat.
+
+**The cold review (2026-11-26)** found three things, fixed before the
+pull request: a change refused while the doctor list was being read
+showed as saved; Add doctor over a name deleted elsewhere was refused;
+the Unsent sheet said "Changed: photo" for a doctor with no photo on
+file. Its leftovers are under Later in `docs/PLAN.md`.
+
+**Not done here:** a doctor's photo is still an upload, so choosing a
+new one needs a connection (the save around it is kept).
 
 ## Order of work, one change each for your "push"
 

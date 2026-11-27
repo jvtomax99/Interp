@@ -110,6 +110,9 @@ async function mergeDuplicateDoctors(keepId){
   if(!whoAmI()){ requireName(() => mergeDuplicateDoctors(keepId)); return; }
   const group = duplicateDoctorGroups().find(g => g.some(d => d.id === keepId));
   if(!group){ showToast('Nothing left to merge.'); return; }
+  // Never kept for later: a merge sent late from this phone's copy would
+  // undo what teammates changed meanwhile (kept-on-phone-saves.md).
+  if(offlineBlocked('Joining duplicate doctors')) return;
 
   const target = group.find(d => d.id === keepId) || group[0];
   const merged = mergeDoctorRecords(group, target.id);
@@ -128,7 +131,7 @@ async function mergeDuplicateDoctors(keepId){
     // The others' team terms move the same way, added one by one to whatever
     // the kept doctor holds in the database (a doctor save never sends the list).
     const own = Array.isArray(target.customTerms) ? target.customTerms : [];
-    await doctorTermWrite(merged.id, { add: (merged.customTerms || []).filter(t => !own.includes(t)) });
+    await doctorTermWrite(merged.id, { add: (merged.customTerms || []).filter(t => !own.includes(t)) }, true);
     let kept = 0;
     for(const other of group){
       if(other.id === merged.id) continue;
